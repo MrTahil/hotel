@@ -1,0 +1,6 @@
+@HMZ_rt_HostAddress = http://localhost:5007
+
+GET {{HMZ_rt_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
