@@ -108,7 +108,7 @@ body {
 /* Miért válaszd a Hotel Kiválót szekció */
 .about {
     padding: 60px 0;
-    background-color: var(--highlight);
+    background-color: #A9D6E5;
     text-align: center;
     border-radius: 10px;  /* Lekerekített sarkok */
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);  /* Finom árnyék */
@@ -159,7 +159,7 @@ body {
 /* Galéria */
 .gallery {
     padding: 60px 0;
-    background-color: #fff;
+    background-color: #A9D6E5;
     text-align: center;
 }
 
