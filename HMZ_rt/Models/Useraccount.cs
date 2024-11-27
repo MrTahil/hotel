@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace HMZ_rt.Models;
 
@@ -24,6 +25,6 @@ public partial class Useraccount
     public DateTime? DateUpdated { get; set; }
 
     public string? Notes { get; set; }
-
+    
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }
