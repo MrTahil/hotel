@@ -12,6 +12,11 @@ namespace HMZ_rt.Controllers
     public class UserAccounts_controller : Controller
     {
         private readonly HmzRtContext _context;
+        public UserAccounts_controller(HmzRtContext context)
+        {
+            _context = context;
+        }
+
         // A collection to keep track of already generated IDs (in a real scenario, use a database)
         private static HashSet<string> generatedIds = new HashSet<string>();
 
@@ -64,23 +69,23 @@ namespace HMZ_rt.Controllers
 
 
 
-        [HttpGet]
+        [HttpGet("listoutallusers")]
         public async Task<ActionResult<Useraccount>> Userslist()
         {
             return Ok(await _context.Useraccounts.ToListAsync());
-            
+
         }
 
 
 
-        [HttpGet]
+        [HttpGet("idsfortheids")]
         public async Task<ActionResult<HashSet<string>>> Usersids()
         {
             var ids = await _context.Useraccounts
-                                    .Select(u => u.UserId.ToString()) 
+                                    .Select(u => u.UserId.ToString())
                                     .ToListAsync();
 
-            lock (generatedIds) 
+            lock (generatedIds)
             {
                 foreach (var id in ids)
                 {
@@ -95,12 +100,12 @@ namespace HMZ_rt.Controllers
 
 
 
-        [HttpPost]
+        [HttpPost("NewUserGenerating")]
         public async Task<ActionResult<Useraccount>> NewAccount(CreateUserDto newuser) {
 
             var user = new Useraccount
             {
-                Username = newuser.Username,
+                Username = newuser.UserName,
                 UserId = Convert.ToInt32(GenerateUniqueId()),
                 Password = newuser.Password,
                 Email = newuser.Email,
@@ -111,12 +116,40 @@ namespace HMZ_rt.Controllers
                 LastLogin = DateTime.Now,
                 Notes = newuser.Notes,
             };
-            if (user != null) { 
-            await _context.Useraccounts.AddAsync(user);
-            await _context.SaveChangesAsync();
+            if (user != null) {
+                await _context.Useraccounts.AddAsync(user);
+                await _context.SaveChangesAsync();
                 return StatusCode(201, user);
             }
             return BadRequest();
         }
+        [HttpDelete("DeleteUserById{InUserId}")]
+        public async Task<ActionResult<Useraccount>> DeleteAccount(int InUserId)
+        {
+            var os = await _context.Useraccounts.FirstOrDefaultAsync(x => x.UserId == InUserId);
+            if (os != null)
+            {
+                _context.Useraccounts.Remove(os);
+                    await _context.SaveChangesAsync();
+                return Ok(new { message = "Sikeresen törölve!" });
+            }
+            return NotFound();
+        }
+
+
+        [HttpDelete("DeleteUserByUsername{Username}")]
+        public async Task<ActionResult<Useraccount>> DeleteAccountByName(string Username)
+        {
+            var os = await _context.Useraccounts.FirstOrDefaultAsync(x => x.Username == Username);
+            if (os != null)
+            {
+                _context.Useraccounts.Remove(os);
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Sikeresen törölve!" });
+            }
+            return NotFound();
+        }
+
+
     }
 }
