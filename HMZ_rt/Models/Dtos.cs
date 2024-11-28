@@ -16,17 +16,7 @@ namespace HMZ_rt.Models
         public string? Email { get; set; }
         public string? Status { get; set; }
         public string? Notes { get; set; }
-
-
-
-
-
-
-
-
-
     }
 
-
-        //(string? Username, string? Password, string? Email, string? Status, string? Notes);
+    public record CreateNotifiactionDto( string? Message, string? Status, string? Type, int? Priority, string? Notes, int UserId, string? Category);
     }

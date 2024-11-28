@@ -144,6 +144,8 @@ namespace HMZ_rt.Controllers
             }
             return BadRequest();
         }
+
+
         [HttpDelete("DeleteUserById{InUserId}")]
         public async Task<ActionResult<Useraccount>> DeleteAccount(int InUserId)
         {
