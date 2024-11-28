@@ -4158,23 +4158,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Tahil\\.nuget\\packages\\": {},
+    "C:\\Users\\hiloczkit\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Tahil\\source\\repos\\MrTahil\\Hotel\\HMZ_rt\\HMZ_rt.csproj",
+      "projectUniqueName": "C:\\Users\\hiloczkit\\Source\\Repos\\MrTahil\\Hotel\\HMZ_rt\\HMZ_rt.csproj",
       "projectName": "HMZ_rt",
-      "projectPath": "C:\\Users\\Tahil\\source\\repos\\MrTahil\\Hotel\\HMZ_rt\\HMZ_rt.csproj",
-      "packagesPath": "C:\\Users\\Tahil\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Tahil\\source\\repos\\MrTahil\\Hotel\\HMZ_rt\\obj\\",
+      "projectPath": "C:\\Users\\hiloczkit\\Source\\Repos\\MrTahil\\Hotel\\HMZ_rt\\HMZ_rt.csproj",
+      "packagesPath": "C:\\Users\\hiloczkit\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\hiloczkit\\Source\\Repos\\MrTahil\\Hotel\\HMZ_rt\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\Tahil\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\hiloczkit\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -4183,7 +4183,6 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -4200,9 +4199,8 @@
       "restoreAuditProperties": {
         "enableAudit": "true",
         "auditLevel": "low",
-        "auditMode": "all"
-      },
-      "SdkAnalysisLevel": "9.0.100"
+        "auditMode": "direct"
+      }
     },
     "frameworks": {
       "net8.0": {
@@ -4246,60 +4244,8 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.202/PortableRuntimeIdentifierGraph.json"
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1902",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'BouncyCastle.Cryptography' 2.2.1 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-8xfc-gm6g-vgpv",
-      "libraryId": "BouncyCastle.Cryptography",
-      "targetGraphs": [
-        "net8.0"
-      ]
-    },
-    {
-      "code": "NU1902",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'BouncyCastle.Cryptography' 2.2.1 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-m44j-cfrm-g8qc",
-      "libraryId": "BouncyCastle.Cryptography",
-      "targetGraphs": [
-        "net8.0"
-      ]
-    },
-    {
-      "code": "NU1902",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'BouncyCastle.Cryptography' 2.2.1 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-v435-xc8x-wvr9",
-      "libraryId": "BouncyCastle.Cryptography",
-      "targetGraphs": [
-        "net8.0"
-      ]
-    },
-    {
-      "code": "NU1904",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'System.Drawing.Common' 4.7.0 has a known critical severity vulnerability, https://github.com/advisories/GHSA-rxg9-xrhp-64gj",
-      "libraryId": "System.Drawing.Common",
-      "targetGraphs": [
-        "net8.0"
-      ]
-    },
-    {
-      "code": "NU1903",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'System.Text.Json' 7.0.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-hh2w-p6rv-4g7w",
-      "libraryId": "System.Text.Json",
-      "targetGraphs": [
-        "net8.0"
-      ]
-    }
-  ]
+  }
 }

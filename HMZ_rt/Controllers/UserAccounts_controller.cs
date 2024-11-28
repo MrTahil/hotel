@@ -17,8 +17,9 @@ namespace HMZ_rt.Controllers
             _context = context;
         }
 
-        // A collection to keep track of already generated IDs (in a real scenario, use a database)
+        // A collection to keep track of already generated IDs
         private static HashSet<string> generatedIds = new HashSet<string>();
+        
 
 
         // Method to generate a unique numeric ID
@@ -27,12 +28,12 @@ namespace HMZ_rt.Controllers
             string uniqueId;
             do
             {
-                // Generate the ID by combining a timestamp and random digits
+                
                 uniqueId = GenerateNumericId();
             }
             while (generatedIds.Contains(uniqueId)); // Check if the ID already exists
 
-            // Add the generated ID to the collection (in practice, store it in a database)
+            
             generatedIds.Add(uniqueId);
             return uniqueId;
         }
@@ -44,10 +45,10 @@ namespace HMZ_rt.Controllers
             string timestamp = DateTime.UtcNow.Ticks.ToString().Substring(10); // Take the last 10 digits of the timestamp (for 11 digit ID)
             string randomPart = GenerateRandomNumericString(1); // Add 1 random digit to make the ID 11 characters long
 
-            // Combine both parts to create an 11-digit ID
+            
             string id = timestamp + randomPart;
 
-            return id.Length > 11 ? id.Substring(0, 11) : id; // Ensure the ID is exactly 11 characters long
+            return id.Length > 11 ? id.Substring(0, 11) : id; 
         }
 
         // Method to generate a random numeric string of a specified length
@@ -57,7 +58,7 @@ namespace HMZ_rt.Controllers
             string result = string.Empty;
             for (int i = 0; i < length; i++)
             {
-                result += random.Next(0, 10); // Random digit between 0 and 9
+                result += random.Next(0, 10); 
             }
             return result;
         }
@@ -103,6 +104,26 @@ namespace HMZ_rt.Controllers
         [HttpPost("NewUserGenerating")]
         public async Task<ActionResult<Useraccount>> NewAccount(CreateUserDto newuser) {
 
+
+            //ellenőrzés
+            var existingUserByUsername = await _context.Useraccounts
+            .FirstOrDefaultAsync(u => u.Username == newuser.UserName);
+
+            if (existingUserByUsername != null)
+            {
+                return BadRequest(new { message = "Ez a felhasználónév már használatban van!" });
+            }
+
+
+            var existingUserByEmail = await _context.Useraccounts
+    .FirstOrDefaultAsync(u => u.Email == newuser.Email);
+
+            if (existingUserByEmail != null)
+            {
+                return BadRequest(new { message = "Ez az E-mail már használatban van!" });
+            }
+
+            //mentés
             var user = new Useraccount
             {
                 Username = newuser.UserName,

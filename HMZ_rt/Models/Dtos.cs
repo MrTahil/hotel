@@ -3,16 +3,16 @@ namespace HMZ_rt.Models
 {
     public class CreateUserDto
     {
-        [Required(ErrorMessage = "Username is required.")]
-        [MinLength(5, ErrorMessage = "Username must be at least 5 characters long.")]
-        [MaxLength(20, ErrorMessage = "Username cannot exceed 20 characters.")]
+        [Required(ErrorMessage = "Meg kell adnod egy felhasználónevet!")]
+        [MinLength(5, ErrorMessage = "A felhasználónévnek legalább 5 karakter hosszúnak kell lennie!")]
+        [MaxLength(20, ErrorMessage = "A felhasználónév nem lehet hosszabb 20 karakternél!")]
         public string? UserName { get; set; }
 
-        [Required(ErrorMessage = "Password is required.")]
-        [MinLength(8, ErrorMessage = "Password must be at least 8 characters long.")]
-        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", ErrorMessage = "Password must include at least one uppercase letter, one lowercase letter, and one number.")]
+        [Required(ErrorMessage = "Jelszó megadása kötelező!")]
+        [MinLength(8, ErrorMessage = "A jelszónak legalább 8 karakter hossúnak kell lennie!")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", ErrorMessage = "A jelszónak tartalmaznia kell legalább 1, Kis és Nagy betűt illetve számot.")]
         public string? Password { get; set; }
-        [EmailAddress(ErrorMessage = "Invalid email format.")]
+        [EmailAddress(ErrorMessage = "Nem megfelelő Email forma.")]
         public string? Email { get; set; }
         public string? Status { get; set; }
         public string? Notes { get; set; }
