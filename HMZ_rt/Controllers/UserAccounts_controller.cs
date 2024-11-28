@@ -19,7 +19,7 @@ namespace HMZ_rt.Controllers
 
         // A collection to keep track of already generated IDs
         private static HashSet<string> generatedIds = new HashSet<string>();
-        
+
 
 
         // Method to generate a unique numeric ID
@@ -28,12 +28,12 @@ namespace HMZ_rt.Controllers
             string uniqueId;
             do
             {
-                
+
                 uniqueId = GenerateNumericId();
             }
             while (generatedIds.Contains(uniqueId)); // Check if the ID already exists
 
-            
+
             generatedIds.Add(uniqueId);
             return uniqueId;
         }
@@ -45,10 +45,10 @@ namespace HMZ_rt.Controllers
             string timestamp = DateTime.UtcNow.Ticks.ToString().Substring(10); // Take the last 10 digits of the timestamp (for 11 digit ID)
             string randomPart = GenerateRandomNumericString(1); // Add 1 random digit to make the ID 11 characters long
 
-            
+
             string id = timestamp + randomPart;
 
-            return id.Length > 11 ? id.Substring(0, 11) : id; 
+            return id.Length > 11 ? id.Substring(0, 11) : id;
         }
 
         // Method to generate a random numeric string of a specified length
@@ -58,7 +58,7 @@ namespace HMZ_rt.Controllers
             string result = string.Empty;
             for (int i = 0; i < length; i++)
             {
-                result += random.Next(0, 10); 
+                result += random.Next(0, 10);
             }
             return result;
         }
@@ -153,7 +153,7 @@ namespace HMZ_rt.Controllers
             if (os != null)
             {
                 _context.Useraccounts.Remove(os);
-                    await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
                 return Ok(new { message = "Sikeresen törölve!" });
             }
             return NotFound();
@@ -171,6 +171,14 @@ namespace HMZ_rt.Controllers
                 return Ok(new { message = "Sikeresen törölve!" });
             }
             return NotFound();
+        }
+
+
+        [HttpGet("UsersWithNotificationsFull{UserIdd}")]
+        public async Task<ActionResult<Useraccount>> GetAllNotification(int UserIdd)
+        {
+            var alldat = await _context.Useraccounts.Include(x => x.Notifications).Where(x=> x.UserId == UserIdd).ToListAsync();
+            return Ok(alldat);
         }
 
 

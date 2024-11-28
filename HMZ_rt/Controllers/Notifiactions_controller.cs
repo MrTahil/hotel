@@ -1,5 +1,6 @@
 ﻿using HMZ_rt.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 
 namespace HMZ_rt.Controllers
@@ -83,6 +84,21 @@ namespace HMZ_rt.Controllers
                 return StatusCode(201, isis);
             }
             return BadRequest();
+        }
+
+
+        [HttpPut("UpdateSentTime{NotiId}")]
+        public async Task<ActionResult<Notification>> UpdateOnSent(int NotiId)
+        {
+            var oke=await _context.Notifications.FirstOrDefaultAsync(x => x.NotificationId == NotiId);
+            if (oke != null)
+            {
+                oke.DateSent = DateTime.Now;
+                _context.Notifications.Update(oke);
+                await _context.SaveChangesAsync();
+                return Ok(oke);
+            }
+            return NotFound(new { message = "Nincs ilyen id-val rendelkező adat az adatbázisban." });
         }
     }
 }

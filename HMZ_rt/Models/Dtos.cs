@@ -20,3 +20,4 @@ namespace HMZ_rt.Models
 
     public record CreateNotifiactionDto( string? Message, string? Status, string? Type, int? Priority, string? Notes, int UserId, string? Category);
     }
+
