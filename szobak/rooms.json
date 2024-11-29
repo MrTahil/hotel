@@ -1,0 +1,32 @@
+/*
+
+[
+    {
+        "id": "room-1",
+        "name": "Standard Szoba",
+        "image": "https://via.placeholder.com/300x200?text=Szoba+1",
+        "smallImages": ["https://via.placeholder.com/100x100?text=Gyerekágy", "https://via.placeholder.com/100x100?text=Állatbarát"],
+        "pricePerNight": "10,000 HUF",
+        "capacity": "2 fő",
+        "description": "Kényelmes, modern elrendezésű szoba, tökéletes egy éjszakai pihenéshez."
+    },
+    {
+        "id": "room-2",
+        "name": "Family Suite",
+        "image": "https://via.placeholder.com/300x200?text=Szoba+2",
+        "smallImages": ["https://via.placeholder.com/100x100?text=Két+Ágy", "https://via.placeholder.com/100x100?text=Fürdőszoba"],
+        "pricePerNight": "20,000 HUF",
+        "capacity": "4 fő",
+        "description": "Tágas szoba családok számára, két különálló hálószobával és saját fürdőszobával."
+    },
+    {
+        "id": "room-3",
+        "name": "Deluxe Szoba",
+        "image": "https://via.placeholder.com/300x200?text=Szoba+3",
+        "smallImages": ["https://via.placeholder.com/100x100?text=Terasz", "https://via.placeholder.com/100x100?text=Panoráma"],
+        "pricePerNight": "30,000 HUF",
+        "capacity": "2 fő",
+        "description": "Luxus szoba, tökéletes választás a kényelmes pihenéshez. Saját terasszal és panorámás kilátással rendelkezik."
+    }
+]
+*/

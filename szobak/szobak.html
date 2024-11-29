@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Szobák</title>
+    <link rel="stylesheet" href="rooms.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="C:\Users\zelenakzn\Desktop\hohoho\kezdolap\index.html">Kezdőlap</a></li>
+                <li><a href="rooms.html" class="active">Szobák</a></li>
+                <li><a href="contact.html">Kapcsolat</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <section class="room-list">
+            <h1>Szobák</h1>
+            <p>Fedezze fel szobáinkat és válassza ki az ideális szobát!</p>
+            <!-- Itt a JavaScript fogja létrehozni a szoba kártyákat -->
+        </section>
+
+        <!-- Popup a szoba részletekhez -->
+        <section class="room-details">
+            <div class="room-popup" id="room-popup">
+                <div class="popup-content">
+                    <h2>Szoba részletei</h2>
+                    <p id="room-description"></p>
+                    <button class="close-popup">Bezárás</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Hotel neve. Minden jog fenntartva.</p>
+    </footer>
+
+    <script src="rooms.js"></script>
+</body>
+</html>
