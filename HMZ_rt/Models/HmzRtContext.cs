@@ -758,6 +758,10 @@ public partial class HmzRtContext : DbContext
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("text")
                 .HasColumnName("amenities");
+            entity.Property(e => e.Images)
+                .HasDefaultValueSql("'NULL'")
+                .HasColumnType("text")
+                .HasColumnName("Images");
             entity.Property(e => e.Capacity)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("int(11)")

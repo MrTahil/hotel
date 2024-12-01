@@ -17,14 +17,34 @@ namespace HMZ_rt.Controllers
             _context = context;
         }
 
+
+
+
+
+
+
+
+
+
         // A collection to keep track of already generated IDs
         private static HashSet<string> generatedIds = new HashSet<string>();
-
-
-
         // Method to generate a unique numeric ID
-        public static string GenerateUniqueId()
+        public string GenerateUniqueId()
         {
+            if (generatedIds==null)
+            {
+                var ids = _context.Useraccounts
+                       .Select(u => u.UserId.ToString())
+                       .ToList();
+
+                lock (generatedIds)
+                {
+                    foreach (var id in ids)
+                    {
+                        generatedIds.Add(id);
+                    }
+                }
+            }
             string uniqueId;
             do
             {
@@ -37,20 +57,15 @@ namespace HMZ_rt.Controllers
             generatedIds.Add(uniqueId);
             return uniqueId;
         }
-
         // Method to generate a random numeric ID
         public static string GenerateNumericId()
         {
             // Combine current timestamp (e.g., the number of seconds since Unix epoch) and random digits
             string timestamp = DateTime.UtcNow.Ticks.ToString().Substring(10); // Take the last 10 digits of the timestamp (for 11 digit ID)
             string randomPart = GenerateRandomNumericString(1); // Add 1 random digit to make the ID 11 characters long
-
-
-            string id = timestamp + randomPart;
-
+            string id = timestamp + randomPart; 
             return id.Length > 11 ? id.Substring(0, 11) : id;
         }
-
         // Method to generate a random numeric string of a specified length
         private static string GenerateRandomNumericString(int length)
         {
@@ -77,26 +92,6 @@ namespace HMZ_rt.Controllers
 
         }
 
-
-
-        [HttpGet("idsfortheids")]
-        public async Task<ActionResult<HashSet<string>>> Usersids()
-        {
-            var ids = await _context.Useraccounts
-                                    .Select(u => u.UserId.ToString())
-                                    .ToListAsync();
-
-            lock (generatedIds)
-            {
-                foreach (var id in ids)
-                {
-                    generatedIds.Add(id);
-                }
-            }
-
-
-            return Ok(generatedIds);
-        }
 
 
 

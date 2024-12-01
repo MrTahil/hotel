@@ -25,6 +25,8 @@ public partial class Room
 
     public DateTime? DateAdded { get; set; }
 
+    public string? Images { get; set; }
+
     public virtual ICollection<Amenity> AmenitiesNavigation { get; set; } = new List<Amenity>();
 
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();

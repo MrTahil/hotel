@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HMZ_rt.Models;
+using System.ComponentModel.DataAnnotations;
 namespace HMZ_rt.Models
 {
     public class CreateUserDto
@@ -20,4 +21,6 @@ namespace HMZ_rt.Models
 
     public record CreateNotifiactionDto( string? Message, string? Status, string? Type, int? Priority, string? Notes, int UserId, string? Category);
     }
+
+    public record CreateRoom(string? RoomType, string? RoomNumber, int? Capacity, decimal? PricePerNight, string? Status, string? Description, int? FLoorNumber, string? Amenities, string? Images);
 
