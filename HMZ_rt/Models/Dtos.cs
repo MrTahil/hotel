@@ -1,4 +1,4 @@
-﻿using HMZ_rt.Models;
+using HMZ_rt.Models;
 using System.ComponentModel.DataAnnotations;
 namespace HMZ_rt.Models
 {
@@ -10,8 +10,8 @@ namespace HMZ_rt.Models
         public string? UserName { get; set; }
 
         [Required(ErrorMessage = "Jelszó megadása kötelező!")]
-        [MinLength(8, ErrorMessage = "A jelszónak legalább 8 karakter hossúnak kell lennie!")]
-        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", ErrorMessage = "A jelszónak tartalmaznia kell legalább 1, Kis és Nagy betűt illetve számot.")]
+        [MinLength(8, ErrorMessage = "A jelszónak legalább 8 karakter hosszúnak kell lennie!")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", ErrorMessage = "A jelszónak tartalmaznia kell legalább 1, kis és Nagy betűt illetve számot.")]
         public string? Password { get; set; }
         [EmailAddress(ErrorMessage = "Nem megfelelő Email forma.")]
         public string? Email { get; set; }

@@ -1,9 +1,11 @@
-﻿using HMZ_rt.Models;
+using HMZ_rt.Models;
 using Microsoft.AspNetCore.Mvc;
 using HMZ_rt.Controllers;
 
 namespace HMZ_rt.Controllers
 {
+    [Route("Rooms")]
+    [ApiController]
     public class Rooms_controller : Controller
     {
         [HttpGet]
