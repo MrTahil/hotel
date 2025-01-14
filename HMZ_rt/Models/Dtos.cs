@@ -24,5 +24,5 @@ namespace HMZ_rt.Models
     }
 
     public record CreateRoom(string? RoomType, string? RoomNumber, int? Capacity, decimal? PricePerNight, string? Status, string? Description, int? FLoorNumber, string? Images);
-    public record UpdateAmenitiesForNewRoomDto(string? AmenityName, string? Descript, int AmenityId, string? Availability, int? RoomId, string? Status, string? Icon, string? Categ, int? Priority);
+    public record UploadAmenitiesForNewRoomDto(string? AmenityName, string? Descript, string? Availability, string? Status, string? Icon, string? Categ, int? Priority, int? RoomId);
 

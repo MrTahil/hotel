@@ -55,7 +55,6 @@ namespace HMZ_rt.Controllers
 
 
 
-
         [HttpDelete("DeleteRoomById{Id}")]
         public async Task<ActionResult<Room>> DeleteRoomById(int Id)
         {
@@ -71,5 +70,6 @@ namespace HMZ_rt.Controllers
             return NotFound();
         }
 
+        
     }
 }
