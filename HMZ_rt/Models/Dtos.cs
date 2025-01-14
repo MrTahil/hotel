@@ -1,5 +1,6 @@
 using HMZ_rt.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography.X509Certificates;
 namespace HMZ_rt.Models
 {
     public class CreateUserDto
@@ -22,5 +23,6 @@ namespace HMZ_rt.Models
     public record CreateNotifiactionDto( string? Message, string? Status, string? Type, int? Priority, string? Notes, int UserId, string? Category);
     }
 
-    public record CreateRoom(string? RoomType, string? RoomNumber, int? Capacity, decimal? PricePerNight, string? Status, string? Description, int? FLoorNumber, string? Amenities, string? Images);
+    public record CreateRoom(string? RoomType, string? RoomNumber, int? Capacity, decimal? PricePerNight, string? Status, string? Description, int? FLoorNumber, string? Images);
+    public record UpdateAmenitiesForNewRoomDto(string? AmenityName, string? Descript, int AmenityId, string? Availability, int? RoomId, string? Status, string? Icon, string? Categ, int? Priority);
 
