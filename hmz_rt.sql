@@ -328,7 +328,7 @@ CREATE TABLE `rooms` (
   `floor_number` int(11) DEFAULT NULL,
   `amenities` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
   `date_added` date DEFAULT NULL,
-  `images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`images`))
+  `images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 -- --------------------------------------------------------
