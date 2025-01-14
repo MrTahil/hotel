@@ -761,7 +761,7 @@ public partial class HmzRtContext : DbContext
             entity.Property(e => e.Images)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("text")
-                .HasColumnName("Images");
+                .HasColumnName("images");
             entity.Property(e => e.Capacity)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("int(11)")
