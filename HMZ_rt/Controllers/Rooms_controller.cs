@@ -46,8 +46,11 @@ namespace HMZ_rt.Controllers
                 return StatusCode(201, room);
             }
             return BadRequest();
-
-
+        }
+        [HttpGet("GetRoomWithoutAmenities")]
+        public async Task<ActionResult<Room>> GetRooms()
+        {
+            return Ok( _context.Rooms.ToListAsync());
         }
 
     }
