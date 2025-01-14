@@ -53,5 +53,23 @@ namespace HMZ_rt.Controllers
             return Ok( _context.Rooms.ToListAsync());
         }
 
+
+
+
+        [HttpDelete("DeleteRoomById{Id}")]
+        public async Task<ActionResult<Room>> DeleteRoomById(int Id)
+        {
+
+
+            var os = await _context.Rooms.FirstOrDefaultAsync(x => x.RoomId== Id);
+            if (os != null)
+            {
+                _context.Rooms.Remove(os);
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Sikeresen törölve!" });
+            }
+            return NotFound();
+        }
+
     }
 }
