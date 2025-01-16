@@ -2,6 +2,7 @@ using HMZ_rt.Models;
 using Microsoft.AspNetCore.Mvc;
 using HMZ_rt.Controllers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HMZ_rt.Controllers
 {
@@ -47,10 +48,11 @@ namespace HMZ_rt.Controllers
             }
             return BadRequest();
         }
+
         [HttpGet("GetRoomWithoutAmenities")]
         public async Task<ActionResult<Room>> GetRooms()
         {
-            return Ok( _context.Rooms.ToListAsync());
+            return Ok(await _context.Rooms.ToListAsync());
         }
 
 

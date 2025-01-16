@@ -1134,6 +1134,14 @@ public partial class HmzRtContext : DbContext
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnName("role");
+            entity.Property(e => e.RefreshToken)
+                .HasMaxLength(255)
+                .HasDefaultValueSql("'NULL'")
+                .HasColumnName("refreshtoken");
+            entity.Property(e => e.RefreshTokenExpiryTime)
+                .HasMaxLength(255)
+                .HasDefaultValueSql("'NULL'")
+                .HasColumnName("refreshtokenexpirytime");
             entity.Property(e => e.Status)
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")

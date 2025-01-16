@@ -1,11 +1,12 @@
 {
   "Version": 1,
-  "Hash": "tdyXAcF8ZAF2ycK9qm5+czOJuhe6H91RgGboo9l7FEs=",
+  "Hash": "Bbxxncy/rKVzIaCqTRoZoYPWsQ/427zNfkodGl/FffQ=",
   "Source": "HMZ_rt",
   "BasePath": "_content/HMZ_rt",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": []
+  "Assets": [],
+  "Endpoints": []
 }

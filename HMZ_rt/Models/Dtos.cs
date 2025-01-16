@@ -27,10 +27,10 @@ namespace HMZ_rt.Models
     public record UploadAmenitiesForNewRoomDto(string? AmenityName, string? Descript, string? Availability, string? Status, string? Icon, string? Categ, int? Priority, int? RoomId);
     public class LoginDto
 {
-
-    [Required(ErrorMessage = "Jelszó megadása kötelező!")]
-    public string? Password { get; set; }
     [Required(ErrorMessage = "Meg kell adnod egy felhasználónevet!")]
     public string? UserName { get; set; }
+    [Required(ErrorMessage = "Jelszó megadása kötelező!")]
+    public string? Password { get; set; }
+
 
 }

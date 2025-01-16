@@ -6,6 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace HMZ_rt.Controllers
 {
@@ -14,9 +17,12 @@ namespace HMZ_rt.Controllers
     public class UserAccounts_controller : Controller
     {
         private readonly HmzRtContext _context;
-        public UserAccounts_controller(HmzRtContext context)
+        private readonly IConfiguration _configuration;
+
+        public UserAccounts_controller(HmzRtContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
         public static class PasswordHasher
@@ -62,6 +68,53 @@ namespace HMZ_rt.Controllers
 
 
 
+        public class TokenService
+        {
+            private readonly IConfiguration _configuration;
+
+            public TokenService(IConfiguration configuration)
+            {
+                _configuration = configuration;
+            }
+
+            public string GenerateJwtToken(string userId, string role)
+            {
+                var secretKey = _configuration["JwtSettings:SecretKey"];
+                var issuer = _configuration["JwtSettings:Issuer"];
+                var audience = _configuration["JwtSettings:Audience"];
+                var expiration = DateTime.UtcNow.AddMinutes(int.Parse(_configuration["JwtSettings:AccessTokenExpirationMinutes"]));
+
+                var claims = new[]
+                {
+            new Claim(JwtRegisteredClaimNames.Sub, userId),
+            new Claim(ClaimTypes.Role, role),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+                var token = new JwtSecurityToken(
+                    issuer: issuer,
+                    audience: audience,
+                    claims: claims,
+                    expires: expiration,
+                    signingCredentials: creds
+                );
+
+                return new JwtSecurityTokenHandler().WriteToken(token);
+            }
+
+            public string GenerateRefreshToken()
+            {
+                var randomNumber = new byte[32];
+                using (var rng = RandomNumberGenerator.Create())
+                {
+                    rng.GetBytes(randomNumber);
+                    return Convert.ToBase64String(randomNumber);
+                }
+            }
+        }
 
 
 
@@ -81,7 +134,19 @@ namespace HMZ_rt.Controllers
 
 
 
-            //Végpontok
+
+
+
+
+
+
+
+
+
+
+
+
+        //Végpontok
         [HttpGet("listoutallusers")]
         public async Task<ActionResult<Useraccount>> Userslist()
         {
@@ -167,6 +232,7 @@ namespace HMZ_rt.Controllers
         }
 
 
+
         [HttpGet("UsersWithNotificationsFull{UserIdd}")]
         public async Task<ActionResult<Useraccount>> GetAllNotification(int UserIdd)
         {
@@ -178,30 +244,63 @@ namespace HMZ_rt.Controllers
 
 
         [HttpPost("Login")]
-        public async Task<ActionResult> Login(LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             var user = await _context.Useraccounts
-                .FirstOrDefaultAsync(u => u.Username == loginDto.UserName || u.Email == loginDto.UserName);
+                .FirstOrDefaultAsync(u => u.Username.Trim() == loginDto.UserName.Trim());
 
-            if (user == null)
-            {
-                return Unauthorized(new { message = "Helytelen felhasználónév vagy jelszó!" });
-            }
 
-            // Jelszó ellenőrzése
-            bool isPasswordValid = PasswordHasher.VerifyPassword(loginDto.Password, user.Password);
+            if (user == null || !PasswordHasher.VerifyPassword(loginDto.Password, user.Password))
+                return Unauthorized(new { message = "Invalid credentials" });
 
-            if (!isPasswordValid)
-            {
-                return Unauthorized(new { message = "Helytelen felhasználónév vagy jelszó!" });
-            }
+            var tokenService = new TokenService(_configuration);
 
-            user.LastLogin = DateTime.Now;
+            var jwtToken = tokenService.GenerateJwtToken(user.UserId.ToString(), user.Role);
+            var refreshToken = tokenService.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(int.Parse(_configuration["JwtSettings:RefreshTokenExpirationDays"]));
+
             _context.Useraccounts.Update(user);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Sikeres bejelentkezés!", user });
+            return Ok(new
+            {
+                AccessToken = jwtToken,
+                RefreshToken = refreshToken
+            });
         }
+
+
+        [HttpPost("RefreshToken")]
+        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
+        {
+            var user = await _context.Useraccounts.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+
+            if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+                return Unauthorized(new { message = "Invalid vagy lejárt token" });
+
+            var tokenService = new TokenService(_configuration);
+            var newJwtToken = tokenService.GenerateJwtToken(user.UserId.ToString(), user.Role);
+            var newRefreshToken = tokenService.GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(int.Parse(_configuration["JwtSettings:RefreshTokenExpirationDays"]));
+
+            _context.Useraccounts.Update(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                AccessToken = newJwtToken,
+                RefreshToken = newRefreshToken
+            });
+        }
+
+
+
+
+
 
 
 
