@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using HMZ_rt.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Cryptography.X509Certificates;
 
 namespace HMZ_rt.Controllers
 {
@@ -71,6 +72,20 @@ namespace HMZ_rt.Controllers
             }
             return NotFound();
         }
+
+        [HttpPut("SzobaUpdate")]
+        public async Task<ActionResult<Room>> UpdateRoomById(int Id, UpdateRoomDto udto)
+        {
+            var os = await _context.Rooms.FirstOrDefaultAsync(x => x.RoomId == Id);
+            if (os != null)
+            {
+            
+            os.Status = udto.Status;
+            await _context.SaveChangesAsync();
+            return Ok();}
+            return BadRequest();
+        } 
+            
 
         
     }

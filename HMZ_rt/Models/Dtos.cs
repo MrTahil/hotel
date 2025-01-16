@@ -34,3 +34,4 @@ namespace HMZ_rt.Models
 
 
 }
+    public record UpdateRoomDto(string? Status);
