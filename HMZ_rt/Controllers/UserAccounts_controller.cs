@@ -9,6 +9,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HMZ_rt.Controllers
 {
@@ -29,10 +30,7 @@ namespace HMZ_rt.Controllers
         {
             public static string HashPassword(string password)
             {
-                // Só generálása
                 byte[] salt = RandomNumberGenerator.GetBytes(16);
-
-                // Jelszó hashelése PBKDF2-vel
                 using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000, HashAlgorithmName.SHA256);
                 byte[] hash = pbkdf2.GetBytes(32);
 
@@ -40,33 +38,23 @@ namespace HMZ_rt.Controllers
                 Buffer.BlockCopy(salt, 0, hashBytes, 0, salt.Length);
                 Buffer.BlockCopy(hash, 0, hashBytes, salt.Length, hash.Length);
 
-                // Visszaadás Base64 formátumban
                 return Convert.ToBase64String(hashBytes);
             }
 
-
             public static bool VerifyPassword(string password, string storedHash)
             {
-                // Tárolt hash Base64 dekódolása
                 byte[] hashBytes = Convert.FromBase64String(storedHash);
-
-                // Só és hash szétválasztása
                 byte[] salt = new byte[16];
                 Buffer.BlockCopy(hashBytes, 0, salt, 0, 16);
                 byte[] storedHashBytes = new byte[32];
                 Buffer.BlockCopy(hashBytes, 16, storedHashBytes, 0, 32);
 
-                // Új hash generálása 
                 using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000, HashAlgorithmName.SHA256);
                 byte[] newHash = pbkdf2.GetBytes(32);
 
-                // Hash-ek összehasonlítása
                 return newHash.SequenceEqual(storedHashBytes);
             }
         }
-
-
-
 
         public class TokenService
         {
@@ -86,10 +74,10 @@ namespace HMZ_rt.Controllers
 
                 var claims = new[]
                 {
-            new Claim(JwtRegisteredClaimNames.Sub, userId),
-            new Claim(ClaimTypes.Role, role),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+                    new Claim(JwtRegisteredClaimNames.Sub, userId),
+                    new Claim(ClaimTypes.Role, role),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                };
 
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -147,11 +135,15 @@ namespace HMZ_rt.Controllers
 
 
         //Végpontok
-        [HttpGet("listoutallusers")]
-        public async Task<ActionResult<Useraccount>> Userslist()
+        [Authorize(Roles = "System,Admin")]
+        [HttpGet("Allusers")]
+        public async Task<IActionResult> GetUsersWithNotifications()
         {
-            return Ok(await _context.Useraccounts.ToListAsync());
+            var usersWithNotifications = await _context.Useraccounts
+                .Include(u => u.Notifications) // Kapcsolódó Notifications betöltése
+                .ToListAsync();
 
+            return Ok(usersWithNotifications);
         }
 
 
@@ -232,7 +224,7 @@ namespace HMZ_rt.Controllers
         }
 
 
-
+        [Authorize(Roles = "System")]
         [HttpGet("UsersWithNotificationsFull{UserIdd}")]
         public async Task<ActionResult<Useraccount>> GetAllNotification(int UserIdd)
         {

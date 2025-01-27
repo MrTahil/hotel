@@ -49,7 +49,7 @@ namespace HMZ_rt.Controllers
             }
             return BadRequest();
         }
-
+        [Authorize("System")]
         [HttpGet("GetRoomWithoutAmenities")]
         public async Task<ActionResult<Room>> GetRooms()
         {
