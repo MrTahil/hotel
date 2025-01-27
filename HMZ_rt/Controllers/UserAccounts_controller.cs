@@ -225,7 +225,7 @@ namespace HMZ_rt.Controllers
 
 
         [Authorize(Roles = "System")]
-        [HttpGet("UsersWithNotificationsFull{UserIdd}")]
+        [HttpGet("UsersWithNotifications{UserIdd}")]
         public async Task<ActionResult<Useraccount>> GetAllNotification(int UserIdd)
         {
             var alldat = await _context.Useraccounts.Include(x => x.Notifications).Where(x=> x.UserId == UserIdd).ToListAsync();

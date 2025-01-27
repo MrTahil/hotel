@@ -18,6 +18,7 @@ namespace HMZ_rt.Controllers
         }
 
 
+        [Authorize(Roles = "System,Admin,Recept")]
         [HttpPost("CreateRoom")]
         public async Task<ActionResult<Room>> CreateRoom(CreateRoom crtm)
         {
@@ -49,15 +50,18 @@ namespace HMZ_rt.Controllers
             }
             return BadRequest();
         }
-        [Authorize("System")]
-        [HttpGet("GetRoomWithoutAmenities")]
-        public async Task<ActionResult<Room>> GetRooms()
+
+        [HttpGet("GetRoomWith")]
+        public async Task<ActionResult<List<Room>>> GetRooms()
         {
-            return Ok(await _context.Rooms.ToListAsync());
+            var roomsWithAmenities = await _context.Rooms
+                .Include(r => r.AmenitiesNavigation) 
+                .ToListAsync();
+
+            return Ok(roomsWithAmenities);
         }
 
-
-
+        [Authorize(Roles = "System,Admin,Recept")]
         [HttpDelete("DeleteRoomById{Id}")]
         public async Task<ActionResult<Room>> DeleteRoomById(int Id)
         {
@@ -73,6 +77,7 @@ namespace HMZ_rt.Controllers
             return NotFound();
         }
 
+        [Authorize(Roles = "System,Admin,Recept")]
         [HttpPut("SzobaUpdate")]
         public async Task<ActionResult<Room>> UpdateRoomById(int Id, UpdateRoomDto udto)
         {

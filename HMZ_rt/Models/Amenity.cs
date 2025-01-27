@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace HMZ_rt.Models;
 
@@ -24,6 +25,6 @@ public partial class Amenity
     public string? Category { get; set; }
 
     public int? Priority { get; set; }
-
+    [JsonIgnore]
     public virtual Room? Room { get; set; }
 }
