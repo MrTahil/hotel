@@ -35,3 +35,5 @@ namespace HMZ_rt.Models
 
 }
     public record UpdateRoomDto(string? Status);
+
+    public record CreateBookingDto(int RoomId, int GuestId, DateTime? CheckInDate, DateTime? CheckOutDate, int NumberOfGuests, decimal? TotalPrice, string? Status, string? PaymentStatus);
