@@ -56,6 +56,19 @@ namespace HMZ_rt.Controllers
 
         [Authorize(Roles = "System,Admin,Recept")]
         [HttpGet("Admin_Get_Data")]
+        public async Task<ActionResult<List<Room>>> GetRooms()
+        {
+            var rooms = await _context.Rooms
+                .Include(r => r.AmenitiesNavigation)
+                .Include(a => a.Promotions)
+                .Include(a => a.Reviews)
+                .Include(a => a.Roominventories)
+                .Include(a => a.Roommaintenances)
+                .Include(a =>a.Bookings)
+                .ToListAsync();
+
+            return Ok(rooms);
+        }
 
         [HttpGet("GetRoomWith")]
         public async Task<ActionResult<List<Room>>> GetRooms()
