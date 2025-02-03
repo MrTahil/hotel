@@ -56,7 +56,7 @@ namespace HMZ_rt.Controllers
 
         [Authorize(Roles = "System,Admin,Recept")]
         [HttpGet("Admin_Get_Data")]
-        public async Task<ActionResult<List<Room>>> GetRooms()
+        public async Task<ActionResult<List<Room>>> GetRoomsAdmin()
         {
             var rooms = await _context.Rooms
                 .Include(r => r.AmenitiesNavigation)
