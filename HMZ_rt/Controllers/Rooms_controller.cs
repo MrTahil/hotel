@@ -27,7 +27,7 @@ namespace HMZ_rt.Controllers
 
             if (existingRoomByNumber != null)
             {
-                return BadRequest(new { message = "Ez a szobasz·m m·r haszn·latban van!" });
+                return BadRequest(new { message = "Ez a szobasz√°m m√°r haszn√°latban van!" });
             }
 
 
@@ -51,11 +51,20 @@ namespace HMZ_rt.Controllers
             return BadRequest();
         }
 
+
+
+
+        [Authorize(Roles = "System,Admin,Recept")]
+        [HttpGet("Admin_Get_Data")]
+
         [HttpGet("GetRoomWith")]
         public async Task<ActionResult<List<Room>>> GetRooms()
         {
             var roomsWithAmenities = await _context.Rooms
-                .Include(r => r.AmenitiesNavigation) 
+                .Include(r => r.AmenitiesNavigation)
+                .Include(a => a.Promotions)
+                .Include(a => a.Reviews)
+                .Include(a => a.Roominventories)
                 .ToListAsync();
 
             return Ok(roomsWithAmenities);
@@ -72,7 +81,7 @@ namespace HMZ_rt.Controllers
             {
                 _context.Rooms.Remove(os);
                 await _context.SaveChangesAsync();
-                return Ok(new { message = "Sikeresen tˆrˆlve!" });
+                return Ok(new { message = "Sikeresen t√∂r√∂lve!" });
             }
             return NotFound();
         }
