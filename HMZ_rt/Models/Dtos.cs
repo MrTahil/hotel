@@ -31,9 +31,18 @@ namespace HMZ_rt.Models
     public string? UserName { get; set; }
     [Required(ErrorMessage = "Jelszó megadása kötelező!")]
     public string? Password { get; set; }
-
-
 }
     public record UpdateRoomDto(string? Status);
-
     public record CreateBookingDto(int RoomId, int GuestId, DateTime? CheckInDate, DateTime? CheckOutDate, int NumberOfGuests, decimal? TotalPrice, string? Status, string? PaymentStatus);
+public class NewStaffDto
+{
+   public string? FirstName { get; set; }
+   public string? LastName { get; set; }
+    [EmailAddress(ErrorMessage = "Nem megfelelő Email forma.")]
+    public     string? Email { get; set; }
+  public      string? PhoneNumber { get; set; }
+     public   string? Position { get; set; }
+   public     decimal? Salary { get; set; }
+     public   string? Status { get; set; }
+     public   string? Departmen { get; set; }
+}
