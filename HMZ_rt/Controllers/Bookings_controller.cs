@@ -14,6 +14,8 @@ namespace HMZ_rt.Controllers
             _context = context;
         }
 
+
+
         [Authorize(Roles ="Base")]
         [HttpPost("New_Booking{RoomId}")]
         public async Task<ActionResult<Booking>> Booking(int roomid, CreateBookingDto crtbooking)
@@ -37,8 +39,12 @@ namespace HMZ_rt.Controllers
             }
             return BadRequest();
         }
-        
 
+        //[HttpGet("BookingsByUserId{UserId}")]
+        //public async Task<ActionResult<Booking>> GetUserBookings(int UserIdd)
+        //{
+        //    return await _context.
+        //}
 
 
 
