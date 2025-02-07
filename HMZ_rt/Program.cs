@@ -4,7 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using static HMZ_rt.Controllers.UserAccounts_controller;
+using HMZ_rt.Controllers;
 
 namespace HMZ_rt
 {
@@ -24,7 +28,11 @@ namespace HMZ_rt
             });
 
 
+            var smtpSettings = builder.Configuration.GetSection("SmtpSettings").Get<SmtpSettings>();
 
+            // SmtpSettings hozzáadása a DI konténerhez
+            builder.Services.AddSingleton(smtpSettings);
+            builder.Services.AddTransient<IEmailService, EmailService>();
 
 
             builder.Services.AddDbContext<HmzRtContext>(o =>
