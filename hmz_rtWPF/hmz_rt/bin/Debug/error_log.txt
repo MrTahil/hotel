@@ -1,0 +1,16 @@
+[2025. 02. 09. 14:06:12] Hiba történt: Hiba történt a kérelem elküldésekor.
+   a következő helyen: System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   a következő helyen: System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   a következő helyen: System.Runtime.CompilerServices.TaskAwaiter`1.GetResult()
+   a következő helyen: RoomListApp.MainWindow.<LoadRooms>d__3.MoveNext() hely: C:\Users\User\Downloads\hmz_rt\hmz_rt\MainWindow.xaml.cs, sor: 32
+
+[2025. 02. 09. 14:08:46] Hiba történt: Hiba történt a kérelem elküldésekor.
+   a következő helyen: System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+   a következő helyen: System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   a következő helyen: System.Runtime.CompilerServices.TaskAwaiter`1.GetResult()
+   a következő helyen: RoomListApp.MainWindow.<LoadRooms>d__3.MoveNext() hely: C:\Users\User\Downloads\hmz_rt\hmz_rt\MainWindow.xaml.cs, sor: 32
+
+Hiba a szobák lekérésekor: NotFound
+Hiba a szobák lekérésekor: NotFound
+Hiba a szobák lekérésekor: NotFound
+Hiba a szobák lekérésekor: NotFound
