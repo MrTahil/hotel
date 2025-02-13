@@ -15,7 +15,7 @@ namespace RoomListApp
     }
     public partial class MainWindow : Window
     {
-        private readonly HttpClient _httpClient = new HttpClient { BaseAddress = new Uri("http://localhost:5007/Rooms/") };
+        private readonly HttpClient _httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7047/Rooms/") };
 
         public MainWindow()
         {

@@ -9,6 +9,6 @@
         <TextBlock Text="Jelszó:" VerticalAlignment="Top" Margin="50,70,0,0"/>
         <PasswordBox x:Name="txtPassword" Width="200" Height="25" VerticalAlignment="Top" Margin="150,70,0,0"/>
 
-        <Button Content="Bejelentkezés" Width="100" Height="30" Click="btnLogin_Click" VerticalAlignment="Top" Margin="150,120,0,0"/>
+        <Button x:Name="btnLogin" Content="Bejelentkezés" Width="100" Height="30" Click="btnLogin_Click" VerticalAlignment="Top" Margin="150,120,0,0"/>
     </Grid>
 </Window>

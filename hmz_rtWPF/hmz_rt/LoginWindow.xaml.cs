@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -9,33 +10,48 @@ namespace RoomListApp
 {
     public partial class LoginWindow : Window
     {
-        private readonly HttpClient _httpClient = new HttpClient { BaseAddress = new Uri("http://localhost:5007/") };
+        private readonly HttpClient _httpClient;
 
         public LoginWindow()
         {
             InitializeComponent();
+
+            // SSL validáció kikapcsolása (ha szükséges)
+            var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+            };
+
+            _httpClient = new HttpClient(handler) { BaseAddress = new Uri("https://localhost:7047/UserAccounts/") };
         }
 
         private async void btnLogin_Click(object sender, RoutedEventArgs e)
         {
-            string username = txtUsername.Text;
-            string password = txtPassword.Password;
+            MessageBox.Show("btnLogin_Click lefutott!");
 
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            btnLogin.IsEnabled = false;
+
+            bool success = await AuthenticateUser(txtUsername.Text, txtPassword.Password);
+
+            if (success)
             {
-                MessageBox.Show("Kérlek töltsd ki az összes mezőt!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                MessageBox.Show("Sikeres bejelentkezés, DialogResult = true lesz!");
+                this.DialogResult = true;
             }
-
-            bool isSuccess = await AuthenticateUser(username, password);
-            if (isSuccess)
+            else
             {
-                this.Hide();
-                MainWindow mainWindow = new MainWindow();
-                mainWindow.Show();
-                this.Close();
+                btnLogin.IsEnabled = true;
+                MessageBox.Show("Bejelentkezés sikertelen.");
             }
         }
+
+
+
+
+
+
+
+
 
         private async Task<bool> AuthenticateUser(string username, string password)
         {
@@ -45,22 +61,31 @@ namespace RoomListApp
                 string json = JsonSerializer.Serialize(loginData);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync("api/auth/login", content);
+                HttpResponseMessage response = await _httpClient.PostAsync("Login", content);
+                string responseString = await response.Content.ReadAsStringAsync();
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show("Hibás felhasználónév vagy jelszó!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Bejelentkezési hiba ({response.StatusCode}): {responseString}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                     return false;
                 }
 
-                var responseString = await response.Content.ReadAsStringAsync();
                 var result = JsonSerializer.Deserialize<AuthResponse>(responseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 TokenStorage.AuthToken = result.Token;
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
+
+                MessageBox.Show("Sikeres bejelentkezés!", "Üdv", MessageBoxButton.OK, MessageBoxImage.Information);
                 return true;
+            }
+            catch (HttpRequestException ex)
+            {
+                MessageBox.Show($"Hálózati hiba: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ismeretlen hiba történt: {ex.Message}\n{ex.StackTrace}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
         }

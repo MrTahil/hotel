@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 
 namespace RoomListApp
 {
@@ -8,16 +9,21 @@ namespace RoomListApp
         {
             base.OnStartup(e);
 
-            LoginWindow loginWindow = new LoginWindow();
-            if (loginWindow.ShowDialog() == true)
+            var loginWindow = new LoginWindow();
+            bool? result = loginWindow.ShowDialog();
+
+            if (result == true)
             {
-                MainWindow mainWindow = new MainWindow();
+                var mainWindow = new MainWindow();
                 mainWindow.Show();
             }
             else
             {
-                Shutdown(); // Ha a bejelentkezés sikertelen, az app kilép
+                Application.Current.Shutdown();
             }
         }
+
+
+
     }
 }
