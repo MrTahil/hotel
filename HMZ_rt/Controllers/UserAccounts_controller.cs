@@ -10,6 +10,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using System.Net.Mail;
+using System.Net;
 
 namespace HMZ_rt.Controllers
 {
@@ -103,6 +105,46 @@ namespace HMZ_rt.Controllers
                 }
             }
         }
+        private string Generate2FACode()
+        {
+            // 6 számjegyű véletlenszerű kód generálása
+            var random = new Random();
+            return random.Next(100000, 999999).ToString();
+        }
+
+
+        private async Task Send2FACodeByEmail(string email, string code)
+        {
+            var smtpSettings = new SmtpSettings
+            {
+                Server = "smtp.gmail.com",
+                Port = 587,
+                Username = "hmzrtkando@gmail.com",
+                Password = "kcrv dzii jrum sabt",
+                FromEmail = "hmzservices@hmz.hu"
+            };
+
+            var subject = "HMZ regisztráció megerősítése";
+            var body = $"<h1>Kétfaktoros hitelesítés</h1><p>Az Ön hitelesítési kódja: <strong>{code}</strong></p>";
+
+            using (var client = new SmtpClient(smtpSettings.Server, smtpSettings.Port))
+            {
+                client.EnableSsl = true;
+                client.UseDefaultCredentials = false;
+                client.Credentials = new NetworkCredential(smtpSettings.Username, smtpSettings.Password);
+
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress(smtpSettings.FromEmail),
+                    Subject = subject,
+                    Body = body,
+                    IsBodyHtml = true
+                };
+                mailMessage.To.Add(email);
+
+                await client.SendMailAsync(mailMessage);
+            }
+        }
 
 
 
@@ -151,28 +193,30 @@ namespace HMZ_rt.Controllers
 
 
         [HttpPost("Register")]
-        public async Task<ActionResult<Useraccount>> NewAccount(CreateUserDto newuser) {
-
-
-            //ellenőrzés
+        public async Task<ActionResult<Useraccount>> NewAccount(CreateUserDto newuser)
+        {
+            // Ellenőrzés
             var existingUserByUsername = await _context.Useraccounts
-            .FirstOrDefaultAsync(u => u.Username == newuser.UserName);
+                .FirstOrDefaultAsync(u => u.Username == newuser.UserName);
 
             if (existingUserByUsername != null)
             {
                 return BadRequest(new { message = "Ez a felhasználónév már használatban van!" });
             }
 
-
             var existingUserByEmail = await _context.Useraccounts
-            .FirstOrDefaultAsync(u => u.Email == newuser.Email);
+                .FirstOrDefaultAsync(u => u.Email == newuser.Email);
 
             if (existingUserByEmail != null)
             {
                 return BadRequest(new { message = "Ez az E-mail már használatban van!" });
             }
 
-            //mentés
+            // 2FA kód generálása
+            var twoFactorCode = Generate2FACode();
+            var twoFactorCodeExpiry = DateTime.Now.AddDays(1); // 10 percig érvényes
+
+            // Mentés
             string hashedPassword = PasswordHasher.HashPassword(newuser.Password);
 
             var user = new Useraccount
@@ -180,20 +224,80 @@ namespace HMZ_rt.Controllers
                 Username = newuser.UserName,
                 Password = hashedPassword,
                 Email = newuser.Email,
-                Role = "Base",
+                Role = "unactivated",
                 Status = newuser.Status,
                 DateCreated = DateTime.Now,
                 DateUpdated = DateTime.Now,
                 LastLogin = DateTime.Now,
                 Notes = newuser.Notes,
+
+                // 2FA mezők
+                Authenticationcode = twoFactorCode,
+                Authenticationexpire = twoFactorCodeExpiry
             };
-            if (user != null) {
+            
+            if (user != null)
+            {
                 await _context.Useraccounts.AddAsync(user);
                 await _context.SaveChangesAsync();
-                return StatusCode(201, user);
+
+                // 2FA kód küldése e-mailben
+                await Send2FACodeByEmail(user.Email, twoFactorCode);
+
+                return StatusCode(201, new { message = "Regisztráció sikeres! Kérjük, erősítse meg a fiókját a kapott 2FA kóddal." });
             }
-            return BadRequest();
+            return StatusCode(418);
+
         }
+
+        [HttpPost("Verify2FA")]
+        public async Task<ActionResult> Verify2FA(string email, string code)
+        {
+            var user = await _context.Useraccounts
+                .FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user == null)
+            {
+                return NotFound(new { message = "Felhasználó nem található!" });
+            }
+
+            // Ellenőrzés, hogy a kód érvényes-e
+            if (user.Authenticationcode == code && user.Authenticationexpire > DateTime.Now)
+            {
+                // 2FA sikeres, kód törlése
+                user.Authenticationcode = "activated";
+                user.Role = "Base";
+                user.Authenticationexpire = null;
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "2FA hitelesítés sikeres! Fiókja aktiválva." });
+            }
+
+            return BadRequest(new { message = "Érvénytelen vagy lejárt 2FA kód!" });
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         [HttpDelete("DeleteUserById{InUserId}")]
@@ -288,6 +392,8 @@ namespace HMZ_rt.Controllers
                 RefreshToken = newRefreshToken
             });
         }
+
+            
 
 
 

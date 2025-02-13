@@ -30,5 +30,9 @@ public partial class Useraccount
 
     public string? Notes { get; set; }
 
+    public string Authenticationcode { get; set; }
+
+    public DateTime? Authenticationexpire { get; set; }
+
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }

@@ -1150,6 +1150,16 @@ public partial class HmzRtContext : DbContext
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnName("username");
+            entity.Property(e => e.Authenticationcode)
+                .HasMaxLength(255)
+                .HasDefaultValueSql("'NULL'")
+                .HasColumnName("authenticationcode");
+            entity.Property(e => e.Authenticationexpire)
+                .HasDefaultValueSql("'NULL'")
+                .HasColumnType("date")
+                .HasColumnName("authenticationexpire");
+
+
         });
 
         OnModelCreatingPartial(modelBuilder);

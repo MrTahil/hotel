@@ -18,6 +18,8 @@ namespace HMZ_rt.Models
         public string? Email { get; set; }
         public string? Status { get; set; }
         public string? Notes { get; set; }
+        public string? TwoFactorCode { get; set; }
+        public DateTime? TwoFactorCodeExpiry { get; set; }
     }
 
     public record CreateNotifiactionDto( string? Message, string? Status, string? Type, int? Priority, string? Notes, int UserId, string? Category);
