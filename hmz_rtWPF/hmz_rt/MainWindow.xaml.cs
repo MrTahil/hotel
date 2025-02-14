@@ -9,30 +9,40 @@ using System.Windows.Controls;
 
 namespace RoomListApp
 {
-    public static class TokenStorage
-    {
+    public static class TokenStorage {
         public static string AuthToken { get; set; }
+        public static string RefreshToken { get; set; } // RefreshToken tárolása
     }
     public partial class MainWindow : Window
-    {
-        private readonly HttpClient _httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:7047/Rooms/") };
+{
+    private readonly HttpClient _httpClient;
 
-        public MainWindow()
-        {
+        public MainWindow() {
             InitializeComponent();
+
+            // SSL beállítások
+            var handler = new HttpClientHandler {
+                ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+            };
+
+            _httpClient = new HttpClient(handler) { BaseAddress = new Uri("https://localhost:7047/Rooms/") };
+
+            // Aszinkron hívás, de ne zárd be az ablakot hibák esetén
             _ = LoadRooms();
         }
 
 
-        private async Task LoadRooms()
-        {
-            try
-            {
+        private async Task LoadRooms() {
+            try {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken)) {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
 
                 var response = await _httpClient.GetAsync("GetRoomWith"); // API végpont
-                if (!response.IsSuccessStatusCode)
-                {
+                if (!response.IsSuccessStatusCode) {
                     string errorResponse = await response.Content.ReadAsStringAsync();
                     MessageBox.Show($"Hiba a szobák lekérdezésekor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
@@ -41,17 +51,15 @@ namespace RoomListApp
                 var responseString = await response.Content.ReadAsStringAsync();
                 var rooms = JsonSerializer.Deserialize<List<Room>>(responseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                if (rooms == null || rooms.Count == 0)
-                {
+                if (rooms == null || rooms.Count == 0) {
                     MessageBox.Show("Nincsenek elérhető szobák az adatbázisban.", "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
 
                 lstRooms.ItemsSource = rooms;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Hiba történt: {ex.Message}\n{ex.StackTrace}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            catch (Exception ex) {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

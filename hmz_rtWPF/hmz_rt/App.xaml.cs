@@ -5,20 +5,18 @@ namespace RoomListApp
 {
     public partial class App : Application
     {
-        protected override void OnStartup(StartupEventArgs e)
-        {
+        protected override void OnStartup(StartupEventArgs e) {
             base.OnStartup(e);
 
             var loginWindow = new LoginWindow();
             bool? result = loginWindow.ShowDialog();
 
-            if (result == true)
-            {
+            if (result == true) {
                 var mainWindow = new MainWindow();
+                mainWindow.Closed += (s, args) => Application.Current.Shutdown(); // ⚠️ Bezáráskor kilép
                 mainWindow.Show();
             }
-            else
-            {
+            else {
                 Application.Current.Shutdown();
             }
         }
