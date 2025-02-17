@@ -136,7 +136,7 @@ namespace HMZ_rt.Controllers
         private async Task Send2FACodeByEmail(string email, string code)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(code))
-                throw new ArgumentException("Email and code must not be null or empty");
+                throw new ArgumentException("Az email code nem lehet üres");
 
             var smtpSettings = new SmtpSettings
             {
@@ -259,7 +259,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed to send email: {ex.Message}", ex);
+                throw new Exception($"Sikertelen email küldés: {ex.Message}", ex);
             }
         }
 
@@ -278,7 +278,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Internal server error occurred while fetching users." });
+                return StatusCode(500, new { message = "Szerverhiba lépett fel" });
             }
         }
 
@@ -288,10 +288,10 @@ namespace HMZ_rt.Controllers
             try
             {
                 if (newuser == null)
-                    return BadRequest(new { message = "Invalid user data" });
+                    return BadRequest(new { message = "Hibás felhasználói adatok" });
 
                 if (await UserExists(newuser.UserName, newuser.Email))
-                    return BadRequest(new { message = "Username or email already exists" });
+                    return BadRequest(new { message = "Név vagy Email már használatban van" });
 
                 var twoFactorCode = Generate2FACode();
                 var user = await CreateNewUser(newuser, twoFactorCode);
@@ -300,7 +300,7 @@ namespace HMZ_rt.Controllers
                 await _context.SaveChangesAsync();
                 await Send2FACodeByEmail(user.Email, twoFactorCode);
 
-                return StatusCode(201, new { message = "Registration successful! Please verify your account with the 2FA code." });
+                return StatusCode(201, new { message = "Sikeres regisztráció, emailben elküldtük az aktiváló kódot" });
             }
             catch (Exception ex)
             {
@@ -341,17 +341,17 @@ namespace HMZ_rt.Controllers
                     .FirstOrDefaultAsync(u => u.Email == email);
 
                 if (user == null)
-                    return NotFound(new { message = "User not found" });
+                    return NotFound(new { message = "Felhasználható nem található" });
 
                 if (!IsValidTwoFactorCode(user, code))
-                    return BadRequest(new { message = "Invalid or expired 2FA code" });
+                    return BadRequest(new { message = "Hibás vagy lejárt hitelesítő kód" });
 
                 await ActivateUser(user);
-                return Ok(new { message = "2FA verification successful! Account activated." });
+                return Ok(new { message = "Sikeres aktiválás, mostmár bejelentkezhetsz" });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Verification failed due to an internal error." });
+                return StatusCode(500, new { message = "Szerver miatti sikertelen aktiváls, ha a hiba továbbra is fenn áll kérlek kérd a munkatársaink segítéségét" });
             }
         }
 
@@ -378,15 +378,15 @@ namespace HMZ_rt.Controllers
                     .FirstOrDefaultAsync(x => x.UserId == InUserId);
 
                 if (user == null)
-                    return NotFound(new { message = "User not found" });
+                    return NotFound(new { message = "Felhasználó nem található" });
 
                 _context.Useraccounts.Remove(user);
                 await _context.SaveChangesAsync();
-                return Ok(new { message = "Successfully deleted" });
+                return Ok(new { message = "Sikeres törlés" });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Deletion failed due to an internal error." });
+                return StatusCode(500, new { message = "Szerverhiba miatt sikertelen törlés" });
             }
         }
 
@@ -399,15 +399,15 @@ namespace HMZ_rt.Controllers
                     .FirstOrDefaultAsync(x => x.Username == Username);
 
                 if (user == null)
-                    return NotFound(new { message = "User not found" });
+                    return NotFound(new { message = "Felhasználó nem található" });
 
                 _context.Useraccounts.Remove(user);
                 await _context.SaveChangesAsync();
-                return Ok(new { message = "Successfully deleted" });
+                return Ok(new { message = "Sikeres törlés" });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Deletion failed due to an internal error." });
+                return StatusCode(500, new { message = "Szerverhiba miatt sikertelen törlés" });
             }
         }
 
@@ -423,13 +423,13 @@ namespace HMZ_rt.Controllers
                     .ToListAsync();
 
                 if (!userData.Any())
-                    return NotFound(new { message = "User not found" });
+                    return NotFound(new { message = "Felhasználó nem található" });
 
                 return Ok(userData);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Failed to retrieve notifications." });
+                return StatusCode(500, new { message = "Az adatok lekérése sikertelen" });
             }
         }
 
@@ -439,11 +439,11 @@ namespace HMZ_rt.Controllers
             try
             {
                 if (loginDto == null)
-                    return BadRequest(new { message = "Invalid login data" });
+                    return BadRequest(new { message = "Hibás bejelentési adatok" });
 
                 var user = await ValidateUser(loginDto);
                 if (user == null)
-                    return Unauthorized(new { message = "Invalid credentials" });
+                    return Unauthorized(new { message = "Hibás adatok" });
 
                 var (accessToken, refreshToken) = GenerateTokens(user);
                 await UpdateUserRefreshToken(user, refreshToken);
@@ -452,7 +452,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Login failed due to an internal error." });
+                return StatusCode(500, new { message = "Sikertelen bejelentkezés szerverhiba miatt" });
             }
         }
 
@@ -490,13 +490,13 @@ namespace HMZ_rt.Controllers
             try
             {
                 if (string.IsNullOrEmpty(refreshToken))
-                    return BadRequest(new { message = "Invalid refresh token" });
+                    return BadRequest(new { message = "Hibás token" });
 
                 var user = await _context.Useraccounts
                     .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
 
                 if (!IsValidRefreshToken(user))
-                    return Unauthorized(new { message = "Invalid or expired token" });
+                    return Unauthorized(new { message = "Hibás vagy lejárt token" });
 
                 var (accessToken, newRefreshToken) = GenerateTokens(user);
                 await UpdateUserRefreshToken(user, newRefreshToken);
@@ -505,7 +505,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Token refresh failed due to an internal error." });
+                return StatusCode(500, new { message = "Szerverhiba miatt sikertelen tokenrefresh" });
             }
         }
 
@@ -519,7 +519,7 @@ namespace HMZ_rt.Controllers
                 {
                     string code = Generate2FACode();
                     if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(code))
-                        throw new ArgumentException("Email and code must not be null or empty");
+                        throw new ArgumentException("Az email code nem lehet se null se üres");
 
                     var smtpSettings = new SmtpSettings
                     {
@@ -623,7 +623,7 @@ namespace HMZ_rt.Controllers
                         .FirstOrDefaultAsync(x => x.Email == email);
 
                     if (user == null)
-                        return NotFound(new { message = "User not found" });
+                        return NotFound(new { message = "Felhasználó nem található!" });
                     user.Authenticationcode = code;
                     user.Authenticationexpire = DateTime.Now.AddDays(TwoFactorCodeExpiryDays);
                     _context.Useraccounts.Update(user);
@@ -652,7 +652,7 @@ namespace HMZ_rt.Controllers
                     }
                     catch (Exception ex)
                     {
-                        throw new Exception($"Failed to send email: {ex.Message}", ex);
+                        throw new Exception($"Sikertelen Email küldés: {ex.Message}", ex);
                     }
                 }
 
