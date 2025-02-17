@@ -510,7 +510,7 @@ namespace HMZ_rt.Controllers
         }
 
 
-        [HttpPost("ForgotPassword")]
+        [HttpPost("ForgotPasswordsendemail")]
         public async Task<ActionResult<Useraccount>> Forgotpass(string email)
         {
             try
@@ -531,8 +531,103 @@ namespace HMZ_rt.Controllers
                     };
 
                     var subject = "HMZ elfeljtett jelszó";
-                    var body = $@"<!DOCTYPE html>\r\n<html lang=\""hu\"">\r\n<head>\r\n    <meta charset=\""UTF-8\"">\r\n    <meta name=\""viewport\"" content=\""width=device-width, initial-scale=1.0\"">\r\n    <title>Biztonsági Kód</title>\r\n    <style>\r\n        body {{{{\r\n            font-family: 'Arial', sans-serif;\r\n            line-height: 1.6;\r\n            margin: 0;\r\n            padding: 0;\r\n            background-color: #f0f8ff;\r\n        }}}}\r\n        .container {{{{\r\n            max-width: 600px;\r\n            margin: 20px auto;\r\n            padding: 30px;\r\n            background-color: #ffffff;\r\n            border-radius: 10px;\r\n            box-shadow: 0 2px 5px rgba(0,0,0,0.1);\r\n        }}}}\r\n        .header {{{{\r\n            text-align: center;\r\n            color: #1a73e8;\r\n            margin-bottom: 25px;\r\n        }}}}\r\n        .code {{{{\r\n            font-size: 32px;\r\n            font-weight: bold;\r\n            color: #1565c0;\r\n            text-align: center;\r\n            margin: 30px 0;\r\n            padding: 15px;\r\n            background-color: #e3f2fd;\r\n            border-radius: 5px;\r\n            letter-spacing: 3px;\r\n        }}}}\r\n        .footer {{{{\r\n            text-align: center;\r\n            margin-top: 30px;\r\n            color: #666666;\r\n            font-size: 12px;\r\n        }}}}\r\n        .note {{{{\r\n            color: #666;\r\n            font-size: 14px;\r\n            text-align: center;\r\n            margin: 20px 0;\r\n            font-style: italic;\r\n        }}}}\r\n        .warning {{{{\r\n            text-align: center;\r\n            color: #666;\r\n            font-size: 14px;\r\n            margin: 20px 0;\r\n        }}}}\r\n        @media screen and (max-width: 600px) {{{{\r\n            .container {{{{\r\n                margin: 10px;\r\n                padding: 20px;\r\n            }}}}\r\n        }}}}\r\n    </style>\r\n</head>\r\n<body>\r\n    <div class=\""container\"">\r\n        <div class=\""header\"">\r\n            <h1>Biztonsági Kód</h1>\r\n        </div>\r\n        \r\n        <p>Kedves Felhasználónk!</p>\r\n        \r\n        <p>A bejelentkezéshez szükséges kétlépcsős azonosítás kódja:</p>\r\n        \r\n        <div class=\""code\"">{{code}}</div>\r\n        \r\n        <p class=\""note\"">Ez egy automatikusan generált üzenet, kérjük ne válaszoljon rá.</p>\r\n        \r\n        <p class=\""warning\"">Ha nem Ön kezdeményezte ezt a kérést, kérjük azonnal változtassa meg jelszavát!</p>\r\n        \r\n        <div class=\""footer\"">\r\n            <p>© 2025 [hmzrt.com] Minden jog fenntartva</p>\r\n            <p>Ügyfélszolgálat: [hmzrtkando@gmail.com] | [+36 70 1231212]</p>\r\n        </div>\r\n    </div>\r\n</body>\r\n</html>";
+                    var body = $@"<!DOCTYPE html>
+<html lang=""hu"">
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <title>Biztonsági Kód</title>
+    <style>
+        body {{
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f8ff;
+        }}
+        .container {{
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }}
+        .header {{
+            text-align: center;
+            color: #1a73e8;
+            margin-bottom: 25px;
+        }}
+        .code {{
+            font-size: 32px;
+            font-weight: bold;
+            color: #1565c0;
+            text-align: center;
+            margin: 30px 0;
+            padding: 15px;
+            background-color: #e3f2fd;
+            border-radius: 5px;
+            letter-spacing: 3px;
+        }}
+        .footer {{
+            text-align: center;
+            margin-top: 30px;
+            color: #666666;
+            font-size: 12px;
+        }}
+        .note {{
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            margin: 20px 0;
+            font-style: italic;
+        }}
+        .warning {{
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin: 20px 0;
+        }}
+        @media screen and (max-width: 600px) {{
+            .container {{
+                margin: 10px;
+                padding: 20px;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>Biztonsági Kód</h1>
+        </div>
+        
+        <p>Kedves Felhasználónk!</p>
+        
+        <p>A jelszó visszaállításához szükséges kódja:</p>
+        
+        <div class=""code"">{code}</div>
+        
+        <p class=""note"">Ez egy automatikusan generált üzenet, kérjük ne válaszoljon rá.</p>
+        
+        <p class=""warning"">Ha nem Ön kezdeményezte ezt a kérést, kérjük azonnal változtassa meg jelszavát!</p>
+        
+        <div class=""footer"">
+            <p>© 2025 [hmzrt.com] Minden jog fenntartva</p>
+            <p>Ügyfélszolgálat: [hmzrtkando@gmail.com] | [+36 70 1231212]</p>
+        </div>
+    </div>
+</body>
+</html>";
+                    var user = await _context.Useraccounts
+                        .FirstOrDefaultAsync(x => x.Email == email);
 
+                    if (user == null)
+                        return NotFound(new { message = "User not found" });
+                    user.Authenticationcode = code;
+                    user.Authenticationexpire = DateTime.Now.AddDays(TwoFactorCodeExpiryDays);
+                    _context.Useraccounts.Update(user);
+                    await _context.SaveChangesAsync();
 
                     using var client = new SmtpClient(smtpSettings.Server, smtpSettings.Port)
                     {
@@ -549,10 +644,11 @@ namespace HMZ_rt.Controllers
                         IsBodyHtml = true
                     };
                     mailMessage.To.Add(email);
-
+                    
                     try
                     {
                         await client.SendMailAsync(mailMessage);
+                        return StatusCode(418);
                     }
                     catch (Exception ex)
                     {
@@ -561,12 +657,14 @@ namespace HMZ_rt.Controllers
                 }
 
 
+                return StatusCode(418);
 
 
 
 
-                return (BadRequest());
-                
+
+
+
             }
             catch (Exception ex)
             {

@@ -1,0 +1,505 @@
+[
+  {
+    "ContainingType": "HMZ_rt.Controllers.Amenities_controller",
+    "Method": "GetResultsForRunner",
+    "RelativePath": "Amenities/GetAmenitiesForRoom{Id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[HMZ_rt.Models.Amenity, HMZ_rt, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Amenities_controller",
+    "Method": "GenerateNewAmenitie",
+    "RelativePath": "Amenities/New aminiti",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "upload",
+        "Type": "UploadAmenitiesForNewRoomDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Amenity",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Bookings_controller",
+    "Method": "Booking",
+    "RelativePath": "Bookings/New_Booking{RoomId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "roomid",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "crtbooking",
+        "Type": "CreateBookingDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Booking",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Rooms_controller",
+    "Method": "GetRoomsAdmin",
+    "RelativePath": "Rooms/Admin_Get_Data",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[HMZ_rt.Models.Room, HMZ_rt, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Rooms_controller",
+    "Method": "CreateRoom",
+    "RelativePath": "Rooms/CreateRoom",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "crtm",
+        "Type": "CreateRoom",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Room",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Rooms_controller",
+    "Method": "DeleteRoomById",
+    "RelativePath": "Rooms/DeleteRoomById{Id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Room",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Rooms_controller",
+    "Method": "GetRooms",
+    "RelativePath": "Rooms/GetRoomWith",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[HMZ_rt.Models.Room, HMZ_rt, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Rooms_controller",
+    "Method": "UpdateRoomById",
+    "RelativePath": "Rooms/SzobaUpdate",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Id",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "udto",
+        "Type": "UpdateRoomDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Room",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Staff_controller",
+    "Method": "CreateStaff",
+    "RelativePath": "Staff",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "nwstdto",
+        "Type": "NewStaffDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Staff",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
+    "Method": "GetUsersWithNotifications",
+    "RelativePath": "UserAccounts/Allusers",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
+    "Method": "DeleteAccount",
+    "RelativePath": "UserAccounts/DeleteUserById{InUserId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "InUserId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Useraccount",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
+    "Method": "DeleteAccountByName",
+    "RelativePath": "UserAccounts/DeleteUserByUsername{Username}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Username",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Useraccount",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
+    "Method": "Forgotpass",
+    "RelativePath": "UserAccounts/ForgotPassword",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "email",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Useraccount",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
+    "Method": "Login",
+    "RelativePath": "UserAccounts/Login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "loginDto",
+        "Type": "LoginDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
+    "Method": "RefreshToken",
+    "RelativePath": "UserAccounts/RefreshToken",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "refreshToken",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
+    "Method": "NewAccount",
+    "RelativePath": "UserAccounts/Register",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "newuser",
+        "Type": "HMZ_rt.Models.CreateUserDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Useraccount",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Notifiactions_controller",
+    "Method": "NewMessage",
+    "RelativePath": "UserAccounts/Sent Messages",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "notidto",
+        "Type": "HMZ_rt.Models.CreateNotifiactionDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Notification",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Notifiactions_controller",
+    "Method": "UpdateOnOpened",
+    "RelativePath": "UserAccounts/UpdateOpenedTime{NotiId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "NotiId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Notification",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Notifiactions_controller",
+    "Method": "UpdateOnSent",
+    "RelativePath": "UserAccounts/UpdateSentTime{NotiId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "NotiId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Notification",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
+    "Method": "GetAllNotification",
+    "RelativePath": "UserAccounts/UsersWithNotifications{UserIdd}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "UserIdd",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Useraccount",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
+    "Method": "Verify2FA",
+    "RelativePath": "UserAccounts/Verify2FA",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "email",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "code",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  }
+]
