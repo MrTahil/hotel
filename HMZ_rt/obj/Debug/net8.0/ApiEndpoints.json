@@ -296,7 +296,7 @@
   {
     "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
     "Method": "Forgotpass",
-    "RelativePath": "UserAccounts/ForgotPassword",
+    "RelativePath": "UserAccounts/ForgotPasswordsendemail",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -404,6 +404,37 @@
     ]
   },
   {
+    "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
+    "Method": "setnewpass",
+    "RelativePath": "UserAccounts/SetNewPassword",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "email",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "pass",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Useraccount",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
     "ContainingType": "HMZ_rt.Controllers.Notifiactions_controller",
     "Method": "UpdateOnOpened",
     "RelativePath": "UserAccounts/UpdateOpenedTime{NotiId}",
@@ -501,5 +532,36 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
+    "Method": "forgotpasspart2",
+    "RelativePath": "UserAccounts/VerifyTheforgotpass",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "email",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "code",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Useraccount",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   }
 ]

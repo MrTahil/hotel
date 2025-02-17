@@ -5,6 +5,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{F3743A9B-7EE9-41C7-926E-0DC734867C88}|HMZ_rt\\HMZ_rt.csproj|c:\\users\\tanulo\\source\\repos\\mrtahil\\hotel\\hmz_rt\\controllers\\useraccounts_controller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F3743A9B-7EE9-41C7-926E-0DC734867C88}|HMZ_rt\\HMZ_rt.csproj|solutionrelative:hmz_rt\\controllers\\useraccounts_controller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F3743A9B-7EE9-41C7-926E-0DC734867C88}|HMZ_rt\\HMZ_rt.csproj|c:\\users\\tanulo\\source\\repos\\mrtahil\\hotel\\hmz_rt\\models\\dtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F3743A9B-7EE9-41C7-926E-0DC734867C88}|HMZ_rt\\HMZ_rt.csproj|solutionrelative:hmz_rt\\models\\dtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,7 +18,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 10,
+          "SelectedChildIndex": 11,
           "Children": [
             {
               "$type": "Bookmark",
@@ -58,13 +62,26 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Dtos.cs",
+              "DocumentMoniker": "C:\\Users\\Tanulo\\source\\repos\\MrTahil\\Hotel\\HMZ_rt\\Models\\Dtos.cs",
+              "RelativeDocumentMoniker": "HMZ_rt\\Models\\Dtos.cs",
+              "ToolTip": "C:\\Users\\Tanulo\\source\\repos\\MrTahil\\Hotel\\HMZ_rt\\Models\\Dtos.cs",
+              "RelativeToolTip": "HMZ_rt\\Models\\Dtos.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-17T07:59:55.934Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
               "Title": "UserAccounts_controller.cs",
               "DocumentMoniker": "C:\\Users\\Tanulo\\source\\repos\\MrTahil\\Hotel\\HMZ_rt\\Controllers\\UserAccounts_controller.cs",
               "RelativeDocumentMoniker": "HMZ_rt\\Controllers\\UserAccounts_controller.cs",
-              "ToolTip": "C:\\Users\\Tanulo\\source\\repos\\MrTahil\\Hotel\\HMZ_rt\\Controllers\\UserAccounts_controller.cs*",
-              "RelativeToolTip": "HMZ_rt\\Controllers\\UserAccounts_controller.cs*",
-              "ViewState": "AgIAAOgAAAAAAAAAAAAmwAcBAAAJAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\Tanulo\\source\\repos\\MrTahil\\Hotel\\HMZ_rt\\Controllers\\UserAccounts_controller.cs",
+              "RelativeToolTip": "HMZ_rt\\Controllers\\UserAccounts_controller.cs",
+              "ViewState": "AgIAAKMCAAAAAAAAAAAswK4CAAA6AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-17T06:49:30.762Z",
               "EditorCaption": ""

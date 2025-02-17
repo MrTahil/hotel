@@ -668,8 +668,46 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "New password failed due to an internal error." });
+                return StatusCode(500, new { ex.Message });
             }
+        }
+
+
+
+
+        [HttpPut("VerifyTheforgotpass")]
+        public async Task<ActionResult<Useraccount>> forgotpasspart2(string email, string code)
+        {
+            var user = await _context.Useraccounts.FirstOrDefaultAsync(x => x.Email == email);
+            if (user != null)
+            {
+                
+                if (user.Authenticationcode== code)
+                {
+                    user.Authenticationcode = "confirmed";
+                    _context.Useraccounts.Update(user);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(201);
+                }
+            }
+            return StatusCode(202);
+        }
+        [HttpPut("SetNewPassword")]
+        public async Task<ActionResult<Useraccount>> setnewpass(string email, string pass)
+        {
+            var user = await _context.Useraccounts.FirstOrDefaultAsync(x => x.Email == email);
+            if ( user != null)
+            {
+                { if(user.Authenticationcode == "confirmed")
+                    {
+                        user.Password = PasswordHasher.HashPassword(pass);
+                        user.Authenticationcode = "000000";
+                        _context.Useraccounts.Update(user);
+                        await _context.SaveChangesAsync();
+                        return StatusCode(201, new { message = "Sikeres jelszóváltoztatás!" });
+                    } }
+            }
+            return StatusCode(500, new { message = "Valami nem jó biza" });
         }
 
         private bool IsValidRefreshToken(Useraccount user)
