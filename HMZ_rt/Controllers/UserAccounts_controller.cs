@@ -411,7 +411,7 @@ namespace HMZ_rt.Controllers
             }
         }
 
-        [Authorize(Roles = "System")]
+        [Authorize(Roles = "System,Admin")]
         [HttpGet("UsersWithNotifications{UserIdd}")]
         public async Task<ActionResult<Useraccount>> GetAllNotification(int UserIdd)
         {

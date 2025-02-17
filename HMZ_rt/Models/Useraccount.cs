@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace HMZ_rt.Models;
 
@@ -16,11 +15,11 @@ public partial class Useraccount
 
     public string? Role { get; set; }
 
-    public string? Status { get; set; }
-    
     public string? RefreshToken { get; set; }
 
     public DateTime? RefreshTokenExpiryTime { get; set; }
+
+    public string? Status { get; set; }
 
     public DateTime? DateCreated { get; set; }
 
@@ -30,9 +29,11 @@ public partial class Useraccount
 
     public string? Notes { get; set; }
 
-    public string Authenticationcode { get; set; }
+    public string? Authenticationcode { get; set; }
 
     public DateTime? Authenticationexpire { get; set; }
+
+    public virtual ICollection<Guest> Guests { get; set; } = new List<Guest>();
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }

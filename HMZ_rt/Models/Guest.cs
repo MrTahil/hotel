@@ -25,6 +25,8 @@ public partial class Guest
 
     public string? Gender { get; set; }
 
+    public int? UserId { get; set; }
+
     public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 
     public virtual ICollection<Eventbooking> Eventbookings { get; set; } = new List<Eventbooking>();
@@ -32,4 +34,6 @@ public partial class Guest
     public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+    public virtual Useraccount? User { get; set; }
 }

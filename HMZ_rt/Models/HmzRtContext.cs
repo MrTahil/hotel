@@ -338,6 +338,8 @@ public partial class HmzRtContext : DbContext
 
             entity.ToTable("guests");
 
+            entity.HasIndex(e => e.UserId, "fk_guests_useraccounts");
+
             entity.Property(e => e.GuestId)
                 .HasColumnType("int(11)")
                 .HasColumnName("guest_id");
@@ -377,6 +379,15 @@ public partial class HmzRtContext : DbContext
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnName("phone_number");
+            entity.Property(e => e.UserId)
+                .HasDefaultValueSql("'NULL'")
+                .HasColumnType("int(11)")
+                .HasColumnName("user_id");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Guests)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("fk_guests_useraccounts");
         });
 
         modelBuilder.Entity<Invoice>(entity =>
@@ -758,10 +769,6 @@ public partial class HmzRtContext : DbContext
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("text")
                 .HasColumnName("amenities");
-            entity.Property(e => e.Images)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnType("text")
-                .HasColumnName("images");
             entity.Property(e => e.Capacity)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("int(11)")
@@ -778,6 +785,9 @@ public partial class HmzRtContext : DbContext
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("int(11)")
                 .HasColumnName("floor_number");
+            entity.Property(e => e.Images)
+                .HasDefaultValueSql("'NULL'")
+                .HasColumnName("images");
             entity.Property(e => e.PricePerNight)
                 .HasPrecision(10)
                 .HasDefaultValueSql("'NULL'")
@@ -1106,6 +1116,14 @@ public partial class HmzRtContext : DbContext
             entity.Property(e => e.UserId)
                 .HasColumnType("int(11)")
                 .HasColumnName("user_id");
+            entity.Property(e => e.Authenticationcode)
+                .HasMaxLength(255)
+                .HasDefaultValueSql("'NULL'")
+                .HasColumnName("authenticationcode");
+            entity.Property(e => e.Authenticationexpire)
+                .HasDefaultValueSql("'NULL'")
+                .HasColumnType("date")
+                .HasColumnName("authenticationexpire");
             entity.Property(e => e.DateCreated)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("date")
@@ -1130,18 +1148,16 @@ public partial class HmzRtContext : DbContext
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnName("password");
+            entity.Property(e => e.RefreshToken)
+                .HasMaxLength(255)
+                .HasDefaultValueSql("'NULL'");
+            entity.Property(e => e.RefreshTokenExpiryTime)
+                .HasDefaultValueSql("'NULL'")
+                .HasColumnType("date");
             entity.Property(e => e.Role)
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnName("role");
-            entity.Property(e => e.RefreshToken)
-                .HasMaxLength(255)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnName("refreshtoken");
-            entity.Property(e => e.RefreshTokenExpiryTime)
-                .HasMaxLength(255)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnName("refreshtokenexpirytime");
             entity.Property(e => e.Status)
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")
@@ -1150,16 +1166,6 @@ public partial class HmzRtContext : DbContext
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnName("username");
-            entity.Property(e => e.Authenticationcode)
-                .HasMaxLength(255)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnName("authenticationcode");
-            entity.Property(e => e.Authenticationexpire)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnType("date")
-                .HasColumnName("authenticationexpire");
-
-
         });
 
         OnModelCreatingPartial(modelBuilder);
