@@ -178,7 +178,7 @@ namespace HMZ_rt.Controllers
 
         private string GenerateEmailBody(string code)
         {
-            // Email template moved to a separate method for clarity
+            
             return $@"<!DOCTYPE html>\r\n<html lang=\""hu\"">\r\n<head>\r\n    <meta charset=\""UTF-8\"">\r\n    <meta name=\""viewport\"" content=\""width=device-width, initial-scale=1.0\"">\r\n    <title>Biztonsági Kód</title>\r\n    <style>\r\n        body {{{{\r\n            font-family: 'Arial', sans-serif;\r\n            line-height: 1.6;\r\n            margin: 0;\r\n            padding: 0;\r\n            background-color: #f0f8ff;\r\n        }}}}\r\n        .container {{{{\r\n            max-width: 600px;\r\n            margin: 20px auto;\r\n            padding: 30px;\r\n            background-color: #ffffff;\r\n            border-radius: 10px;\r\n            box-shadow: 0 2px 5px rgba(0,0,0,0.1);\r\n        }}}}\r\n        .header {{{{\r\n            text-align: center;\r\n            color: #1a73e8;\r\n            margin-bottom: 25px;\r\n        }}}}\r\n        .code {{{{\r\n            font-size: 32px;\r\n            font-weight: bold;\r\n            color: #1565c0;\r\n            text-align: center;\r\n            margin: 30px 0;\r\n            padding: 15px;\r\n            background-color: #e3f2fd;\r\n            border-radius: 5px;\r\n            letter-spacing: 3px;\r\n        }}}}\r\n        .footer {{{{\r\n            text-align: center;\r\n            margin-top: 30px;\r\n            color: #666666;\r\n            font-size: 12px;\r\n        }}}}\r\n        .note {{{{\r\n            color: #666;\r\n            font-size: 14px;\r\n            text-align: center;\r\n            margin: 20px 0;\r\n            font-style: italic;\r\n        }}}}\r\n        .warning {{{{\r\n            text-align: center;\r\n            color: #666;\r\n            font-size: 14px;\r\n            margin: 20px 0;\r\n        }}}}\r\n        @media screen and (max-width: 600px) {{{{\r\n            .container {{{{\r\n                margin: 10px;\r\n                padding: 20px;\r\n            }}}}\r\n        }}}}\r\n    </style>\r\n</head>\r\n<body>\r\n    <div class=\""container\"">\r\n        <div class=\""header\"">\r\n            <h1>Biztonsági Kód</h1>\r\n        </div>\r\n        \r\n        <p>Kedves Felhasználónk!</p>\r\n        \r\n        <p>A bejelentkezéshez szükséges kétlépcsős azonosítás kódja:</p>\r\n        \r\n        <div class=\""code\"">{{code}}</div>\r\n        \r\n        <p class=\""note\"">Ez egy automatikusan generált üzenet, kérjük ne válaszoljon rá.</p>\r\n        \r\n        <p class=\""warning\"">Ha nem Ön kezdeményezte ezt a kérést, kérjük azonnal változtassa meg jelszavát!</p>\r\n        \r\n        <div class=\""footer\"">\r\n            <p>© 2025 [hmzrt.com] Minden jog fenntartva</p>\r\n            <p>Ügyfélszolgálat: [hmzrtkando@gmail.com] | [+36 70 1231212]</p>\r\n        </div>\r\n    </div>\r\n</body>\r\n</html>";
         }
 
@@ -222,7 +222,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Registration failed due to an internal error." });
+                return StatusCode(500, new { message = ex.Message });
             }
         }
 
@@ -427,6 +427,71 @@ namespace HMZ_rt.Controllers
             }
         }
 
+
+        [HttpPost("ForgotPassword")]
+        public async Task<ActionResult<Useraccount>> Forgotpass(string email)
+        {
+            try
+            {
+                if (await _context.Useraccounts.AnyAsync(x => x.Email == email))
+                {
+                    string code = Generate2FACode();
+                    if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(code))
+                        throw new ArgumentException("Email and code must not be null or empty");
+
+                    var smtpSettings = new SmtpSettings
+                    {
+                        Server = "smtp.gmail.com",
+                        Port = 587,
+                        Username = "hmzrtkando@gmail.com",
+                        Password = "kcrv dzii jrum sabt",
+                        FromEmail = "hmzservices@hmz.hu"
+                    };
+
+                    var subject = "HMZ elfeljtett jelszó";
+                    var body = $@"<!DOCTYPE html>\r\n<html lang=\""hu\"">\r\n<head>\r\n    <meta charset=\""UTF-8\"">\r\n    <meta name=\""viewport\"" content=\""width=device-width, initial-scale=1.0\"">\r\n    <title>Biztonsági Kód</title>\r\n    <style>\r\n        body {{{{\r\n            font-family: 'Arial', sans-serif;\r\n            line-height: 1.6;\r\n            margin: 0;\r\n            padding: 0;\r\n            background-color: #f0f8ff;\r\n        }}}}\r\n        .container {{{{\r\n            max-width: 600px;\r\n            margin: 20px auto;\r\n            padding: 30px;\r\n            background-color: #ffffff;\r\n            border-radius: 10px;\r\n            box-shadow: 0 2px 5px rgba(0,0,0,0.1);\r\n        }}}}\r\n        .header {{{{\r\n            text-align: center;\r\n            color: #1a73e8;\r\n            margin-bottom: 25px;\r\n        }}}}\r\n        .code {{{{\r\n            font-size: 32px;\r\n            font-weight: bold;\r\n            color: #1565c0;\r\n            text-align: center;\r\n            margin: 30px 0;\r\n            padding: 15px;\r\n            background-color: #e3f2fd;\r\n            border-radius: 5px;\r\n            letter-spacing: 3px;\r\n        }}}}\r\n        .footer {{{{\r\n            text-align: center;\r\n            margin-top: 30px;\r\n            color: #666666;\r\n            font-size: 12px;\r\n        }}}}\r\n        .note {{{{\r\n            color: #666;\r\n            font-size: 14px;\r\n            text-align: center;\r\n            margin: 20px 0;\r\n            font-style: italic;\r\n        }}}}\r\n        .warning {{{{\r\n            text-align: center;\r\n            color: #666;\r\n            font-size: 14px;\r\n            margin: 20px 0;\r\n        }}}}\r\n        @media screen and (max-width: 600px) {{{{\r\n            .container {{{{\r\n                margin: 10px;\r\n                padding: 20px;\r\n            }}}}\r\n        }}}}\r\n    </style>\r\n</head>\r\n<body>\r\n    <div class=\""container\"">\r\n        <div class=\""header\"">\r\n            <h1>Biztonsági Kód</h1>\r\n        </div>\r\n        \r\n        <p>Kedves Felhasználónk!</p>\r\n        \r\n        <p>A bejelentkezéshez szükséges kétlépcsős azonosítás kódja:</p>\r\n        \r\n        <div class=\""code\"">{{code}}</div>\r\n        \r\n        <p class=\""note\"">Ez egy automatikusan generált üzenet, kérjük ne válaszoljon rá.</p>\r\n        \r\n        <p class=\""warning\"">Ha nem Ön kezdeményezte ezt a kérést, kérjük azonnal változtassa meg jelszavát!</p>\r\n        \r\n        <div class=\""footer\"">\r\n            <p>© 2025 [hmzrt.com] Minden jog fenntartva</p>\r\n            <p>Ügyfélszolgálat: [hmzrtkando@gmail.com] | [+36 70 1231212]</p>\r\n        </div>\r\n    </div>\r\n</body>\r\n</html>";
+
+
+                    using var client = new SmtpClient(smtpSettings.Server, smtpSettings.Port)
+                    {
+                        EnableSsl = true,
+                        UseDefaultCredentials = false,
+                        Credentials = new NetworkCredential(smtpSettings.Username, smtpSettings.Password)
+                    };
+
+                    var mailMessage = new MailMessage
+                    {
+                        From = new MailAddress(smtpSettings.FromEmail),
+                        Subject = subject,
+                        Body = body,
+                        IsBodyHtml = true
+                    };
+                    mailMessage.To.Add(email);
+
+                    try
+                    {
+                        await client.SendMailAsync(mailMessage);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"Failed to send email: {ex.Message}", ex);
+                    }
+                }
+
+
+
+
+
+
+                return (BadRequest());
+                
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "New password failed due to an internal error." });
+            }
+        }
+
         private bool IsValidRefreshToken(Useraccount user)
         {
             return user != null && user.RefreshTokenExpiryTime > DateTime.UtcNow;
@@ -440,5 +505,8 @@ namespace HMZ_rt.Controllers
             public string Password { get; set; }
             public string FromEmail { get; set; }
         }
+
+
+
     }
 }
