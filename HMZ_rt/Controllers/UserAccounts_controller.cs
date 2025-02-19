@@ -415,6 +415,8 @@ namespace HMZ_rt.Controllers
         [HttpGet("UsersWithNotifications{UserIdd}")]
         public async Task<ActionResult<Useraccount>> GetAllNotification(int UserIdd)
         {
+
+
             try
             {
                 var userData = await _context.Useraccounts
