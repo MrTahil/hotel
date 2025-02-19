@@ -23,7 +23,7 @@ function RegisterModal({ onClose, switchToLogin }) {
             const response = await fetch('https://localhost:7047/UserAccounts/Register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password })
+                body: JSON.stringify({ username, email, password }),
             });
 
             const data = await response.json();
@@ -39,11 +39,16 @@ function RegisterModal({ onClose, switchToLogin }) {
         }
     };
 
+    const handleVerificationSuccess = () => {
+        setShowVerification(false);
+        switchToLogin();
+    };
+
     return (
         <div className="modal-backdrop">
             <div className="modal">
                 {showVerification ? (
-                    <VerificationModal email={email} onClose={onClose} onSuccess={() => { setShowVerification(false); switchToLogin(); }} />
+                    <VerificationModal email={email} onClose={onClose} onSuccess={handleVerificationSuccess} />
                 ) : (
                     <form className="form" onSubmit={handleSubmit}>
                         <p className="title">Regisztráció</p>
