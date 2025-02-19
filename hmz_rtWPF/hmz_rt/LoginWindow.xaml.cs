@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -36,7 +36,9 @@ namespace RoomListApp
             if (success)
             {
                 MessageBox.Show("Sikeres bejelentkezés, DialogResult = true lesz!");
-                this.DialogResult = true;
+                MainWindow adminWindow = new MainWindow();
+                adminWindow.Show();
+                this.Close();
             }
             else
             {
