@@ -1,0 +1,19 @@
+.contact {
+    padding: 60px 0;
+    background-color: #01497C;
+    text-align: center;
+    color: #fff;
+}
+.contact .cta-button {
+    background-color: #61A5C2;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 18px;
+    text-decoration: none;
+    color: #fff;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+.contact .cta-button:hover {
+    background-color: #A9D6E5;
+    transform: scale(1.05);
+}
