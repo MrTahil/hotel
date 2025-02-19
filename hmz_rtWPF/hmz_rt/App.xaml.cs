@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows;
 
 namespace RoomListApp
@@ -10,15 +10,6 @@ namespace RoomListApp
 
             var loginWindow = new LoginWindow();
             bool? result = loginWindow.ShowDialog();
-
-            if (result == true) {
-                var mainWindow = new MainWindow();
-                mainWindow.Closed += (s, args) => Application.Current.Shutdown(); // ⚠️ Bezáráskor kilép
-                mainWindow.Show();
-            }
-            else {
-                Application.Current.Shutdown();
-            }
         }
 
 
