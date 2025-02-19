@@ -416,8 +416,6 @@ namespace HMZ_rt.Controllers
         public async Task<ActionResult<Useraccount>> GetAllNotification(int UserIdd)
         {
 
-
-
             try
             {
                 var userData = await _context.Useraccounts
