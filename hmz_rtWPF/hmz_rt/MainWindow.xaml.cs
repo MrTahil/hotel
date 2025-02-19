@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -41,7 +41,7 @@ namespace RoomListApp
 
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
 
-                var response = await _httpClient.GetAsync("GetRoomWith"); // API végpont
+                var response = await _httpClient.GetAsync("https://localhost:7047/Rooms/GetRoomWith"); // API végpont
                 if (!response.IsSuccessStatusCode) {
                     string errorResponse = await response.Content.ReadAsStringAsync();
                     MessageBox.Show($"Hiba a szobák lekérdezésekor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -65,10 +65,10 @@ namespace RoomListApp
 
         private void lstRooms_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (lstRooms.SelectedItem is Room selectedRoom)
-            {
-                DetailsPanel.DataContext = selectedRoom;
-            }
+            //if (lstRooms.SelectedItem is Room selectedRoom)
+            //{
+            //    DetailsPanel.DataContext = selectedRoom;
+            //}
         }
     }
 
