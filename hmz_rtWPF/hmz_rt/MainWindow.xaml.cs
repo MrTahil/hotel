@@ -56,7 +56,7 @@ namespace RoomListApp
                     return;
                 }
 
-                lstRooms.ItemsSource = rooms;
+                //lstRooms.ItemsSource = rooms;
             }
             catch (Exception ex) {
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
