@@ -360,7 +360,7 @@ namespace HMZ_rt.Controllers
             await _context.SaveChangesAsync();
         }
 
-        [HttpDelete("DeleteUserById{InUserId}")]
+        [HttpDelete("DeleteUserById/:{InUserId}")]
         public async Task<ActionResult<Useraccount>> DeleteAccount(int InUserId)
         {
             try
@@ -381,7 +381,7 @@ namespace HMZ_rt.Controllers
             }
         }
 
-        [HttpDelete("DeleteUserByUsername{Username}")]
+        [HttpDelete("DeleteUserByUsername/:{Username}")]
         public async Task<ActionResult<Useraccount>> DeleteAccountByName(string Username)
         {
             try
@@ -403,7 +403,7 @@ namespace HMZ_rt.Controllers
         }
 
         [Authorize(Roles = "System,Admin")]
-        [HttpGet("UsersWithNotifications{UserIdd}")]
+        [HttpGet("UsersWithNotifications/:{UserIdd}")]
         public async Task<ActionResult<Useraccount>> GetAllNotification(int UserIdd)
         {
 
