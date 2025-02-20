@@ -74,23 +74,25 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="John Doe" 
-                         FontSize="24" 
-                         FontWeight="Bold" 
-                         VerticalAlignment="Center"/>
+                <TextBlock x:Name="UserNameDisplay" 
+                 Text="John Doe" 
+                 FontSize="24" 
+                 FontWeight="Bold" 
+                 VerticalAlignment="Center"/>
 
                 <StackPanel Grid.Column="1" 
-                          Orientation="Horizontal" 
-                          HorizontalAlignment="Right">
+                  Orientation="Horizontal" 
+                  HorizontalAlignment="Right">
                     <TextBlock x:Name="CurrentTime" 
-                             Text="12:00:00" 
-                             VerticalAlignment="Center" 
-                             Margin="0,0,20,0"/>
+                     Text="12:00:00" 
+                     VerticalAlignment="Center" 
+                     Margin="0,0,20,0"/>
                     <Button Content="Kijelentkezés" 
-                            Padding="15,8" 
-                            Background="#dc2626" 
-                            Foreground="White" 
-                            BorderThickness="0">
+                    Padding="15,8" 
+                    Background="#dc2626" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    Click="LogoutButton_Click">
                         <Button.Resources>
                             <Style TargetType="Border">
                                 <Setter Property="CornerRadius" Value="6"/>
@@ -104,7 +106,7 @@
         <!-- Dashboard Grid -->
         <UniformGrid Grid.Row="1" Columns="4" Margin="20">
             <!-- Szobák kezelése -->
-            <Border Style="{StaticResource DashboardCard}" Background="#EFF6FF">
+            <Border x:Name="szobak_kez" Style="{StaticResource DashboardCard}" Background="#EFF6FF" MouseLeftButtonDown="szobak_kez_MouseLeftButtonDown">
                 <Border.RenderTransform>
                     <ScaleTransform/>
                 </Border.RenderTransform>

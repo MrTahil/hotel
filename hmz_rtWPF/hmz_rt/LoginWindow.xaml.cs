@@ -55,8 +55,10 @@ namespace RoomListApp
 
 
 
-        private async Task<bool> AuthenticateUser(string username, string password) {
-            try {
+        private async Task<bool> AuthenticateUser(string username, string password)
+        {
+            try
+            {
                 var loginData = new { Username = username, Password = password };
                 string json = JsonSerializer.Serialize(loginData);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -64,32 +66,39 @@ namespace RoomListApp
                 HttpResponseMessage response = await _httpClient.PostAsync("Login", content);
                 string responseString = await response.Content.ReadAsStringAsync();
 
-                if (!response.IsSuccessStatusCode) {
+                if (!response.IsSuccessStatusCode)
+                {
                     MessageBox.Show($"Bejelentkezési hiba ({response.StatusCode}): {responseString}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                     return false;
                 }
 
                 var result = JsonSerializer.Deserialize<AuthResponse>(responseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
+
                 // Az AccessToken-t használjuk a továbbiakban
                 TokenStorage.AuthToken = result.AccessToken;
+                TokenStorage.RefreshToken = result.RefreshToken;
+                TokenStorage.Username = username;
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
 
                 MessageBox.Show("Sikeres bejelentkezés!", "Üdv", MessageBoxButton.OK, MessageBoxImage.Information);
                 return true;
             }
-            catch (HttpRequestException ex) {
+            catch (HttpRequestException ex)
+            {
                 MessageBox.Show($"Hálózati hiba: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 MessageBox.Show($"Ismeretlen hiba történt: {ex.Message}\n{ex.StackTrace}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
         }
     }
 
-    public class AuthResponse {
+    public class AuthResponse
+    {
         public string AccessToken { get; set; }  // accessToken
         public string RefreshToken { get; set; } // refreshToken
     }
