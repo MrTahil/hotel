@@ -76,3 +76,17 @@ public class fa2
     [Required(ErrorMessage = "Add meg kötelezően ezt is!")]
     public string? Code { get; set; }
 }
+
+public class kacsa
+{
+    [Required(ErrorMessage = "A szoba karbantartás idejének megadása kötelező!")]
+    public DateTime? MaintenanceDate { get; set; }
+    [Required(ErrorMessage = "A karbantartás leírásának megadása kötelező!")]
+    public string? Description{get;set;}
+    [Required(ErrorMessage = "A szoba karbantartás végrehajtási idejének megadása kötelező!")]
+    public DateTime? ResolutionDate { get; set; }
+    [Required(ErrorMessage = "A szoba karbantartás leírásának megadása kötelező!")]
+    public string? Notes { get; set; }
+    [Required(ErrorMessage = "A szobaszám megadása kötelező")]
+    public int RoomId { get; set; }
+}
