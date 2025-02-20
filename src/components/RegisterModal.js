@@ -30,7 +30,7 @@ function RegisterModal({ onClose, switchToLogin }) {
 
             if (response.ok) {
                 setSuccessMessage('Sikeres regisztráció! Kérlek ellenőrizd az emailed és add meg a kódot!');
-                setTimeout(() => setShowVerification(true), 2000);
+                setTimeout(() => setShowVerification(true), 2000);  // Várakozás után megjeleníti a kódot
             } else {
                 setErrorMessage(data.message || 'Hiba történt a regisztráció során!');
             }
@@ -41,7 +41,7 @@ function RegisterModal({ onClose, switchToLogin }) {
 
     const handleVerificationSuccess = () => {
         setShowVerification(false);
-        switchToLogin();
+        switchToLogin();  // Átvált a bejelentkezési oldalra
     };
 
     return (
