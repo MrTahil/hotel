@@ -138,15 +138,6 @@ namespace HMZ_rt.Controllers
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(code))
                 throw new ArgumentException("Az email code nem lehet üres");
 
-            var smtpSettings = new SmtpSettings
-            {
-                Server = "smtp.gmail.com",
-                Port = 587,
-                Username = "hmzrtkando@gmail.com",
-                Password = "kcrv dzii jrum sabt",
-                FromEmail = "hmzservices@hmz.hu"
-            };
-
             var subject = "HMZ regisztráció megerősítése";
             var body = $@"<!DOCTYPE html>
 <html lang=""hu"">
@@ -237,16 +228,16 @@ namespace HMZ_rt.Controllers
 </body>
 </html>";
 
-            using var client = new SmtpClient(smtpSettings.Server, smtpSettings.Port)
+            using var client = new SmtpClient(Server, Port)
             {
                 EnableSsl = true,
                 UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(smtpSettings.Username, smtpSettings.Password)
+                Credentials = new NetworkCredential(Username, Password)
             };
 
             var mailMessage = new MailMessage
             {
-                From = new MailAddress(smtpSettings.FromEmail),
+                From = new MailAddress(FromEmail),
                 Subject = subject,
                 Body = body,
                 IsBodyHtml = true
@@ -522,14 +513,6 @@ namespace HMZ_rt.Controllers
                     if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(code))
                         throw new ArgumentException("Az email code nem lehet se null se üres");
 
-                    var smtpSettings = new SmtpSettings
-                    {
-                        Server = "smtp.gmail.com",
-                        Port = 587,
-                        Username = "hmzrtkando@gmail.com",
-                        Password = "kcrv dzii jrum sabt",
-                        FromEmail = "hmzservices@hmz.hu"
-                    };
 
                     var subject = "HMZ elfeljtett jelszó";
                     var body = $@"<!DOCTYPE html>
@@ -630,16 +613,16 @@ namespace HMZ_rt.Controllers
                     _context.Useraccounts.Update(user);
                     await _context.SaveChangesAsync();
 
-                    using var client = new SmtpClient(smtpSettings.Server, smtpSettings.Port)
+                    using var client = new SmtpClient(Server, Port)
                     {
                         EnableSsl = true,
                         UseDefaultCredentials = false,
-                        Credentials = new NetworkCredential(smtpSettings.Username, smtpSettings.Password)
+                        Credentials = new NetworkCredential(Username,Password)
                     };
 
                     var mailMessage = new MailMessage
                     {
-                        From = new MailAddress(smtpSettings.FromEmail),
+                        From = new MailAddress(FromEmail),
                         Subject = subject,
                         Body = body,
                         IsBodyHtml = true
@@ -716,14 +699,14 @@ namespace HMZ_rt.Controllers
             return user != null && user.RefreshTokenExpiryTime > DateTime.UtcNow;
         }
 
-        private class SmtpSettings
-        {
-            public string Server { get; set; }
-            public int Port { get; set; }
-            public string Username { get; set; }
-            public string Password { get; set; }
-            public string FromEmail { get; set; }
-        }
+
+            private readonly string Server = "smtp.gmail.com";
+            private readonly int Port = 587;
+            private readonly string Username = "hmzrtkando@gmail.com";
+            private readonly string Password = "kcrv dzii jrum sabt";
+            private readonly string FromEmail = "hmzservices@hmz.hu";
+        
+
 
 
 
