@@ -13,14 +13,16 @@ namespace RoomListApp
     public static class TokenStorage
     {
         public static string AuthToken { get; set; }
-        public static string RefreshToken { get; set; } // RefreshToken tárolása
-
+        public static string RefreshToken { get; set; }
+        public static string Role { get; set; }  // ÚJ: Role tárolása
         public static string Username { get; set; }
+
         public static void ClearTokens()
         {
             AuthToken = null;
             RefreshToken = null;
             Username = null;
+            Role = null;
         }
     }
 

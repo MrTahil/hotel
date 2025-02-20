@@ -3,8 +3,10 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
+using ThirdParty.Json.LitJson;
 
 namespace RoomListApp
 {
@@ -74,14 +76,14 @@ namespace RoomListApp
 
                 var result = JsonSerializer.Deserialize<AuthResponse>(responseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-
-                // Az AccessToken-t használjuk a továbbiakban
+                // Token és role mentése
                 TokenStorage.AuthToken = result.AccessToken;
                 TokenStorage.RefreshToken = result.RefreshToken;
+                TokenStorage.Role = result.Role; // ÚJ: Role mentése
                 TokenStorage.Username = username;
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
 
-                MessageBox.Show("Sikeres bejelentkezés!", "Üdv", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Sikeres bejelentkezés!\nSzerepkör: {result.Role}", "Üdv", MessageBoxButton.OK, MessageBoxImage.Information);
                 return true;
             }
             catch (HttpRequestException ex)
@@ -95,11 +97,22 @@ namespace RoomListApp
                 return false;
             }
         }
+
+
     }
 
     public class AuthResponse
     {
-        public string AccessToken { get; set; }  // accessToken
-        public string RefreshToken { get; set; } // refreshToken
+        [JsonPropertyName("accessToken")]
+        public string AccessToken { get; set; }
+
+        [JsonPropertyName("refreshToken")]
+        public string RefreshToken { get; set; }
+
+        [JsonPropertyName("role")]
+        public string Role { get; set; }
     }
+
+
+
 }
