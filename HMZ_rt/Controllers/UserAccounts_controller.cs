@@ -324,17 +324,17 @@ namespace HMZ_rt.Controllers
         }
 
         [HttpPost("Verify2FA")]
-        public async Task<ActionResult> Verify2FA(string email, string code)
+        public async Task<ActionResult> Verify2FA(fa2 dto)
         {
             try
             {
                 var user = await _context.Useraccounts
-                    .FirstOrDefaultAsync(u => u.Email == email);
+                    .FirstOrDefaultAsync(u => u.Email == dto.Email);
 
                 if (user == null)
                     return NotFound(new { message = "Felhasználható nem található" });
 
-                if (!IsValidTwoFactorCode(user, code))
+                if (!IsValidTwoFactorCode(user, dto.Code))
                     return BadRequest(new { message = "Hibás vagy lejárt hitelesítő kód" });
 
                 await ActivateUser(user);

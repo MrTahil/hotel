@@ -69,3 +69,10 @@ public class UpdateStaffDto
     [Required(ErrorMessage = "Meg kell adnod kötelezően egy Beosztást!")]
     public string? Department { get; set; }
 }
+public class fa2
+{
+    [Required(ErrorMessage = "Add meg kötelezően!")]
+    public string? Email { get; set; }
+    [Required(ErrorMessage = "Add meg kötelezően ezt is!")]
+    public string? Code { get; set; }
+}
