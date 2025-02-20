@@ -2,6 +2,7 @@ using HMZ_rt.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace HMZ_rt.Controllers
 {
@@ -64,6 +65,36 @@ namespace HMZ_rt.Controllers
 
             
             return StatusCode(201, await _context.Staff.ToListAsync());
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, new { ex });
+            }
+        }
+
+        [Authorize(Roles ="System,Admin,Recept")]
+        [HttpPut("UpdateStaff")]
+        public async Task<ActionResult<Staff>> UpdateStaff(UpdateStaffDto crtdto, int id)
+        {
+            try
+            {
+                var os = await _context.Staff.FirstOrDefaultAsync(x => x.StaffId == id);
+                if (os != null)
+                {
+                    os.Salary = crtdto.Salary;
+                    os.PhoneNumber = crtdto.PhoneNumber;
+                    os.FirstName = crtdto.FirstName;
+                    os.LastName = crtdto.LastName;
+                    os.Email = crtdto.Email;
+                    os.Department = crtdto.Department;
+                    os.Position = crtdto.Position;
+                    
+                    await _context.SaveChangesAsync();
+                    return Ok();
+                }
+                return StatusCode(404,  "Nem található a felhasználó");
+            
             }
             catch (Exception ex)
             {

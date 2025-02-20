@@ -48,3 +48,24 @@ public class NewStaffDto
      public   string? Status { get; set; }
      public   string? Departmen { get; set; }
 }
+
+public class UpdateStaffDto
+{
+    [Required(ErrorMessage = "Az Családnév megadása kötelező!")]
+    public string? FirstName { get; set; }
+    [Required(ErrorMessage = "A Keresztnév megadása kötelező!")]
+    public string? LastName { get; set; }
+    [Required(ErrorMessage = "Az Email megadása kötelező!")]
+    [EmailAddress(ErrorMessage ="Nem megfelelő Email forma.")]
+    public string? Email { get; set; }
+    [Required(ErrorMessage = "A Telefonszám megadása kötelező!")]
+    public string? PhoneNumber { get; set; }
+    [Required(ErrorMessage = "A Pozicíó megadása kötelező!")]
+    public string? Position { get; set; }
+    [Required(ErrorMessage = "A Fizetésnek meg kell adva lennie!")]
+    public decimal? Salary { get; set; }
+    [Required(ErrorMessage = "Kötelező megadnod egy Státuszt!")]
+    public string? Status { get; set; }
+    [Required(ErrorMessage = "Meg kell adnod kötelezően egy Beosztást!")]
+    public string? Department { get; set; }
+}
