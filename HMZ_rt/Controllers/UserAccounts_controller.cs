@@ -439,8 +439,13 @@ namespace HMZ_rt.Controllers
 
                 var (accessToken, refreshToken) = GenerateTokens(user);
                 await UpdateUserRefreshToken(user, refreshToken);
+                if (user.Role == "System" || user.Role == "Recept" || user.Role == "Admin")
+                {
 
-                return Ok(new { AccessToken = accessToken, RefreshToken = refreshToken });
+
+                    return Ok(new { AccessToken = accessToken, RefreshToken = refreshToken , user.Role});
+                }
+                return Ok(new { AccesToken = accessToken, RefreshToken = refreshToken });
             }
             catch (Exception ex)
             {
