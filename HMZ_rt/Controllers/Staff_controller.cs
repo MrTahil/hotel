@@ -1,6 +1,7 @@
 using HMZ_rt.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace HMZ_rt.Controllers
 {
@@ -17,9 +18,13 @@ namespace HMZ_rt.Controllers
 
 
         [Authorize(Roles = "System,Admin")]
-        [HttpPost]
+        [HttpPost("CreateStaff")]
         public async Task<ActionResult<Staff>> CreateStaff(NewStaffDto nwstdto)
         {
+            try
+            {
+
+
             var dolgozo = new Staff
             {
                 FirstName = nwstdto.FirstName,
@@ -39,6 +44,32 @@ namespace HMZ_rt.Controllers
                 return StatusCode(201, dolgozo);
             }
             return BadRequest();
+        }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, new { ex
+    });
+            }
+
+
+            
+        }
+        [Authorize(Roles = "System,Admin,Recept")]
+        [HttpGet("ListStaff")]
+        public async Task<ActionResult<Staff>> Getstaff()
+        {
+            try
+            {
+
+            
+            return StatusCode(201, await _context.Staff.ToListAsync());
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, new { ex });
+            }
         }
     }
 }
