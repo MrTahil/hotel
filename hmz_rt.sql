@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Feb 17. 10:38
+-- Létrehozás ideje: 2025. Feb 21. 13:58
 -- Kiszolgáló verziója: 10.4.20-MariaDB
 -- PHP verzió: 7.3.29
 
@@ -332,6 +332,13 @@ CREATE TABLE `roommaintenance` (
   `notes` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
+--
+-- A tábla adatainak kiíratása `roommaintenance`
+--
+
+INSERT INTO `roommaintenance` (`maintenance_id`, `room_id`, `maintenance_date`, `description`, `status`, `staff_id`, `date_reported`, `resolution_date`, `cost`, `notes`) VALUES
+(1, 5, '2025-02-21', 'Büdi van', 'Not resolved yet', NULL, '2025-02-21', '0001-01-01', '0', 'büdös');
+
 -- --------------------------------------------------------
 
 --
@@ -423,6 +430,14 @@ CREATE TABLE `staff` (
   `department` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
+--
+-- A tábla adatainak kiíratása `staff`
+--
+
+INSERT INTO `staff` (`first_name`, `staff_id`, `last_name`, `email`, `phone_number`, `position`, `salary`, `date_hired`, `status`, `department`) VALUES
+('Pozsgai', 1, 'Marcell', 'pozsgaim@kkszki.hu', '+36 2013747285', 'Tomo arus', '-1000', '2025-02-21', 'Self Employed', 'Tomo king'),
+('Jánosi', 2, 'Marcell', 'janosim@kkszki.hu', '+36 2019855222', 'Hotel Manager', '10000000', '2025-02-21', 'Boss', 'Manager');
+
 -- --------------------------------------------------------
 
 --
@@ -472,7 +487,8 @@ CREATE TABLE `useraccounts` (
 INSERT INTO `useraccounts` (`username`, `user_id`, `password`, `email`, `role`, `RefreshToken`, `RefreshTokenExpiryTime`, `status`, `date_created`, `last_login`, `date_updated`, `notes`, `authenticationcode`, `authenticationexpire`) VALUES
 ('Tahil', 3, 'hte+RnleAunUji+Bx3f7EPd8Nd2nOw82PS50E6kPBYOBYQ+8JUKlArMigzjZ1CM3', 'hiloczkit@kkszki.hu', 'System', 'OMPldv1Ly9+hEyF2hIEoAXEHpWJhBg2gtr216ykVIJM=', '2025-02-21', 'string', '2025-01-16', '2025-01-16', '2025-01-16', 'string', '111111', '2025-02-13'),
 ('asdasdasd', 4, '3S4JbEmjI0P69HENXf0Wp+u8teCyLgUPrKSYOMLRv91+ixql4MlfM4TWgeaJLIU/', 'hiloczkit12@kkszki.hu', 'Base', 'qiNaBxchix/fw5p2I6Bq0odyQmSo0CmQawB6MiPqVFc=', '2025-01-23', 'string', '2025-01-16', '2025-01-16', '2025-01-16', 'string', '111111', '2025-02-13'),
-('a_Beto', 5, 'u04oCPhO+K7Y9IBD+zsk/QP/jWnVhlEdpOyaWFAzwQjPvc0kubpehqBt15MLXuVv', 'monostorir@kkszki.hu', 'System', 'iQTdfHFCVJDHpXJQIohyky4Tf3RFxMeRFAd8ywugh+E=', '2025-02-24', 'string', '2025-02-14', '2025-02-14', '2025-02-14', 'string', 'activated', NULL);
+('a_Beto', 5, 'u04oCPhO+K7Y9IBD+zsk/QP/jWnVhlEdpOyaWFAzwQjPvc0kubpehqBt15MLXuVv', 'monostori@kkszki.hu', 'System', 'v95cRrpUOexmmUnF/V4oAbeWZu8ckokxKJvPQFhsmPg=', '2025-02-28', 'string', '2025-02-14', '2025-02-14', '2025-02-14', 'string', 'activated', '2025-02-20'),
+('Bozsgai', 6, '48RL9zaxFrXNx3WQWwmErDml2gjVS/8N8ess8G65a4mMWb4VBkZqDJDsEki62YpY', 'monostorir@kkszki.hu', 'Base', NULL, NULL, NULL, '2025-02-21', '2025-02-21', '2025-02-21', NULL, 'activated', NULL);
 
 --
 -- Indexek a kiírt táblákhoz
@@ -634,7 +650,7 @@ ALTER TABLE `amenities`
 -- AUTO_INCREMENT a táblához `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT a táblához `eventbookings`
@@ -712,7 +728,7 @@ ALTER TABLE `roominventory`
 -- AUTO_INCREMENT a táblához `roommaintenance`
 --
 ALTER TABLE `roommaintenance`
-  MODIFY `maintenance_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `maintenance_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT a táblához `rooms`
@@ -736,7 +752,7 @@ ALTER TABLE `services`
 -- AUTO_INCREMENT a táblához `staff`
 --
 ALTER TABLE `staff`
-  MODIFY `staff_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `staff_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT a táblához `taxrates`
@@ -748,7 +764,7 @@ ALTER TABLE `taxrates`
 -- AUTO_INCREMENT a táblához `useraccounts`
 --
 ALTER TABLE `useraccounts`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Megkötések a kiírt táblákhoz
