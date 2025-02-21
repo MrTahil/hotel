@@ -75,7 +75,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock x:Name="UserNameDisplay" 
-                 Text="John Doe" 
+                 Text="" 
                  FontSize="24" 
                  FontWeight="Bold" 
                  VerticalAlignment="Center"/>

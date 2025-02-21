@@ -6,7 +6,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
-using ThirdParty.Json.LitJson;
 
 namespace RoomListApp
 {

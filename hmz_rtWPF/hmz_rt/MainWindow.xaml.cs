@@ -44,7 +44,7 @@ namespace RoomListApp
             _httpClient = new HttpClient(handler) { BaseAddress = new Uri("https://localhost:7047/Rooms/") };
 
             // Aszinkron hívás, de ne zárd be az ablakot hibák esetén
-            _ = LoadRooms();
+            //_ = LoadRooms();
 
             // Display the logged-in username
             if (!string.IsNullOrEmpty(TokenStorage.Username))
