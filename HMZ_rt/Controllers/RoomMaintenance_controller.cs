@@ -16,15 +16,15 @@ namespace HMZ_rt.Controllers
         {
             _context = context;
         }
-        [Authorize(Roles ="Admin,System,Recept")]
+        [Authorize(Roles = "Admin,System,Recept")]
         [HttpGet]
         public async Task<ActionResult<Roommaintenance>> GetMain()
         {
             try
             {
 
-            
-            return StatusCode(201, await _context.Roommaintenances.ToListAsync());
+
+                return StatusCode(201, await _context.Roommaintenances.ToListAsync());
             }
             catch (Exception ex)
             {
@@ -48,8 +48,8 @@ namespace HMZ_rt.Controllers
                     ResolutionDate = DateTime.MinValue,
                     Cost = 0,
                     Notes = dto.Notes,
-                    RoomId=dto.RoomId
-                    
+                    RoomId = dto.RoomId
+
                 };
                 if (valami != null)
                 {
@@ -58,8 +58,8 @@ namespace HMZ_rt.Controllers
                     return StatusCode(201, "Sikeres kérvény leadás!");
                 }
                 return StatusCode(404, "Ha ide eljutsz rég baj van igazából");
-               
-                
+
+
             }
             catch (Exception ex)
             {
@@ -68,7 +68,44 @@ namespace HMZ_rt.Controllers
             }
         }
 
-        
+
+        [Authorize(Roles = "Base,Admin,System,Recept")]
+        [HttpDelete("DeleteRequest/{id}")]
+        public async Task<ActionResult<Roommaintenance>> Deleteareq(int id)
+        {
+            try
+            {
+                var valami = await _context.Roommaintenances.FirstOrDefaultAsync(x => x.MaintenanceId == id);
+                if (valami != null)
+                {
+                    _context.Roommaintenances.Remove(valami);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(201, "Sikeres törlés");
+                }
+                return StatusCode(404, "Nem található a kérelem");
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, new { ex });
+            }
+        }
+
+
+        [Authorize(Roles = "Admin,System,Recept")]
+        [HttpPut("UpdateRequestByManagger/{id}")]
+        public async Task<ActionResult<Roommaintenance>> Updatereq(int id)
+        {
+            try
+            {
+                return StatusCode(500);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { ex });
+                throw;
+            }
+        }
     }
         
 }
