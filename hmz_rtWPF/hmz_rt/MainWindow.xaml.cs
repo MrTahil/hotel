@@ -14,7 +14,7 @@ namespace RoomListApp
     {
         public static string AuthToken { get; set; }
         public static string RefreshToken { get; set; }
-        public static string Role { get; set; }  // ÚJ: Role tárolása
+        public static string Role { get; set; }
         public static string Username { get; set; }
 
         public static void ClearTokens()
@@ -41,26 +41,23 @@ namespace RoomListApp
                 ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
             };
 
-            _httpClient = new HttpClient(handler) { BaseAddress = new Uri("https://localhost:7047/Rooms/") };
+            _httpClient = new HttpClient(handler) { BaseAddress = new Uri("https://localhost:7047/") };
 
-            // Aszinkron hívás, de ne zárd be az ablakot hibák esetén
-            //_ = LoadRooms();
 
-            // Display the logged-in username
             if (!string.IsNullOrEmpty(TokenStorage.Username))
             {
-                UserNameDisplay.Text = TokenStorage.Username;
+                UserNameDisplay.Text = $"Üdvözöljük, {TokenStorage.Username}!";
             }
 
-            // Set up a timer to update the current time
+
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(1);
             timer.Tick += Timer_Tick;
             timer.Start();
 
-            // Initialize the time display
             UpdateTimeDisplay();
         }
+
         private void Timer_Tick(object sender, EventArgs e)
         {
             UpdateTimeDisplay();
@@ -71,8 +68,35 @@ namespace RoomListApp
             CurrentTime.Text = DateTime.Now.ToString("HH:mm:ss");
         }
 
+        private async void szobak_kez_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            try
+            {
 
-        private async Task LoadRooms()
+                dashboardGrid.Visibility = Visibility.Collapsed;
+                roomsContainer.Visibility = Visibility.Visible;
+
+
+                await LoadRoomsToListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+
+
+                dashboardGrid.Visibility = Visibility.Visible;
+                roomsContainer.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            
+            roomsContainer.Visibility = Visibility.Collapsed;
+            dashboardGrid.Visibility = Visibility.Visible;
+        }
+
+        private async Task LoadRoomsToListView()
         {
             try
             {
@@ -84,7 +108,7 @@ namespace RoomListApp
 
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
 
-                var response = await _httpClient.GetAsync("https://localhost:7047/Rooms/GetRoomWith"); // API végpont
+                var response = await _httpClient.GetAsync("Rooms/GetRoomWith"); // API végpont
                 if (!response.IsSuccessStatusCode)
                 {
                     string errorResponse = await response.Content.ReadAsStringAsync();
@@ -102,59 +126,69 @@ namespace RoomListApp
                 }
 
 
+                roomsListView.ItemsSource = rooms;
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                throw; 
             }
-        }
-
-
-        private void szobak_kez_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-
         }
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
-
-            // Make sure to stop the timer to prevent memory leaks
             if (timer != null)
             {
                 timer.Stop();
                 timer = null;
             }
 
-            // Clear tokens and authentication information
             TokenStorage.ClearTokens();
 
-            // Create and show the login window
             LoginWindow loginWindow = new LoginWindow();
             loginWindow.Show();
 
-            // Close this window
             this.Close();
+        }
+
+    }
+
+    // Az adatbázis struktúrájának megfelelő Room osztály
+    public class Room
+    {
+        
+        public int RoomId { get; set; }
+
+       
+        public string RoomType { get; set; }
+
+        
+        public string RoomNumber { get; set; }
+
+
+        public int? Capacity { get; set; }
+
+        
+        public decimal? PricePerNight { get; set; }
+
+
+        public string Status { get; set; }
+
+
+        public string Description { get; set; }
+
+
+        public int? FloorNumber { get; set; }
+
+        public string Amenities { get; set; }
+
+        public DateTime? DateAdded { get; set; }
+
+        public string Images { get; set; }
+
+        public override string ToString()
+        {
+            return $"{RoomNumber} - {RoomType} ({PricePerNight} Ft/éj), Kapacitás: {Capacity} fő, Állapot: {Status}";
         }
     }
 }
-
-public class Room
-{
-    public int RoomId { get; set; }
-    public string RoomType { get; set; }
-    public string RoomNumber { get; set; }
-    public int? Capacity { get; set; }
-    public decimal? PricePerNight { get; set; }
-    public string Status { get; set; }
-    public string Description { get; set; }
-    public int? FloorNumber { get; set; }
-    public string Amenities { get; set; }
-    public DateTime? DateAdded { get; set; }
-    public string Images { get; set; }
-
-    public override string ToString()
-    {
-        return $"{RoomNumber} - {RoomType} ({PricePerNight} Ft/éj), Kapacitás: {Capacity} fő, Állapot: {Status}";
-    }
-}
-

@@ -103,8 +103,8 @@
             </Grid>
         </Border>
 
-        <!-- Dashboard Grid -->
-        <UniformGrid Grid.Row="1" Columns="4" Margin="20">
+        <!-- Főoldal Grid -->
+        <UniformGrid x:Name="dashboardGrid" Grid.Row="1" Columns="4" Margin="20" Visibility="Visible">
             <!-- Szobák kezelése -->
             <Border x:Name="szobak_kez" Style="{StaticResource DashboardCard}" Background="#EFF6FF" MouseLeftButtonDown="szobak_kez_MouseLeftButtonDown">
                 <Border.RenderTransform>
@@ -149,9 +149,6 @@
                 </StackPanel>
             </Border>
 
-            <!-- Additional cards follow the same pattern... -->
-            <!-- For brevity, I'll show just a few more -->
-
             <!-- Értesítések kezelése -->
             <Border Style="{StaticResource DashboardCard}" Background="#FEF2F2">
                 <Border.RenderTransform>
@@ -173,6 +170,7 @@
                     <TextBlock Text="Email kiküldése" Style="{StaticResource DashboardTitle}" Foreground="#312E81"/>
                 </StackPanel>
             </Border>
+
             <!-- Beosztások -->
             <Border Style="{StaticResource DashboardCard}" Background="#FFF7ED">
                 <Border.RenderTransform>
@@ -216,7 +214,65 @@
                     <TextBlock Text="Promóciók kezelése" Style="{StaticResource DashboardTitle}" Foreground="#78350F"/>
                 </StackPanel>
             </Border>
-            <!-- Continue with remaining cards following the same pattern -->
         </UniformGrid>
+
+        <!-- Rooms Container -  -->
+        <Grid x:Name="roomsContainer" Grid.Row="1" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            
+            <Button Grid.Row="0" 
+                    Content="Vissza a főmenübe" 
+                    HorizontalAlignment="Left" 
+                    Margin="20,0,0,10" 
+                    Padding="15,8" 
+                    Background="#2563EB" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    Click="BackButton_Click">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="6"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+            <!-- Rooms list -->
+            <ListView x:Name="roomsListView" Grid.Row="1" Margin="20">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="ID" DisplayMemberBinding="{Binding RoomId}" Width="60"/>
+                        <GridViewColumn Header="Szobaszám" DisplayMemberBinding="{Binding RoomNumber}" Width="100"/>
+                        <GridViewColumn Header="Típus" DisplayMemberBinding="{Binding RoomType}" Width="150"/>
+                        <GridViewColumn Header="Kapacitás" DisplayMemberBinding="{Binding Capacity}" Width="80"/>
+                        <GridViewColumn Header="Ár/éj" DisplayMemberBinding="{Binding PricePerNight, StringFormat='{}{0:N0} Ft'}" Width="120"/>
+                        <GridViewColumn Header="Állapot" DisplayMemberBinding="{Binding Status}" Width="120"/>
+                        <GridViewColumn Header="Emelet" DisplayMemberBinding="{Binding FloorNumber}" Width="70"/>
+                        <GridViewColumn Header="Hozzáadva" DisplayMemberBinding="{Binding DateAdded, StringFormat='{}{0:yyyy.MM.dd}'}" Width="100"/>
+                        <GridViewColumn Header="Leírás" DisplayMemberBinding="{Binding Description}" Width="200"/>
+                    </GridView>
+                </ListView.View>
+
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Status}" Value="Foglalt">
+                                <Setter Property="Background" Value="#FEE2E2" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="Szabad">
+                                <Setter Property="Background" Value="#DCFCE7" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="Takarítás alatt">
+                                <Setter Property="Background" Value="#FEF3C7" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+        </Grid>
     </Grid>
 </Window>
