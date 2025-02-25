@@ -89,46 +89,38 @@ namespace HMZ_rt.Controllers
                     os.Email = crtdto.Email;
                     os.Department = crtdto.Department;
                     os.Position = crtdto.Position;
-                    
+                    os.Status = crtdto.Status;
+
                     await _context.SaveChangesAsync();
                     return Ok();
                 }
-                return StatusCode(404,  "Nem található a felhasználó");
-            
+                return StatusCode(404, "Nem található a felhasználó");
             }
             catch (Exception ex)
             {
-
                 return StatusCode(500, new { ex });
             }
         }
         [Authorize(Roles ="Admin,Recept,System")]
-        [HttpDelete("DeleteStaff/:{id}")]
+        [HttpDelete("DeleteStaff/{id}")]
         public async Task<ActionResult<Staff>> DeleteStafff(int id)
         {
             try
             {
-
-
-                var user = await _context.Staff
-                        .FirstOrDefaultAsync(x => x.StaffId == id);
-
+                var user = await _context.Staff.FirstOrDefaultAsync(x => x.StaffId == id);
                 if (user == null)
                     return NotFound(new { message = "Felhasználó nem található" });
 
                 _context.Staff.Remove(user);
                 await _context.SaveChangesAsync();
                 return Ok(new { message = "Sikeres törlés" });
-
-
             }
             catch (Exception ex)
             {
-
                 return StatusCode(500, new { ex });
             }
-
         }
+
 
     }
 }
