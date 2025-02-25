@@ -128,7 +128,7 @@
             </Border>
 
             <!-- Dolgozók kezelése -->
-            <Border Style="{StaticResource DashboardCard}" Background="#FAF5FF">
+            <Border Style="{StaticResource DashboardCard}" Background="#FAF5FF" MouseLeftButtonDown="Border_MouseLeftButtonDown_1">
                 <Border.RenderTransform>
                     <ScaleTransform/>
                 </Border.RenderTransform>
@@ -223,7 +223,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            
+
             <Button Grid.Row="0" 
                     Content="Vissza a főmenübe" 
                     HorizontalAlignment="Left" 
@@ -267,6 +267,222 @@
                                 <Setter Property="Background" Value="#DCFCE7" />
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Status}" Value="Takarítás alatt">
+                                <Setter Property="Background" Value="#FEF3C7" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+        </Grid>
+        <!-- Dolgozók Container - Will be shown when staff is selected -->
+        <Grid x:Name="staffContainer" Grid.Row="1" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Back button and Action buttons -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Back button -->
+                <Button Grid.Column="0" 
+                Content="Vissza a főmenübe" 
+                HorizontalAlignment="Left" 
+                Margin="20,0,0,10" 
+                Padding="15,8" 
+                Background="#9333EA" 
+                Foreground="White" 
+                BorderThickness="0"
+                Click="StaffBackButton_Click">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="6"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <!-- Action buttons -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,20,10">
+                    <Button x:Name="AddStaffButton"
+                    Content="Új dolgozó" 
+                    Margin="5,0" 
+                    Padding="15,8" 
+                    Background="#16A34A" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    Click="AddStaffButton_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                    <Button x:Name="EditStaffButton"
+                    Content="Szerkesztés" 
+                    Margin="5,0" 
+                    Padding="15,8" 
+                    Background="#2563EB" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    Click="EditStaffButton_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                    <Button x:Name="DeleteStaffButton"
+                    Content="Törlés" 
+                    Margin="5,0" 
+                    Padding="15,8" 
+                    Background="#DC2626" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    Click="DeleteStaffButton_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Staff edit form -->
+            <Border x:Name="staffEditPanel" Grid.Row="1" Padding="20" Margin="20,0,20,10" Background="White" CornerRadius="8" Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- First name -->
+                    <StackPanel Grid.Column="0" Grid.Row="0" Margin="5">
+                        <TextBlock Text="Keresztnév" Margin="0,0,0,5"/>
+                        <TextBox x:Name="FirstNameTextBox" Padding="5"/>
+                    </StackPanel>
+
+                    <!-- Last name -->
+                    <StackPanel Grid.Column="1" Grid.Row="0" Margin="5">
+                        <TextBlock Text="Vezetéknév" Margin="0,0,0,5"/>
+                        <TextBox x:Name="LastNameTextBox" Padding="5"/>
+                    </StackPanel>
+
+                    <!-- Email -->
+                    <StackPanel Grid.Column="2" Grid.Row="0" Margin="5">
+                        <TextBlock Text="Email" Margin="0,0,0,5"/>
+                        <TextBox x:Name="EmailTextBox" Padding="5"/>
+                    </StackPanel>
+
+                    <!-- Phone number -->
+                    <StackPanel Grid.Column="3" Grid.Row="0" Margin="5">
+                        <TextBlock Text="Telefonszám" Margin="0,0,0,5"/>
+                        <TextBox x:Name="PhoneTextBox" Padding="5"/>
+                    </StackPanel>
+
+                    <!-- Position -->
+                    <StackPanel Grid.Column="0" Grid.Row="1" Margin="5">
+                        <TextBlock Text="Pozíció" Margin="0,0,0,5"/>
+                        <TextBox x:Name="PositionTextBox" Padding="5"/>
+                    </StackPanel>
+
+                    <!-- Salary -->
+                    <StackPanel Grid.Column="1" Grid.Row="1" Margin="5">
+                        <TextBlock Text="Fizetés" Margin="0,0,0,5"/>
+                        <TextBox x:Name="SalaryTextBox" Padding="5"/>
+                    </StackPanel>
+
+                    <!-- Status -->
+                    <StackPanel Grid.Column="2" Grid.Row="1" Margin="5">
+                        <TextBlock Text="Státusz" Margin="0,0,0,5"/>
+                        <ComboBox x:Name="StatusComboBox" Padding="5">
+                            <ComboBoxItem Content="Aktív"/>
+                            <ComboBoxItem Content="Inaktív"/>
+                            <ComboBoxItem Content="Szabadságon"/>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <!-- Department -->
+                    <StackPanel Grid.Column="3" Grid.Row="1" Margin="5">
+                        <TextBlock Text="Részleg" Margin="0,0,0,5"/>
+                        <TextBox x:Name="DepartmentTextBox" Padding="5"/>
+                    </StackPanel>
+
+                    <!-- Action buttons -->
+                    <StackPanel Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                        <Button x:Name="CancelEditButton"
+                        Content="Mégse" 
+                        Margin="5,0" 
+                        Padding="15,8" 
+                        Background="#6B7280" 
+                        Foreground="White" 
+                        BorderThickness="0"
+                        Click="CancelEditButton_Click">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+                        <Button x:Name="SaveStaffButton"
+                        Content="Mentés" 
+                        Margin="5,0" 
+                        Padding="15,8" 
+                        Background="#16A34A" 
+                        Foreground="White" 
+                        BorderThickness="0"
+                        Click="SaveStaffButton_Click">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Staff list -->
+            <ListView x:Name="staffListView" Grid.Row="2" Margin="20">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="ID" DisplayMemberBinding="{Binding StaffId}" Width="60"/>
+                        <GridViewColumn Header="Vezetéknév" DisplayMemberBinding="{Binding LastName}" Width="120"/>
+                        <GridViewColumn Header="Keresztnév" DisplayMemberBinding="{Binding FirstName}" Width="120"/>
+                        <GridViewColumn Header="Email" DisplayMemberBinding="{Binding Email}" Width="200"/>
+                        <GridViewColumn Header="Telefonszám" DisplayMemberBinding="{Binding PhoneNumber}" Width="120"/>
+                        <GridViewColumn Header="Pozíció" DisplayMemberBinding="{Binding Position}" Width="120"/>
+                        <GridViewColumn Header="Fizetés" DisplayMemberBinding="{Binding Salary, StringFormat='{}{0:N0} Ft'}" Width="100"/>
+                        <GridViewColumn Header="Felvétel Dátuma" DisplayMemberBinding="{Binding DateHired, StringFormat='{}{0:yyyy.MM.dd}'}" Width="120"/>
+                        <GridViewColumn Header="Státusz" DisplayMemberBinding="{Binding Status}" Width="100"/>
+                        <GridViewColumn Header="Részleg" DisplayMemberBinding="{Binding Department}" Width="120"/>
+                    </GridView>
+                </ListView.View>
+
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Status}" Value="Aktív">
+                                <Setter Property="Background" Value="#DCFCE7" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="Inaktív">
+                                <Setter Property="Background" Value="#FEE2E2" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="Szabadságon">
                                 <Setter Property="Background" Value="#FEF3C7" />
                             </DataTrigger>
                         </Style.Triggers>
