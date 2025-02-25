@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.1
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Feb 21. 13:58
--- Kiszolgáló verziója: 10.4.20-MariaDB
--- PHP verzió: 7.3.29
+-- Létrehozás ideje: 2025. Feb 25. 19:56
+-- Kiszolgáló verziója: 10.4.32-MariaDB
+-- PHP verzió: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -30,15 +30,15 @@ USE `hmz_rt`;
 --
 
 CREATE TABLE `amenities` (
-  `amenity_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `description` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `amenity_name` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
   `amenity_id` int(11) NOT NULL,
-  `availability` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `availability` varchar(255) DEFAULT NULL,
   `date_added` date DEFAULT NULL,
   `room_id` int(11) DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `icon` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `category` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `icon` varchar(255) DEFAULT NULL,
+  `category` varchar(255) DEFAULT NULL,
   `priority` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
@@ -80,8 +80,8 @@ CREATE TABLE `bookings` (
   `number_of_guests` int(11) DEFAULT NULL,
   `total_price` decimal(10,0) DEFAULT NULL,
   `booking_date` date DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `payment_status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL
+  `status` varchar(255) DEFAULT NULL,
+  `payment_status` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 -- --------------------------------------------------------
@@ -97,10 +97,10 @@ CREATE TABLE `eventbookings` (
   `booking_date` date DEFAULT NULL,
   `number_of_tickets` int(11) DEFAULT NULL,
   `total_price` decimal(10,0) DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `payment_status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `payment_status` varchar(255) DEFAULT NULL,
   `date_added` date DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL
+  `notes` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 -- --------------------------------------------------------
@@ -111,15 +111,15 @@ CREATE TABLE `eventbookings` (
 
 CREATE TABLE `events` (
   `capacity` int(11) DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
   `event_id` int(11) NOT NULL,
-  `event_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `event_name` varchar(255) DEFAULT NULL,
   `event_date` date DEFAULT NULL,
-  `location` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `description` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
   `date_added` date DEFAULT NULL,
-  `organizer_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `contact_info` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL
+  `organizer_name` varchar(255) DEFAULT NULL,
+  `contact_info` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 -- --------------------------------------------------------
@@ -131,11 +131,11 @@ CREATE TABLE `events` (
 CREATE TABLE `feedback` (
   `feedback_id` int(11) NOT NULL,
   `feedback_date` date DEFAULT NULL,
-  `comments` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `category` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `comments` text DEFAULT NULL,
+  `category` varchar(255) DEFAULT NULL,
   `rating` decimal(10,0) DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `response` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `response` text DEFAULT NULL,
   `response_date` date DEFAULT NULL,
   `date_added` date DEFAULT NULL,
   `guest_id` int(11) NOT NULL
@@ -148,16 +148,16 @@ CREATE TABLE `feedback` (
 --
 
 CREATE TABLE `guests` (
-  `first_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `first_name` varchar(255) DEFAULT NULL,
   `guest_id` int(11) NOT NULL,
-  `last_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `email` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `phone_number` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `address` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `city` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `country` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `last_name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `city` varchar(255) DEFAULT NULL,
+  `country` varchar(255) DEFAULT NULL,
   `date_of_birth` date DEFAULT NULL,
-  `gender` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `gender` varchar(255) DEFAULT NULL,
   `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
@@ -168,16 +168,16 @@ CREATE TABLE `guests` (
 --
 
 CREATE TABLE `invoices` (
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
   `invoice_id` int(11) NOT NULL,
   `booking_id` int(11) NOT NULL,
   `invoice_date` date DEFAULT NULL,
   `total_amount` decimal(10,0) DEFAULT NULL,
-  `payment_status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `payment_status` varchar(255) DEFAULT NULL,
   `due_date` date DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `notes` text DEFAULT NULL,
   `date_added` date DEFAULT NULL,
-  `currency` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL
+  `currency` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 -- --------------------------------------------------------
@@ -187,16 +187,16 @@ CREATE TABLE `invoices` (
 --
 
 CREATE TABLE `loyaltyprograms` (
-  `program_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `program_name` varchar(255) DEFAULT NULL,
   `loyalty_program_id` int(11) NOT NULL,
-  `description` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `description` text DEFAULT NULL,
   `points_required` int(11) DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
   `date_added` date DEFAULT NULL,
-  `benefits` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `benefits` text DEFAULT NULL,
   `expiration_period` int(11) DEFAULT NULL,
-  `terms_conditions` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `category` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL
+  `terms_conditions` text DEFAULT NULL,
+  `category` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 -- --------------------------------------------------------
@@ -207,15 +207,15 @@ CREATE TABLE `loyaltyprograms` (
 
 CREATE TABLE `marketing` (
   `marketing_id` int(11) NOT NULL,
-  `campaign_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `campaign_name` varchar(255) DEFAULT NULL,
   `start_date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,
   `budget` decimal(10,0) DEFAULT 10,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `description` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `target_audience` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `target_audience` varchar(255) DEFAULT NULL,
   `date_added` date DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL
+  `notes` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 -- --------------------------------------------------------
@@ -227,14 +227,14 @@ CREATE TABLE `marketing` (
 CREATE TABLE `notifications` (
   `notification_id` int(11) NOT NULL,
   `date_sent` date DEFAULT NULL,
-  `message` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `type` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `message` text DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
   `date_read` date DEFAULT NULL,
   `priority` int(11) DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `notes` text DEFAULT NULL,
   `user_id` int(11) NOT NULL,
-  `category` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL
+  `category` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 -- --------------------------------------------------------
@@ -248,11 +248,11 @@ CREATE TABLE `payments` (
   `booking_id` int(11) NOT NULL,
   `payment_date` date DEFAULT NULL,
   `amount` decimal(10,0) DEFAULT NULL,
-  `payment_method` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `transaction_id` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `currency` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `payment_notes` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `payment_method` varchar(255) DEFAULT NULL,
+  `transaction_id` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `currency` varchar(255) DEFAULT NULL,
+  `payment_notes` text DEFAULT NULL,
   `date_added` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
@@ -264,14 +264,14 @@ CREATE TABLE `payments` (
 
 CREATE TABLE `promotions` (
   `promotion_id` int(11) NOT NULL,
-  `promotion_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `description` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `promotion_name` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
   `start_date` date DEFAULT NULL,
-  `terms_conditions` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `terms_conditions` text DEFAULT NULL,
   `end_date` date DEFAULT NULL,
   `discount_percentage` decimal(10,0) DEFAULT NULL,
   `room_id` int(11) DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
   `date_added` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
@@ -287,9 +287,9 @@ CREATE TABLE `reviews` (
   `guest_id` int(11) NOT NULL,
   `room_id` int(11) NOT NULL,
   `rating` decimal(10,0) DEFAULT NULL,
-  `comment` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `response` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `comment` text DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `response` text DEFAULT NULL,
   `response_date` date DEFAULT NULL,
   `date_added` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
@@ -301,13 +301,13 @@ CREATE TABLE `reviews` (
 --
 
 CREATE TABLE `roominventory` (
-  `item_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `item_name` varchar(255) DEFAULT NULL,
   `quantity` int(11) DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
   `date_added` date DEFAULT NULL,
   `last_updated` date DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `supplier` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `supplier` varchar(255) DEFAULT NULL,
   `inventory_id` int(11) NOT NULL,
   `room_id` int(11) NOT NULL,
   `cost_per_item` decimal(10,0) DEFAULT NULL
@@ -323,13 +323,13 @@ CREATE TABLE `roommaintenance` (
   `maintenance_id` int(11) NOT NULL,
   `room_id` int(11) NOT NULL,
   `maintenance_date` date DEFAULT NULL,
-  `description` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
   `staff_id` int(11) DEFAULT NULL,
   `date_reported` date DEFAULT NULL,
   `resolution_date` date DEFAULT NULL,
   `cost` decimal(10,0) DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL
+  `notes` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 --
@@ -337,7 +337,7 @@ CREATE TABLE `roommaintenance` (
 --
 
 INSERT INTO `roommaintenance` (`maintenance_id`, `room_id`, `maintenance_date`, `description`, `status`, `staff_id`, `date_reported`, `resolution_date`, `cost`, `notes`) VALUES
-(1, 5, '2025-02-21', 'Büdi van', 'Not resolved yet', NULL, '2025-02-21', '0001-01-01', '0', 'büdös');
+(1, 5, '2025-02-21', 'Büdi van', 'Not resolved yet', NULL, '2025-02-21', '0001-01-01', 0, 'büdös');
 
 -- --------------------------------------------------------
 
@@ -346,15 +346,15 @@ INSERT INTO `roommaintenance` (`maintenance_id`, `room_id`, `maintenance_date`, 
 --
 
 CREATE TABLE `rooms` (
-  `room_type` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `room_type` varchar(255) DEFAULT NULL,
   `room_id` int(11) NOT NULL,
-  `room_number` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `room_number` varchar(255) DEFAULT NULL,
   `capacity` int(11) DEFAULT NULL,
   `price_per_night` decimal(10,0) DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `description` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
   `floor_number` int(11) DEFAULT NULL,
-  `amenities` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `amenities` text DEFAULT NULL,
   `date_added` date DEFAULT NULL,
   `images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
@@ -364,14 +364,14 @@ CREATE TABLE `rooms` (
 --
 
 INSERT INTO `rooms` (`room_type`, `room_id`, `room_number`, `capacity`, `price_per_night`, `status`, `description`, `floor_number`, `amenities`, `date_added`, `images`) VALUES
-('string', 1, 'string', 3, '3', 'string', 'string', 0, NULL, '2025-01-14', 'string'),
-('Deluxe', 2, '101', 2, '120', 'Available', 'Luxus szoba king-size ággyal és lenyűgöző városi kilátással.', 1, NULL, '2025-01-14', ''),
-('Standard', 3, '102', 2, '80', 'Occupied', 'Kényelmes szoba queen-size ággyal és modern kényelmi szolgáltatásokkal.', 1, NULL, '2025-01-14', ''),
-('Suite', 4, '201', 4, '250', 'Available', 'Tágas lakosztály külön nappali résszel, ideális családok számára.', 2, NULL, '2025-01-14', ''),
-('Single', 5, '301', 1, '50', 'Under Maintenance', 'Kényelmes egyágyas szoba alapvető kényelmi szolgáltatásokkal, ideális egyedül utazók számára.', 3, NULL, '2025-01-14', ''),
-('Family', 6, '302', 5, '180', 'Available', 'Családi szoba több ággyal és játszótérrel a gyermekek számára.', 3, NULL, '2025-01-14', ''),
-('Queen', 9, '106', 2, '120', 'Available', 'Kényelmes queen-size ágyas szoba modern felszereltséggel.', 1, NULL, '2025-01-14', ''),
-('King', 10, '207', 2, '180', 'Occupied', 'Tágas szoba luxus king-size ággyal és panorámás kilátással.', 2, NULL, '2025-01-14', '');
+('string', 1, 'string', 3, 3, 'string', 'string', 0, NULL, '2025-01-14', 'string'),
+('Deluxe', 2, '101', 2, 120, 'Available', 'Luxus szoba king-size ággyal és lenyűgöző városi kilátással.', 1, NULL, '2025-01-14', ''),
+('Standard', 3, '102', 2, 80, 'Occupied', 'Kényelmes szoba queen-size ággyal és modern kényelmi szolgáltatásokkal.', 1, NULL, '2025-01-14', ''),
+('Suite', 4, '201', 4, 250, 'Available', 'Tágas lakosztály külön nappali résszel, ideális családok számára.', 2, NULL, '2025-01-14', ''),
+('Single', 5, '301', 1, 50, 'Under Maintenance', 'Kényelmes egyágyas szoba alapvető kényelmi szolgáltatásokkal, ideális egyedül utazók számára.', 3, NULL, '2025-01-14', ''),
+('Family', 6, '302', 5, 180, 'Available', 'Családi szoba több ággyal és játszótérrel a gyermekek számára.', 3, NULL, '2025-01-14', ''),
+('Queen', 9, '106', 2, 120, 'Available', 'Kényelmes queen-size ágyas szoba modern felszereltséggel.', 1, NULL, '2025-01-14', ''),
+('King', 10, '207', 2, 180, 'Occupied', 'Tágas szoba luxus king-size ággyal és panorámás kilátással.', 2, NULL, '2025-01-14', '');
 
 -- --------------------------------------------------------
 
@@ -380,15 +380,15 @@ INSERT INTO `rooms` (`room_type`, `room_id`, `room_number`, `capacity`, `price_p
 --
 
 CREATE TABLE `roomtypes` (
-  `type_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `type_name` varchar(255) DEFAULT NULL,
   `room_type_id` int(11) NOT NULL,
-  `description` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `description` text DEFAULT NULL,
   `base_price` decimal(10,0) DEFAULT NULL,
   `max_capacity` int(11) DEFAULT NULL,
-  `amenities` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `amenities` text DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
   `date_added` date DEFAULT NULL,
-  `image_url` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
   `priority` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
@@ -399,12 +399,12 @@ CREATE TABLE `roomtypes` (
 --
 
 CREATE TABLE `services` (
-  `service_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `service_name` varchar(255) DEFAULT NULL,
   `service_id` int(11) NOT NULL,
-  `description` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `description` text DEFAULT NULL,
   `price` decimal(10,0) DEFAULT NULL,
-  `service_type` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `availability` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `service_type` varchar(255) DEFAULT NULL,
+  `availability` varchar(255) DEFAULT NULL,
   `date_added` date DEFAULT NULL,
   `duration` int(11) DEFAULT NULL,
   `staff_id` int(11) DEFAULT NULL,
@@ -418,16 +418,16 @@ CREATE TABLE `services` (
 --
 
 CREATE TABLE `staff` (
-  `first_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `first_name` varchar(255) DEFAULT NULL,
   `staff_id` int(11) NOT NULL,
-  `last_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `email` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `phone_number` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `position` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `last_name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(255) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL,
   `salary` decimal(10,0) DEFAULT NULL,
   `date_hired` date DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `department` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL
+  `status` varchar(255) DEFAULT NULL,
+  `department` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 --
@@ -435,8 +435,9 @@ CREATE TABLE `staff` (
 --
 
 INSERT INTO `staff` (`first_name`, `staff_id`, `last_name`, `email`, `phone_number`, `position`, `salary`, `date_hired`, `status`, `department`) VALUES
-('Pozsgai', 1, 'Marcell', 'pozsgaim@kkszki.hu', '+36 2013747285', 'Tomo arus', '-1000', '2025-02-21', 'Self Employed', 'Tomo king'),
-('Jánosi', 2, 'Marcell', 'janosim@kkszki.hu', '+36 2019855222', 'Hotel Manager', '10000000', '2025-02-21', 'Boss', 'Manager');
+('Pozsgai', 1, 'Marcell', 'pozsgaim@kkszki.hu', '+36 2013747285', 'Tomo arus', -1000, '2025-02-21', 'Aktív', 'Tomo king'),
+('Jánosi', 2, 'Marcell', 'janosim@kkszki.hu', '+36 2019855222', 'Hotel Manager', 10000000, '2025-02-21', 'Inaktív', 'Manager'),
+('Zalán', 5, 'Zelenák', 'zelenakz@kkszki.hu', '+36 209548099', 'Karbantartó', 100000000, '2025-02-25', 'Szabadságon', 'IT');
 
 -- --------------------------------------------------------
 
@@ -446,15 +447,15 @@ INSERT INTO `staff` (`first_name`, `staff_id`, `last_name`, `email`, `phone_numb
 
 CREATE TABLE `taxrates` (
   `tax_rate_id` int(11) NOT NULL,
-  `tax_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `tax_name` varchar(255) DEFAULT NULL,
   `rate` decimal(10,0) DEFAULT NULL,
   `effective_date` date DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `description` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
   `date_added` date DEFAULT NULL,
-  `country` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `state` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `city` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL
+  `country` varchar(255) DEFAULT NULL,
+  `state` varchar(255) DEFAULT NULL,
+  `city` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 -- --------------------------------------------------------
@@ -464,19 +465,19 @@ CREATE TABLE `taxrates` (
 --
 
 CREATE TABLE `useraccounts` (
-  `username` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `username` varchar(255) DEFAULT NULL,
   `user_id` int(11) NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `email` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `role` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `RefreshToken` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `role` varchar(255) DEFAULT NULL,
+  `RefreshToken` varchar(255) DEFAULT NULL,
   `RefreshTokenExpiryTime` date DEFAULT NULL,
-  `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
   `date_created` date DEFAULT NULL,
   `last_login` date DEFAULT NULL,
   `date_updated` date DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `authenticationcode` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `authenticationcode` varchar(255) DEFAULT NULL,
   `authenticationexpire` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
@@ -487,8 +488,8 @@ CREATE TABLE `useraccounts` (
 INSERT INTO `useraccounts` (`username`, `user_id`, `password`, `email`, `role`, `RefreshToken`, `RefreshTokenExpiryTime`, `status`, `date_created`, `last_login`, `date_updated`, `notes`, `authenticationcode`, `authenticationexpire`) VALUES
 ('Tahil', 3, 'hte+RnleAunUji+Bx3f7EPd8Nd2nOw82PS50E6kPBYOBYQ+8JUKlArMigzjZ1CM3', 'hiloczkit@kkszki.hu', 'System', 'OMPldv1Ly9+hEyF2hIEoAXEHpWJhBg2gtr216ykVIJM=', '2025-02-21', 'string', '2025-01-16', '2025-01-16', '2025-01-16', 'string', '111111', '2025-02-13'),
 ('asdasdasd', 4, '3S4JbEmjI0P69HENXf0Wp+u8teCyLgUPrKSYOMLRv91+ixql4MlfM4TWgeaJLIU/', 'hiloczkit12@kkszki.hu', 'Base', 'qiNaBxchix/fw5p2I6Bq0odyQmSo0CmQawB6MiPqVFc=', '2025-01-23', 'string', '2025-01-16', '2025-01-16', '2025-01-16', 'string', '111111', '2025-02-13'),
-('a_Beto', 5, 'u04oCPhO+K7Y9IBD+zsk/QP/jWnVhlEdpOyaWFAzwQjPvc0kubpehqBt15MLXuVv', 'monostori@kkszki.hu', 'System', 'v95cRrpUOexmmUnF/V4oAbeWZu8ckokxKJvPQFhsmPg=', '2025-02-28', 'string', '2025-02-14', '2025-02-14', '2025-02-14', 'string', 'activated', '2025-02-20'),
-('Bozsgai', 6, '48RL9zaxFrXNx3WQWwmErDml2gjVS/8N8ess8G65a4mMWb4VBkZqDJDsEki62YpY', 'monostorir@kkszki.hu', 'Base', NULL, NULL, NULL, '2025-02-21', '2025-02-21', '2025-02-21', NULL, 'activated', NULL);
+('a_Beto', 5, 'u04oCPhO+K7Y9IBD+zsk/QP/jWnVhlEdpOyaWFAzwQjPvc0kubpehqBt15MLXuVv', 'monostorir@kkszki.hu', 'System', 'NJMTLsrwjnfq7lVRulLMrxqiMoGePom+7hPpcN1TFvU=', '2025-03-04', 'string', '2025-02-14', '2025-02-14', '2025-02-14', 'string', 'activated', '2025-02-20'),
+('Bozsgai', 6, '48RL9zaxFrXNx3WQWwmErDml2gjVS/8N8ess8G65a4mMWb4VBkZqDJDsEki62YpY', 'monostori@kkszki.hu', 'Base', NULL, NULL, NULL, '2025-02-21', '2025-02-21', '2025-02-21', NULL, 'activated', '2025-02-21');
 
 --
 -- Indexek a kiírt táblákhoz
@@ -752,7 +753,7 @@ ALTER TABLE `services`
 -- AUTO_INCREMENT a táblához `staff`
 --
 ALTER TABLE `staff`
-  MODIFY `staff_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `staff_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT a táblához `taxrates`
