@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace HMZ_rt.Models;
 
@@ -24,6 +25,6 @@ public partial class Promotion
     public string? Status { get; set; }
 
     public DateTime? DateAdded { get; set; }
-
+    [JsonIgnore]
     public virtual Room? Room { get; set; }
 }
