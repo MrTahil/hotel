@@ -7,12 +7,12 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           <div>
             <h4 className="text-lg md:text-xl font-bold mb-4">Kapcsolat</h4>
-            <p className="mb-2">Email: info@luxusszalloda.hu</p>
-            <p>Tel: +36 1 234 5678</p>
+            <p className="mb-2">Email: hmzrtkando@gmail.com</p>
+            <p>Tel: +36 70 323 7436</p>
           </div>
           <div>
             <h4 className="text-lg md:text-xl font-bold mb-4">Címünk</h4>
-            <p>1234 Budapest, Példa utca 1.</p>
+            <p>Miskolc, Palóczy László utca 3, 3525</p>
           </div>
           <div>
             <h4 className="text-lg md:text-xl font-bold mb-4">Kövessen minket</h4>
