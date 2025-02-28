@@ -15,7 +15,7 @@ namespace HMZ_rt.Controllers
         }
 
 
-        [HttpGet]
+        [HttpGet("Getpromotions")]
         public async Task<ActionResult<Promotion>> getpromotions()
         {
             try
