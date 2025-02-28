@@ -90,3 +90,47 @@ public class kacsa
     [Required(ErrorMessage = "A szobaszám megadása kötelező")]
     public int RoomId { get; set; }
 }
+
+
+public class promotionupdate
+{
+    [Required(ErrorMessage = "A név megadása kötelező!")]
+    public string? Name { get; set; }
+    [Required(ErrorMessage = "A leírás megadása kötelező!")]
+    public string? Description { get; set; }
+    [Required(ErrorMessage ="A kezdeti időpont megadása kötelező!")]
+    public DateTime? StartDate { get; set; }
+    [Required(ErrorMessage = "A Terms and conditions megadása kötelező!")]
+    public string? TermsConditions { get; set; }
+    [Required(ErrorMessage = "A végzeti időpont megadása kötelező!")]
+    public DateTime? EndDate { get; set; }
+    [Required(ErrorMessage = "A a kedvezmény százalék megadása kötelező!")]
+    public decimal? DiscountPercentage { get; set; }
+    [Required(ErrorMessage = "A szobid kötelező!")]
+    public int? RoomId { get; set; }
+    [Required(ErrorMessage = "A státusz megadása kötelező!")]
+    public string? Status { get; set; }
+
+}
+
+
+public class promotioncreate
+{
+    [Required(ErrorMessage = "A név megadása kötelező!")]
+    public string? Name { get; set; }
+    [Required(ErrorMessage = "A leírás megadása kötelező!")]
+    public string? Description { get; set; }
+    [Required(ErrorMessage = "A kezdeti időpont megadása kötelező!")]
+    public DateTime? StartDate { get; set; }
+    [Required(ErrorMessage = "A Terms and conditions megadása kötelező!")]
+    public string? TermsConditions { get; set; }
+    [Required(ErrorMessage = "A végzeti időpont megadása kötelező!")]
+    public DateTime? EndDate { get; set; }
+    [Required(ErrorMessage = "A a kedvezmény százalék megadása kötelező!")]
+    public decimal? DiscountPercentage { get; set; }
+    [Required(ErrorMessage = "A szobid kötelező!")]
+    public int? RoomId { get; set; }
+    [Required(ErrorMessage = "A státusz megadása kötelező!")]
+    public string? Status { get; set; }
+
+}
