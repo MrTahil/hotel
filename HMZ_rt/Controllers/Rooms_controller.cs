@@ -22,33 +22,44 @@ namespace HMZ_rt.Controllers
         [HttpPost("CreateRoom")]
         public async Task<ActionResult<Room>> CreateRoom(CreateRoom crtm)
         {
-            var existingRoomByNumber = await _context.Rooms
-            .FirstOrDefaultAsync(u => u.RoomNumber == crtm.RoomNumber);
-
-            if (existingRoomByNumber != null)
+            try
             {
-                return BadRequest(new { message = "Ez a szobaszám már használatban van!" });
+
+
+                var existingRoomByNumber = await _context.Rooms
+                .FirstOrDefaultAsync(u => u.RoomNumber == crtm.RoomNumber);
+
+                if (existingRoomByNumber != null)
+                {
+                    return BadRequest(new { message = "Ez a szobaszám már használatban van!" });
+                }
+
+
+                var room = new Room
+                {
+                    RoomType = crtm.RoomType,
+                    RoomNumber = crtm.RoomNumber,
+                    Capacity = crtm.Capacity,
+                    PricePerNight = crtm.PricePerNight,
+                    Status = crtm.Status,
+                    Description = crtm.Description,
+                    FloorNumber = crtm.FLoorNumber,
+                    Images = crtm.Images,
+                    DateAdded = DateTime.Now
+                };
+                if (room != null)
+                {
+                    await _context.Rooms.AddAsync(room);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(201, room);
+                }
+                return BadRequest();
             }
-
-
-            var room = new Room
+            catch (Exception ex)
             {
-                RoomType = crtm.RoomType,
-                RoomNumber = crtm.RoomNumber,
-                Capacity = crtm.Capacity,
-                PricePerNight = crtm.PricePerNight,
-                Status = crtm.Status,
-                Description = crtm.Description,
-                FloorNumber = crtm.FLoorNumber,
-                Images = crtm.Images,
-                DateAdded = DateTime.Now
-            };
-            if (room != null) {
-                await _context.Rooms.AddAsync(room);
-                await _context.SaveChangesAsync();
-                return StatusCode(201, room);
+
+                return StatusCode(500, ex);
             }
-            return BadRequest();
         }
 
 
@@ -58,21 +69,35 @@ namespace HMZ_rt.Controllers
         [HttpGet("Admin_Get_Data")]
         public async Task<ActionResult<List<Room>>> GetRoomsAdmin()
         {
-            var rooms = await _context.Rooms
-                .Include(r => r.AmenitiesNavigation)
-                .Include(a => a.Promotions)
-                .Include(a => a.Reviews)
-                .Include(a => a.Roominventories)
-                .Include(a => a.Roommaintenances)
-                .Include(a =>a.Bookings)
-                .ToListAsync();
+            try
+            {
 
-            return Ok(rooms);
+
+                var rooms = await _context.Rooms
+                    .Include(r => r.AmenitiesNavigation)
+                    .Include(a => a.Promotions)
+                    .Include(a => a.Reviews)
+                    .Include(a => a.Roominventories)
+                    .Include(a => a.Roommaintenances)
+                    .Include(a => a.Bookings)
+                    .ToListAsync();
+
+                return Ok(rooms);
+
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
         }
-
         [HttpGet("GetRoomWith")]
         public async Task<ActionResult<List<Room>>> GetRooms()
         {
+            try
+            {
+
+
             var roomsWithAmenities = await _context.Rooms
                 .Include(r => r.AmenitiesNavigation)
                 .Include(a => a.Promotions)
@@ -81,12 +106,21 @@ namespace HMZ_rt.Controllers
                 .ToListAsync();
 
             return Ok(roomsWithAmenities);
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
         }
 
         [Authorize(Roles = "System,Admin,Recept")]
         [HttpDelete("DeleteRoomById{Id}")]
         public async Task<ActionResult<Room>> DeleteRoomById(int Id)
         {
+
+            try
+            {
 
 
             var os = await _context.Rooms.FirstOrDefaultAsync(x => x.RoomId== Id);
@@ -97,20 +131,38 @@ namespace HMZ_rt.Controllers
                 return Ok(new { message = "Sikeresen törölve!" });
             }
             return NotFound();
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
         }
 
         [Authorize(Roles = "System,Admin,Recept")]
         [HttpPut("SzobaUpdate")]
         public async Task<ActionResult<Room>> UpdateRoomById(int Id, UpdateRoomDto udto)
         {
-            var os = await _context.Rooms.FirstOrDefaultAsync(x => x.RoomId == Id);
-            if (os != null)
+            try
             {
-            
-            os.Status = udto.Status;
-            await _context.SaveChangesAsync();
-            return Ok();}
-            return BadRequest();
+
+
+                var os = await _context.Rooms.FirstOrDefaultAsync(x => x.RoomId == Id);
+                if (os != null)
+                {
+
+                    os.Status = udto.Status;
+                    await _context.SaveChangesAsync();
+                    return Ok();
+                }
+                return BadRequest();
+            }
+
+            catch (Exception ex)
+            {
+
+                return StatusCode(500,ex);
+            }
         } 
             
 
