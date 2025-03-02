@@ -138,5 +138,5 @@ public class promotioncreate
 public class PromotionStatus
 {
     [Required(ErrorMessage = "Nem lehet üres!")]
-    public string Status { get; set; }
+    public string? Status { get; set; }
 }
