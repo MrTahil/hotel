@@ -134,3 +134,9 @@ public class promotioncreate
     public string? Status { get; set; }
 
 }
+
+public class PromotionStatus
+{
+    [Required(ErrorMessage = "Nem lehet üres!")]
+    public string Status { get; set; }
+}

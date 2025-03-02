@@ -54,7 +54,7 @@ namespace HMZ_rt.Controllers
 
         [Authorize(Roles = "System,Admin,Recept")]
         [HttpPut("UpdatePromotion/{id}")]
-        public async Task<ActionResult<Promotion>> UpdateRoom(int id, promotionupdate udto)
+        public async Task<ActionResult<Promotion>> UpdatePromotion(int id, promotionupdate udto)
         {
             try
             {
@@ -82,14 +82,15 @@ namespace HMZ_rt.Controllers
         }
 
 
-        [Authorize(Roles ="System,Admin,Recept")]
+        [Authorize(Roles = "System,Admin,Recept")]
         [HttpPost("CreatePromotion")]
         public async Task<ActionResult<Promotion>> CreatePromotion(promotioncreate crtdto)
         {
             try
             {
-            var existingpromotion = await _context.Promotions.FirstOrDefaultAsync(x => x.PromotionName == crtdto.Name);
-            if (existingpromotion == null) {
+                var existingpromotion = await _context.Promotions.FirstOrDefaultAsync(x => x.PromotionName == crtdto.Name);
+                if (existingpromotion == null)
+                {
 
                     var promotion = new Promotion
                     {
@@ -102,23 +103,23 @@ namespace HMZ_rt.Controllers
                         RoomId = crtdto.RoomId,
                         Status = crtdto.Status,
                         DateAdded = DateTime.Now
-                       
+
                     };
                     if (promotion != null)
                     {
                         await _context.Promotions.AddAsync(promotion);
                         await _context.SaveChangesAsync();
-                        return StatusCode(201,"Sikeres mentés!");
+                        return StatusCode(201, "Sikeres mentés!");
                     }
                     return StatusCode(418, "Ha ide jutsz az baj");
                 }
-            if (existingpromotion != null)
+                if (existingpromotion != null)
                 {
                     return StatusCode(404, "Már létező promotion");
                 }
-            return BadRequest();
+                return BadRequest();
             }
-            
+
 
 
             catch (Exception ex)
@@ -127,5 +128,28 @@ namespace HMZ_rt.Controllers
                 return StatusCode(500, ex);
             }
         }
+            [Authorize(Roles = "System,Admin,Recept")]
+            [HttpPut("UpdateStatusofpromotion/{id}")]
+            public async Task<ActionResult<Promotion>> UpdateStatusofpromotion(int id, PromotionStatus udto)
+            {
+                try
+                {
+                    var os = await _context.Promotions.FirstOrDefaultAsync(x => x.PromotionId == id);
+                    if (os != null)
+                    {
+                        os.Status = udto.Status;
+                        await _context.SaveChangesAsync();
+                        return StatusCode(201, "Sikeres mentés");
+                    }
+                    return StatusCode(404);
+
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, ex);
+
+                }
+            }
+
+        }
     }
-}
