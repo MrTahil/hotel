@@ -106,8 +106,6 @@ public class promotionupdate
     public DateTime? EndDate { get; set; }
     [Required(ErrorMessage = "A a kedvezmény százalék megadása kötelező!")]
     public decimal? DiscountPercentage { get; set; }
-    [Required(ErrorMessage = "A szobid kötelező!")]
-    public int? RoomId { get; set; }
     [Required(ErrorMessage = "A státusz megadása kötelező!")]
     public string? Status { get; set; }
 
