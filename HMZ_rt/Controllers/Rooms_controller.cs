@@ -115,7 +115,7 @@ namespace HMZ_rt.Controllers
         }
 
         [Authorize(Roles = "System,Admin,Recept")]
-        [HttpDelete("DeleteRoomById{Id}")]
+        [HttpDelete("DeleteRoomById/{Id}")]
         public async Task<ActionResult<Room>> DeleteRoomById(int Id)
         {
 
