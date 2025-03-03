@@ -106,6 +106,8 @@ public class promotionupdate
     public DateTime? EndDate { get; set; }
     [Required(ErrorMessage = "A a kedvezmény százalék megadása kötelező!")]
     public decimal? DiscountPercentage { get; set; }
+    [Required(ErrorMessage = "A szobid kötelező!")]
+    public int? RoomId { get; set; }
     [Required(ErrorMessage = "A státusz megadása kötelező!")]
     public string? Status { get; set; }
 
@@ -166,4 +168,33 @@ public class CreateGuest
     [Required(ErrorMessage = "A gender megadása kötelező!")]
     public string? Gender { get; set; }
     public int? UserId { get; set; }
+}
+
+
+
+
+public class UpdateGuest
+{
+    [Required(ErrorMessage = "Az elsőnév kötelező!")]
+    [MinLength(5, ErrorMessage = "Legalább 4 karakternek kell a családnévnek lennie!")]
+    public string? FirstName { get; set; }
+    [Required(ErrorMessage = "A második név kötelező!")]
+    [MinLength(5, ErrorMessage = "Legalább 4 karakternek kell lennie a kerewsztnévnek!")]
+    public string? LastName { get; set; }
+    [Required(ErrorMessage = "Az email megadása kötelező!")]
+    [EmailAddress(ErrorMessage = "Nem megfelelő email forma!")]
+    public string? Email { get; set; }
+    [Required(ErrorMessage = "Telefonszám megadása kötelező!")]
+    [Phone(ErrorMessage = "Nem megfelelő telefonszám formátum!")]
+    public string? PhoneNumber { get; set; }
+    [Required(ErrorMessage = "A cím megadása kötelező (utca,házszám)")]
+    public string? Address { get; set; }
+    [Required(ErrorMessage = "A város megadása kötelező")]
+    public string? City { get; set; }
+    [Required(ErrorMessage = "Az ország megadása kötelező!")]
+    public string? Country { get; set; }
+    [Required(ErrorMessage = "A születési dátum megadása kötelező")]
+    public DateTime? DateOfBirth { get; set; }
+    [Required(ErrorMessage = "A gender megadása kötelező!")]
+    public string? Gender { get; set; }
 }
