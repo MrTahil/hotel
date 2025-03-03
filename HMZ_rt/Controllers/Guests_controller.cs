@@ -1,4 +1,4 @@
-﻿using HMZ_rt.Models;
+using HMZ_rt.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -71,5 +71,51 @@ namespace HMZ_rt.Controllers
                 return StatusCode(500, ex);
             }
         }
+
+        [Authorize(Roles = "Base,Admin,Recept,System")]
+        [HttpPut("UpdateGuest/{id}")]
+        public async Task<ActionResult<Guest>> UpdateGuest(int id,UpdateGuest udto) {
+            try
+            {
+            var someone= await _context.Guests.FirstOrDefaultAsync(x=> x.GuestId == id);
+            if (someone != null) { 
+                someone.Address = udto.Address;
+                someone.Email = udto.Email;
+                someone.PhoneNumber = udto.PhoneNumber;
+                someone.LastName = udto.LastName;
+                    someone.FirstName = udto.FirstName;
+                    someone.City = udto.City;
+                    someone.Country = udto.Country;
+                    someone.DateOfBirth = udto.DateOfBirth;
+                    someone.Gender = udto.Gender;
+                    await _context.SaveChangesAsync();
+                    return StatusCode(201, "Sikeres frissítés");
+                }
+                return StatusCode(404, "Nem található, vagy hibás json");
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
+
+        }
+
+
+        [Authorize(Roles = "Admin,System,Recept")]
+        [HttpGet("GetcurrentGuests")]
+        public async Task<ActionResult<Guest>> Getpplcurrentlyhere()
+        {
+            try
+            {
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
+        }
+
     }
 }
