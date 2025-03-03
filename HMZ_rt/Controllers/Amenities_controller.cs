@@ -19,6 +19,10 @@ namespace HMZ_rt.Controllers
         [HttpPost("New aminiti")]
         public async Task<ActionResult<Amenity>> GenerateNewAmenitie( UploadAmenitiesForNewRoomDto upload)
         {
+            try
+            {
+
+
                 //mentés
                 var amenity = new Amenity
                 {
@@ -39,14 +43,23 @@ namespace HMZ_rt.Controllers
                     return StatusCode(201, amenity);
                 }
                 return BadRequest();
-            
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
         }
 
 
-        [HttpGet("GetAmenitiesForRoom{Id}")]
+        [HttpGet("GetAmenitiesForRoom/{Id}")]
 
         public async Task<ActionResult<IEnumerable<Amenity>>> GetResultsForRunner(int Id)
         {
+            try
+            {
+
+
             var results = await _context.Amenities.Where(x => x.RoomId == Id).ToListAsync();
 
             if (!results.Any())
@@ -54,7 +67,30 @@ namespace HMZ_rt.Controllers
                 return NotFound(new { message = "Elfelejtetted feltölteni ezt a szekciót!" });
             }
             return Ok(results);
-        }
+            }
+            catch (Exception ex)
+            {
 
+                return StatusCode(500, ex);
+            }
+        }
+        [HttpDelete("DeleteAmenity/{id}")]
+        public async Task<ActionResult<Amenity>> Deleteamenity(int id)
+        {
+            try
+            {
+                var deletee = await _context.Amenities.FirstOrDefaultAsync(x => x.AmenityId == id);
+                if (deletee != null) { 
+                _context.Amenities.Remove(deletee);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(201, "Sikeres törlés");
+                } return StatusCode(404, "Ez az adat nem található az adatbázisban!");
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
+        }
     }
 }
