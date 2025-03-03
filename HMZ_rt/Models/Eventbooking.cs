@@ -24,8 +24,8 @@ public partial class Eventbooking
     public DateTime? DateAdded { get; set; }
 
     public string? Notes { get; set; }
-
+    [JsonIgnore]
     public virtual Event Event { get; set; } = null!;
-
+    [JsonIgnore]
     public virtual Guest Guest { get; set; } = null!;
 }
