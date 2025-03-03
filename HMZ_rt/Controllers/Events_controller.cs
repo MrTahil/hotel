@@ -43,7 +43,7 @@ namespace HMZ_rt.Controllers
             try
             {
                 var existing = await _context.Events.FirstOrDefaultAsync(x => x.EventName == crtdto.EventName);
-                if (existing != null)
+                if (existing == null)
                 {
                     var news = new Event
                     {
@@ -106,7 +106,7 @@ namespace HMZ_rt.Controllers
             {
 
 
-            var dat = await _context.Events.Include(x => x.Eventbookings).Where(x=> x.EventDate >= DateTime.Now ).ToListAsync();
+            var dat = await _context.Events.Include(x => x.Eventbookings).Where(x=> x.EventDate > DateTime.Now.AddDays(-1) ).ToListAsync();
                 return StatusCode(201, dat);
             }
             catch (Exception ex)
