@@ -685,6 +685,7 @@ namespace HMZ_rt.Controllers
         public async Task<ActionResult<Useraccount>> setnewpass(string email, string pass)
         {
             var user = await _context.Useraccounts.FirstOrDefaultAsync(x => x.Email == email);
+
             if ( user != null)
             {
                 { if(user.Authenticationcode == "confirmed")
