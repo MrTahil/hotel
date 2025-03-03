@@ -1,0 +1,259 @@
+﻿using System;
+using System.IO;
+using System.Net;
+using System.Net.Mail;
+
+public class AuthEmailService
+{
+    private readonly string _smtpServer;
+    private readonly int _smtpPort;
+    private readonly string _smtpUsername;
+    private readonly string _smtpPassword;
+    private readonly string _fromEmail;
+    private readonly string _fromName;
+
+    public AuthEmailService(string smtpServer, int smtpPort, string smtpUsername, 
+                           string smtpPassword, string fromEmail, string fromName)
+    {
+        _smtpServer = smtpServer;
+        _smtpPort = smtpPort;
+        _smtpUsername = smtpUsername;
+        _smtpPassword = smtpPassword;
+        _fromEmail = fromEmail;
+        _fromName = fromName;
+    }
+
+    public void Send2FACode(string userName, string recipientEmail, string verificationCode, int expirationMinutes)
+    {
+        // Load the HTML template
+        string emailTemplate = File.ReadAllText("path/to/2fa-code.html");
+
+        // Replace placeholders with actual data
+        emailTemplate = emailTemplate.Replace("{UserName}", userName)
+                                    .Replace("{VerificationCode}", verificationCode)
+                                    .Replace("{ExpirationTime}", expirationMinutes.ToString())
+                                    .Replace("{CurrentYear}", DateTime.Now.Year.ToString())
+                                    .Replace("{CompanyName}", "Your Company Name")
+                                    .Replace("{CompanyAddress}", "123 Main St, City, State, ZIP")
+                                    .Replace("{PrivacyPolicyUrl}", "https://yourcompany.com/privacy")
+                                    .Replace("{TermsUrl}", "https://yourcompany.com/terms");
+
+        // Create the email message
+        MailMessage message = new MailMessage
+        {
+            From = new MailAddress(_fromEmail, _fromName),
+            Subject = "Biztonsági Kód - Az Ön hitelesítési kódja",
+            Body = emailTemplate,
+            IsBodyHtml = true,
+            Priority = MailPriority.High // Set high priority for 2FA emails
+        };
+        message.To.Add(recipientEmail);
+
+        // Send the email
+        using (SmtpClient client = new SmtpClient(_smtpServer, _smtpPort))
+        {
+            client.EnableSsl = true;
+            client.Credentials = new NetworkCredential(_smtpUsername, _smtpPassword);
+            client.Send(message);
+        }
+    }
+
+    // Helper method to generate a random verification code
+    public static string GenerateVerificationCode(int length = 6)
+    {
+        Random random = new Random();
+        string code = string.Empty;
+        
+        for (int i = 0; i < length; i++)
+        {
+            code += random.Next(0, 10).ToString();
+        }
+        
+        return code;
+    }
+}
+
+// Example usage:
+// var authService = new AuthEmailService("smtp.example.com", 587, "username", "password", "noreply@example.com", "Security Team");
+// string code = AuthEmailService.GenerateVerificationCode();
+// authService.Send2FACode("John Doe", "user@example.com", code, 15);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<-------------------------------------------------------------------------------------->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+using System;
+using System.IO;
+using System.Net;
+using System.Net.Mail;
+
+public class BookingEmailService
+{
+    private readonly string _smtpServer;
+    private readonly int _smtpPort;
+    private readonly string _smtpUsername;
+    private readonly string _smtpPassword;
+    private readonly string _fromEmail;
+    private readonly string _fromName;
+
+    public BookingEmailService(string smtpServer, int smtpPort, string smtpUsername, 
+                              string smtpPassword, string fromEmail, string fromName)
+    {
+        _smtpServer = smtpServer;
+        _smtpPort = smtpPort;
+        _smtpUsername = smtpUsername;
+        _smtpPassword = smtpPassword;
+        _fromEmail = fromEmail;
+        _fromName = fromName;
+    }
+
+    public void SendBookingConfirmation(BookingDetails booking, string recipientEmail)
+    {
+        // Load the HTML template
+        string emailTemplate = File.ReadAllText("path/to/booking-confirmation.html");
+
+        // Replace placeholders with actual data
+        emailTemplate = emailTemplate.Replace("{CustomerName}", booking.CustomerName)
+                                    .Replace("{BookingReference}", booking.Reference)
+                                    .Replace("{ServiceName}", booking.ServiceName)
+                                    .Replace("{BookingDateTime}", booking.DateTime.ToString("dddd, MMMM d, yyyy 'at' h:mm tt"))
+                                    .Replace("{Duration}", booking.Duration)
+                                    .Replace("{Location}", booking.Location)
+                                    .Replace("{ServicePrice}", booking.Price.ToString("C"))
+                                    .Replace("{Subtotal}", booking.Subtotal.ToString("C"))
+                                    .Replace("{Tax}", booking.Tax.ToString("C"))
+                                    .Replace("{Total}", booking.Total.ToString("C"))
+                                    .Replace("{PaymentMethod}", booking.PaymentMethod)
+                                    .Replace("{PaymentStatus}", booking.PaymentStatus)
+                                    .Replace("{SupportEmail}", "support@yourcompany.com")
+                                    .Replace("{SupportPhone}", "+1 (555) 123-4567")
+                                    .Replace("{ManageBookingUrl}", $"https://yourcompany.com/bookings/{booking.Reference}")
+                                    .Replace("{CurrentYear}", DateTime.Now.Year.ToString())
+                                    .Replace("{CompanyName}", "Your Company Name")
+                                    .Replace("{CompanyAddress}", "123 Main St, City, State, ZIP")
+                                    .Replace("{PrivacyPolicyUrl}", "https://yourcompany.com/privacy")
+                                    .Replace("{TermsUrl}", "https://yourcompany.com/terms");
+
+        // Handle additional items if any
+        string additionalItemsHtml = "";
+        foreach (var item in booking.AdditionalItems)
+        {
+            additionalItemsHtml += $@"
+                <tr>
+                    <td width=""70%"" style=""font-size: 16px; padding-top: 10px;"">{item.Name}</td>
+                    <td width=""30%"" style=""text-align: right; font-size: 16px; padding-top: 10px;"">{item.Price.ToString("C")}</td>
+                </tr>";
+        }
+        emailTemplate = emailTemplate.Replace("{AdditionalItems}", additionalItemsHtml);
+
+        // Create the email message
+        MailMessage message = new MailMessage
+        {
+            From = new MailAddress(_fromEmail, _fromName),
+            Subject = $"Booking Confirmation - {booking.Reference}",
+            Body = emailTemplate,
+            IsBodyHtml = true
+        };
+        message.To.Add(recipientEmail);
+
+        // Send the email
+        using (SmtpClient client = new SmtpClient(_smtpServer, _smtpPort))
+        {
+            client.EnableSsl = true;
+            client.Credentials = new NetworkCredential(_smtpUsername, _smtpPassword);
+            client.Send(message);
+        }
+    }
+}
+
+// Example booking details class
+public class BookingDetails
+{
+    public string CustomerName { get; set; }
+    public string Reference { get; set; }
+    public string ServiceName { get; set; }
+    public DateTime DateTime { get; set; }
+    public string Duration { get; set; }
+    public string Location { get; set; }
+    public decimal Price { get; set; }
+    public decimal Subtotal { get; set; }
+    public decimal Tax { get; set; }
+    public decimal Total { get; set; }
+    public string PaymentMethod { get; set; }
+    public string PaymentStatus { get; set; }
+    public List<AdditionalItem> AdditionalItems { get; set; } = new List<AdditionalItem>();
+}
+
+public class AdditionalItem
+{
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+}
