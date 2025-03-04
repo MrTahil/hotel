@@ -58,6 +58,45 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="TextWrapping" Value="Wrap"/>
         </Style>
+        <!-- Button Styles -->
+            <Style x:Key="BackButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="#9333EA"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Padding" Value="15,8"/>
+                <Setter Property="Margin" Value="20,0,0,10"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border CornerRadius="6" Background="{TemplateBinding Background}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="AddButtonStyle" TargetType="Button" BasedOn="{StaticResource BackButtonStyle}">
+                <Setter Property="Background" Value="#16A34A"/>
+            </Style>
+
+            <Style x:Key="EditButtonStyle" TargetType="Button" BasedOn="{StaticResource BackButtonStyle}">
+                <Setter Property="Background" Value="#2563EB"/>
+            </Style>
+
+            <Style x:Key="DeleteButtonStyle" TargetType="Button" BasedOn="{StaticResource BackButtonStyle}">
+                <Setter Property="Background" Value="#DC2626"/>
+            </Style>
+
+            <!-- Edit Panel Style -->
+            <Style x:Key="EditPanelStyle" TargetType="Border">
+                <Setter Property="Padding" Value="20"/>
+                <Setter Property="Margin" Value="20,0,20,10"/>
+                <Setter Property="Background" Value="White"/>
+                <Setter Property="CornerRadius" Value="8"/>
+            </Style>
+
+
     </Window.Resources>
 
     <Grid Background="#F5F5F5">
@@ -128,7 +167,7 @@
             </Border>
 
             <!-- Dolgozók kezelése -->
-            <Border Style="{StaticResource DashboardCard}" Background="#FAF5FF" MouseLeftButtonDown="Border_MouseLeftButtonDown_1">
+            <Border Style="{StaticResource DashboardCard}" Background="#FAF5FF" MouseLeftButtonDown="Staff_MouseLeftButtonDown_1">
                 <Border.RenderTransform>
                     <ScaleTransform/>
                 </Border.RenderTransform>
@@ -212,6 +251,20 @@
                 <StackPanel>
                     <TextBlock Text="&#xE789;" Style="{StaticResource DashboardIcon}" Foreground="#D97706"/>
                     <TextBlock Text="Promóciók kezelése" Style="{StaticResource DashboardTitle}" Foreground="#78350F"/>
+                </StackPanel>
+            </Border>
+            <!-- Vendégek kezelése -->
+            <Border Style="{StaticResource DashboardCard}" Background="#F0FDF4" MouseLeftButtonDown="Guest_MouseLeftButtonDown">
+                <Border.RenderTransform>
+                    <ScaleTransform/>
+                </Border.RenderTransform>
+                <StackPanel>
+                    <TextBlock Text="&#xE77B;" 
+                 Style="{StaticResource DashboardIcon}" 
+                 Foreground="#0D9488"/>
+                    <TextBlock Text="Vendégek kezelése" 
+                 Style="{StaticResource DashboardTitle}" 
+                 Foreground="#14532D"/>
                 </StackPanel>
             </Border>
 
@@ -702,6 +755,228 @@
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Status}" Value="Tervezett">
                                 <Setter Property="Background" Value="#FEF3C7" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+        </Grid>
+
+        <!-- Vendégek Container -->
+        <Grid x:Name="guestContainer" Grid.Row="1" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Back button and Action buttons -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Back button -->
+                <Button Grid.Column="0" 
+                Content="Vissza a főmenübe" 
+                HorizontalAlignment="Left" 
+                Margin="20,0,0,10" 
+                Padding="15,8" 
+                Background="#0D9488" 
+                Foreground="White" 
+                BorderThickness="0"
+                Click="GuestBackButton_Click">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="6"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <!-- Action buttons -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,20,10">
+                    <Button x:Name="AddGuestButton"
+                    Content="Új vendég" 
+                    Margin="5,0" 
+                    Padding="15,8" 
+                    Background="#16A34A" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    Click="AddGuestButton_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                    <Button x:Name="EditGuestButton"
+                    Content="Szerkesztés" 
+                    Margin="5,0" 
+                    Padding="15,8" 
+                    Background="#2563EB" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    Click="EditGuestButton_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                    <Button x:Name="DeleteGuestButton"
+                    Content="Törlés" 
+                    Margin="5,0" 
+                    Padding="15,8" 
+                    Background="#DC2626" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    Click="DeleteGuestButton_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Guest edit form -->
+            <Border x:Name="guestEditPanel" Grid.Row="1" Padding="20" Margin="20,0,20,10" Background="White" CornerRadius="8" Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- First name -->
+                    <StackPanel Grid.Column="0" Grid.Row="0" Margin="5">
+                        <TextBlock Text="Keresztnév" Margin="0,0,0,5"/>
+                        <TextBox x:Name="guestFirstNameTextBox" Padding="5"/>
+                    </StackPanel>
+
+                    <!-- Last name -->
+                    <StackPanel Grid.Column="1" Grid.Row="0" Margin="5">
+                        <TextBlock Text="Vezetéknév" Margin="0,0,0,5"/>
+                        <TextBox x:Name="guestLastNameTextBox" Padding="5"/>
+                    </StackPanel>
+
+                    <!-- Email -->
+                    <StackPanel Grid.Column="2" Grid.Row="0" Margin="5">
+                        <TextBlock Text="Email" Margin="0,0,0,5"/>
+                        <TextBox x:Name="guestEmailTextBox" Padding="5"/>
+                    </StackPanel>
+
+                    <!-- Phone number -->
+                    <StackPanel Grid.Column="3" Grid.Row="0" Margin="5">
+                        <TextBlock Text="Telefonszám" Margin="0,0,0,5"/>
+                        <TextBox x:Name="guestPhoneTextBox" Padding="5"/>
+                    </StackPanel>
+
+                    <!-- Address -->
+                    <StackPanel Grid.Column="0" Grid.Row="1" Margin="5">
+                        <TextBlock Text="Cím" Margin="0,0,0,5"/>
+                        <TextBox x:Name="guestAddressTextBox" Padding="5"/>
+                    </StackPanel>
+
+                    <!-- City -->
+                    <StackPanel Grid.Column="1" Grid.Row="1" Margin="5">
+                        <TextBlock Text="Város" Margin="0,0,0,5"/>
+                        <TextBox x:Name="guestCityTextBox" Padding="5"/>
+                    </StackPanel>
+
+                    <!-- Country -->
+                    <StackPanel Grid.Column="2" Grid.Row="1" Margin="5">
+                        <TextBlock Text="Ország" Margin="0,0,0,5"/>
+                        <TextBox x:Name="guestCountryTextBox" Padding="5"/>
+                    </StackPanel>
+
+                    <!-- Date of Birth -->
+                    <StackPanel Grid.Column="3" Grid.Row="1" Margin="5">
+                        <TextBlock Text="Születési dátum" Margin="0,0,0,5"/>
+                        <DatePicker x:Name="guestDateOfBirthPicker" Padding="5"/>
+                    </StackPanel>
+
+                    <!-- Gender -->
+                    <StackPanel Grid.Column="0" Grid.Row="2" Margin="5">
+                        <TextBlock Text="Nem" Margin="0,0,0,5"/>
+                        <ComboBox x:Name="guestGenderComboBox" Padding="5">
+                            <ComboBoxItem Content="Férfi"/>
+                            <ComboBoxItem Content="Nő"/>
+                            <ComboBoxItem Content="Egyéb"/>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <!-- Action buttons -->
+                    <StackPanel Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="2" 
+                      Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                        <Button x:Name="CancelGuestEditButton"
+                        Content="Mégse" 
+                        Margin="5,0" 
+                        Padding="15,8" 
+                        Background="#6B7280" 
+                        Foreground="White" 
+                        BorderThickness="0"
+                        Click="CancelGuestEditButton_Click">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+                        <Button x:Name="SaveGuestButton"
+                        Content="Mentés" 
+                        Margin="5,0" 
+                        Padding="15,8" 
+                        Background="#16A34A" 
+                        Foreground="White" 
+                        BorderThickness="0"
+                        Click="SaveGuestButton_Click">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Guest list -->
+            <ListView x:Name="guestsListView" Grid.Row="2" Margin="20">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="ID" DisplayMemberBinding="{Binding GuestId}" Width="60"/>
+                        <GridViewColumn Header="Vezetéknév" DisplayMemberBinding="{Binding LastName}" Width="120"/>
+                        <GridViewColumn Header="Keresztnév" DisplayMemberBinding="{Binding FirstName}" Width="120"/>
+                        <GridViewColumn Header="Email" DisplayMemberBinding="{Binding Email}" Width="200"/>
+                        <GridViewColumn Header="Telefonszám" DisplayMemberBinding="{Binding PhoneNumber}" Width="120"/>
+                        <GridViewColumn Header="Születési dátum" 
+                              DisplayMemberBinding="{Binding DateOfBirth, StringFormat='{}{0:yyyy.MM.dd}'}" Width="120"/>
+                        <GridViewColumn Header="Nem" DisplayMemberBinding="{Binding Gender}" Width="100"/>
+                    </GridView>
+                </ListView.View>
+
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Gender}" Value="Férfi">
+                                <Setter Property="Background" Value="#E0F2FE" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Gender}" Value="Nő">
+                                <Setter Property="Background" Value="#FCE7F3" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Gender}" Value="Egyéb">
+                                <Setter Property="Background" Value="#F3E8FF" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
