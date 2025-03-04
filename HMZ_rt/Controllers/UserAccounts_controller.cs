@@ -1,37 +1,50 @@
 using HMZ_rt.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
-using System.Net.Mail;
 using System.Net;
+using System.Net.Mail;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace HMZ_rt.Controllers
 {
     [Route("UserAccounts")]
     [ApiController]
-    public class UserAccounts_controller : Controller
+    public class UserAccounts_controller : ControllerBase
     {
         private readonly HmzRtContext _context;
         private readonly IConfiguration _configuration;
         private readonly TokenService _tokenService;
+        private readonly IWebHostEnvironment _env;
+        private readonly SmtpSettings _smtpSettings;
+
         private const int TwoFactorCodeExpiryDays = 1;
         private const string UnactivatedRole = "unactivated";
         private const string BaseRole = "Base";
         private const string ActivatedStatus = "activated";
 
-        public UserAccounts_controller(HmzRtContext context, IConfiguration configuration)
+        public UserAccounts_controller(
+            HmzRtContext context,
+            IConfiguration configuration,
+            IWebHostEnvironment env,
+            IOptions<SmtpSettings> smtpOptions,
+            TokenService tokenService)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            _tokenService = new TokenService(configuration);
+            _env = env ?? throw new ArgumentNullException(nameof(env));
+            _smtpSettings = smtpOptions.Value ?? throw new ArgumentNullException(nameof(smtpOptions));
+            _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
         }
+
+
+
+
 
         public static class PasswordHasher
         {
@@ -133,126 +146,51 @@ namespace HMZ_rt.Controllers
             return new Random().Next(100000, 999999).ToString("D6");
         }
 
-        private async Task Send2FACodeByEmail(string email, string code)
+
+
+
+        private async Task Send2FACode(string userName, string recipientEmail, string verificationCode)
         {
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(code))
-                throw new ArgumentException("Az email code nem lehet üres");
-
-            var subject = "HMZ regisztráció megerősítése";
-            var body = $@"<!DOCTYPE html>
-<html lang=""hu"">
-<head>
-    <meta charset=""UTF-8"">
-    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
-    <title>Biztonsági Kód</title>
-    <style>
-        body {{
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f8ff;
-        }}
-        .container {{
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 30px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }}
-        .header {{
-            text-align: center;
-            color: #1a73e8;
-            margin-bottom: 25px;
-        }}
-        .code {{
-            font-size: 32px;
-            font-weight: bold;
-            color: #1565c0;
-            text-align: center;
-            margin: 30px 0;
-            padding: 15px;
-            background-color: #e3f2fd;
-            border-radius: 5px;
-            letter-spacing: 3px;
-        }}
-        .footer {{
-            text-align: center;
-            margin-top: 30px;
-            color: #666666;
-            font-size: 12px;
-        }}
-        .note {{
-            color: #666;
-            font-size: 14px;
-            text-align: center;
-            margin: 20px 0;
-            font-style: italic;
-        }}
-        .warning {{
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-            margin: 20px 0;
-        }}
-        @media screen and (max-width: 600px) {{
-            .container {{
-                margin: 10px;
-                padding: 20px;
-            }}
-        }}
-    </style>
-</head>
-<body>
-    <div class=""container"">
-        <div class=""header"">
-            <h1>Biztonsági Kód</h1>
-        </div>
-        
-        <p>Kedves Felhasználónk!</p>
-        
-        <p>A bejelentkezéshez szükséges kétlépcsős azonosítás kódja:</p>
-        
-        <div class=""code"">{code}</div>
-        
-        <p class=""note"">Ez egy automatikusan generált üzenet, kérjük ne válaszoljon rá.</p>
-        
-        <p class=""warning"">Ha nem Ön kezdeményezte ezt a kérést, kérjük azonnal változtassa meg jelszavát!</p>
-        
-        <div class=""footer"">
-            <p>© 2025 [hmzrt.com] Minden jog fenntartva</p>
-            <p>Ügyfélszolgálat: [hmzrtkando@gmail.com] | [+36 70 1231212]</p>
-        </div>
-    </div>
-</body>
-</html>";
-
-            using var client = new SmtpClient(Server, Port)
-            {
-                EnableSsl = true,
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(Username, Password)
-            };
-
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress(FromEmail),
-                Subject = subject,
-                Body = body,
-                IsBodyHtml = true
-            };
-            mailMessage.To.Add(email);
-
             try
             {
-                await client.SendMailAsync(mailMessage);
+                string templatePath = Path.Combine(_env.ContentRootPath, "Html", "2fa.html");
+                string emailTemplate =  await System.IO.File.ReadAllTextAsync(templatePath);
+
+                emailTemplate = emailTemplate
+                    .Replace("{UserName}", userName)
+                    .Replace("{VerificationCode}", verificationCode)
+                    .Replace("{ExpirationTime}", "15")
+                    .Replace("{CurrentYear}", DateTime.Now.Year.ToString())
+                    .Replace("{CompanyName}", "HMZ RT")
+                    .Replace("{CompanyAddress}", "Palóczy László utca 3, Miskolc, BAZ, 3531")
+                    .Replace("{PrivacyPolicyUrl}", "https://yourcompany.com/privacy")
+                    .Replace("{TermsUrl}", "https://yourcompany.com/terms");
+
+                using MailMessage message = new()
+                {
+                    From = new MailAddress(_smtpSettings.FromEmail),
+                    Subject = "Biztonsági Kód - Az Ön hitelesítési kódja",
+                    Body = emailTemplate,
+                    IsBodyHtml = true,
+                    Priority = MailPriority.High
+                };
+                message.To.Add(recipientEmail);
+
+                using SmtpClient client = new(_smtpSettings.Server, _smtpSettings.Port)
+                {
+                    EnableSsl = true,
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential(_smtpSettings.Username, _smtpSettings.Password)
+                };
+
+                await client.SendMailAsync(message);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Sikertelen email küldés: {ex.Message}", ex);
+                throw new InvalidOperationException("Failed to send 2FA email", ex);
             }
         }
+
 
 
         [Authorize(Roles = "System,Admin")]
@@ -289,7 +227,7 @@ namespace HMZ_rt.Controllers
 
                 await _context.Useraccounts.AddAsync(user);
                 await _context.SaveChangesAsync();
-                await Send2FACodeByEmail(user.Email, twoFactorCode);
+                await Send2FACode(user.Username,user.Email, twoFactorCode);
 
                 return StatusCode(201, new { message = "Sikeres regisztráció, emailben elküldtük az aktiváló kódot" });
             }
@@ -515,99 +453,7 @@ namespace HMZ_rt.Controllers
                 if (await _context.Useraccounts.AnyAsync(x => x.Email == email))
                 {
                     string code = Generate2FACode();
-                    if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(code))
-                        throw new ArgumentException("Az email code nem lehet se null se üres");
-
-
-                    var subject = "HMZ elfeljtett jelszó";
-                    var body = $@"<!DOCTYPE html>
-<html lang=""hu"">
-<head>
-    <meta charset=""UTF-8"">
-    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
-    <title>Biztonsági Kód</title>
-    <style>
-        body {{
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f8ff;
-        }}
-        .container {{
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 30px;
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }}
-        .header {{
-            text-align: center;
-            color: #1a73e8;
-            margin-bottom: 25px;
-        }}
-        .code {{
-            font-size: 32px;
-            font-weight: bold;
-            color: #1565c0;
-            text-align: center;
-            margin: 30px 0;
-            padding: 15px;
-            background-color: #e3f2fd;
-            border-radius: 5px;
-            letter-spacing: 3px;
-        }}
-        .footer {{
-            text-align: center;
-            margin-top: 30px;
-            color: #666666;
-            font-size: 12px;
-        }}
-        .note {{
-            color: #666;
-            font-size: 14px;
-            text-align: center;
-            margin: 20px 0;
-            font-style: italic;
-        }}
-        .warning {{
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-            margin: 20px 0;
-        }}
-        @media screen and (max-width: 600px) {{
-            .container {{
-                margin: 10px;
-                padding: 20px;
-            }}
-        }}
-    </style>
-</head>
-<body>
-    <div class=""container"">
-        <div class=""header"">
-            <h1>Biztonsági Kód</h1>
-        </div>
-        
-        <p>Kedves Felhasználónk!</p>
-        
-        <p>A jelszó visszaállításához szükséges kódja:</p>
-        
-        <div class=""code"">{code}</div>
-        
-        <p class=""note"">Ez egy automatikusan generált üzenet, kérjük ne válaszoljon rá.</p>
-        
-        <p class=""warning"">Ha nem Ön kezdeményezte ezt a kérést, kérjük azonnal változtassa meg jelszavát!</p>
-        
-        <div class=""footer"">
-            <p>© 2025 [hmzrt.com] Minden jog fenntartva</p>
-            <p>Ügyfélszolgálat: [hmzrtkando@gmail.com] | [+36 70 1231212]</p>
-        </div>
-    </div>
-</body>
-</html>";
+                    
                     var user = await _context.Useraccounts
                         .FirstOrDefaultAsync(x => x.Email == email);
 
@@ -615,45 +461,12 @@ namespace HMZ_rt.Controllers
                         return NotFound(new { message = "Felhasználó nem található!" });
                     user.Authenticationcode = code;
                     user.Authenticationexpire = DateTime.Now.AddDays(TwoFactorCodeExpiryDays);
+                    await Send2FACode(user.Username,email,code);
                     _context.Useraccounts.Update(user);
                     await _context.SaveChangesAsync();
 
-                    using var client = new SmtpClient(Server, Port)
-                    {
-                        EnableSsl = true,
-                        UseDefaultCredentials = false,
-                        Credentials = new NetworkCredential(Username,Password)
-                    };
-
-                    var mailMessage = new MailMessage
-                    {
-                        From = new MailAddress(FromEmail),
-                        Subject = subject,
-                        Body = body,
-                        IsBodyHtml = true
-                    };
-                    mailMessage.To.Add(email);
-                    
-                    try
-                    {
-                        await client.SendMailAsync(mailMessage);
-                        return StatusCode(418);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new Exception($"Sikertelen Email küldés: {ex.Message}", ex);
-                    }
                 }
-
-
                 return StatusCode(418);
-
-
-
-
-
-
-
             }
             catch (Exception ex)
             {
@@ -711,10 +524,7 @@ namespace HMZ_rt.Controllers
             private readonly string Username = "hmzrtkando@gmail.com";
             private readonly string Password = "kcrv dzii jrum sabt";
             private readonly string FromEmail = "hmzservices@hmz.hu";
-        
 
-
-
-
+       
     }
 }

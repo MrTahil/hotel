@@ -60,6 +60,10 @@ namespace HMZ_rt
             });
             builder.Services.AddScoped<TokenService>();
 
+
+
+            builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+            builder.Services.AddScoped<TokenService>();
             // Add services to the container.
 
             builder.Services.AddControllers();
