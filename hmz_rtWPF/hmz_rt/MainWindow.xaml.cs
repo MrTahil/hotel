@@ -647,15 +647,18 @@ namespace RoomListApp
                 }
 
 
-                if (!int.TryParse(DiscountPercentageTextBox.Text, out int discountPercentage) || discountPercentage < 0 || discountPercentage > 100)
+                if (StartDatePicker.SelectedDate > EndDatePicker.SelectedDate)
                 {
-                    MessageBox.Show("Kérjük, adjon meg érvényes kedvezmény százalékot (0-100)!", "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("A kezdő dátum nem lehet későbbi, mint a befejező dátum!",
+                        "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                if (StartDatePicker.SelectedDate > EndDatePicker.SelectedDate)
+                if (!int.TryParse(DiscountPercentageTextBox.Text, out int discountPercentage) ||
+                    discountPercentage < 0 || discountPercentage > 100)
                 {
-                    MessageBox.Show("A kezdő dátum nem lehet későbbi, mint a befejező dátum!", "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Kérjük, adjon meg érvényes kedvezmény százalékot (0-100)!",
+                        "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -681,7 +684,11 @@ namespace RoomListApp
                         EndDate = EndDatePicker.SelectedDate,
                         DiscountPercentage = discountPercentage,
                         TermsConditions = TermsConditionsTextBox.Text,
-                        Status = selectedStatus
+                        Status = selectedStatus,
+                        // Csak akkor adjuk hozzá, ha nem üres
+                        RoomId = string.IsNullOrWhiteSpace(RoomIdTextBox.Text)
+                        ? (int?)null
+                        : int.Parse(RoomIdTextBox.Text)
                     };
 
                     await UpdatePromotion(currentEditPromotionId, updateDto);
@@ -783,6 +790,7 @@ namespace RoomListApp
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private void ClearPromotionFormFields()
         {
@@ -903,6 +911,6 @@ namespace RoomListApp
         public int? DiscountPercentage { get; set; }
         public string TermsConditions { get; set; }
         public string Status { get; set; }
-
+        public int? RoomId { get; set; } // Nullable
     }
 }
