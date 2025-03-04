@@ -1,0 +1,97 @@
+﻿<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biztonsági Kód</title>
+    <style>
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+            }
+
+            .content {
+                padding: 10px !important;
+            }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fa; color: #333333;">
+    <!-- Main Container -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);">
+        <!-- Header -->
+        <tr>
+            <td style="padding: 0;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td style="background-color: #4f46e5; padding: 30px 20px; text-align: center;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">Biztonsági Kód</h1>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Content -->
+        <tr>
+            <td style="padding: 30px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td>
+                            <p style="margin-top: 0; font-size: 16px; line-height: 1.5;">Kedves <strong>{UserName}</strong>,</p>
+                            <p style="font-size: 16px; line-height: 1.5;">Kétlépcsős hitelesítési kódot kért a fiókjához. Kérjük, használja az alábbi kódot a bejelentkezés befejezéséhez:</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Verification Code -->
+        <tr>
+            <td style="padding: 0 20px 30px; text-align: center;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 300px; margin: 0 auto;">
+                    <tr>
+                        <td style="background-color: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; text-align: center;">
+                            <p style="font-size: 32px; font-weight: 700; letter-spacing: 5px; margin: 0; color: #111827; font-family: monospace;">{VerificationCode}</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Additional Information -->
+        <tr>
+            <td style="padding: 0 20px 30px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td>
+                            <p style="font-size: 16px; line-height: 1.5; margin-top: 0;">Ez a kód <strong>{ExpirationTime} percig</strong> érvényes, és csak egyszeri használatra alkalmas.</p>
+                            <p style="font-size: 16px; line-height: 1.5;">Ha nem Ön kérte ezt a kódot, kérjük, hagyja figyelmen kívül ezt az e-mailt, vagy vegye fel a kapcsolatot az ügyfélszolgálatunkkal a biztonság érdekében.</p>
+                            <div style="margin: 25px 0; border-top: 1px solid #e5e7eb;"></div>
+                            <p style="font-size: 14px; color: #6b7280; line-height: 1.5;">Biztonsági tipp: Soha ne ossza meg ezt a kódot senkivel, beleértve a {CompanyName} munkatársait is. Csapatunk soha nem kéri Öntől ezt a kódot.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+            <td style="padding: 0;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td style="background-color: #f3f4f6; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0; font-size: 14px; color: #6b7280;">&copy; {CurrentYear} {CompanyName}. Minden jog fenntartva.</p>
+                            <p style="margin: 10px 0 0; font-size: 14px; color: #6b7280;">{CompanyAddress}</p>
+                            <p style="margin: 10px 0 0; font-size: 14px;">
+                                <a href="{PrivacyPolicyUrl}" style="color: #4f46e5; text-decoration: none; margin: 0 10px;">Adatvédelmi Szabályzat</a>
+                                <a href="{TermsUrl}" style="color: #4f46e5; text-decoration: none; margin: 0 10px;">Felhasználási Feltételek</a>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

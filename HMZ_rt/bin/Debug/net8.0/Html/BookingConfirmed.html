@@ -1,0 +1,194 @@
+﻿<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foglalás Visszaigazolása</title>
+    <style>
+        /* Some email clients will respect these styles */
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+            }
+
+            .content {
+                padding: 10px !important;
+            }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7fa; color: #333333;">
+    <!-- Main Container -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);">
+        <!-- Header -->
+        <tr>
+            <td style="padding: 0;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td style="background-color: #4f46e5; padding: 30px 20px; text-align: center;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">Foglalás Megerősítve!</h1>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Content -->
+        <tr>
+            <td style="padding: 30px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td>
+                            <p style="margin-top: 0; font-size: 16px; line-height: 1.5;">Kedves <strong>{CustomerName}</strong>,</p>
+                            <p style="font-size: 16px; line-height: 1.5;">Köszönjük a foglalását! Örömmel értesítjük, hogy a foglalását sikeresen feldolgoztuk.</p>
+                            <p style="font-size: 16px; line-height: 1.5;">Az Ön foglalási hivatkozási száma: <strong style="color: #4f46e5;">{BookingReference}</strong></p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Booking Details -->
+        <tr>
+            <td style="padding: 0 20px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb;">
+                    <tr>
+                        <td style="background-color: #f3f4f6; padding: 15px; border-bottom: 1px solid #e5e7eb;">
+                            <h2 style="margin: 0; font-size: 18px; color: #111827;">Foglalás Részletei</h2>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 20px;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td width="50%" style="padding-bottom: 10px; vertical-align: top;">
+                                        <p style="margin: 0; color: #6b7280; font-size: 14px;">Szolgáltatás</p>
+                                        <p style="margin: 5px 0 0; font-weight: 600; font-size: 16px;">{ServiceName}</p>
+                                    </td>
+                                    <td width="50%" style="padding-bottom: 10px; vertical-align: top;">
+                                        <p style="margin: 0; color: #6b7280; font-size: 14px;">Dátum és Idő</p>
+                                        <p style="margin: 5px 0 0; font-weight: 600; font-size: 16px;">{BookingDateTime}</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="50%" style="padding-bottom: 10px; vertical-align: top;">
+                                        <p style="margin: 0; color: #6b7280; font-size: 14px;">Időtartam</p>
+                                        <p style="margin: 5px 0 0; font-weight: 600; font-size: 16px;">{Duration}</p>
+                                    </td>
+                                    <td width="50%" style="padding-bottom: 10px; vertical-align: top;">
+                                        <p style="margin: 0; color: #6b7280; font-size: 14px;">Helyszín</p>
+                                        <p style="margin: 5px 0 0; font-weight: 600; font-size: 16px;">{Location}</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Receipt -->
+        <tr>
+            <td style="padding: 0 20px 30px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb;">
+                    <tr>
+                        <td style="background-color: #f3f4f6; padding: 15px; border-bottom: 1px solid #e5e7eb;">
+                            <h2 style="margin: 0; font-size: 18px; color: #111827;">Számla</h2>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 20px;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td style="padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td width="70%" style="font-size: 16px;">{ServiceName}</td>
+                                                <td width="30%" style="text-align: right; font-size: 16px;">{ServicePrice}</td>
+                                            </tr>
+                                            <!-- Additional items can be added here -->
+                                            {AdditionalItems}
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding-top: 15px;">
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td width="70%" style="font-size: 16px; color: #6b7280;">Részösszeg</td>
+                                                <td width="30%" style="text-align: right; font-size: 16px;">{Subtotal}</td>
+                                            </tr>
+                                            <tr>
+                                                <td width="70%" style="font-size: 16px; color: #6b7280; padding-top: 5px;">ÁFA</td>
+                                                <td width="30%" style="text-align: right; font-size: 16px; padding-top: 5px;">{Tax}</td>
+                                            </tr>
+                                            <tr>
+                                                <td width="70%" style="font-size: 18px; font-weight: 600; padding-top: 10px;">Végösszeg</td>
+                                                <td width="30%" style="text-align: right; font-size: 18px; font-weight: 600; padding-top: 10px; color: #4f46e5;">{Total}</td>
+                                            </tr>
+                                            <tr>
+                                                <td width="70%" style="font-size: 14px; color: #6b7280; padding-top: 5px;">Fizetési Mód</td>
+                                                <td width="30%" style="text-align: right; font-size: 14px; padding-top: 5px;">{PaymentMethod}</td>
+                                            </tr>
+                                            <tr>
+                                                <td width="70%" style="font-size: 14px; color: #6b7280; padding-top: 5px;">Fizetési Állapot</td>
+                                                <td width="30%" style="text-align: right; font-size: 14px; padding-top: 5px; color: #10b981; font-weight: 600;">{PaymentStatus}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Additional Information -->
+        <tr>
+            <td style="padding: 0 20px 30px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td>
+                            <h3 style="font-size: 18px; margin-top: 0; margin-bottom: 15px;">Mi a következő lépés?</h3>
+                            <p style="font-size: 16px; line-height: 1.5; margin-top: 0;">Foglalását kezelheti a portálunkon keresztül, vagy vegye fel velünk a kapcsolatot, ha bármilyen változtatásra van szüksége.</p>
+                            <p style="font-size: 16px; line-height: 1.5;">Ha bármilyen kérdése van, kérjük, ne habozzon kapcsolatba lépni velünk a <a href="mailto:{SupportEmail}" style="color: #4f46e5; text-decoration: none;">{SupportEmail}</a> e-mail címen vagy hívjon minket a következő telefonszámon: {SupportPhone}.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- CTA Button -->
+        <tr>
+            <td style="padding: 0 20px 30px; text-align: center;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto;">
+                    <tr>
+                        <td style="background-color: #4f46e5; border-radius: 6px; padding: 12px 25px;">
+                            <a href="{ManageBookingUrl}" style="color: #ffffff; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block;">Foglalás Kezelése</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+            <td style="padding: 0;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                        <td style="background-color: #f3f4f6; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0; font-size: 14px; color: #6b7280;">&copy; {CurrentYear} {CompanyName}. Minden jog fenntartva.</p>
+                            <p style="margin: 10px 0 0; font-size: 14px; color: #6b7280;">{CompanyAddress}</p>
+                            <p style="margin: 10px 0 0; font-size: 14px;">
+                                <a href="{PrivacyPolicyUrl}" style="color: #4f46e5; text-decoration: none; margin: 0 10px;">Adatvédelmi Szabályzat</a>
+                                <a href="{TermsUrl}" style="color: #4f46e5; text-decoration: none; margin: 0 10px;">Felhasználási Feltételek</a>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
