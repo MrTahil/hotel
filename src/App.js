@@ -10,6 +10,8 @@ import Programs from './components/Programs'
 import './App.css';
 import './index.css';
 import Footer from './components/Footer';
+import Services from './components/Services';
+
 
 function App() {
     return (
@@ -23,7 +25,8 @@ function App() {
                         <Route path="/rolunk" element={<About/>} />
                         <Route path="/kapcsolat" element={<Contact/>} />
                         <Route path="/programok" element={<Programs/>} />
-                        <Route path="/szolgaltatasok" element={<Gallery/>} />
+                        <Route path="/szolgaltatasok" element={<Services />} />
+
                     </Routes>
                 </div>
                 <Footer/>
