@@ -51,7 +51,7 @@ namespace HMZ_rt.Controllers
                                         .Replace("{BookingReference}", Convert.ToString(booking.BookingId))
                                         .Replace("{BookingDateTime}", booking.BookingDate.ToString())
                                         .Replace("{Duration}", Convert.ToString(booking.CheckInDate - booking.CheckOutDate))
-                                        .Replace("{Location}", $"{Convert.ToString( roomdata.RoomNumber)}-es sz·m˙ szoba")
+                                        .Replace("{Location}", $"{Convert.ToString( roomdata.RoomNumber)}-es sz√°m√∫ szoba")
                                         .Replace("{Subtotal}", (booking.TotalPrice / Convert.ToDecimal(1.73)).ToString())
                                         .Replace("{Tax}", (booking.TotalPrice /Convert.ToDecimal(1.27)).ToString())
                                         .Replace("{Total}", booking.TotalPrice.ToString())
@@ -62,7 +62,7 @@ namespace HMZ_rt.Controllers
                                         .Replace("{ManageBookingUrl}", $"https://yourcompany.com/bookings/{Convert.ToString(booking.BookingId)}")
                                         .Replace("{CurrentYear}", DateTime.Now.Year.ToString())
                                         .Replace("{CompanyName}", "HMZ RT")
-                                        .Replace("{CompanyAddress}", "PalÛczy L·szlÛ utca 3, Miskolc, BAZ, 3531")
+                                        .Replace("{CompanyAddress}", "Pal√≥czy L√°szl√≥ utca 3, Miskolc, BAZ, 3531")
                                         .Replace("{PrivacyPolicyUrl}", "https://yourcompany.com/privacy")
                                         .Replace("{TermsUrl}", "https://yourcompany.com/terms");
 
@@ -140,7 +140,7 @@ namespace HMZ_rt.Controllers
                 var guests = _context.Guests.FirstOrDefaultAsync(x => x.GuestId == booking.GuestId);
                 if (guests == null)
                 {
-                    return StatusCode(404, "VendÈg megad·sa sz¸ksÈges foglal·s elıtt");
+                    return StatusCode(404, "Vend√©g megad√°sa sz√ºks√©ges foglal√°s el≈ëtt");
                 }
                 var user = _context.Useraccounts.FirstOrDefaultAsync(x => x.UserId == guests.Result.UserId);
 
@@ -149,11 +149,11 @@ namespace HMZ_rt.Controllers
                     BookingId = booking.BookingId,
                     PaymentDate = DateTime.MinValue,
                     Amount = 15000,
-                    PaymentMethod ="",
-                    TransactionId ="",
-                    Status ="not paid yet",
+                    PaymentMethod ="Fizet√©sn√©l friss√ºl",
+                    TransactionId ="0",
+                    Status ="Fizetetlen",
                     Currency = "Huf",
-                    PaymentNotes ="elfogyott",
+                    PaymentNotes ="Fizet√©sre v√°r",
                     DateAdded = DateTime.Now
                 };
                 await _context.Payments.AddAsync(payment);
@@ -163,17 +163,17 @@ namespace HMZ_rt.Controllers
                 Payment paymentdata = _context.Payments.FirstOrDefaultAsync(x => x.BookingId == booking.BookingId).Result;
                 if (guestdata == null || roomdata == null || paymentdata ==null)
                 {
-                    return StatusCode(404, "Nincs lÈtrehozott guest a felhaszn·lÛhoz, vagy nem lÈtezı szob·ra hivatkozt·l");
+                    return StatusCode(404, "Nincs l√©trehozott guest a felhaszn√°l√≥hoz, vagy nem l√©tez≈ë szob√°ra hivatkozt√°l");
                 }
 
-                SendBookingConfirmation(booking, user.Result.Email, guestdata,roomdata,paymentdata);
+                await SendBookingConfirmation(booking, user.Result.Email, guestdata,roomdata,paymentdata);
 
 
 
 
 
 
-                return StatusCode(201, "Sikeres foglal·s");
+                return StatusCode(201, "Sikeres foglal√°s");
                 
             }
             return BadRequest();
