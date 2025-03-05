@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace HMZ_rt.Models;
 
@@ -24,6 +25,6 @@ public partial class Payment
     public string? PaymentNotes { get; set; }
 
     public DateTime? DateAdded { get; set; }
-
+    [JsonIgnore]
     public virtual Booking Booking { get; set; } = null!;
 }
