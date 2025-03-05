@@ -6,6 +6,7 @@ import About from './components/About';
 import Gallery from './components/Gallery';
 import Contact from './components/Contact';
 import Rooms from './components/Rooms';
+import Programs from './components/Programs'
 import './App.css';
 import './index.css';
 import Footer from './components/Footer';
@@ -21,7 +22,7 @@ function App() {
                         <Route path="/szobak" element={<Rooms/>} />
                         <Route path="/rolunk" element={<About/>} />
                         <Route path="/kapcsolat" element={<Contact/>} />
-                        <Route path="/programok" element={<Gallery/>} />
+                        <Route path="/programok" element={<Programs/>} />
                         <Route path="/szolgaltatasok" element={<Gallery/>} />
                     </Routes>
                 </div>
