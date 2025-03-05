@@ -40,9 +40,14 @@ namespace HMZ_rt.Controllers
                 {
                     if (!_context.Guests.Contains(guestss))
                     {
-                        await _context.Guests.AddAsync(guestss);
-                        await _context.SaveChangesAsync();
-                        return StatusCode(201, "Sikeres vendég mentés!");
+                        Useraccount test = _context.Useraccounts.FirstOrDefaultAsync(x => x.UserId == crtdto.UserId).Result;
+                        if (_context.Useraccounts.Contains(test))
+                        {
+                            await _context.Guests.AddAsync(guestss);
+                            await _context.SaveChangesAsync();
+                            return StatusCode(201, "Sikeres vendég mentés!");
+                        }return StatusCode(404, "Nem található felhasználó");
+                        
                     }
                     return StatusCode(400, "Ez a vendég már hozzá van csatolva a profilhoz");
                 }
@@ -51,7 +56,7 @@ namespace HMZ_rt.Controllers
             catch (Exception ex)
             {
 
-                return StatusCode(500, ex);
+                return StatusCode(500, ex.Message);
             }
         }
 
