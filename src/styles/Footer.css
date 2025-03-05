@@ -1,0 +1,52 @@
+/* Gomb stílusa */
+.button-style {
+    background-color: #fff;
+    border: 1px solid #ffffff;
+    padding: 5px;
+    position: relative;
+    width: 7.2em;
+    height: 2em;
+    transition: 0.5s;
+    font-size: 17px;
+    border-radius: 0.4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    text-decoration: none; /* Távolítsuk el az alapértelmezett aláhúzást */
+  }
+  
+  .button-style p {
+    position: absolute;
+    top: 0.4em;
+    left: 1.2em;
+    margin: 0;
+    padding: 0;
+    transition: 0.5s;
+    color: #2f00ff;
+  }
+  
+  .button-style svg {
+    position: absolute;
+    top: 0.45em;
+    right: 0.5em;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+    transition: 0.5s;
+    height: 1em;
+    fill: #fff;
+  }
+  
+  .button-style:hover p {
+    left: 0.6em;
+    color: #fff;
+  }
+  
+  .button-style:hover svg {
+    opacity: 1;
+  }
+  
+  .button-style:hover {
+    background-color: #0026ff;
+  }
