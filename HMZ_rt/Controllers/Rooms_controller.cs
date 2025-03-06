@@ -163,9 +163,21 @@ namespace HMZ_rt.Controllers
 
                 return StatusCode(500,ex);
             }
-        } 
-            
+        }
 
+        [HttpGet("Searchwithparams")]
+        public async Task<ActionResult<Room>> GetroomsWithparams(Getrooms gtdto)
+        {
+            var availableRooms = _context.Rooms
+     .Include(x => x.Bookings)
+     .Where(room => !room.Bookings.Any(b =>
+         ((gtdto.CheckInDate >= b.CheckInDate && gtdto.CheckInDate < b.CheckOutDate) ||
+          (gtdto.CheckOutDate > b.CheckInDate && gtdto.CheckOutDate <= b.CheckOutDate) ||
+          (gtdto.CheckInDate <= b.CheckInDate && gtdto.CheckOutDate >= b.CheckOutDate))));
+
+
+            return StatusCode(200, availableRooms.Where(x => x.Capacity >= gtdto.GuestNumber));
+        }
         
     }
 }
