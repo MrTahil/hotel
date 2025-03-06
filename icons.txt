@@ -1,0 +1,30 @@
+import React from 'react';
+import { FaWifi, FaSnowflake, FaGlassMartiniAlt, FaTv, FaRegEdit, FaCoffee, FaConciergeBell, FaHotTub, FaSpa, FaTrello, FaWater, FaLock, FaIron, FaTshirt, FaBell, FaBed, FaBaby, FaMerge, FaAdjust } from 'react-icons/fa';
+
+function RoomAmenities() {
+  return (
+    <div>
+      <div><FaWifi /> Wi-Fi</div>
+      <div><FaSnowflake /> Légkondicionáló</div>
+      <div><FaGlassMartiniAlt /> Minibár</div>
+      <div><FaTv /> Smart TV</div>
+      <div><FaRegEdit /> Íróasztal</div>
+      <div><FaCoffee /> Kávéfőző</div>
+      <div><FaConciergeBell /> Szobaszerviz</div>
+      <div><FaHotTub /> Jakuzzi</div>
+      <div><FaSpa /> Szauna</div>
+      <div><FaTrello /> Terasz</div>
+      <div><FaWater /> Tengerre néző kilátás</div>
+      <div><FaLock /> Széf</div>
+      <div><FaIron /> Vasaló</div>
+      <div><FaTshirt /> Köntös és papucs</div>
+      <div><FaBell /> Ébresztőóra</div>
+      <div><FaBed /> Ágyazás</div>
+      <div><FaBaby /> Babaágy</div>
+      <div><FaMerge /> Összenyitható szoba</div>
+      <div><FaAdjust /> Szabályozható fényerő</div>
+    </div>
+  );
+}
+
+export default RoomAmenities;
