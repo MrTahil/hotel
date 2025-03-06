@@ -165,7 +165,7 @@ namespace HMZ_rt.Controllers
             }
         }
 
-        [HttpGet("Searchwithparams")]
+        [HttpPut("Searchwithparams")]
         public async Task<ActionResult<Room>> GetroomsWithparams(Getrooms gtdto)
         {
             var availableRooms = _context.Rooms
