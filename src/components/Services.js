@@ -1,8 +1,6 @@
 import React from 'react';
 import '../styles/Services.css';
-import roomservice from '../img/roomservice.png'; // Kép importálása
-import restaurant from '../img/restaurant.png'; // Kép importálása
-import wellness from '../img/wellness.png'; // Kép importálása
+
 
 function Services() {
     const services = [
@@ -10,19 +8,19 @@ function Services() {
             id: 1,
             name: 'Wellness és Spa',
             description: 'Kényeztető masszázsok, szaunák és wellness szolgáltatások várják a vendégeket, hogy feltöltődjenek és ellazuljanak. Professionális terapeutáink segítenek a teljes relaxációban.',
-            image: wellness,
+            image: '../img/wellness.png',
         },
         {
             id: 2,
             name: 'Éttermek',
             description: 'Prémium minőségű ételek és italok különleges atmoszférában. Séfjeink kreatív fogásai és a helyi specialitások garantálják, hogy minden étkezés felejthetetlen élmény legyen.',
-            image: restaurant,
+            image: '../img/restaurant.png',
         },
         {
             id: 3,
             name: 'Szobaszerviz',
             description: 'Non-stop szobaszerviz a kényelmed érdekében. Bármikor rendelhetsz friss ételeket, italokat vagy igénybe vehetsz egyéb szolgáltatásokat, hogy a tartózkodásod még kényelmesebb legyen.',
-            image: roomservice,
+            image: '../img/roomservice.png',
         },
     ];
 

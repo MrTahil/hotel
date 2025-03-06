@@ -1,8 +1,5 @@
 import React from 'react';
 import '../styles/serprog.css';
-import jogahegyen from '../img/jogahegyen.png'; // Kép importálása
-import bor from '../img/bor.png'
-import tour from '../img/tour.png'
 
 function Programs() {
     const programs = [
@@ -10,19 +7,19 @@ function Programs() {
             id: 1,
             name: 'Jóga a hegyekben',
             description: 'Reggeli jógaórák a friss levegőn, gyönyörű kilátással.',
-            image: jogahegyen, // Helyi kép használata
+            image: '../img/jogahegyen.png', // Helyi kép használata
         },
         {
             id: 2,
             name: 'Borkóstoló',
             description: 'Kóstold meg a helyi borászatok legjobb borait.',
-            image: bor, // Példa kép URL
+            image: '../img/bor.png', // Példa kép URL
         },
         {
             id: 3,
             name: 'Túrázás',
             description: 'Vezetett túrák a környező hegyekben és erdőkben.',
-            image: tour, // Példa kép URL
+            image: '../img/tour.png', // Példa kép URL
         },
     ];
 
