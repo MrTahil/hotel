@@ -35,7 +35,19 @@ namespace HMZ_rt.Models
     public string? Password { get; set; }
 }
     public record UpdateRoomDto(string? Status);
-    public record CreateBookingDto(int RoomId, int GuestId, DateTime? CheckInDate, DateTime? CheckOutDate, int NumberOfGuests, decimal? TotalPrice, string? Status, string? PaymentStatus);
+    public class CreateBookingDto {
+        public int GuestId { get; set; }
+        public DateTime? CheckInDate { get; set; }
+        public DateTime? CheckOutDate { get; set; }
+        public int NumberOfGuests { get; set; }
+        public string PaymentMethod { get; set; }
+        
+}
+
+
+
+
+
 public class NewStaffDto
 {
    public string? FirstName { get; set; }

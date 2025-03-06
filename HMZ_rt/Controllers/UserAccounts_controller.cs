@@ -518,13 +518,6 @@ namespace HMZ_rt.Controllers
             return user != null && user.RefreshTokenExpiryTime > DateTime.UtcNow;
         }
 
-
-            private readonly string Server = "smtp.gmail.com";
-            private readonly int Port = 587;
-            private readonly string Username = "hmzrtkando@gmail.com";
-            private readonly string Password = "kcrv dzii jrum sabt";
-            private readonly string FromEmail = "hmzservices@hmz.hu";
-
        
     }
 }
