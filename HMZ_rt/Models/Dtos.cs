@@ -42,6 +42,13 @@ namespace HMZ_rt.Models
         public int NumberOfGuests { get; set; }
         public string PaymentMethod { get; set; }
         
+}   
+public class UpdateBooking
+{
+    public DateTime? CheckInDate { get; set; }
+    public DateTime? CheckOutDate { get; set; }
+    public int NumberOfGuests { get; set; }
+
 }
 
 

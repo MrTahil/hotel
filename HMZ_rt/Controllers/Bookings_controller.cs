@@ -140,9 +140,17 @@ namespace HMZ_rt.Controllers
             {
                 return StatusCode(404, "Nem található felhasználó a vendéghez");
             }
+                
+            var existingBooking = await _context.Bookings
+                .AnyAsync(b => b.RoomId == roomid &&
+                              ((crtbooking.CheckInDate >= b.CheckInDate && crtbooking.CheckInDate < b.CheckOutDate) ||
+                               (crtbooking.CheckOutDate > b.CheckInDate && crtbooking.CheckOutDate <= b.CheckOutDate) ||
+                               (crtbooking.CheckInDate <= b.CheckInDate && crtbooking.CheckOutDate >= b.CheckOutDate)));
 
-
-
+            if (existingBooking)
+            {
+                return StatusCode(409, "A szoba foglalt a kiválasztott időszakra");
+            }
 
 
             var booking = new Booking
@@ -157,9 +165,13 @@ namespace HMZ_rt.Controllers
                 NumberOfGuests = crtbooking.NumberOfGuests,
                 Status = "Jóváhagyva"
             };
+
+            if (roomData.Capacity < crtbooking.NumberOfGuests)
+            {
+                return StatusCode(400, "Túl sok fővel próbáltál foglalni");
+            }
             await _context.Bookings.AddAsync(booking);
             await _context.SaveChangesAsync();
-
             var payment = new Payment
             {
                 BookingId = booking.BookingId,
@@ -174,10 +186,8 @@ namespace HMZ_rt.Controllers
             };
             await _context.Payments.AddAsync(payment);
             await _context.SaveChangesAsync();
-
             await SendBookingConfirmation(booking, user.Email, guestData, roomData, payment);
 
-            
             return StatusCode(201, "Sikeres foglalás");
         }
 
@@ -185,7 +195,7 @@ namespace HMZ_rt.Controllers
 
 
 
-
+        [Authorize("Base,Admin,System,Recept")]
         [HttpGet("BookingsByUserId")]
         public async Task<ActionResult<Booking>> GetUserBookings(int UserIdd)
         {
@@ -197,6 +207,53 @@ namespace HMZ_rt.Controllers
             return BadRequest();
 
 
+        }
+        [Authorize("Base,Admin,System,Recept")]
+        [HttpDelete("DeleteBooking/{id}")]
+        public async Task<ActionResult<Booking>> DeleteBooking(int id)
+        {
+            try
+            {
+                var books =await _context.Bookings.FirstOrDefaultAsync(x => x.BookingId == id);
+                if (books != null)
+                {
+                    _context.Bookings.Remove(books);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(201, "Sikeres törlés");
+                } return StatusCode(404, "Nem található a foglalás");
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
+        }
+        [Authorize("Base,Admin,System,Recept")]
+        [HttpPut("UpdateBooking/{id}")]
+        public async Task<ActionResult<Booking>> UpdateBookingByid(int id, UpdateBooking udto)
+        {
+            try
+            {
+                var updatedbook =await _context.Bookings.FirstOrDefaultAsync(x => x.BookingId == id);
+                if (updatedbook != null)
+                {
+                    updatedbook.CheckInDate = udto.CheckInDate;
+                    updatedbook.CheckOutDate = udto.CheckOutDate;
+                    updatedbook.NumberOfGuests = udto.NumberOfGuests;
+                }
+                else
+                {
+                    return BadRequest();
+                }
+                 _context.Bookings.Update(updatedbook);
+                await _context.SaveChangesAsync();
+                return StatusCode(201, "Sikeres mentés");
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
         }
 
 
