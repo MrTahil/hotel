@@ -39,7 +39,7 @@ function Hero() {
                         <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
                             <div class="h-48 md:h-64 bg-cover bg-center" style={{backgroundImage: `url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3')`}}></div>
                             <div class="p-4 md:p-6">
-                                <h3 class="text-xl md:text-2xl font-bold text-blue-900 mb-2">Executive Suite</h3>
+                                <h3 class="text-xl md:text-2xl font-bold text-blue-900 mb-2">Páros Szoba</h3>
                                 <p class="text-blue-700">Páratlan elegancia</p>
                             </div>
                         </div>
@@ -47,7 +47,7 @@ function Hero() {
                         <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
                             <div class="h-48 md:h-64 bg-cover bg-center" style={{backgroundImage: `url('https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-4.0.3')`}}></div>
                             <div class="p-4 md:p-6">
-                                <h3 class="text-xl md:text-2xl font-bold text-blue-900 mb-2">Elnöki Lakosztály</h3>
+                                <h3 class="text-xl md:text-2xl font-bold text-blue-900 mb-2">Királyi Lakosztály</h3>
                                 <p class="text-blue-700">A tökéletesség új szintje</p>
                             </div>
                         </div>

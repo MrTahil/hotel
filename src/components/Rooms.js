@@ -47,11 +47,11 @@ function RoomCard() {
         <form className="bg-white rounded-xl shadow-lg p-6 md:p-8 mb-8 md:mb-16" onSubmit={(e) => e.preventDefault()}>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Bejelentkezés</label>
+              <label className="block text-sm font-medium text-gray-700">Érkezés</label>
               <input type="date" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
             </div>
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Kijelentkezés</label>
+              <label className="block text-sm font-medium text-gray-700">Távozás</label>
               <input type="date" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
             </div>
             <div className="space-y-2">
@@ -93,13 +93,13 @@ function RoomCard() {
                   <div className="space-y-1">
                     <p><strong>Szobaszám:</strong> {room.roomNumber || 'N/A'}</p>
                     <p><strong>Befogadó képesség:</strong> {room.capacity ? `${room.capacity} fő` : 'N/A'}</p>
-                    <p><strong>Ár / Éj:</strong> {room.pricePerNight ? `${room.pricePerNight} Ft` : 'N/A'}</p>
+                    <p><strong>Ár / Éj / Fő:</strong> {room.pricePerNight ? `${room.pricePerNight} Ft` : 'N/A'}</p>
                     <p><strong>Státusz:</strong> {room.status || 'No data'}</p>
                     <p><strong>Emelet:</strong> {room.floorNumber || 'N/A'}</p>
                     <p><strong>Kényelmi szolgáltatások:</strong> {room.amenities || 'No data'}</p>
                   </div>
                   <button className="w-full bg-blue-800 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-4">
-                    Részletek
+                    Foglalás
                   </button>
                 </div>
               </div>
