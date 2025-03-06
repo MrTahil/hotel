@@ -57,7 +57,6 @@ function VerificationModal({ email, onClose, onSuccess }) {
                 />
             </label>
             <button onClick={handleVerify}>Kód ellenőrzése</button>
-            <button className="close-btn" onClick={onClose}>Bezárás</button>
         </div>
     );
 }

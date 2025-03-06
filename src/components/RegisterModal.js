@@ -11,8 +11,34 @@ function RegisterModal({ onClose, switchToLogin }) {
     const [successMessage, setSuccessMessage] = useState('');
     const [showVerification, setShowVerification] = useState(false);
 
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const validatePassword = (password) => {
+        const passwordRegex = /^(?=.*[A-Z])(?=.*[\W_]).{6,}$/;
+        return passwordRegex.test(password);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setErrorMessage('');
+
+        if (!username) {
+            setErrorMessage('A felhasználónév nem lehet üres!');
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            setErrorMessage('Érvénytelen e-mail cím!');
+            return;
+        }
+
+        if (!validatePassword(password)) {
+            setErrorMessage('A jelszónak legalább 6 karakterből kell állnia, tartalmaznia kell egy nagybetűt és egy speciális karaktert!');
+            return;
+        }
 
         if (password !== confirmPassword) {
             setErrorMessage('A jelszavak nem egyeznek!');
@@ -30,7 +56,7 @@ function RegisterModal({ onClose, switchToLogin }) {
 
             if (response.ok) {
                 setSuccessMessage('Sikeres regisztráció! Kérlek ellenőrizd az emailed és add meg a kódot!');
-                setTimeout(() => setShowVerification(true), 2000);  // Várakozás után megjeleníti a kódot
+                setTimeout(() => setShowVerification(true), 2000);
             } else {
                 setErrorMessage(data.message || 'Hiba történt a regisztráció során!');
             }
@@ -41,7 +67,7 @@ function RegisterModal({ onClose, switchToLogin }) {
 
     const handleVerificationSuccess = () => {
         setShowVerification(false);
-        switchToLogin();  // Átvált a bejelentkezési oldalra
+        switchToLogin();
     };
 
     return (
