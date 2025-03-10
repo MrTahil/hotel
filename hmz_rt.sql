@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Már 10. 10:11
+-- Létrehozás ideje: 2025. Már 10. 10:32
 -- Kiszolgáló verziója: 10.4.20-MariaDB
 -- PHP verzió: 7.3.29
 
@@ -47,23 +47,13 @@ CREATE TABLE `amenities` (
 --
 
 INSERT INTO `amenities` (`amenity_name`, `description`, `amenity_id`, `availability`, `date_added`, `room_id`, `status`, `icon`, `category`, `priority`) VALUES
-('TV', 'Szép lapos', 1, 'Elérhető', NULL, 4, 'Működőképes', 'string', 'Technológia', 3),
-('TV', 'Szép lapos', 2, 'Elérhető', NULL, 2, 'Működőképes', 'string', 'Technológia', 3),
-('TV', 'Szép lapos', 3, 'Nem elérhető', NULL, 10, 'Javítás alatt', 'string', 'Technológia', 3),
-('Törölközők', 'fürdő és kéztörlők', 4, 'Elérhető', NULL, 10, 'Rendben', 'string', 'Alapvető kényelem', 3),
-('Fürdőszobai kellékek', 'szappan, sampon, zuhanyzselé, fogkefe, fogkrém', 5, 'Elérhető', NULL, 10, 'Rendben', 'string', 'Alapvető kényelem', 4),
-('Ingyenes Wi-Fi', 'A szobához modern kornak megfelelő sebességű internet tartozik', 6, 'Elérhető', NULL, 10, 'Rendben', 'string', 'Technológia', 5),
-('Minibár', 'italok, snackek', 7, 'Elérhető', NULL, 10, 'Rendben', 'string', 'Technológia', 2),
-('Szobai széf', 'Széf', 8, 'Elérhető', NULL, 10, 'Rendben', 'string', 'Technológia', 3),
-('Hidromasszázs', 'Masszázs', 9, 'Elérhető', NULL, 10, 'Rendben', 'string', 'Wellness', 2),
-('Wellness törölköző', 'Törölközők wellness részlegekhez', 10, 'Elérhető', NULL, 10, 'Rendben', 'string', 'Wellness', 2),
-('Különleges párnák', 'memóriahabos, anatómiai', 11, 'Elérhető', NULL, 10, 'Rendben', 'string', 'Extra', 1),
-('Ingyenes reggeli', '-', 12, 'Elérhető', NULL, 10, 'Rendben', 'string', 'Extra', 3),
-('Ingyenes reggeli', '-', 13, 'Elérhető', NULL, 2, 'Rendben', 'string', 'Extra', 3),
-('Napi takarítás', '-', 14, 'Elérhető', NULL, 2, 'Rendben', 'string', 'Takarítás', 5),
-('Törölköző csere', '-', 15, 'Elérhető', NULL, 2, 'Rendben', 'string', 'Takarítás', 5),
-('Ágynemű csere', '-', 16, 'Elérhető', NULL, 2, 'Rendben', 'string', 'Takarítás', 5),
-('Mosoda szolgáltatás', 'mosás, vasalás', 17, 'Elérhető', NULL, 2, 'Rendben', 'string', 'Takarítás', 3);
+('TV', 'Szép lapos', 3, 'Nem elérhető', NULL, 10, 'Javítás alatt', '<FaTv />', 'Technológia', 3),
+('Törölközők', 'fürdő és kéztörlők', 4, 'Elérhető', NULL, 10, 'Rendben', '<FaTshirt />', 'Alapvető kényelem', 3),
+('Ingyenes Wi-Fi', 'A szobához modern kornak megfelelő sebességű internet tartozik', 6, 'Elérhető', NULL, 10, 'Rendben', '<FaWifi />', 'Technológia', 5),
+('Minibár', 'italok, snackek', 7, 'Elérhető', NULL, 10, 'Rendben', '<FaGlassMartiniAlt />', 'Technológia', 2),
+('Szobai széf', 'Széf', 8, 'Elérhető', NULL, 10, 'Rendben', '<FaLock />', 'Technológia', 3),
+('Szauna', 'Törölközők wellness részlegekhez', 10, 'Elérhető', NULL, 10, 'Rendben', '<FaSpa />', 'Wellness', 2),
+('Különleges párnák', 'memóriahabos, anatómiai', 11, 'Elérhető', NULL, 10, 'Rendben', '<FaBed />', 'Extra', 1);
 
 -- --------------------------------------------------------
 
@@ -89,8 +79,7 @@ CREATE TABLE `bookings` (
 --
 
 INSERT INTO `bookings` (`room_id`, `booking_id`, `guest_id`, `check_in_date`, `check_out_date`, `number_of_guests`, `total_price`, `booking_date`, `status`, `payment_status`) VALUES
-(20, 4, 3, '2025-03-12', '2025-03-15', 1, '195', '2025-03-10', 'Jóváhagyva', 'Fizetésre vár'),
-(2, 5, 4, '2025-03-10', '2025-03-12', 1, '120', '2025-03-10', 'Jóváhagyva', 'Fizetésre vár');
+(20, 4, 3, '2025-03-12', '2025-03-15', 1, '195', '2025-03-10', 'Jóváhagyva', 'Fizetésre vár');
 
 -- --------------------------------------------------------
 
@@ -278,8 +267,7 @@ CREATE TABLE `payments` (
 --
 
 INSERT INTO `payments` (`payment_id`, `booking_id`, `payment_date`, `amount`, `payment_method`, `transaction_id`, `status`, `currency`, `payment_notes`, `date_added`) VALUES
-(3, 4, '0001-01-01', '195', 'string', '0', 'Fizetésre vár', 'Huf', '', '2025-03-10'),
-(4, 5, '0001-01-01', '120', 'string', '0', 'Fizetésre vár', 'Huf', '', '2025-03-10');
+(3, 4, '0001-01-01', '195', 'string', '0', 'Fizetésre vár', 'Huf', '', '2025-03-10');
 
 -- --------------------------------------------------------
 
@@ -299,13 +287,6 @@ CREATE TABLE `promotions` (
   `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
   `date_added` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
-
---
--- A tábla adatainak kiíratása `promotions`
---
-
-INSERT INTO `promotions` (`promotion_id`, `promotion_name`, `description`, `start_date`, `terms_conditions`, `end_date`, `discount_percentage`, `room_id`, `status`, `date_added`) VALUES
-(1, 'Tavaszi Akció - Maradj 3 éjszakát, fizess 2-t!', 'Élvezd a tavaszi frissességet és pihenj hosszabb ideig, miközben kedvezményt kapsz! Ha 3 éjszakát foglalsz, csak 2 éjszakát kell fizetned.', '2025-03-10', 'A promóció 2025. március 10-től április 30-ig érvényes. Minimum 3 éjszaka foglalása szükséges. A kedvezmény más akciókkal nem vonható össze.', '2025-04-30', '33', 2, 'Aktív', '2025-03-10');
 
 -- --------------------------------------------------------
 
@@ -396,7 +377,6 @@ CREATE TABLE `rooms` (
 --
 
 INSERT INTO `rooms` (`room_type`, `room_id`, `room_number`, `capacity`, `price_per_night`, `status`, `description`, `floor_number`, `amenities`, `date_added`, `images`) VALUES
-('Deluxe', 2, '101', 2, '120', 'Available', 'Luxus szoba king-size ággyal és lenyűgöző városi kilátással.', 1, NULL, '2025-01-14', '../img/deluxe_room.png'),
 ('Standard', 3, '102', 2, '80', 'Occupied', 'Kényelmes szoba queen-size ággyal és modern kényelmi szolgáltatásokkal.', 1, NULL, '2025-01-14', '../img/standard_room.png'),
 ('Suite', 4, '201', 4, '250', 'Available', 'Tágas lakosztály külön nappali résszel, ideális családok számára.', 2, NULL, '2025-01-14', '../img/suite_room.png'),
 ('Single', 5, '301', 1, '50', 'Under Maintenance', 'Kényelmes egyágyas szoba alapvető kényelmi szolgáltatásokkal, ideális egyedül utazók számára.', 3, NULL, '2025-01-14', '../img/single_room.png'),
@@ -497,7 +477,8 @@ CREATE TABLE `taxrates` (
   `date_added` date DEFAULT NULL,
   `country` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
   `state` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `city` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL
+  `city` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `payment_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 -- --------------------------------------------------------
@@ -530,7 +511,7 @@ CREATE TABLE `useraccounts` (
 INSERT INTO `useraccounts` (`username`, `user_id`, `password`, `email`, `role`, `RefreshToken`, `RefreshTokenExpiryTime`, `status`, `date_created`, `last_login`, `date_updated`, `notes`, `authenticationcode`, `authenticationexpire`) VALUES
 ('Tahil', 3, 'hte+RnleAunUji+Bx3f7EPd8Nd2nOw82PS50E6kPBYOBYQ+8JUKlArMigzjZ1CM3', 'hiloczkit@kkszki.hu', 'System', 'OMPldv1Ly9+hEyF2hIEoAXEHpWJhBg2gtr216ykVIJM=', '2025-02-21', 'string', '2025-01-16', '2025-01-16', '2025-01-16', 'string', '111111', '2025-02-13'),
 ('asdasdasd', 4, '3S4JbEmjI0P69HENXf0Wp+u8teCyLgUPrKSYOMLRv91+ixql4MlfM4TWgeaJLIU/', 'hiloczkit12@kkszki.hu', 'Base', 'qiNaBxchix/fw5p2I6Bq0odyQmSo0CmQawB6MiPqVFc=', '2025-01-23', 'string', '2025-01-16', '2025-01-16', '2025-01-16', 'string', '111111', '2025-02-13'),
-('a_Beto', 5, 'u04oCPhO+K7Y9IBD+zsk/QP/jWnVhlEdpOyaWFAzwQjPvc0kubpehqBt15MLXuVv', 'monostorir@kkszki.hu', 'System', 'lkQYlCIWvOBUW1QqELBVvdr1ht2WI0LZvL4SR7VoPiE=', '2025-03-17', 'string', '2025-02-14', '2025-02-14', '2025-02-14', 'string', 'activated', '2025-02-20'),
+('a_Beto', 5, 'u04oCPhO+K7Y9IBD+zsk/QP/jWnVhlEdpOyaWFAzwQjPvc0kubpehqBt15MLXuVv', 'monostorir@kkszki.hu', 'System', 'JqvjKG+yaMYoaZOHM9KSWNCO5uJCwGLd5hrviSgSLLs=', '2025-03-17', 'string', '2025-02-14', '2025-02-14', '2025-02-14', 'string', 'activated', '2025-02-20'),
 ('Bozsgai', 6, '48RL9zaxFrXNx3WQWwmErDml2gjVS/8N8ess8G65a4mMWb4VBkZqDJDsEki62YpY', 'monostori@kkszki.hu', 'Base', NULL, NULL, NULL, '2025-02-21', '2025-02-21', '2025-02-21', NULL, 'activated', '2025-02-21');
 
 --
@@ -671,7 +652,8 @@ ALTER TABLE `staff`
 -- A tábla indexei `taxrates`
 --
 ALTER TABLE `taxrates`
-  ADD PRIMARY KEY (`tax_rate_id`);
+  ADD PRIMARY KEY (`tax_rate_id`),
+  ADD KEY `payment` (`payment_id`);
 
 --
 -- A tábla indexei `useraccounts`
@@ -817,45 +799,45 @@ ALTER TABLE `useraccounts`
 -- Megkötések a táblához `amenities`
 --
 ALTER TABLE `amenities`
-  ADD CONSTRAINT `Amenities_fk5` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`);
+  ADD CONSTRAINT `Amenities_fk5` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
 -- Megkötések a táblához `bookings`
 --
 ALTER TABLE `bookings`
-  ADD CONSTRAINT `Bookings_fk0` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`),
+  ADD CONSTRAINT `Bookings_fk0` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   ADD CONSTRAINT `Bookings_fk2` FOREIGN KEY (`guest_id`) REFERENCES `guests` (`guest_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
 -- Megkötések a táblához `eventbookings`
 --
 ALTER TABLE `eventbookings`
-  ADD CONSTRAINT `EventBookings_fk1` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`),
-  ADD CONSTRAINT `EventBookings_fk2` FOREIGN KEY (`guest_id`) REFERENCES `guests` (`guest_id`);
+  ADD CONSTRAINT `EventBookings_fk1` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  ADD CONSTRAINT `EventBookings_fk2` FOREIGN KEY (`guest_id`) REFERENCES `guests` (`guest_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
 -- Megkötések a táblához `feedback`
 --
 ALTER TABLE `feedback`
-  ADD CONSTRAINT `Feedback_fk9` FOREIGN KEY (`guest_id`) REFERENCES `guests` (`guest_id`);
+  ADD CONSTRAINT `Feedback_fk9` FOREIGN KEY (`guest_id`) REFERENCES `guests` (`guest_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Megkötések a táblához `guests`
 --
 ALTER TABLE `guests`
-  ADD CONSTRAINT `fk_guests_useraccounts` FOREIGN KEY (`user_id`) REFERENCES `useraccounts` (`user_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_guests_useraccounts` FOREIGN KEY (`user_id`) REFERENCES `useraccounts` (`user_id`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 --
 -- Megkötések a táblához `invoices`
 --
 ALTER TABLE `invoices`
-  ADD CONSTRAINT `Invoices_fk2` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`booking_id`);
+  ADD CONSTRAINT `Invoices_fk2` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`booking_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
 -- Megkötések a táblához `notifications`
 --
 ALTER TABLE `notifications`
-  ADD CONSTRAINT `Notifications_fk8` FOREIGN KEY (`user_id`) REFERENCES `useraccounts` (`user_id`);
+  ADD CONSTRAINT `Notifications_fk8` FOREIGN KEY (`user_id`) REFERENCES `useraccounts` (`user_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
 -- Megkötések a táblához `payments`
@@ -867,27 +849,33 @@ ALTER TABLE `payments`
 -- Megkötések a táblához `promotions`
 --
 ALTER TABLE `promotions`
-  ADD CONSTRAINT `Promotions_fk7` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`);
+  ADD CONSTRAINT `Promotions_fk7` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
 -- Megkötések a táblához `reviews`
 --
 ALTER TABLE `reviews`
-  ADD CONSTRAINT `Reviews_fk2` FOREIGN KEY (`guest_id`) REFERENCES `guests` (`guest_id`),
-  ADD CONSTRAINT `Reviews_fk3` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`);
+  ADD CONSTRAINT `Reviews_fk2` FOREIGN KEY (`guest_id`) REFERENCES `guests` (`guest_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `Reviews_fk3` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
 -- Megkötések a táblához `roominventory`
 --
 ALTER TABLE `roominventory`
-  ADD CONSTRAINT `RoomInventory_fk8` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`);
+  ADD CONSTRAINT `RoomInventory_fk8` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
 -- Megkötések a táblához `roommaintenance`
 --
 ALTER TABLE `roommaintenance`
-  ADD CONSTRAINT `RoomMaintenance_fk1` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`),
-  ADD CONSTRAINT `RoomMaintenance_fk5` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`staff_id`);
+  ADD CONSTRAINT `RoomMaintenance_fk1` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  ADD CONSTRAINT `RoomMaintenance_fk5` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`staff_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+--
+-- Megkötések a táblához `taxrates`
+--
+ALTER TABLE `taxrates`
+  ADD CONSTRAINT `taxrates_ibfk_1` FOREIGN KEY (`payment_id`) REFERENCES `payments` (`payment_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
