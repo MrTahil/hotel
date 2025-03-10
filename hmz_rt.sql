@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Már 10. 10:32
+-- Létrehozás ideje: 2025. Már 10. 10:40
 -- Kiszolgáló verziója: 10.4.20-MariaDB
 -- PHP verzió: 7.3.29
 
@@ -377,23 +377,23 @@ CREATE TABLE `rooms` (
 --
 
 INSERT INTO `rooms` (`room_type`, `room_id`, `room_number`, `capacity`, `price_per_night`, `status`, `description`, `floor_number`, `amenities`, `date_added`, `images`) VALUES
-('Standard', 3, '102', 2, '80', 'Occupied', 'Kényelmes szoba queen-size ággyal és modern kényelmi szolgáltatásokkal.', 1, NULL, '2025-01-14', '../img/standard_room.png'),
-('Suite', 4, '201', 4, '250', 'Available', 'Tágas lakosztály külön nappali résszel, ideális családok számára.', 2, NULL, '2025-01-14', '../img/suite_room.png'),
-('Single', 5, '301', 1, '50', 'Under Maintenance', 'Kényelmes egyágyas szoba alapvető kényelmi szolgáltatásokkal, ideális egyedül utazók számára.', 3, NULL, '2025-01-14', '../img/single_room.png'),
-('Family', 6, '302', 5, '180', 'Available', 'Családi szoba több ággyal és játszótérrel a gyermekek számára.', 3, NULL, '2025-01-14', '../img/family_room.png'),
-('Queen', 9, '106', 2, '120', 'Available', 'Kényelmes queen-size ágyas szoba modern felszereltséggel.', 1, NULL, '2025-01-14', '../img/queen_room.png'),
-('King', 10, '207', 2, '180', 'Occupied', 'Tágas szoba luxus king-size ággyal és panorámás kilátással.', 2, NULL, '2025-01-14', '../img/king_room.png'),
-('Family Room', 11, '520', 5, '300', 'Available', 'Családi szoba két hálótérrel és gyerekbarát felszereléssel.', 5, NULL, '2025-03-06', '../img/family_room.png\n'),
-('Deluxe', 12, '202', 3, '180', 'Occupied', 'Tágas szoba extra kényelmi szolgáltatásokkal és erkéllyel.', 2, NULL, '2025-03-06', '../img/deluxe_room.png'),
-('Suite', 13, '305', 4, '250', 'Available', 'Luxus lakosztály panorámás kilátással és privát jacuzzival.', 3, NULL, '2025-03-06', '../img/suite_room.png\n'),
-('Single', 14, '410', 1, '80', 'Under Maintenance', 'Egyszerű, de kényelmes egyágyas szoba üzleti utazók számára.', 4, NULL, '2025-03-06', '../img/single_room.png\n'),
-('Deluxe', 15, '203', 3, '190', 'Available', 'Tágas szoba erkéllyel és luxus felszereltséggel.', 2, NULL, '2025-03-06', '../img/deluxe_room.png'),
-('Suite', 16, '306', 4, '260', 'Occupied', 'Luxus lakosztály privát jacuzzival és panorámás kilátással.', 3, NULL, '2025-03-06', '../img/suite_room.png\n'),
-('Penthouse Suite', 17, '601', 6, '500', 'Occupied', 'Luxus penthouse lakosztály privát terasszal és jacuzzival.', 6, NULL, '2025-03-06', '../img/suite_room.png\n'),
-('Presidential Suite', 18, '702', 6, '800', 'Available', 'Elegáns elnöki lakosztály hatalmas nappalival és privát szaunával.', 7, NULL, '2025-03-06', '../img/suite_room.png\n'),
-('Economy', 19, '110', 2, '75', 'Occupied', 'Egyszerű, de kényelmes szoba alacsonyabb árkategóriában.', 1, NULL, '2025-03-06', '../img/default_image.png\n'),
-('Deluxe', 20, '205', 3, '195', 'Under Maintance', 'Deluxe szoba extra kényelmi szolgáltatásokkal és kilátással a városra.', 2, NULL, '2025-03-06', '../img/deluxe_room.png'),
-('Suite', 21, '307', 4, '275', 'Available', 'Luxus lakosztály tágas nappalival és jacuzzival.', 3, NULL, '2025-03-06', '../img/suite_room.png\n');
+('Standard', 3, '102', 2, '35000', 'Occupied', 'Kényelmes szoba queen-size ággyal és modern kényelmi szolgáltatásokkal.', 1, NULL, '2025-01-14', '../img/standard_room.png'),
+('Suite', 4, '201', 4, '100000', 'Available', 'Tágas lakosztály külön nappali résszel, ideális családok számára.', 2, NULL, '2025-01-14', '../img/suite_room.png'),
+('Single', 5, '301', 1, '15000', 'Under Maintenance', 'Kényelmes egyágyas szoba alapvető kényelmi szolgáltatásokkal, ideális egyedül utazók számára.', 3, NULL, '2025-01-14', '../img/single_room.png'),
+('Family', 6, '302', 5, '60000', 'Available', 'Családi szoba több ággyal és játszótérrel a gyermekek számára.', 3, NULL, '2025-01-14', '../img/family_room.png'),
+('Queen', 9, '106', 2, '50000', 'Available', 'Kényelmes queen-size ágyas szoba modern felszereltséggel.', 1, NULL, '2025-01-14', '../img/queen_room.png'),
+('King', 10, '207', 2, '70000', 'Occupied', 'Tágas szoba luxus king-size ággyal és panorámás kilátással.', 2, NULL, '2025-01-14', '../img/king_room.png'),
+('Family', 11, '520', 5, '60000', 'Available', 'Családi szoba két hálótérrel és gyerekbarát felszereléssel.', 5, NULL, '2025-03-06', '../img/family_room.png\n'),
+('Deluxe', 12, '202', 3, '45000', 'Occupied', 'Tágas szoba extra kényelmi szolgáltatásokkal és erkéllyel.', 2, NULL, '2025-03-06', '../img/deluxe_room.png'),
+('Suite', 13, '305', 4, '100000', 'Available', 'Luxus lakosztály panorámás kilátással és privát jacuzzival.', 3, NULL, '2025-03-06', '../img/suite_room.png\n'),
+('Single', 14, '410', 1, '15000', 'Under Maintenance', 'Egyszerű, de kényelmes egyágyas szoba üzleti utazók számára.', 4, NULL, '2025-03-06', '../img/single_room.png\n'),
+('Deluxe', 15, '203', 3, '45000', 'Available', 'Tágas szoba erkéllyel és luxus felszereltséggel.', 2, NULL, '2025-03-06', '../img/deluxe_room.png'),
+('Suite', 16, '306', 4, '100000', 'Occupied', 'Luxus lakosztály privát jacuzzival és panorámás kilátással.', 3, NULL, '2025-03-06', '../img/suite_room.png\n'),
+('Penthouse Suite', 17, '601', 6, '150000', 'Occupied', 'Luxus penthouse lakosztály privát terasszal és jacuzzival.', 6, NULL, '2025-03-06', '../img/suite_room.png\n'),
+('Presidential Suite', 18, '702', 6, '200000', 'Available', 'Elegáns elnöki lakosztály hatalmas nappalival és privát szaunával.', 7, NULL, '2025-03-06', '../img/suite_room.png\n'),
+('Economy', 19, '110', 2, '18000', 'Occupied', 'Egyszerű, de kényelmes szoba alacsonyabb árkategóriában.', 1, NULL, '2025-03-06', '../img/default_image.png\n'),
+('Deluxe', 20, '205', 3, '45000', 'Under Maintance', 'Deluxe szoba extra kényelmi szolgáltatásokkal és kilátással a városra.', 2, NULL, '2025-03-06', '../img/deluxe_room.png'),
+('Suite', 21, '307', 4, '100000', 'Available', 'Luxus lakosztály tágas nappalival és jacuzzival.', 3, NULL, '2025-03-06', '../img/suite_room.png\n');
 
 -- --------------------------------------------------------
 
