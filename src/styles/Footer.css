@@ -1,20 +1,26 @@
 /* Gomb stílusa */
 .button-style {
-    background-color: #fff;
-    border: 1px solid #ffffff;
-    padding: 5px;
-    position: relative;
-    width: 7.2em;
-    height: 2em;
-    transition: 0.5s;
-    font-size: 17px;
-    border-radius: 0.4em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    text-decoration: none; /* Távolítsuk el az alapértelmezett aláhúzást */
-  }
+  background-color: #fff;
+  border: 1px solid #ffffff;
+  padding: 5px;
+  position: relative;
+  width: 7.2em;
+  height: 2em;
+  transition: 0.5s;
+  font-size: 17px;
+  border-radius: 0.4em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-decoration: none; /* Távolítsuk el az alapértelmezett aláhúzást */
+  line-height: 0.9 ; /* A szöveg sormagasságának beállítása */
+}
+
+.button-style span {
+  display: inline-block;
+  vertical-align: middle; /* Biztosítja, hogy a szöveg középen legyen */
+}
   
   .button-style p {
     position: absolute;
@@ -23,7 +29,7 @@
     margin: 0;
     padding: 0;
     transition: 0.5s;
-    color: #2f00ff;
+    color: #1e40af;
   }
   
   .button-style svg {

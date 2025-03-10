@@ -31,7 +31,7 @@ function Navbar() {
             <nav className="sticky top-0 bg-gradient-to-r from-blue-900 to-blue-800 shadow-lg w-full z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
                     <NavLink to="/" className="text-white text-xl md:text-2xl font-bold cursor-pointer hover:text-blue-200 transition-colors">
-                        Hmz
+                        HMZ Hotel
                     </NavLink>
                     
                     <div className="hidden md:flex space-x-8">
