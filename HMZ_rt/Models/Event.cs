@@ -25,5 +25,7 @@ public partial class Event
 
     public string? ContactInfo { get; set; }
 
+    public string Images { get; set; } = null!;
+
     public virtual ICollection<Eventbooking> Eventbookings { get; set; } = new List<Eventbooking>();
 }

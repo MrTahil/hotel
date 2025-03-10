@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace HMZ_rt.Models;
 
@@ -35,6 +34,6 @@ public partial class Guest
     public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
-    [JsonIgnore]
+
     public virtual Useraccount? User { get; set; }
 }

@@ -57,7 +57,6 @@ public partial class HmzRtContext : DbContext
 
     public virtual DbSet<Useraccount> Useraccounts { get; set; }
 
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Amenity>(entity =>
@@ -110,7 +109,7 @@ public partial class HmzRtContext : DbContext
 
             entity.HasOne(d => d.Room).WithMany(p => p.AmenitiesNavigation)
                 .HasForeignKey(d => d.RoomId)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("Amenities_fk5");
         });
 
@@ -164,12 +163,10 @@ public partial class HmzRtContext : DbContext
 
             entity.HasOne(d => d.Guest).WithMany(p => p.Bookings)
                 .HasForeignKey(d => d.GuestId)
-                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("Bookings_fk2");
 
             entity.HasOne(d => d.Room).WithMany(p => p.Bookings)
                 .HasForeignKey(d => d.RoomId)
-                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("Bookings_fk0");
         });
 
@@ -206,6 +203,7 @@ public partial class HmzRtContext : DbContext
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnName("event_name");
+            entity.Property(e => e.Images).HasColumnName("images");
             entity.Property(e => e.Location)
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")
@@ -270,12 +268,10 @@ public partial class HmzRtContext : DbContext
 
             entity.HasOne(d => d.Event).WithMany(p => p.Eventbookings)
                 .HasForeignKey(d => d.EventId)
-                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("EventBookings_fk1");
 
             entity.HasOne(d => d.Guest).WithMany(p => p.Eventbookings)
                 .HasForeignKey(d => d.GuestId)
-                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("EventBookings_fk2");
         });
 
@@ -328,7 +324,7 @@ public partial class HmzRtContext : DbContext
 
             entity.HasOne(d => d.Guest).WithMany(p => p.Feedbacks)
                 .HasForeignKey(d => d.GuestId)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("Feedback_fk9");
         });
 
@@ -439,7 +435,6 @@ public partial class HmzRtContext : DbContext
 
             entity.HasOne(d => d.Booking).WithMany(p => p.Invoices)
                 .HasForeignKey(d => d.BookingId)
-                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("Invoices_fk2");
         });
 
@@ -586,7 +581,6 @@ public partial class HmzRtContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("Notifications_fk8");
         });
 
@@ -639,7 +633,6 @@ public partial class HmzRtContext : DbContext
 
             entity.HasOne(d => d.Booking).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.BookingId)
-                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("Payments_fk1");
         });
 
@@ -693,7 +686,7 @@ public partial class HmzRtContext : DbContext
 
             entity.HasOne(d => d.Room).WithMany(p => p.Promotions)
                 .HasForeignKey(d => d.RoomId)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("Promotions_fk7");
         });
 
@@ -747,12 +740,11 @@ public partial class HmzRtContext : DbContext
 
             entity.HasOne(d => d.Guest).WithMany(p => p.Reviews)
                 .HasForeignKey(d => d.GuestId)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("Reviews_fk2");
 
             entity.HasOne(d => d.Room).WithMany(p => p.Reviews)
                 .HasForeignKey(d => d.RoomId)
-                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("Reviews_fk3");
         });
 
@@ -855,7 +847,6 @@ public partial class HmzRtContext : DbContext
 
             entity.HasOne(d => d.Room).WithMany(p => p.Roominventories)
                 .HasForeignKey(d => d.RoomId)
-                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("RoomInventory_fk8");
         });
 
@@ -910,12 +901,11 @@ public partial class HmzRtContext : DbContext
 
             entity.HasOne(d => d.Room).WithMany(p => p.Roommaintenances)
                 .HasForeignKey(d => d.RoomId)
-                .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("RoomMaintenance_fk1");
 
             entity.HasOne(d => d.Staff).WithMany(p => p.Roommaintenances)
                 .HasForeignKey(d => d.StaffId)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("RoomMaintenance_fk5");
         });
 
@@ -1066,6 +1056,8 @@ public partial class HmzRtContext : DbContext
 
             entity.ToTable("taxrates");
 
+            entity.HasIndex(e => e.PaymentId, "payment");
+
             entity.Property(e => e.TaxRateId)
                 .HasColumnType("int(11)")
                 .HasColumnName("tax_rate_id");
@@ -1089,6 +1081,9 @@ public partial class HmzRtContext : DbContext
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("date")
                 .HasColumnName("effective_date");
+            entity.Property(e => e.PaymentId)
+                .HasColumnType("int(11)")
+                .HasColumnName("payment_id");
             entity.Property(e => e.Rate)
                 .HasPrecision(10)
                 .HasDefaultValueSql("'NULL'")
@@ -1105,6 +1100,10 @@ public partial class HmzRtContext : DbContext
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnName("tax_name");
+
+            entity.HasOne(d => d.Payment).WithMany(p => p.Taxrates)
+                .HasForeignKey(d => d.PaymentId)
+                .HasConstraintName("taxrates_ibfk_1");
         });
 
         modelBuilder.Entity<Useraccount>(entity =>

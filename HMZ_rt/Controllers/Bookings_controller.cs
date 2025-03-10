@@ -80,7 +80,7 @@ namespace HMZ_rt.Controllers
                 using (MailMessage message = new MailMessage())
                 {
                     message.From = new MailAddress(_smtpSettings.FromEmail);
-                    message.Subject = $"Booking Confirmation - {Convert.ToString(booking.BookingId)}";
+                    message.Subject = $"Foglalás megerősítése - {Convert.ToString(booking.BookingId)}";
                     message.Body = emailTemplate;
                     message.IsBodyHtml = true;
                     message.To.Add(recipientEmail);

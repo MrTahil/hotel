@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace HMZ_rt.Models;
 
@@ -25,8 +24,8 @@ public partial class Roommaintenance
     public decimal? Cost { get; set; }
 
     public string? Notes { get; set; }
-    [JsonIgnore]
+
     public virtual Room Room { get; set; } = null!;
-    [JsonIgnore]
+
     public virtual Staff? Staff { get; set; }
 }

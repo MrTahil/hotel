@@ -114,10 +114,11 @@ namespace HMZ_rt.Controllers
         {
             try
             {
-                var data = _context.Guests.Where(x => x.Bookings.Where(y => y.CheckInDate < DateTime.Now.AddDays(-1) && y.CheckOutDate > DateTime.Now.AddDays(-1)).ToList() != null);
-                if (data != null)
+                var ppl = _context.Guests.Include(x => x.Bookings.Where(x => x.CheckInDate < DateTime.Now.AddDays(-1) && x.CheckOutDate > DateTime.Now.AddDays(1)));
+                
+                if (ppl != null)
                 {
-                    return StatusCode(201, data);
+                    return StatusCode(201, ppl);
                 }
                 return StatusCode(400, "Én se tudom mi a baja engedd el");
 

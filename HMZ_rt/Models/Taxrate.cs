@@ -24,4 +24,8 @@ public partial class Taxrate
     public string? State { get; set; }
 
     public string? City { get; set; }
+
+    public int PaymentId { get; set; }
+
+    public virtual Payment Payment { get; set; } = null!;
 }
