@@ -40,7 +40,7 @@ namespace HMZ_rt.Controllers
         }
 
 
-        [HttpPut("UpdateSentTime{NotiId}")]
+        [HttpPut("UpdateSentTime/{NotiId}")]
         public async Task<ActionResult<Notification>> UpdateOnSent(int NotiId)
         {
             var oke=await _context.Notifications.FirstOrDefaultAsync(x => x.NotificationId == NotiId);
@@ -54,7 +54,7 @@ namespace HMZ_rt.Controllers
             return NotFound(new { message = "Nincs ilyen id-val rendelkező adat az adatbázisban." });
         }
 
-        [HttpPut("UpdateOpenedTime{NotiId}")]
+        [HttpPut("UpdateOpenedTime/{NotiId}")]
         public async Task<ActionResult<Notification>> UpdateOnOpened(int NotiId)
         {
             var oke = await _context.Notifications.FirstOrDefaultAsync(x => x.NotificationId == NotiId);

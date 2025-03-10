@@ -115,5 +115,25 @@ namespace HMZ_rt.Controllers
                 return StatusCode(500, ex);
             }
         }
+        [Authorize(Roles ="Admin,System,Recept")]
+        [HttpDelete("DeleteEvenet/{id}")]
+        public async Task<ActionResult<Event>> DeleteEvent(int id)
+        {
+            try
+            {
+                var dat = await _context.Events.FirstOrDefaultAsync(x => x.EventId == id);
+                if (dat != null) { 
+                _context.Events.Remove(dat);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(201, "Sikeres törlés");
+                }
+                return StatusCode(404, "Nincs találat");
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
+        }
     }
 }

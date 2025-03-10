@@ -165,10 +165,10 @@ public class PromotionStatus
 public class CreateGuest
 {
     [Required(ErrorMessage = "Az elsőnév kötelező!")]
-    [MinLength(5, ErrorMessage = "Legalább 4 karakternek kell a családnévnek lennie!")]
+    [MinLength(2, ErrorMessage = "Legalább 2 karakternek kell a családnévnek lennie!")]
     public string? FirstName { get; set; }
     [Required(ErrorMessage = "A második név kötelező!")]
-    [MinLength(5, ErrorMessage = "Legalább 4 karakternek kell lennie a kerewsztnévnek!")]
+    [MinLength(2, ErrorMessage = "Legalább 2 karakternek kell lennie a kerewsztnévnek!")]
     public string? LastName { get; set; }
     [Required(ErrorMessage = "Az email megadása kötelező!")]
     [EmailAddress(ErrorMessage = "Nem megfelelő email forma!")]
@@ -195,10 +195,10 @@ public class CreateGuest
 public class UpdateGuest
 {
     [Required(ErrorMessage = "Az elsőnév kötelező!")]
-    [MinLength(5, ErrorMessage = "Legalább 4 karakternek kell a családnévnek lennie!")]
+    [MinLength(2, ErrorMessage = "Legalább 2 karakternek kell a családnévnek lennie!")]
     public string? FirstName { get; set; }
     [Required(ErrorMessage = "A második név kötelező!")]
-    [MinLength(5, ErrorMessage = "Legalább 4 karakternek kell lennie a kerewsztnévnek!")]
+    [MinLength(2, ErrorMessage = "Legalább 2 karakternek kell lennie a kerewsztnévnek!")]
     public string? LastName { get; set; }
     [Required(ErrorMessage = "Az email megadása kötelező!")]
     [EmailAddress(ErrorMessage = "Nem megfelelő email forma!")]

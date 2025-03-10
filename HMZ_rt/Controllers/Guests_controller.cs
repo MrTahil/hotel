@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.CompilerServices;
 
 namespace HMZ_rt.Controllers
 {
@@ -113,7 +114,16 @@ namespace HMZ_rt.Controllers
         {
             try
             {
-                return BadRequest();
+                var data = _context.Guests.Where(x => x.Bookings.Where(y => y.CheckInDate < DateTime.Now.AddDays(-1) && y.CheckOutDate > DateTime.Now.AddDays(-1)).ToList() != null);
+                if (data != null)
+                {
+                    return StatusCode(201, data);
+                }
+                return StatusCode(400, "Én se tudom mi a baja engedd el");
+
+
+
+
             }
             catch (Exception ex)
             {
@@ -122,5 +132,27 @@ namespace HMZ_rt.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,System,Recept,Base")]
+        [HttpDelete("DeleteGuest/{id}")]
+        public async Task<ActionResult<Guest>> DeleteGuest(int id)
+        {
+            try
+            {
+                var dat = await _context.Guests.FirstOrDefaultAsync(x => x.GuestId == id);
+                if (dat != null) { 
+                _context.Guests.Remove(dat);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(201, "Sikeres törlés!");
+                }
+                return StatusCode(404, "Nem található!");
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
+            
+
+        }
     }
 }
