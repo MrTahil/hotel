@@ -195,7 +195,7 @@ namespace HMZ_rt.Controllers
 
 
 
-        [Authorize("Base,Admin,System,Recept")]
+        [Authorize(Roles ="Base,Admin,System,Recept")]
         [HttpGet("BookingsByUserId")]
         public async Task<ActionResult<Booking>> GetUserBookings(int UserIdd)
         {
@@ -208,7 +208,7 @@ namespace HMZ_rt.Controllers
 
 
         }
-        [Authorize("Base,Admin,System,Recept")]
+        [Authorize(Roles = "Base,Admin,System,Recept")]
         [HttpDelete("DeleteBooking/{id}")]
         public async Task<ActionResult<Booking>> DeleteBooking(int id)
         {
@@ -228,7 +228,7 @@ namespace HMZ_rt.Controllers
                 return StatusCode(500, ex);
             }
         }
-        [Authorize("Base,Admin,System,Recept")]
+        [Authorize(Roles = "Base,Admin,System,Recept")]
         [HttpPut("UpdateBooking/{id}")]
         public async Task<ActionResult<Booking>> UpdateBookingByid(int id, UpdateBooking udto)
         {
@@ -256,6 +256,27 @@ namespace HMZ_rt.Controllers
             }
         }
 
+        [Authorize(Roles = "Base,Admin,System,Recept")]
+        [HttpGet("Getalldat")]
+        public async Task<ActionResult<Booking>> GetallData()
+        {
+            try
+            {
+
+
+            var data = await _context.Bookings.ToListAsync();
+            if (data!= null)
+            {
+                return StatusCode(200, data);
+            }
+                return StatusCode(404, "Nincs adat a táblában");
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
+        }
 
 
     }
