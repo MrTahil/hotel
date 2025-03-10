@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace HMZ_rt.Models;
 
@@ -24,8 +25,8 @@ public partial class Review
     public DateTime? ResponseDate { get; set; }
 
     public DateTime? DateAdded { get; set; }
-
+    [JsonIgnore]
     public virtual Guest Guest { get; set; } = null!;
-
+    [JsonIgnore]
     public virtual Room Room { get; set; } = null!;
 }

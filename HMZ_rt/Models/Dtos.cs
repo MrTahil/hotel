@@ -266,3 +266,29 @@ public class Getrooms
     public DateTime CheckOutDate { get; set; }
     public int GuestNumber { get; set; }
 }
+
+
+
+
+
+public class CreateFeedback
+{
+    [Required(ErrorMessage = "Kategória megadása kötelező!")]
+    public string? Category { get; set; }
+    [Required(ErrorMessage = "A rating megadása kötelező!")]
+    [Range(1, 10)]
+    public decimal? Rating { get; set; }
+    [Required(ErrorMessage = "Status megadása kötelező!")]
+    public string? Status { get; set; }
+    [Required(ErrorMessage = "A response nem lehet üres!")]
+    public string? Response { get; set; }
+    [Required(ErrorMessage = "A guest id megadása kötelező!")]
+    public int GuestId { get;set; }
+}
+
+
+
+public class UpdateFeedback
+{
+    public string? Comments { get; set; }
+}

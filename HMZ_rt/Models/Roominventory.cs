@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace HMZ_rt.Models;
 
@@ -24,6 +25,6 @@ public partial class Roominventory
     public int RoomId { get; set; }
 
     public decimal? CostPerItem { get; set; }
-
+    [JsonIgnore]
     public virtual Room Room { get; set; } = null!;
 }

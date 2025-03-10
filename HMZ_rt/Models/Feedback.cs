@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace HMZ_rt.Models;
 
@@ -24,6 +25,6 @@ public partial class Feedback
     public DateTime? DateAdded { get; set; }
 
     public int GuestId { get; set; }
-
+    [JsonIgnore]
     public virtual Guest Guest { get; set; } = null!;
 }

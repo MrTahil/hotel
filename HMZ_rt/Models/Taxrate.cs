@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace HMZ_rt.Models;
 
@@ -26,6 +27,6 @@ public partial class Taxrate
     public string? City { get; set; }
 
     public int PaymentId { get; set; }
-
+    [JsonIgnore]
     public virtual Payment Payment { get; set; } = null!;
 }
