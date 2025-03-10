@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Már 10. 10:04
+-- Létrehozás ideje: 2025. Már 10. 10:11
 -- Kiszolgáló verziója: 10.4.20-MariaDB
 -- PHP verzió: 7.3.29
 
@@ -127,7 +127,8 @@ CREATE TABLE `events` (
   `description` text COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
   `date_added` date DEFAULT NULL,
   `organizer_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
-  `contact_info` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL
+  `contact_info` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
+  `images` longtext COLLATE utf8mb4_hungarian_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 -- --------------------------------------------------------
