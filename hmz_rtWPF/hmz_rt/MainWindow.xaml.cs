@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace RoomListApp
@@ -46,7 +47,7 @@ namespace RoomListApp
         private int currentEditPromotionId = 0;
 
         //Változók a Guest szerkesztési módhoz
-        private bool isGuestEditMode = false;
+        private bool isEditGuest = false;
         private int currentEditGuestId = 0;
 
 
@@ -253,7 +254,7 @@ namespace RoomListApp
 
             FirstNameTextBox.Text = selectedStaff.FirstName;
             LastNameTextBox.Text = selectedStaff.LastName;
-            EmailTextBox.Text = selectedStaff.Email;
+            StaffEmailTextBox.Text = selectedStaff.Email;
             PhoneTextBox.Text = selectedStaff.PhoneNumber;
             PositionTextBox.Text = selectedStaff.Position;
             SalaryTextBox.Text = selectedStaff.Salary?.ToString();
@@ -335,7 +336,7 @@ namespace RoomListApp
             {
                 if (string.IsNullOrWhiteSpace(FirstNameTextBox.Text) ||
                     string.IsNullOrWhiteSpace(LastNameTextBox.Text) ||
-                    string.IsNullOrWhiteSpace(EmailTextBox.Text) ||
+                    string.IsNullOrWhiteSpace(StaffEmailTextBox.Text) ||
                     StatusComboBox.SelectedItem == null)
                 {
                     MessageBox.Show("Kérjük, töltse ki az összes kötelező mezőt!", "Hiányzó adatok", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -356,7 +357,7 @@ namespace RoomListApp
                     {
                         FirstName = FirstNameTextBox.Text,
                         LastName = LastNameTextBox.Text,
-                        Email = EmailTextBox.Text,
+                        Email = StaffEmailTextBox.Text,
                         PhoneNumber = PhoneTextBox.Text,
                         Position = PositionTextBox.Text,
                         Salary = salary,
@@ -372,7 +373,7 @@ namespace RoomListApp
                     {
                         FirstName = FirstNameTextBox.Text,
                         LastName = LastNameTextBox.Text,
-                        Email = EmailTextBox.Text,
+                        Email = StaffEmailTextBox.Text,
                         PhoneNumber = PhoneTextBox.Text,
                         Position = PositionTextBox.Text,
                         Salary = salary,
@@ -467,7 +468,7 @@ namespace RoomListApp
         {
             FirstNameTextBox.Text = string.Empty;
             LastNameTextBox.Text = string.Empty;
-            EmailTextBox.Text = string.Empty;
+            StaffEmailTextBox.Text = string.Empty;
             PhoneTextBox.Text = string.Empty;
             PositionTextBox.Text = string.Empty;
             SalaryTextBox.Text = string.Empty;
@@ -815,14 +816,15 @@ namespace RoomListApp
             PromotionStatusComboBox.SelectedIndex = 0;
         }
 
-        private async void Guest_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private async void Guest_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             try
             {
                 dashboardGrid.Visibility = Visibility.Collapsed;
-                guestContainer.Visibility = Visibility.Visible;
+                guestsContainer.Visibility = Visibility.Visible;
+
                 guestEditPanel.Visibility = Visibility.Collapsed;
-                isGuestEditMode = false;
+                isEditGuest = false;
                 currentEditGuestId = 0;
 
                 await LoadGuestsToListView();
@@ -830,14 +832,15 @@ namespace RoomListApp
             catch (Exception ex)
             {
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+
                 dashboardGrid.Visibility = Visibility.Visible;
-                guestContainer.Visibility = Visibility.Collapsed;
+                guestsContainer.Visibility = Visibility.Collapsed;
             }
         }
 
-        private void GuestBackButton_Click(object sender, RoutedEventArgs e)
+        private void GuestsBackButton_Click(object sender, RoutedEventArgs e)
         {
-            guestContainer.Visibility = Visibility.Collapsed;
+            guestsContainer.Visibility = Visibility.Collapsed;
             dashboardGrid.Visibility = Visibility.Visible;
         }
 
@@ -882,8 +885,15 @@ namespace RoomListApp
         private void AddGuestButton_Click(object sender, RoutedEventArgs e)
         {
             ClearGuestFormFields();
-            isGuestEditMode = false;
+
+            isEditGuest = false;
             currentEditGuestId = 0;
+
+            /* Új vendég létrehozásánál is csak olvasható a UserId mező,
+            mert azt automatikusan töltjük ki az email alapján*/
+            GuestUserIdTextBox.IsReadOnly = true;
+            GuestUserIdTextBox.Background = Brushes.LightGray;
+
             guestEditPanel.Visibility = Visibility.Visible;
         }
 
@@ -896,19 +906,30 @@ namespace RoomListApp
                 return;
             }
 
-            isGuestEditMode = true;
+            isEditGuest = true;
             currentEditGuestId = selectedGuest.GuestId;
 
-            // Populate form fields
-            guestFirstNameTextBox.Text = selectedGuest.FirstName;
-            guestLastNameTextBox.Text = selectedGuest.LastName;
-            guestEmailTextBox.Text = selectedGuest.Email;
-            guestPhoneTextBox.Text = selectedGuest.PhoneNumber;
-            guestAddressTextBox.Text = selectedGuest.Address;
-            guestCityTextBox.Text = selectedGuest.City;
-            guestCountryTextBox.Text = selectedGuest.Country;
-            guestDateOfBirthPicker.SelectedDate = selectedGuest.DateOfBirth;
-            guestGenderComboBox.SelectedValue = selectedGuest.Gender;
+            GuestFirstNameTextBox.Text = selectedGuest.FirstName;
+            GuestLastNameTextBox.Text = selectedGuest.LastName;
+            GuestEmailTextBox.Text = selectedGuest.Email;
+            GuestPhoneTextBox.Text = selectedGuest.PhoneNumber;
+            GuestAddressTextBox.Text = selectedGuest.Address;
+            GuestCityTextBox.Text = selectedGuest.City;
+            GuestCountryTextBox.Text = selectedGuest.Country;
+            GuestDateOfBirthPicker.SelectedDate = selectedGuest.DateOfBirth;
+            GuestUserIdTextBox.Text = selectedGuest.UserId?.ToString();
+
+            GuestUserIdTextBox.IsReadOnly = true;
+            GuestUserIdTextBox.Background = Brushes.LightGray;
+
+            foreach (ComboBoxItem item in GuestGenderComboBox.Items)
+            {
+                if (item.Content.ToString() == selectedGuest.Gender)
+                {
+                    GuestGenderComboBox.SelectedItem = item;
+                    break;
+                }
+            }
 
             guestEditPanel.Visibility = Visibility.Visible;
         }
@@ -934,6 +955,205 @@ namespace RoomListApp
             }
         }
 
+        private void CancelGuestEditButton_Click(object sender, RoutedEventArgs e)
+        {
+            guestEditPanel.Visibility = Visibility.Collapsed;
+            isEditGuest = false;
+            currentEditGuestId = 0;
+        }
+
+        private async void SaveGuestButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(GuestFirstNameTextBox.Text) ||
+                    string.IsNullOrWhiteSpace(GuestLastNameTextBox.Text) ||
+                    string.IsNullOrWhiteSpace(GuestEmailTextBox.Text) ||
+                    GuestGenderComboBox.SelectedItem == null)
+                {
+                    MessageBox.Show("Kérjük, töltse ki az összes kötelező mezőt!", "Hiányzó adatok", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var selectedGender = (GuestGenderComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+
+                if (isEditGuest)
+                {
+                    var updateDto = new UpdateGuest
+                    {
+                        FirstName = GuestFirstNameTextBox.Text,
+                        LastName = GuestLastNameTextBox.Text,
+                        Email = GuestEmailTextBox.Text,
+                        PhoneNumber = GuestPhoneTextBox.Text,
+                        Address = GuestAddressTextBox.Text,
+                        City = GuestCityTextBox.Text,
+                        Country = GuestCountryTextBox.Text,
+                        DateOfBirth = GuestDateOfBirthPicker.SelectedDate,
+                        Gender = selectedGender
+                    };
+
+                    await UpdateGuest(currentEditGuestId, updateDto);
+                }
+                else
+                {
+
+                    int? userId = await GetUserIdByEmail(GuestEmailTextBox.Text);
+                    if (userId == null)
+                    {
+                        MessageBox.Show("Ezzel az email címmel nincs létrehozva felhasználói fiók!", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    var createDto = new CreateGuest
+                    {
+                        FirstName = GuestFirstNameTextBox.Text,
+                        LastName = GuestLastNameTextBox.Text,
+                        Email = GuestEmailTextBox.Text,
+                        PhoneNumber = GuestPhoneTextBox.Text,
+                        Address = GuestAddressTextBox.Text,
+                        City = GuestCityTextBox.Text,
+                        Country = GuestCountryTextBox.Text,
+                        DateOfBirth = GuestDateOfBirthPicker.SelectedDate,
+                        Gender = selectedGender,
+                        UserId = userId
+                    };
+
+                    await CreateGuest(createDto);
+                }
+
+                guestEditPanel.Visibility = Visibility.Collapsed;
+                isEditGuest = false;
+                currentEditGuestId = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task<int?> GetUserIdByEmail(string email)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return null;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var response = await _httpClient.GetAsync($"UserAccounts/GetId/{email}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        return null;
+                    }
+
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba a felhasználó azonosító lekérésekor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return null;
+                }
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                var userId = JsonSerializer.Deserialize<int>(responseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return userId;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt a felhasználó azonosító lekérésekor: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                return null;
+            }
+        }
+
+        private async void GuestEmailTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (!isEditGuest && !string.IsNullOrWhiteSpace(GuestEmailTextBox.Text))
+            {
+                int? userId = await GetUserIdByEmail(GuestEmailTextBox.Text);
+                if (userId != null)
+                {
+                    GuestUserIdTextBox.Text = userId.ToString();
+                }
+                else
+                {
+                    GuestUserIdTextBox.Text = "";
+                    MessageBox.Show("Figyelem: Ezzel az email címmel nincs létrehozva felhasználói fiók!",
+                        "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+        }
+
+        private async Task CreateGuest(CreateGuest newGuest)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var content = new StringContent(
+                    JsonSerializer.Serialize(newGuest, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                    System.Text.Encoding.UTF8,
+                    "application/json");
+
+                var response = await _httpClient.PostAsync("Guests/Addnewguest", content);
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba a vendég létrehozásakor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                MessageBox.Show("Az új vendég sikeresen létrehozva!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                await LoadGuestsToListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task UpdateGuest(int guestId, UpdateGuest updateGuest)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var content = new StringContent(
+                    JsonSerializer.Serialize(updateGuest, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                    System.Text.Encoding.UTF8,
+                    "application/json");
+
+                var response = await _httpClient.PutAsync($"Guests/UpdateGuest/{guestId}", content);
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba a vendég frissítésekor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                MessageBox.Show("A vendég adatai sikeresen frissítve!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                await LoadGuestsToListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         private async Task DeleteGuest(int guestId)
         {
             try
@@ -955,129 +1175,7 @@ namespace RoomListApp
                 }
 
                 MessageBox.Show("A vendég sikeresen törölve!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
-                await LoadGuestsToListView();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
 
-        private void CancelGuestEditButton_Click(object sender, RoutedEventArgs e)
-        {
-            guestEditPanel.Visibility = Visibility.Collapsed;
-            isGuestEditMode = false;
-            currentEditGuestId = 0;
-        }
-
-        private async void SaveGuestButton_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(guestFirstNameTextBox.Text) ||
-                    string.IsNullOrWhiteSpace(guestLastNameTextBox.Text) ||
-                    string.IsNullOrWhiteSpace(guestEmailTextBox.Text) ||
-                    guestGenderComboBox.SelectedItem == null ||
-                    guestDateOfBirthPicker.SelectedDate == null)
-                {
-                    MessageBox.Show("Kérjük, töltse ki az összes kötelező mezőt!", "Hiányzó adatok", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                if (isGuestEditMode)
-                {
-                    var updateDto = new UpdateGuestDto
-                    {
-                        FirstName = guestFirstNameTextBox.Text,
-                        LastName = guestLastNameTextBox.Text,
-                        Email = guestEmailTextBox.Text,
-                        PhoneNumber = guestPhoneTextBox.Text,
-                        Address = guestAddressTextBox.Text,
-                        City = guestCityTextBox.Text,
-                        Country = guestCountryTextBox.Text,
-                        DateOfBirth = guestDateOfBirthPicker.SelectedDate.Value,
-                        Gender = guestGenderComboBox.SelectedValue.ToString()
-                    };
-
-                    await UpdateGuest(currentEditGuestId, updateDto);
-                }
-                else
-                {
-                    var newDto = new CreateGuestDto
-                    {
-                        FirstName = guestFirstNameTextBox.Text,
-                        LastName = guestLastNameTextBox.Text,
-                        Email = guestEmailTextBox.Text,
-                        PhoneNumber = guestPhoneTextBox.Text,
-                        Address = guestAddressTextBox.Text,
-                        City = guestCityTextBox.Text,
-                        Country = guestCountryTextBox.Text,
-                        DateOfBirth = guestDateOfBirthPicker.SelectedDate.Value,
-                        Gender = guestGenderComboBox.SelectedValue.ToString(),
-                        UserId = TokenStorage.UserId // Assuming you have user ID in TokenStorage
-                    };
-
-                    await CreateGuest(newDto);
-                }
-
-                guestEditPanel.Visibility = Visibility.Collapsed;
-                isGuestEditMode = false;
-                currentEditGuestId = 0;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private async Task CreateGuest(CreateGuestDto newGuest)
-        {
-            try
-            {
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
-
-                var content = new StringContent(
-                    JsonSerializer.Serialize(newGuest),
-                    Encoding.UTF8,
-                    "application/json");
-
-                var response = await _httpClient.PostAsync("Guests/Addnewguest", content);
-                if (!response.IsSuccessStatusCode)
-                {
-                    string errorResponse = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"Hiba a vendég létrehozásakor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                MessageBox.Show("Az új vendég sikeresen létrehozva!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
-                await LoadGuestsToListView();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private async Task UpdateGuest(int guestId, UpdateGuestDto updateGuest)
-        {
-            try
-            {
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
-
-                var content = new StringContent(
-                    JsonSerializer.Serialize(updateGuest),
-                    Encoding.UTF8,
-                    "application/json");
-
-                var response = await _httpClient.PutAsync($"Guests/UpdateGuest/{guestId}", content);
-                if (!response.IsSuccessStatusCode)
-                {
-                    string errorResponse = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"Hiba a vendég frissítésekor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                MessageBox.Show("A vendég sikeresen frissítve!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
                 await LoadGuestsToListView();
             }
             catch (Exception ex)
@@ -1088,15 +1186,16 @@ namespace RoomListApp
 
         private void ClearGuestFormFields()
         {
-            guestFirstNameTextBox.Text = string.Empty;
-            guestLastNameTextBox.Text = string.Empty;
-            guestEmailTextBox.Text = string.Empty;
-            guestPhoneTextBox.Text = string.Empty;
-            guestAddressTextBox.Text = string.Empty;
-            guestCityTextBox.Text = string.Empty;
-            guestCountryTextBox.Text = string.Empty;
-            guestDateOfBirthPicker.SelectedDate = null;
-            guestGenderComboBox.SelectedIndex = -1;
+            GuestFirstNameTextBox.Text = string.Empty;
+            GuestLastNameTextBox.Text = string.Empty;
+            GuestEmailTextBox.Text = string.Empty;
+            GuestPhoneTextBox.Text = string.Empty;
+            GuestAddressTextBox.Text = string.Empty;
+            GuestCityTextBox.Text = string.Empty;
+            GuestCountryTextBox.Text = string.Empty;
+            GuestDateOfBirthPicker.SelectedDate = null;
+            GuestUserIdTextBox.Text = string.Empty;
+            GuestGenderComboBox.SelectedIndex = -1;
         }
     }
 
@@ -1210,7 +1309,6 @@ namespace RoomListApp
     }
 
     // Guest osztályok
-
     public class Guest
     {
         public int GuestId { get; set; }
@@ -1221,12 +1319,13 @@ namespace RoomListApp
         public string Address { get; set; }
         public string City { get; set; }
         public string Country { get; set; }
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
         public string Gender { get; set; }
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
     }
 
-    public class CreateGuestDto
+    
+    public class CreateGuest
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -1235,12 +1334,13 @@ namespace RoomListApp
         public string Address { get; set; }
         public string City { get; set; }
         public string Country { get; set; }
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
         public string Gender { get; set; }
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
     }
 
-    public class UpdateGuestDto
+    
+    public class UpdateGuest
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -1249,7 +1349,7 @@ namespace RoomListApp
         public string Address { get; set; }
         public string City { get; set; }
         public string Country { get; set; }
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
         public string Gender { get; set; }
     }
 }
