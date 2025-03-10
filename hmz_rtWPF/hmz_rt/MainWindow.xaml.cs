@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -7,6 +9,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -33,6 +36,32 @@ namespace RoomListApp
         }
     }
 
+    public class StatusToButtonTextConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            string status = value?.ToString();
+            switch (status)
+            {
+                case "Jóváhagyva":
+                case "Függőben":
+                    return "Check In";
+                case "Checked In":
+                    return "Check Out";
+                case "Finished":
+                    return "Lezárva";
+                case "Lemondva":
+                    return "Lemondva";
+                default:
+                    return status;
+            }
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
     public partial class MainWindow : Window
     {
         private readonly HttpClient _httpClient;
@@ -49,6 +78,9 @@ namespace RoomListApp
         //Változók a Guest szerkesztési módhoz
         private bool isEditGuest = false;
         private int currentEditGuestId = 0;
+
+        private bool isEditBooking = false;
+        private int currentEditBookingId = 0;
 
 
         public MainWindow()
@@ -1197,6 +1229,812 @@ namespace RoomListApp
             GuestUserIdTextBox.Text = string.Empty;
             GuestGenderComboBox.SelectedIndex = -1;
         }
+
+
+        private async void BookingsCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                dashboardGrid.Visibility = Visibility.Collapsed;
+                bookingsContainer.Visibility = Visibility.Visible;
+
+                bookingEditPanel.Visibility = Visibility.Collapsed;
+                isEditBooking = false;
+                currentEditBookingId = 0;
+
+                await LoadBookingsToListView();
+                await LoadRoomsComboBox();
+                await LoadGuestsComboBox();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                dashboardGrid.Visibility = Visibility.Visible;
+                bookingsContainer.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void BookingsBackButton_Click(object sender, RoutedEventArgs e)
+        {
+            bookingsContainer.Visibility = Visibility.Collapsed;
+            dashboardGrid.Visibility = Visibility.Visible;
+        }
+
+        private async Task LoadBookingsToListView()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                // Az új végpont használata
+                var response = await _httpClient.GetAsync("Bookings/Getalldat");
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba a foglalások lekérdezésekor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                var guests = JsonSerializer.Deserialize<List<Guest>>(responseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (guests == null || guests.Count == 0)
+                {
+                    MessageBox.Show("Nincsenek elérhető vendégek az adatbázisban.", "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
+                    bookingsListView.ItemsSource = null;
+                    return;
+                }
+
+                // Vendégekhez tartozó foglalások lekérése
+                var bookingsWithDetails = new List<BookingViewModel>();
+
+                foreach (var guest in guests)
+                {
+                    // Minden vendéghez lekérjük a foglalásait
+                    var bookingResponse = await _httpClient.GetAsync($"Bookings/BookingsByUserId/{guest.UserId}");
+                    if (bookingResponse.IsSuccessStatusCode)
+                    {
+                        var bookingResponseString = await bookingResponse.Content.ReadAsStringAsync();
+                        var guestBookings = JsonSerializer.Deserialize<List<Booking>>(bookingResponseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                        if (guestBookings != null && guestBookings.Count > 0)
+                        {
+                            foreach (var booking in guestBookings)
+                            {
+                                var room = await GetRoomById(booking.RoomId ?? 0);
+
+                                bookingsWithDetails.Add(new BookingViewModel
+                                {
+                                    BookingId = booking.BookingId,
+                                    GuestId = booking.GuestId,
+                                    GuestName = $"{guest.LastName} {guest.FirstName}",
+                                    RoomId = booking.RoomId,
+                                    RoomNumber = room != null ? room.RoomNumber : "Ismeretlen",
+                                    CheckInDate = booking.CheckInDate,
+                                    CheckOutDate = booking.CheckOutDate,
+                                    BookingDate = booking.BookingDate,
+                                    NumberOfGuests = booking.NumberOfGuests,
+                                    TotalPrice = booking.TotalPrice,
+                                    PaymentStatus = booking.PaymentStatus,
+                                    Status = booking.Status
+                                });
+                            }
+                        }
+                    }
+                }
+
+                if (bookingsWithDetails.Count == 0)
+                {
+                    MessageBox.Show("Nincsenek elérhető foglalások az adatbázisban.", "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
+                    bookingsListView.ItemsSource = null;
+                    return;
+                }
+
+                bookingsListView.ItemsSource = bookingsWithDetails;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task<Guest> GetGuestById(int guestId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    return null;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var guests = await _httpClient.GetAsync("Guests/GetAllGuestever");
+                if (!guests.IsSuccessStatusCode)
+                    return null;
+
+                var guestsString = await guests.Content.ReadAsStringAsync();
+                var allGuests = JsonSerializer.Deserialize<List<Guest>>(guestsString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                return allGuests?.FirstOrDefault(g => g.GuestId == guestId);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private async Task<Room> GetRoomById(int roomId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    return null;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var rooms = await _httpClient.GetAsync("Rooms/GetRoomWith");
+                if (!rooms.IsSuccessStatusCode)
+                    return null;
+
+                var roomsString = await rooms.Content.ReadAsStringAsync();
+                var allRooms = JsonSerializer.Deserialize<List<Room>>(roomsString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                return allRooms?.FirstOrDefault(r => r.RoomId == roomId);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private async Task LoadRoomsComboBox()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var response = await _httpClient.GetAsync("Rooms/GetRoomWith");
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba a szobák lekérdezésekor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                var rooms = JsonSerializer.Deserialize<List<Room>>(responseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (rooms == null || rooms.Count == 0)
+                {
+                    MessageBox.Show("Nincsenek elérhető szobák az adatbázisban.", "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Csak a szabad szobákat jelenítjük meg
+                var availableRooms = rooms.Where(r => r.Status == "Szabad").ToList();
+                RoomComboBox.ItemsSource = availableRooms;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task LoadGuestsComboBox()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var response = await _httpClient.GetAsync("Guests/GetAllGuestever");
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba a vendégek lekérdezésekor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                var guests = JsonSerializer.Deserialize<List<Guest>>(responseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (guests == null || guests.Count == 0)
+                {
+                    MessageBox.Show("Nincsenek elérhető vendégek az adatbázisban.", "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Hozzáadjuk a FullName tulajdonságot a kiválasztáshoz
+                var guestViewModels = guests.Select(g => new
+                {
+                    g.GuestId,
+                    g.FirstName,
+                    g.LastName,
+                    FullName = $"{g.LastName} {g.FirstName}"
+                }).ToList();
+
+                GuestComboBox.ItemsSource = guestViewModels;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void AddBookingButton_Click(object sender, RoutedEventArgs e)
+        {
+            ClearBookingFormFields();
+
+            isEditBooking = false;
+            currentEditBookingId = 0;
+
+            CheckInDatePicker.SelectedDate = DateTime.Today;
+            CheckOutDatePicker.SelectedDate = DateTime.Today.AddDays(1);
+
+            bookingEditPanel.Visibility = Visibility.Visible;
+        }
+
+        private void EditBookingButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedBooking = bookingsListView.SelectedItem as BookingViewModel;
+            if (selectedBooking == null)
+            {
+                MessageBox.Show("Kérjük, válasszon ki egy foglalást a szerkesztéshez!", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            isEditBooking = true;
+            currentEditBookingId = selectedBooking.BookingId;
+
+            // Szoba és vendég kiválasztása
+            // A már foglalt szoba is elérhető legyen
+            LoadRoomForEditAsync(selectedBooking.RoomId.Value);
+
+
+            foreach (var item in GuestComboBox.Items)
+            {
+                var prop = item.GetType().GetProperty("GuestId");
+                if (prop != null && (int)prop.GetValue(item) == selectedBooking.GuestId)
+                {
+                    GuestComboBox.SelectedItem = item;
+                    break;
+                }
+            }
+
+
+            CheckInDatePicker.SelectedDate = selectedBooking.CheckInDate;
+            CheckOutDatePicker.SelectedDate = selectedBooking.CheckOutDate;
+
+
+            NumberOfGuestsTextBox.Text = selectedBooking.NumberOfGuests?.ToString();
+            TotalPriceTextBox.Text = selectedBooking.TotalPrice?.ToString("N0") + " Ft";
+
+            bookingEditPanel.Visibility = Visibility.Visible;
+        }
+
+        private async void LoadRoomForEditAsync(int roomId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                    return;
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var response = await _httpClient.GetAsync("Rooms/GetRoomWith");
+                if (!response.IsSuccessStatusCode)
+                    return;
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                var allRooms = JsonSerializer.Deserialize<List<Room>>(responseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                var room = allRooms?.FirstOrDefault(r => r.RoomId == roomId);
+                if (room != null)
+                {
+                    // Ha a szoba már foglalt, de ez a szoba az aktuális foglaláshoz tartozik, akkor is betöltjük
+                    // Az elérhető szobákhoz hozzáadjuk az adott szobát
+                    var availableRooms = allRooms.Where(r => r.Status == "Szabad" || r.RoomId == roomId).ToList();
+                    RoomComboBox.ItemsSource = availableRooms;
+
+
+                    foreach (var item in RoomComboBox.Items)
+                    {
+                        if ((item as Room)?.RoomId == roomId)
+                        {
+                            RoomComboBox.SelectedItem = item;
+                            break;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Hiba esetén nem teszünk semmit
+            }
+        }
+
+        private async void DeleteBookingButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedBooking = bookingsListView.SelectedItem as BookingViewModel;
+            if (selectedBooking == null)
+            {
+                MessageBox.Show("Kérjük, válasszon ki egy foglalást a törléshez!", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Biztosan törölni szeretné a(z) {selectedBooking.BookingId}. számú foglalást?\nVendég: {selectedBooking.GuestName}\nSzoba: {selectedBooking.RoomNumber}",
+                "Törlés megerősítése",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                await DeleteBooking(selectedBooking.BookingId);
+            }
+        }
+
+        private async Task DeleteBooking(int bookingId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var response = await _httpClient.DeleteAsync($"Bookings/DeleteBooking/{bookingId}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba a foglalás törlésekor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                MessageBox.Show("A foglalás sikeresen törölve!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                await LoadBookingsToListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void CancelBookingEditButton_Click(object sender, RoutedEventArgs e)
+        {
+            bookingEditPanel.Visibility = Visibility.Collapsed;
+            isEditBooking = false;
+            currentEditBookingId = 0;
+        }
+
+        
+        private void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateTotalPrice();
+        }
+
+        private void RoomComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateTotalPrice();
+        }
+
+        private void NumberOfGuestsTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            UpdateTotalPrice();
+        }
+
+        private void UpdateTotalPrice()
+        {
+            if (RoomComboBox.SelectedItem != null &&
+                CheckInDatePicker.SelectedDate.HasValue &&
+                CheckOutDatePicker.SelectedDate.HasValue &&
+                !string.IsNullOrWhiteSpace(NumberOfGuestsTextBox.Text))
+            {
+                var room = RoomComboBox.SelectedItem as Room;
+                var checkInDate = CheckInDatePicker.SelectedDate.Value;
+                var checkOutDate = CheckOutDatePicker.SelectedDate.Value;
+
+                if (int.TryParse(NumberOfGuestsTextBox.Text, out int numberOfGuests))
+                {
+
+                    var days = (checkOutDate - checkInDate).Days;
+
+
+                    if (days > 0 && room?.PricePerNight.HasValue == true)
+                    {
+                        var totalPrice = days * room.PricePerNight.Value * numberOfGuests;
+                        TotalPriceTextBox.Text = totalPrice.ToString("N0") + " Ft";
+                        return;
+                    }
+                }
+            }
+
+            TotalPriceTextBox.Text = string.Empty;
+        }
+
+        private async void SaveBookingButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (RoomComboBox.SelectedItem == null ||
+                    GuestComboBox.SelectedItem == null ||
+                    CheckInDatePicker.SelectedDate == null ||
+                    CheckOutDatePicker.SelectedDate == null ||
+                    string.IsNullOrWhiteSpace(NumberOfGuestsTextBox.Text) ||
+                    PaymentMethodComboBox.SelectedItem == null)
+                {
+                    MessageBox.Show("Kérjük, töltse ki az összes kötelező mezőt!", "Hiányzó adatok", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (CheckInDatePicker.SelectedDate >= CheckOutDatePicker.SelectedDate)
+                {
+                    MessageBox.Show("A kijelentkezés dátuma későbbi kell legyen, mint a bejelentkezés dátuma!", "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (!int.TryParse(NumberOfGuestsTextBox.Text, out int numberOfGuests) || numberOfGuests <= 0)
+                {
+                    MessageBox.Show("Kérjük, adjon meg érvényes számú vendéget!", "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var selectedRoom = RoomComboBox.SelectedItem as Room;
+                if (selectedRoom?.Capacity < numberOfGuests)
+                {
+                    MessageBox.Show($"A választott szoba kapacitása ({selectedRoom.Capacity} fő) kisebb, mint a megadott vendégek száma ({numberOfGuests} fő).", "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var selectedPaymentMethod = (PaymentMethodComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+
+                if (isEditBooking)
+                {
+                    var updateDto = new UpdateBooking
+                    {
+                        CheckInDate = CheckInDatePicker.SelectedDate,
+                        CheckOutDate = CheckOutDatePicker.SelectedDate,
+                        NumberOfGuests = numberOfGuests
+                    };
+
+                    await UpdateBooking(currentEditBookingId, updateDto);
+                }
+                else
+                {
+                    var guestIdProperty = GuestComboBox.SelectedItem.GetType().GetProperty("GuestId");
+                    int guestId = (int)guestIdProperty.GetValue(GuestComboBox.SelectedItem);
+
+                    var createDto = new CreateBookingDto
+                    {
+                        CheckInDate = CheckInDatePicker.SelectedDate,
+                        CheckOutDate = CheckOutDatePicker.SelectedDate,
+                        GuestId = guestId,
+                        NumberOfGuests = numberOfGuests,
+                        PaymentMethod = selectedPaymentMethod
+                    };
+
+                    await CreateBooking(selectedRoom.RoomId, createDto);
+                }
+
+                bookingEditPanel.Visibility = Visibility.Collapsed;
+                isEditBooking = false;
+                currentEditBookingId = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task CreateBooking(int roomId, CreateBookingDto newBooking)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var content = new StringContent(
+                    JsonSerializer.Serialize(newBooking, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                    System.Text.Encoding.UTF8,
+                    "application/json");
+
+                var response = await _httpClient.PostAsync($"Bookings/New_Booking/{roomId}", content);
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba a foglalás létrehozásakor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                MessageBox.Show("Az új foglalás sikeresen létrehozva!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                await LoadBookingsToListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task UpdateBooking(int bookingId, UpdateBooking updateBooking)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var content = new StringContent(
+                    JsonSerializer.Serialize(updateBooking, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                    System.Text.Encoding.UTF8,
+                    "application/json");
+
+                var response = await _httpClient.PutAsync($"Bookings/UpdateBooking/{bookingId}", content);
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba a foglalás frissítésekor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                MessageBox.Show("A foglalás sikeresen frissítve!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                await LoadBookingsToListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ClearBookingFormFields()
+        {
+            RoomComboBox.SelectedIndex = -1;
+            GuestComboBox.SelectedIndex = -1;
+            CheckInDatePicker.SelectedDate = null;
+            CheckOutDatePicker.SelectedDate = null;
+            NumberOfGuestsTextBox.Text = string.Empty;
+            PaymentMethodComboBox.SelectedIndex = -1;
+            TotalPriceTextBox.Text = string.Empty;
+        }
+
+        
+        private async void StatusButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag != null)
+            {
+                int bookingId = (int)button.Tag;
+                var booking = (bookingsListView.Items.Cast<BookingViewModel>()
+                    .FirstOrDefault(b => b.BookingId == bookingId));
+
+                if (booking == null) return;
+
+                switch (booking.Status)
+                {
+                    case "Függőben":
+                    case "Jóváhagyva":
+
+                        await UpdateBookingStatus(bookingId, "Checked In");
+                        break;
+
+                    case "Checked In":
+                        
+                        bool isEverythingOk = await ShowCheckoutConfirmation();
+                        if (isEverythingOk)
+                        {
+                            await UpdateBookingStatus(bookingId, "Finished");
+                        }
+                        else
+                        {
+
+                            string complaint = await ShowComplaintDialog();
+                            if (!string.IsNullOrWhiteSpace(complaint))
+                            {
+                                await SaveComplaint(bookingId, complaint);
+                                await UpdateBookingStatus(bookingId, "Finished");
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+
+        private async Task<bool> ShowCheckoutConfirmation()
+        {
+            var result = MessageBox.Show(
+                "Minden rendben volt a vendéggel kapcsolatban?",
+                "Kijelentkezés megerősítése",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            return result == MessageBoxResult.Yes;
+        }
+
+        private async Task<string> ShowComplaintDialog()
+        {
+            // Panasz beviteli ablak
+            var complaintWindow = new Window
+            {
+                Title = "Panasz rögzítése",
+                Width = 400,
+                Height = 250,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Owner = this,
+                ResizeMode = ResizeMode.NoResize
+            };
+
+            var grid = new Grid();
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+
+            var headerText = new TextBlock
+            {
+                Text = "Kérjük, írja le a panaszt:",
+                Margin = new Thickness(10),
+                FontWeight = FontWeights.Bold
+            };
+            Grid.SetRow(headerText, 0);
+
+            var complaintTextBox = new TextBox
+            {
+                Margin = new Thickness(10),
+                AcceptsReturn = true,
+                TextWrapping = TextWrapping.Wrap,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+            };
+            Grid.SetRow(complaintTextBox, 1);
+
+            var buttonPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(10)
+            };
+
+            var cancelButton = new Button
+            {
+                Content = "Mégse",
+                Padding = new Thickness(10, 5, 10, 5),
+                Margin = new Thickness(5, 0, 5, 0),
+                MinWidth = 80
+            };
+
+            var saveButton = new Button
+            {
+                Content = "Mentés",
+                Padding = new Thickness(10, 5, 10, 5),
+                Margin = new Thickness(5, 0, 5, 0),
+                MinWidth = 80,
+                IsDefault = true
+            };
+
+            buttonPanel.Children.Add(cancelButton);
+            buttonPanel.Children.Add(saveButton);
+            Grid.SetRow(buttonPanel, 2);
+
+            grid.Children.Add(headerText);
+            grid.Children.Add(complaintTextBox);
+            grid.Children.Add(buttonPanel);
+
+            complaintWindow.Content = grid;
+
+            string result = null;
+
+            saveButton.Click += (s, e) =>
+            {
+                result = complaintTextBox.Text;
+                complaintWindow.DialogResult = true;
+            };
+
+            cancelButton.Click += (s, e) => complaintWindow.DialogResult = false;
+
+            if (complaintWindow.ShowDialog() == true)
+            {
+                return result;
+            }
+
+            return null;
+        }
+
+        private async Task UpdateBookingStatus(int bookingId, string newStatus)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+
+                var booking = (bookingsListView.Items.Cast<BookingViewModel>()
+                    .FirstOrDefault(b => b.BookingId == bookingId));
+
+                var updateDto = new UpdateBooking
+                {
+                    CheckInDate = booking.CheckInDate,
+                    CheckOutDate = booking.CheckOutDate,
+                    NumberOfGuests = booking.NumberOfGuests ?? 1,
+                };
+
+                var content = new StringContent(
+                    JsonSerializer.Serialize(updateDto, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                    System.Text.Encoding.UTF8,
+                    "application/json");
+
+                var response = await _httpClient.PutAsync($"Bookings/UpdateBooking/{bookingId}", content); if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba a foglalás státuszának frissítésekor: {response.StatusCode}\n{errorResponse}",
+                                   "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+
+                booking.Status = newStatus;
+
+
+                bookingsListView.Items.Refresh();
+
+                MessageBox.Show($"A foglalás állapota sikeresen módosítva: {newStatus}",
+                              "Sikeres művelet", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task SaveComplaint(int bookingId, string complaintText)
+        {
+            // Mivel még nincs külön panaszkezelő végpont az API-ban,
+            // itt csak lokálisan logoljuk a panaszt
+
+            // Valódi implementációban ezt küldenénk a szervernek
+            Console.WriteLine($"Panasz rögzítve a {bookingId} foglaláshoz: {complaintText}");
+
+
+            MessageBox.Show("A panasz sikeresen rögzítve!", "Sikeres művelet",
+                          MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+    }
     }
 
     //Room osztályok
@@ -1352,4 +2190,75 @@ namespace RoomListApp
         public DateTime? DateOfBirth { get; set; }
         public string Gender { get; set; }
     }
-}
+
+    // Booking osztályok
+    public class Booking
+    {
+        public int BookingId { get; set; }
+        public DateTime? CheckInDate { get; set; }
+        public DateTime? CheckOutDate { get; set; }
+        public int? GuestId { get; set; }
+        public int? RoomId { get; set; }
+        public decimal? TotalPrice { get; set; }
+        public DateTime? BookingDate { get; set; }
+        public string PaymentStatus { get; set; }
+        public int? NumberOfGuests { get; set; }
+        public string Status { get; set; }
+        public List<Payment> Payments { get; set; }
+    }
+
+    public class Payment
+    {
+        public int PaymentId { get; set; }
+        public int? BookingId { get; set; }
+        public DateTime? PaymentDate { get; set; }
+        public decimal? Amount { get; set; }
+        public string PaymentMethod { get; set; }
+        public string TransactionId { get; set; }
+        public string Status { get; set; }
+        public string Currency { get; set; }
+        public string PaymentNotes { get; set; }
+        public DateTime? DateAdded { get; set; }
+    }
+
+    public class CreateBookingDto
+    {
+        public DateTime? CheckInDate { get; set; }
+        public DateTime? CheckOutDate { get; set; }
+        public int GuestId { get; set; }
+        public int NumberOfGuests { get; set; }
+        public string PaymentMethod { get; set; }
+    }
+
+    public class UpdateBooking
+    {
+        public DateTime? CheckInDate { get; set; }
+        public DateTime? CheckOutDate { get; set; }
+        public int NumberOfGuests { get; set; }
+    }
+
+    // ViewModel a foglalások megjelenítéséhez
+    public class BookingViewModel
+    {
+        public int BookingId { get; set; }
+        public int? GuestId { get; set; }
+        public string GuestName { get; set; }
+        public int? RoomId { get; set; }
+        public string RoomNumber { get; set; }
+        public DateTime? CheckInDate { get; set; }
+        public DateTime? CheckOutDate { get; set; }
+        public DateTime? BookingDate { get; set; }
+        public int? NumberOfGuests { get; set; }
+        public decimal? TotalPrice { get; set; }
+        public string PaymentStatus { get; set; }
+        public string Status { get; set; }
+
+        public bool CanChangeStatus
+        {
+            get
+            {
+                return Status != "Finished" && Status != "Lemondva";
+            }
+        }
+    }
+
