@@ -28,18 +28,7 @@ function RoomCard() {
     );
   };
 
-  const getRoomImage = (roomType) => {
-    switch (roomType.toLowerCase()) {
-      case 'deluxe': return '../img/deluxe_room.png';
-      case 'standard': return '../img/standard_room.png';
-      case 'suite': return '../img/suite_room.png';
-      case 'single': return '../img/single_room.png';
-      case 'family': return '../img/family_room.png';
-      case 'queen': return '../img/queen_room.png';
-      case 'king': return '../img/king_room.png';
-      default: return '../img/default_image.png';
-    }
-  };
+
 
   return (
     <main className="bg-gradient-to-b from-blue-100 via-blue-50 to-white min-h-screen pt-8 md:pt-16">
@@ -85,7 +74,7 @@ function RoomCard() {
             filteredRooms.map((room) => (
               <div key={room.room_id || room.room_number || Math.random()} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
                 <div className="h-48 bg-gray-200">
-                  <img src={getRoomImage(room.roomType)} alt={room.roomType || 'No image available'} className="w-full h-full object-cover" />
+                  <img src={room.images} className="w-full h-full object-cover" />
                 </div>
                 <div className="p-4">
                   <h3 className="text-xl font-bold text-blue-900 mb-2">{room.roomType || 'Not Available'}</h3>

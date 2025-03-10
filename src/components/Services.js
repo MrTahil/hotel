@@ -1,5 +1,6 @@
 import React from 'react';
 import '../styles/Services.css';
+import { Link } from 'react-router-dom';
 
 
 function Services() {
@@ -36,7 +37,10 @@ function Services() {
                         <div className="service-content">
                             <h2>{service.name}</h2>
                             <p>{service.description}</p>
+
+                            <Link to={"/rolunk"}>
                             <button className="service-button">További információ</button>
+                            </Link>
                         </div>
                     </div>
                 ))}
