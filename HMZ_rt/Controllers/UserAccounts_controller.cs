@@ -445,7 +445,7 @@ namespace HMZ_rt.Controllers
         }
 
 
-        [HttpPost("ForgotPasswordsendemail")]
+        [HttpPost("ForgotPasswordsendemail/{email}")]
         public async Task<ActionResult<Useraccount>> Forgotpass(string email)
         {
             try
@@ -478,13 +478,13 @@ namespace HMZ_rt.Controllers
 
 
         [HttpPut("VerifyTheforgotpass")]
-        public async Task<ActionResult<Useraccount>> forgotpasspart2(string email, string code)
+        public async Task<ActionResult<Useraccount>> forgotpasspart2(Forgotpass frgdto)
         {
-            var user = await _context.Useraccounts.FirstOrDefaultAsync(x => x.Email == email);
+            var user = await _context.Useraccounts.FirstOrDefaultAsync(x => x.Email == frgdto.Email);
             if (user != null)
             {
                 
-                if (user.Authenticationcode== code)
+                if (user.Authenticationcode== frgdto.Code)
                 {
                     user.Authenticationcode = "confirmed";
                     _context.Useraccounts.Update(user);
@@ -495,15 +495,15 @@ namespace HMZ_rt.Controllers
             return StatusCode(202);
         }
         [HttpPut("SetNewPassword")]
-        public async Task<ActionResult<Useraccount>> setnewpass(string email, string pass)
+        public async Task<ActionResult<Useraccount>> setnewpass(Forgotpass1 frgdto)
         {
-            var user = await _context.Useraccounts.FirstOrDefaultAsync(x => x.Email == email);
+            var user = await _context.Useraccounts.FirstOrDefaultAsync(x => x.Email == frgdto.Email);
 
             if ( user != null)
             {
                 { if(user.Authenticationcode == "confirmed")
                     {
-                        user.Password = PasswordHasher.HashPassword(pass);
+                        user.Password = PasswordHasher.HashPassword(frgdto.Password);
                         user.Authenticationcode = "000000";
                         _context.Useraccounts.Update(user);
                         await _context.SaveChangesAsync();
