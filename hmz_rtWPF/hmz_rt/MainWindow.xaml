@@ -1016,20 +1016,6 @@
 
                 <!-- Műveleti gombok -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,20,10">
-                    <Button x:Name="AddBookingButton"
-            Content="Új foglalás" 
-            Margin="5,0" 
-            Padding="15,8" 
-            Background="#16A34A" 
-            Foreground="White" 
-            BorderThickness="0"
-            Click="AddBookingButton_Click">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="6"/>
-                            </Style>
-                        </Button.Resources>
-                    </Button>
                     <Button x:Name="EditBookingButton"
             Content="Szerkesztés" 
             Margin="5,0" 
@@ -1165,7 +1151,7 @@
                         <GridViewColumn Header="Szoba" DisplayMemberBinding="{Binding RoomNumber}" Width="80"/>
                         <GridViewColumn Header="Bejelentkezés" DisplayMemberBinding="{Binding CheckInDate, StringFormat='{}{0:yyyy.MM.dd}'}" Width="120"/>
                         <GridViewColumn Header="Kijelentkezés" DisplayMemberBinding="{Binding CheckOutDate, StringFormat='{}{0:yyyy.MM.dd}'}" Width="120"/>
-                        <GridViewColumn Header="Létrehozva" DisplayMemberBinding="{Binding BookingDate, StringFormat='{}{0:yyyy.MM.dd HH:mm}'}" Width="150"/>
+                        <!--<GridViewColumn Header="Létrehozva" DisplayMemberBinding="{Binding BookingDate, StringFormat='{}{0:yyyy.MM.dd HH:mm}'}" Width="150"/>-->
                         <GridViewColumn Header="Vendégek száma" DisplayMemberBinding="{Binding NumberOfGuests}" Width="120"/>
                         <GridViewColumn Header="Teljes ár" DisplayMemberBinding="{Binding TotalPrice, StringFormat='{}{0:N0} Ft'}" Width="120"/>
                         <GridViewColumn Header="Fizetési státusz" DisplayMemberBinding="{Binding PaymentStatus}" Width="120"/>
