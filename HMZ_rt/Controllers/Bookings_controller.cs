@@ -279,5 +279,46 @@ namespace HMZ_rt.Controllers
         }
 
 
+
+
+
+        [Authorize(Roles = "Admin,System,Recept")]
+        [HttpPut("UpdateBookingStatus/{id}")]
+        public async Task<ActionResult<Booking>> UpdateBookingStatusByid(int id, UpdateBookingStatus udto)
+        {
+            try
+            {
+                var updatedbook = await _context.Bookings.FirstOrDefaultAsync(x => x.BookingId == id);
+                if (updatedbook != null)
+                {
+                    if (updatedbook.PaymentStatus.Trim().ToLower() == "fizetve" && udto.Status.Trim().ToLower() == "finished")
+                    {
+                        updatedbook.Status = udto.Status;
+                    }
+                    if (updatedbook.PaymentStatus.Trim().ToLower() != "fizetve" && udto.Status.Trim().ToLower() == "finished")
+                    {
+                        return StatusCode(400, "Még nincs kifizetve, addig nem lezárható");
+                    }
+
+                    if (updatedbook.Status.Trim().ToLower() != "finished")
+                    {
+                        updatedbook.Status = udto.Status;
+                    }
+                }
+                else
+                {
+                    return BadRequest();
+                }
+                _context.Bookings.Update(updatedbook);
+                await _context.SaveChangesAsync();
+                return StatusCode(201, "Sikeres mentés");
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
+        }
+
     }
 }
