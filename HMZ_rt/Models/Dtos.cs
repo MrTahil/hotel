@@ -298,6 +298,11 @@ public class Forgotpass1
     public string? Password { get; set; }
 }
 
+public class UpdateBookingStatus
+{
+    [Required(ErrorMessage = "Nem lehet üres a status")]
+    public string? Status { get; set; }
+}
 
 
 public class UpdateFeedback
