@@ -291,11 +291,11 @@ public record Forgotpass(string? Email, string? Code);
 public class Forgotpass1
 {
     [EmailAddress(ErrorMessage = "Nem megfelelő Email forma.")]
-    string? Email { get; set; }
+    public string? Email { get; set; }
     [Required(ErrorMessage = "Jelszó megadása kötelező!")]
     [MinLength(8, ErrorMessage = "A jelszónak legalább 8 karakter hosszúnak kell lennie!")]
     [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", ErrorMessage = "A jelszónak tartalmaznia kell legalább 1, kis és Nagy betűt illetve számot.")]
-    string? Password { get; set; }
+    public string? Password { get; set; }
 }
 
 
