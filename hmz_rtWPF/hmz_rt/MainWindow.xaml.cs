@@ -23,7 +23,7 @@ namespace RoomListApp
         public static string Role { get; set; }
         public static string Username { get; set; }
 
-        public static int UserId { get; set; }  // Add this line
+        public static int UserId { get; set; } 
 
 
         public static void ClearTokens()
@@ -78,7 +78,7 @@ namespace RoomListApp
         //Változók a Guest szerkesztési módhoz
         private bool isEditGuest = false;
         private int currentEditGuestId = 0;
-
+        //Változók a Booking szerkesztési módhoz
         private bool isEditBooking = false;
         private int currentEditBookingId = 0;
 
@@ -1261,86 +1261,56 @@ namespace RoomListApp
             dashboardGrid.Visibility = Visibility.Visible;
         }
 
-        private async Task LoadBookingsToListView()
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
-                {
+        private async Task LoadBookingsToListView() {
+            try {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken)) {
                     MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
 
-                // Az új végpont használata
                 var response = await _httpClient.GetAsync("Bookings/Getalldat");
-                if (!response.IsSuccessStatusCode)
-                {
+                if (!response.IsSuccessStatusCode) {
                     string errorResponse = await response.Content.ReadAsStringAsync();
                     MessageBox.Show($"Hiba a foglalások lekérdezésekor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
                 var responseString = await response.Content.ReadAsStringAsync();
-                var guests = JsonSerializer.Deserialize<List<Guest>>(responseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var bookings = JsonSerializer.Deserialize<List<Booking>>(responseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                if (guests == null || guests.Count == 0)
-                {
-                    MessageBox.Show("Nincsenek elérhető vendégek az adatbázisban.", "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
-                    bookingsListView.ItemsSource = null;
-                    return;
-                }
-
-                // Vendégekhez tartozó foglalások lekérése
-                var bookingsWithDetails = new List<BookingViewModel>();
-
-                foreach (var guest in guests)
-                {
-                    // Minden vendéghez lekérjük a foglalásait
-                    var bookingResponse = await _httpClient.GetAsync($"Bookings/BookingsByUserId/{guest.UserId}");
-                    if (bookingResponse.IsSuccessStatusCode)
-                    {
-                        var bookingResponseString = await bookingResponse.Content.ReadAsStringAsync();
-                        var guestBookings = JsonSerializer.Deserialize<List<Booking>>(bookingResponseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                        if (guestBookings != null && guestBookings.Count > 0)
-                        {
-                            foreach (var booking in guestBookings)
-                            {
-                                var room = await GetRoomById(booking.RoomId ?? 0);
-
-                                bookingsWithDetails.Add(new BookingViewModel
-                                {
-                                    BookingId = booking.BookingId,
-                                    GuestId = booking.GuestId,
-                                    GuestName = $"{guest.LastName} {guest.FirstName}",
-                                    RoomId = booking.RoomId,
-                                    RoomNumber = room != null ? room.RoomNumber : "Ismeretlen",
-                                    CheckInDate = booking.CheckInDate,
-                                    CheckOutDate = booking.CheckOutDate,
-                                    BookingDate = booking.BookingDate,
-                                    NumberOfGuests = booking.NumberOfGuests,
-                                    TotalPrice = booking.TotalPrice,
-                                    PaymentStatus = booking.PaymentStatus,
-                                    Status = booking.Status
-                                });
-                            }
-                        }
-                    }
-                }
-
-                if (bookingsWithDetails.Count == 0)
-                {
+                if (bookings == null || bookings.Count == 0) {
                     MessageBox.Show("Nincsenek elérhető foglalások az adatbázisban.", "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
                     bookingsListView.ItemsSource = null;
                     return;
                 }
 
+                var bookingsWithDetails = new List<BookingViewModel>();
+
+                foreach (var booking in bookings) {
+                    var guest = await GetGuestById(booking.GuestId ?? 0);
+                    var room = await GetRoomById(booking.RoomId ?? 0);
+
+                    bookingsWithDetails.Add(new BookingViewModel {
+                        BookingId = booking.BookingId,
+                        GuestId = booking.GuestId,
+                        GuestName = guest != null ? $"{guest.LastName} {guest.FirstName}" : "Ismeretlen",
+                        RoomId = booking.RoomId,
+                        RoomNumber = room != null ? room.RoomNumber : "Ismeretlen",
+                        CheckInDate = booking.CheckInDate,
+                        CheckOutDate = booking.CheckOutDate,
+                        //BookingDate = booking.BookingDate,
+                        NumberOfGuests = booking.NumberOfGuests,
+                        TotalPrice = booking.TotalPrice,
+                        PaymentStatus = booking.PaymentStatus,
+                        Status = booking.Status
+                    });
+                }
+
                 bookingsListView.ItemsSource = bookingsWithDetails;
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -1426,7 +1396,6 @@ namespace RoomListApp
                     return;
                 }
 
-                // Csak a szabad szobákat jelenítjük meg
                 var availableRooms = rooms.Where(r => r.Status == "Szabad").ToList();
                 RoomComboBox.ItemsSource = availableRooms;
             }
@@ -1465,7 +1434,6 @@ namespace RoomListApp
                     return;
                 }
 
-                // Hozzáadjuk a FullName tulajdonságot a kiválasztáshoz
                 var guestViewModels = guests.Select(g => new
                 {
                     g.GuestId,
@@ -1482,19 +1450,6 @@ namespace RoomListApp
             }
         }
 
-        private void AddBookingButton_Click(object sender, RoutedEventArgs e)
-        {
-            ClearBookingFormFields();
-
-            isEditBooking = false;
-            currentEditBookingId = 0;
-
-            CheckInDatePicker.SelectedDate = DateTime.Today;
-            CheckOutDatePicker.SelectedDate = DateTime.Today.AddDays(1);
-
-            bookingEditPanel.Visibility = Visibility.Visible;
-        }
-
         private void EditBookingButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedBooking = bookingsListView.SelectedItem as BookingViewModel;
@@ -1507,8 +1462,7 @@ namespace RoomListApp
             isEditBooking = true;
             currentEditBookingId = selectedBooking.BookingId;
 
-            // Szoba és vendég kiválasztása
-            // A már foglalt szoba is elérhető legyen
+            
             LoadRoomForEditAsync(selectedBooking.RoomId.Value);
 
 
@@ -1552,8 +1506,7 @@ namespace RoomListApp
                 var room = allRooms?.FirstOrDefault(r => r.RoomId == roomId);
                 if (room != null)
                 {
-                    // Ha a szoba már foglalt, de ez a szoba az aktuális foglaláshoz tartozik, akkor is betöltjük
-                    // Az elérhető szobákhoz hozzáadjuk az adott szobát
+                    
                     var availableRooms = allRooms.Where(r => r.Status == "Szabad" || r.RoomId == roomId).ToList();
                     RoomComboBox.ItemsSource = availableRooms;
 
@@ -1713,10 +1666,8 @@ namespace RoomListApp
 
                 var selectedPaymentMethod = (PaymentMethodComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
 
-                if (isEditBooking)
-                {
-                    var updateDto = new UpdateBooking
-                    {
+                if (isEditBooking) {
+                    var updateDto = new UpdateBooking {
                         CheckInDate = CheckInDatePicker.SelectedDate,
                         CheckOutDate = CheckOutDatePicker.SelectedDate,
                         NumberOfGuests = numberOfGuests
@@ -1724,22 +1675,7 @@ namespace RoomListApp
 
                     await UpdateBooking(currentEditBookingId, updateDto);
                 }
-                else
-                {
-                    var guestIdProperty = GuestComboBox.SelectedItem.GetType().GetProperty("GuestId");
-                    int guestId = (int)guestIdProperty.GetValue(GuestComboBox.SelectedItem);
-
-                    var createDto = new CreateBookingDto
-                    {
-                        CheckInDate = CheckInDatePicker.SelectedDate,
-                        CheckOutDate = CheckOutDatePicker.SelectedDate,
-                        GuestId = guestId,
-                        NumberOfGuests = numberOfGuests,
-                        PaymentMethod = selectedPaymentMethod
-                    };
-
-                    await CreateBooking(selectedRoom.RoomId, createDto);
-                }
+                else { }
 
                 bookingEditPanel.Visibility = Visibility.Collapsed;
                 isEditBooking = false;
@@ -1751,40 +1687,6 @@ namespace RoomListApp
             }
         }
 
-        private async Task CreateBooking(int roomId, CreateBookingDto newBooking)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
-                {
-                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
-
-                var content = new StringContent(
-                    JsonSerializer.Serialize(newBooking, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
-                    System.Text.Encoding.UTF8,
-                    "application/json");
-
-                var response = await _httpClient.PostAsync($"Bookings/New_Booking/{roomId}", content);
-                if (!response.IsSuccessStatusCode)
-                {
-                    string errorResponse = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"Hiba a foglalás létrehozásakor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                MessageBox.Show("Az új foglalás sikeresen létrehozva!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                await LoadBookingsToListView();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
 
         private async Task UpdateBooking(int bookingId, UpdateBooking updateBooking)
         {
@@ -1886,7 +1788,6 @@ namespace RoomListApp
 
         private async Task<string> ShowComplaintDialog()
         {
-            // Panasz beviteli ablak
             var complaintWindow = new Window
             {
                 Title = "Panasz rögzítése",
@@ -1971,27 +1872,23 @@ namespace RoomListApp
             return null;
         }
 
-        private async Task UpdateBookingStatus(int bookingId, string newStatus)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
-                {
+        private async Task UpdateBookingStatus(int bookingId, string newStatus) {
+            try {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken)) {
                     MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
 
-
                 var booking = (bookingsListView.Items.Cast<BookingViewModel>()
                     .FirstOrDefault(b => b.BookingId == bookingId));
 
-                var updateDto = new UpdateBooking
-                {
+                var updateDto = new UpdateBooking {
                     CheckInDate = booking.CheckInDate,
                     CheckOutDate = booking.CheckOutDate,
                     NumberOfGuests = booking.NumberOfGuests ?? 1,
+                    Status = newStatus 
                 };
 
                 var content = new StringContent(
@@ -1999,25 +1896,21 @@ namespace RoomListApp
                     System.Text.Encoding.UTF8,
                     "application/json");
 
-                var response = await _httpClient.PutAsync($"Bookings/UpdateBooking/{bookingId}", content); if (!response.IsSuccessStatusCode)
-                {
+                var response = await _httpClient.PutAsync($"Bookings/UpdateBooking/{bookingId}", content);
+                if (!response.IsSuccessStatusCode) {
                     string errorResponse = await response.Content.ReadAsStringAsync();
                     MessageBox.Show($"Hiba a foglalás státuszának frissítésekor: {response.StatusCode}\n{errorResponse}",
                                    "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
-
                 booking.Status = newStatus;
-
-
                 bookingsListView.Items.Refresh();
 
                 MessageBox.Show($"A foglalás állapota sikeresen módosítva: {newStatus}",
-                              "Sikeres művelet", MessageBoxButton.OK, MessageBoxImage.Information);
+                               "Sikeres művelet", MessageBoxButton.OK, MessageBoxImage.Information);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -2143,7 +2036,7 @@ namespace RoomListApp
         public int? DiscountPercentage { get; set; }
         public string TermsConditions { get; set; }
         public string Status { get; set; }
-        public int? RoomId { get; set; } // Nullable
+        public int? RoomId { get; set; } 
     }
 
     // Guest osztályok
@@ -2200,7 +2093,7 @@ namespace RoomListApp
         public int? GuestId { get; set; }
         public int? RoomId { get; set; }
         public decimal? TotalPrice { get; set; }
-        public DateTime? BookingDate { get; set; }
+        //public DateTime? BookingDate { get; set; }
         public string PaymentStatus { get; set; }
         public int? NumberOfGuests { get; set; }
         public string Status { get; set; }
@@ -2235,9 +2128,10 @@ namespace RoomListApp
         public DateTime? CheckInDate { get; set; }
         public DateTime? CheckOutDate { get; set; }
         public int NumberOfGuests { get; set; }
-    }
 
-    // ViewModel a foglalások megjelenítéséhez
+        public string Status { get; set; }
+}
+
     public class BookingViewModel
     {
         public int BookingId { get; set; }
@@ -2247,7 +2141,7 @@ namespace RoomListApp
         public string RoomNumber { get; set; }
         public DateTime? CheckInDate { get; set; }
         public DateTime? CheckOutDate { get; set; }
-        public DateTime? BookingDate { get; set; }
+        //public DateTime? BookingDate { get; set; }
         public int? NumberOfGuests { get; set; }
         public decimal? TotalPrice { get; set; }
         public string PaymentStatus { get; set; }
