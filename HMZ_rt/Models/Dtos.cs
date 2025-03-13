@@ -305,7 +305,30 @@ public class UpdateBookingStatus
 }
 
 
+
+public class UpdateNotiStatus
+{
+    [Required(ErrorMessage ="Kötelező az új státuszt megadni!")]
+    public string? Status { get; set; }
+}
+
+
+
+public class UpdateAmenity
+{
+    public string? AmenityName { get; set; }
+    public string? Descript { get; set; }
+    public string? Availability { get; set; }
+    public string? Status { get; set; }
+    public string? Icon { get; set; }
+    public string? Category { get; set; }
+    public int? Priority { get; set; }
+}
+
+
 public class UpdateFeedback
 {
-    public string? Comments { get; set; }
+    public string? Comment { get; set; }
+    public string? Status { get; set; }
+
 }

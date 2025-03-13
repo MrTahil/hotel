@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HMZ_rt")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6b41581095563f6e00d350d3cc8a38376928227a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+935a0b502e2002618c96a99c0004022520d92699")]
 [assembly: System.Reflection.AssemblyProductAttribute("HMZ_rt")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HMZ_rt")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

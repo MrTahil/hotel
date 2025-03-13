@@ -74,5 +74,29 @@ namespace HMZ_rt.Controllers
                 return StatusCode(500, ex);
             }
         }
+
+
+        [Authorize(Roles = "Admin,System,Recept")]
+        [HttpPut("UpdateForFeedback/{id}")]
+        public async Task<ActionResult<Feedback>> UpdateFeedback(UpdateFeedback udto, int id)
+        {
+            try
+            {
+                var adat = await _context.Feedbacks.FirstOrDefaultAsync(x => x.FeedbackId == id);
+                if (adat != null)
+                {
+                    adat.Comments = udto.Comment;
+                    adat.Status = udto.Status;
+                    _context.Feedbacks.Update(adat);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(201, "Sikeres mentés");
+                } return StatusCode(404, "Nem található id");
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
+        }
     }
 }
