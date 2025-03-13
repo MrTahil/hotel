@@ -86,7 +86,7 @@ namespace HMZ_rt.Controllers
                     await _context.SaveChangesAsync();
                     _context.Bookings.Update(booking);
                     await _context.SaveChangesAsync();
-                    return StatusCode(201, "Siker")
+                    return StatusCode(201, "Siker");
                 } return StatusCode(404, "Nem található id");
             }
             catch (Exception ex)
