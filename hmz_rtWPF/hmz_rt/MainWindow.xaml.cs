@@ -75,6 +75,55 @@ namespace RoomListApp
             return (Visibility)value == Visibility.Visible;
         }
     }
+
+    public class RatingToStarsConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null) return null;
+
+            int rating = (int)value;
+            StackPanel starPanel = new StackPanel { Orientation = Orientation.Horizontal };
+
+            for (int i = 1; i <= 10; i++)
+            {
+                TextBlock star = new TextBlock
+                {
+                    Text = "★",
+                    FontSize = 16,
+                    Foreground = i <= rating ? Brushes.Gold : Brushes.LightGray,
+                    Margin = new Thickness(1, 0, 1, 0)
+                };
+
+                starPanel.Children.Add(star);
+            }
+
+            return starPanel;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class StarColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null || parameter == null) return Brushes.LightGray;
+
+            int rating = (int)value;
+            int position = (int)parameter;
+
+            return (position <= rating) ? Brushes.Gold : Brushes.LightGray;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
     public partial class MainWindow : Window
     {
         private readonly HttpClient _httpClient;
@@ -602,11 +651,10 @@ namespace RoomListApp
                 return;
             }
 
-            // Szerkesztési mód beállítása
             isEditPromotion = true;
             currentEditPromotionId = selectedPromotion.PromotionId;
 
-            // Mezők feltöltése
+
             PromotionNameTextBox.Text = selectedPromotion.PromotionName;
             DescriptionTextBox.Text = selectedPromotion.Description;
             StartDatePicker.SelectedDate = selectedPromotion.StartDate;
@@ -615,7 +663,7 @@ namespace RoomListApp
             TermsConditionsTextBox.Text = selectedPromotion.TermsConditions;
             RoomIdTextBox.Text = selectedPromotion.RoomId?.ToString();
 
-            // Státusz beállítása
+
             foreach (ComboBoxItem item in PromotionStatusComboBox.Items)
             {
                 if (item.Content.ToString() == selectedPromotion.Status)
@@ -625,7 +673,7 @@ namespace RoomListApp
                 }
             }
 
-            // Megjelenítjük a szerkesztő panelt
+
             promotionEditPanel.Visibility = Visibility.Visible;
         }
 
@@ -742,7 +790,6 @@ namespace RoomListApp
                         DiscountPercentage = discountPercentage,
                         TermsConditions = TermsConditionsTextBox.Text,
                         Status = selectedStatus,
-                        // Csak akkor adjuk hozzá, ha nem üres
                         RoomId = string.IsNullOrWhiteSpace(RoomIdTextBox.Text)
                         ? (int?)null
                         : int.Parse(RoomIdTextBox.Text)
@@ -1784,12 +1831,10 @@ namespace RoomListApp
                 {
                     case "Függőben":
                     case "Jóváhagyva":
-                        // Check In - státusz módosítása
                         await UpdateBookingStatus(bookingId, "Checked In");
                         break;
 
                     case "Checked In":
-                        // Check Out - kérdezzük meg, minden rendben volt-e
                         bool isEverythingOk = await ShowCheckoutConfirmation();
                         if (isEverythingOk)
                         {
@@ -1797,11 +1842,9 @@ namespace RoomListApp
                         }
                         else
                         {
-                            // Panasz esetén kérjünk leírást
-                            string complaint = await ShowComplaintDialog();
-                            if (!string.IsNullOrWhiteSpace(complaint))
+                            var complaintResult = await ShowComplaintDialog(bookingId, booking.GuestId ?? 0);
+                            if (complaintResult != null)
                             {
-                                await SaveComplaint(bookingId, complaint);
                                 await UpdateBookingStatus(bookingId, "Finished");
                             }
                         }
@@ -1832,12 +1875,10 @@ namespace RoomListApp
                     System.Text.Encoding.UTF8,
                     "application/json");
 
-                // Az új végpont hívása
                 var response = await _httpClient.PutAsync($"Bookings/UpdateBookingStatus/{bookingId}", content);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    // Kliens oldali adat frissítése
                     var booking = (bookingsListView.Items.Cast<BookingViewModel>()
                         .FirstOrDefault(b => b.BookingId == bookingId));
 
@@ -1854,7 +1895,6 @@ namespace RoomListApp
                 {
                     string errorResponse = await response.Content.ReadAsStringAsync();
 
-                    // Kezeljük a speciális hibakódokat
                     if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
                     {
                         MessageBox.Show("A foglalás nem zárható le, mert még nincs kifizetve.",
@@ -1884,13 +1924,19 @@ namespace RoomListApp
             return result == MessageBoxResult.Yes;
         }
 
-        private async Task<string> ShowComplaintDialog()
+        private class ComplaintResult
+        {
+            public string Text { get; set; }
+            public int Rating { get; set; }
+        }
+
+        private async Task<ComplaintResult> ShowComplaintDialog(int bookingId, int guestId)
         {
             var complaintWindow = new Window
             {
-                Title = "Panasz rögzítése",
-                Width = 400,
-                Height = 250,
+                Title = "Panasz és értékelés",
+                Width = 500,
+                Height = 400,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Owner = this,
                 ResizeMode = ResizeMode.NoResize
@@ -1898,73 +1944,236 @@ namespace RoomListApp
 
             var grid = new Grid();
             grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
             grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
             grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
 
             var headerText = new TextBlock
             {
-                Text = "Kérjük, írja le a panaszt:",
-                Margin = new Thickness(10),
-                FontWeight = FontWeights.Bold
+                Text = "Panasz és értékelés",
+                FontSize = 18,
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(10)
             };
             Grid.SetRow(headerText, 0);
+            grid.Children.Add(headerText);
+
+            var ratingPanel = new StackPanel
+            {
+                Margin = new Thickness(10, 0, 10, 10)
+            };
+            Grid.SetRow(ratingPanel, 1);
+
+            ratingPanel.Children.Add(new TextBlock
+            {
+                Text = "Értékelés (kattintson a csillagokra):",
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, 0, 0, 10)
+            });
+
+            int ratingValue = 1;
+
+            var starsPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Left
+            };
+
+            var ratingValueText = new TextBlock
+            {
+                Text = $"Kiválasztott értékelés: {ratingValue}/10",
+                Margin = new Thickness(0, 10, 0, 0)
+            };
+
+            for (int i = 1; i <= 10; i++)
+            {
+                var star = new TextBlock
+                {
+                    Text = "★",
+                    FontSize = 32,
+                    Foreground = (i <= ratingValue) ? Brushes.Gold : Brushes.LightGray,
+                    Margin = new Thickness(2, 0, 2, 0),
+                    Cursor = Cursors.Hand,
+                    Tag = i
+                };
+
+                star.MouseEnter += (s, e) =>
+                {
+                    if (s is TextBlock tb && tb.Tag != null)
+                    {
+                        int hoverRating = (int)tb.Tag;
+
+                        int index = 0;
+                        foreach (var starElement in starsPanel.Children.OfType<TextBlock>())
+                        {
+                            index++;
+                            starElement.Foreground = (index <= hoverRating) ? Brushes.Gold : Brushes.LightGray;
+                        }
+                    }
+                };
+
+                star.MouseLeave += (s, e) =>
+                {
+                    int index = 0;
+                    foreach (var starElement in starsPanel.Children.OfType<TextBlock>())
+                    {
+                        index++;
+                        starElement.Foreground = (index <= ratingValue) ? Brushes.Gold : Brushes.LightGray;
+                    }
+                };
+                star.MouseLeftButtonDown += (s, e) =>
+                {
+                    if (s is TextBlock tb && tb.Tag != null)
+                    {
+                        ratingValue = (int)tb.Tag;
+
+                        int index = 0;
+                        foreach (var starElement in starsPanel.Children.OfType<TextBlock>())
+                        {
+                            index++;
+                            starElement.Foreground = (index <= ratingValue) ? Brushes.Gold : Brushes.LightGray;
+                        }
+
+                        ratingValueText.Text = $"Kiválasztott értékelés: {ratingValue}/10";
+                    }
+                };
+
+                starsPanel.Children.Add(star);
+            }
+
+            ratingPanel.Children.Add(starsPanel);
+            ratingPanel.Children.Add(ratingValueText);
+
+            grid.Children.Add(ratingPanel);
+
+            
+            var commentPanel = new StackPanel
+            {
+                Margin = new Thickness(10, 0, 10, 10)
+            };
+            Grid.SetRow(commentPanel, 2);
+
+            commentPanel.Children.Add(new TextBlock
+            {
+                Text = "Kérjük, írja le a panaszt részletesen:",
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, 0, 0, 5)
+            });
 
             var complaintTextBox = new TextBox
             {
-                Margin = new Thickness(10),
                 AcceptsReturn = true,
                 TextWrapping = TextWrapping.Wrap,
-                VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                Height = 150
             };
-            Grid.SetRow(complaintTextBox, 1);
 
-            var buttonPanel = new StackPanel
+            commentPanel.Children.Add(complaintTextBox);
+            grid.Children.Add(commentPanel);
+
+            var buttonsPanel = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
                 HorizontalAlignment = HorizontalAlignment.Right,
-                Margin = new Thickness(10)
+                Margin = new Thickness(0, 0, 10, 10)
             };
+            Grid.SetRow(buttonsPanel, 3);
 
             var cancelButton = new Button
             {
                 Content = "Mégse",
-                Padding = new Thickness(10, 5, 10, 5),
-                Margin = new Thickness(5, 0, 5, 0),
-                MinWidth = 80
-            };
-
-            var saveButton = new Button
-            {
-                Content = "Mentés",
-                Padding = new Thickness(10, 5, 10, 5),
-                Margin = new Thickness(5, 0, 5, 0),
-                MinWidth = 80,
-                IsDefault = true
-            };
-
-            buttonPanel.Children.Add(cancelButton);
-            buttonPanel.Children.Add(saveButton);
-            Grid.SetRow(buttonPanel, 2);
-
-            grid.Children.Add(headerText);
-            grid.Children.Add(complaintTextBox);
-            grid.Children.Add(buttonPanel);
-
-            complaintWindow.Content = grid;
-
-            string result = null;
-
-            saveButton.Click += (s, e) =>
-            {
-                result = complaintTextBox.Text;
-                complaintWindow.DialogResult = true;
+                Padding = new Thickness(15, 8, 15, 8),
+                Margin = new Thickness(0, 0, 10, 0),
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280")),
+                Foreground = Brushes.White
             };
 
             cancelButton.Click += (s, e) => complaintWindow.DialogResult = false;
 
+            var saveButton = new Button
+            {
+                Content = "Mentés",
+                Padding = new Thickness(15, 8, 15, 8),
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#16A34A")),
+                Foreground = Brushes.White,
+                IsDefault = true
+            };
+
+            saveButton.Click += async (s, e) =>
+            {
+                if (string.IsNullOrWhiteSpace(complaintTextBox.Text))
+                {
+                    MessageBox.Show("Kérjük, írja le a panasz részleteit!", "Hiányzó információ",
+                                   MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                try
+                {
+                    saveButton.IsEnabled = false;
+
+                    var feedback = new CreateFeedback
+                    {
+                        Category = "Panasz",
+                        Rating = ratingValue,
+                        Status = "Új",
+                        Response = complaintTextBox.Text,
+                        GuestId = guestId
+                    };
+
+                    var content = new StringContent(
+                        JsonSerializer.Serialize(feedback, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                        System.Text.Encoding.UTF8,
+                        "application/json");
+
+                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+                    var response = await _httpClient.PostAsync("Feedback/UploadFeedback", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("A panasz sikeresen rögzítve!", "Sikeres művelet",
+                                       MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        var booking = bookingsListView.Items.Cast<BookingViewModel>()
+                            .FirstOrDefault(b => b.BookingId == bookingId);
+
+                        if (booking != null)
+                        {
+                            booking.HasFeedback = true;
+                            bookingsListView.Items.Refresh();
+                        }
+
+                        complaintWindow.DialogResult = true;
+                    }
+                    else
+                    {
+                        string errorResponse = await response.Content.ReadAsStringAsync();
+                        MessageBox.Show($"Hiba a visszajelzés mentésekor: {errorResponse}",
+                                       "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                        saveButton.IsEnabled = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba",
+                                   MessageBoxButton.OK, MessageBoxImage.Error);
+                    saveButton.IsEnabled = true;
+                }
+            };
+
+            buttonsPanel.Children.Add(cancelButton);
+            buttonsPanel.Children.Add(saveButton);
+            grid.Children.Add(buttonsPanel);
+
+            complaintWindow.Content = grid;
+
             if (complaintWindow.ShowDialog() == true)
             {
-                return result;
+                return new ComplaintResult
+                {
+                    Text = complaintTextBox.Text,
+                    Rating = ratingValue
+                };
             }
 
             return null;
@@ -1974,7 +2183,6 @@ namespace RoomListApp
         {
             try
             {
-                // Foglalás adatainak lekérése
                 var booking = (bookingsListView.Items.Cast<BookingViewModel>()
                     .FirstOrDefault(b => b.BookingId == bookingId));
 
@@ -1984,11 +2192,10 @@ namespace RoomListApp
                     return;
                 }
 
-                // Új feedback létrehozása
                 var feedback = new CreateFeedback
                 {
                     Category = "Panasz",
-                    Rating = 1, // Alacsony értékelés panasz esetén
+                    Rating = 1, 
                     Status = "Új",
                     Response = complaintText,
                     GuestId = booking.GuestId.Value
@@ -2007,7 +2214,6 @@ namespace RoomListApp
                     MessageBox.Show("A panasz sikeresen rögzítve!", "Sikeres művelet",
                                   MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    // Frissítjük a HasFeedback tulajdonságot
                     booking.HasFeedback = true;
                     bookingsListView.Items.Refresh();
                 }
@@ -2025,140 +2231,510 @@ namespace RoomListApp
         }
 
         private async void ViewFeedback_Click(object sender, RoutedEventArgs e)
-{
-    if (sender is Button button && button.Tag != null)
-    {
-        int bookingId = (int)button.Tag;
-        var booking = bookingsListView.Items.Cast<BookingViewModel>()
-            .FirstOrDefault(b => b.BookingId == bookingId);
-        
-        if (booking == null || !booking.GuestId.HasValue) return;
-        
-        try
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
-            
-            var response = await _httpClient.GetAsync("Feedback/GetallFeedback");
-            if (!response.IsSuccessStatusCode)
+            if (sender is Button button && button.Tag != null)
             {
-                MessageBox.Show("Nem sikerült lekérni a visszajelzéseket.", "Hiba", 
-                              MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-            
-            var responseString = await response.Content.ReadAsStringAsync();
-            var allFeedbacks = JsonSerializer.Deserialize<List<Feedback>>(responseString, 
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            
-            var guestFeedbacks = allFeedbacks
-                .Where(f => f.GuestId == booking.GuestId)
-                .OrderByDescending(f => f.FeedbackDate)
-                .ToList();
-            
-            if (guestFeedbacks.Count == 0)
-            {
-                MessageBox.Show("Nincsenek visszajelzések ehhez a vendéghez.", "Információ", 
-                              MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-            
-            ShowFeedbackDialog(guestFeedbacks, booking);
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
-}
+                int bookingId = (int)button.Tag;
+                var booking = bookingsListView.Items.Cast<BookingViewModel>()
+                    .FirstOrDefault(b => b.BookingId == bookingId);
 
-private void ShowFeedbackDialog(List<Feedback> feedbacks, BookingViewModel booking)
-{
-    var feedbackWindow = new Window
-    {
-        Title = $"Visszajelzések - {booking.GuestName}",
-        Width = 600,
-        Height = 400,
-        WindowStartupLocation = WindowStartupLocation.CenterOwner,
-        Owner = this,
-        ResizeMode = ResizeMode.NoResize
-    };
-    
-    var grid = new Grid();
-    grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
-    grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-    grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
-    
-    var headerText = new TextBlock
-    {
-        Text = $"Visszajelzések a vendégtől: {booking.GuestName}",
-        Margin = new Thickness(10),
-        FontWeight = FontWeights.Bold,
-        FontSize = 16
-    };
-    Grid.SetRow(headerText, 0);
-    
-    var listView = new ListView
-    {
-        Margin = new Thickness(10)
-    };
-    Grid.SetRow(listView, 1);
-    
-    var gridView = new GridView();
-    listView.View = gridView;
-    
-    gridView.Columns.Add(new GridViewColumn
-    {
-        Header = "Dátum",
-        DisplayMemberBinding = new Binding("FeedbackDate") 
-        { 
-            StringFormat = "{0:yyyy.MM.dd HH:mm}" 
-        },
-        Width = 120
-    });
-    
-    gridView.Columns.Add(new GridViewColumn
-    {
-        Header = "Kategória",
-        DisplayMemberBinding = new Binding("Category"),
-        Width = 100
-    });
-    
-    gridView.Columns.Add(new GridViewColumn
-    {
-        Header = "Értékelés",
-        DisplayMemberBinding = new Binding("Rating"),
-        Width = 70
-    });
-    
-    gridView.Columns.Add(new GridViewColumn
-    {
-        Header = "Panasz szövege",
-        DisplayMemberBinding = new Binding("Response"),
-        Width = 280
-    });
-    
-    listView.ItemsSource = feedbacks;
-    
-    var closeButton = new Button
-    {
-        Content = "Bezárás",
-        Padding = new Thickness(15, 8, 15, 8),
-        Margin = new Thickness(0, 10, 10, 10),
-        Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3B82F6")),
-        Foreground = Brushes.White,
-        HorizontalAlignment = HorizontalAlignment.Right
-    };
-    Grid.SetRow(closeButton, 2);
-    
-    closeButton.Click += (s, e) => feedbackWindow.Close();
-    
-    grid.Children.Add(headerText);
-    grid.Children.Add(listView);
-    grid.Children.Add(closeButton);
-    
-    feedbackWindow.Content = grid;
-    feedbackWindow.ShowDialog();
-}
+                if (booking == null || !booking.GuestId.HasValue) return;
+
+                try
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                    var response = await _httpClient.GetAsync("Feedback/GetallFeedback");
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Nem sikerült lekérni a visszajelzéseket.", "Hiba",
+                                      MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    var allFeedbacks = JsonSerializer.Deserialize<List<Feedback>>(responseString,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    var guestFeedbacks = allFeedbacks
+                        .Where(f => f.GuestId == booking.GuestId)
+                        .OrderByDescending(f => f.FeedbackDate)
+                        .ToList();
+
+                    if (guestFeedbacks.Count == 0)
+                    {
+                        MessageBox.Show("Nincsenek visszajelzések ehhez a vendéghez.", "Információ",
+                                      MessageBoxButton.OK, MessageBoxImage.Information);
+                        return;
+                    }
+
+                    ShowFeedbacksListDialog(guestFeedbacks, booking);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void ShowFeedbacksListDialog(List<Feedback> feedbacks, BookingViewModel booking)
+        {
+            var feedbackWindow = new Window
+            {
+                Title = $"Visszajelzések - {booking.GuestName}",
+                Width = 800, 
+                Height = 600, 
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Owner = this
+            };
+
+            var mainGrid = new Grid();
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+
+            var headerText = new TextBlock
+            {
+                Text = $"Visszajelzések a vendégtől: {booking.GuestName}",
+                Margin = new Thickness(10),
+                FontWeight = FontWeights.Bold,
+                FontSize = 16
+            };
+            Grid.SetRow(headerText, 0);
+            mainGrid.Children.Add(headerText);
+
+            var listView = new ListView
+            {
+                Margin = new Thickness(10),
+                SelectionMode = SelectionMode.Single
+            };
+            Grid.SetRow(listView, 1);
+
+            var gridView = new GridView();
+            listView.View = gridView;
+
+            gridView.Columns.Add(new GridViewColumn
+            {
+                Header = "Dátum",
+                DisplayMemberBinding = new Binding("FeedbackDate")
+                {
+                    StringFormat = "{0:yyyy.MM.dd}"
+                },
+                Width = 80
+            });
+
+            gridView.Columns.Add(new GridViewColumn
+            {
+                Header = "Kategória",
+                DisplayMemberBinding = new Binding("Category"),
+                Width = 80
+            });
+
+            var ratingColumn = new GridViewColumn
+            {
+                Header = "Értékelés",
+                Width = 180
+            };
+
+            ratingColumn.CellTemplate = new DataTemplate();
+            var factory = new FrameworkElementFactory(typeof(StackPanel));
+            factory.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
+
+            for (int i = 1; i <= 10; i++)
+            {
+                var starFactory = new FrameworkElementFactory(typeof(TextBlock));
+                starFactory.SetValue(TextBlock.TextProperty, "★");
+                starFactory.SetValue(TextBlock.FontSizeProperty, 16.0);
+                starFactory.SetValue(TextBlock.MarginProperty, new Thickness(1));
+
+                Binding colorBinding = new Binding("Rating");
+                colorBinding.Converter = new StarColorConverter();
+                colorBinding.ConverterParameter = i;
+                starFactory.SetBinding(TextBlock.ForegroundProperty, colorBinding);
+
+                factory.AppendChild(starFactory);
+            }
+
+            ratingColumn.CellTemplate.VisualTree = factory;
+            gridView.Columns.Add(ratingColumn);
+
+            gridView.Columns.Add(new GridViewColumn
+            {
+                Header = "Állapot",
+                DisplayMemberBinding = new Binding("Status"),
+                Width = 80
+            });
+
+            var commentColumn = new GridViewColumn
+            {
+                Header = "Megjegyzés",
+                Width = 150
+            };
+
+            commentColumn.CellTemplate = new DataTemplate();
+            var commentFactory = new FrameworkElementFactory(typeof(TextBlock));
+            commentFactory.SetBinding(TextBlock.TextProperty, new Binding("Comments"));
+            commentFactory.SetValue(TextBlock.TextWrappingProperty, TextWrapping.Wrap);
+            commentFactory.SetValue(TextBlock.MaxWidthProperty, 140.0);
+            commentFactory.SetValue(TextBlock.MarginProperty, new Thickness(5));
+            commentColumn.CellTemplate.VisualTree = commentFactory;
+
+            gridView.Columns.Add(commentColumn);
+
+            var responseColumn = new GridViewColumn
+            {
+                Header = "Panasz",
+                Width = 200 
+
+            };
+
+            responseColumn.CellTemplate = new DataTemplate();
+            var responseFactory = new FrameworkElementFactory(typeof(TextBlock));
+            responseFactory.SetBinding(TextBlock.TextProperty, new Binding("Response"));
+            responseFactory.SetValue(TextBlock.TextWrappingProperty, TextWrapping.Wrap);
+            responseFactory.SetValue(TextBlock.MaxWidthProperty, 190.0);
+            responseFactory.SetValue(TextBlock.MarginProperty, new Thickness(5));
+            responseColumn.CellTemplate.VisualTree = responseFactory;
+
+            gridView.Columns.Add(responseColumn);
+
+            listView.ItemsSource = feedbacks;
+
+            listView.ItemContainerStyle = new Style(typeof(ListViewItem))
+            {
+                Setters =
+        {
+            new Setter(ListViewItem.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch),
+            new Setter(ListViewItem.HeightProperty, double.NaN), 
+            new Setter(ListViewItem.MinHeightProperty, 50.0) 
+        }
+            };
+
+            mainGrid.Children.Add(listView);
+
+            var buttonsPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(0, 10, 10, 10)
+            };
+            Grid.SetRow(buttonsPanel, 2);
+
+            var editButton = new Button
+            {
+                Content = "Szerkesztés",
+                Padding = new Thickness(15, 8, 15, 8),
+                Margin = new Thickness(0, 0, 10, 0),
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#16A34A")),
+                Foreground = Brushes.White
+            };
+
+            editButton.Click += async (s, e) =>
+            {
+                var selectedFeedback = listView.SelectedItem as Feedback;
+                if (selectedFeedback == null)
+                {
+                    MessageBox.Show("Kérjük, válasszon ki egy visszajelzést a szerkesztéshez.",
+                                  "Nincs kiválasztva", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                await ShowFeedbackEditDialog(selectedFeedback, feedbackWindow);
+                listView.Items.Refresh();
+            };
+
+            var closeButton = new Button
+            {
+                Content = "Bezárás",
+                Padding = new Thickness(15, 8, 15, 8),
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280")),
+                Foreground = Brushes.White
+            };
+
+            closeButton.Click += (s, e) => feedbackWindow.Close();
+
+            buttonsPanel.Children.Add(editButton);
+            buttonsPanel.Children.Add(closeButton);
+            mainGrid.Children.Add(buttonsPanel);
+
+            feedbackWindow.Content = mainGrid;
+            feedbackWindow.ShowDialog();
+        }
+
+        private async Task ShowFeedbackEditDialog(Feedback feedback, Window owner)
+        {
+            var editWindow = new Window
+            {
+                Title = "Visszajelzés szerkesztése",
+                Width = 500,
+                Height = 400,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Owner = owner,
+                ResizeMode = ResizeMode.NoResize
+            };
+
+            var grid = new Grid();
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+
+            var headerText = new TextBlock
+            {
+                Text = "Visszajelzés szerkesztése",
+                Margin = new Thickness(10),
+                FontWeight = FontWeights.Bold,
+                FontSize = 16
+            };
+            Grid.SetRow(headerText, 0);
+            grid.Children.Add(headerText);
+
+            var infoPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(10, 5, 10, 10)
+            };
+            Grid.SetRow(infoPanel, 1);
+
+            infoPanel.Children.Add(new TextBlock
+            {
+                Text = $"Dátum: {feedback.FeedbackDate?.ToString("yyyy.MM.dd")}",
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, 0, 20, 0)
+            });
+
+            infoPanel.Children.Add(new TextBlock
+            {
+                Text = $"Kategória: {feedback.Category}",
+                FontWeight = FontWeights.SemiBold
+            });
+
+            grid.Children.Add(infoPanel);
+
+            var ratingPanel = new StackPanel
+            {
+                Margin = new Thickness(10, 5, 10, 10)
+            };
+            Grid.SetRow(ratingPanel, 2);
+
+            ratingPanel.Children.Add(new TextBlock
+            {
+                Text = "Értékelés (kattintson a csillagokra):",
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, 0, 0, 10)
+            });
+
+            int ratingValue = feedback.Rating ?? 1;
+
+            var starsPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Left
+            };
+
+            var ratingValueText = new TextBlock
+            {
+                Text = $"Kiválasztott értékelés: {ratingValue}/10",
+                Margin = new Thickness(0, 10, 0, 0)
+            };
+
+            for (int i = 1; i <= 10; i++)
+            {
+                var star = new TextBlock
+                {
+                    Text = "★",
+                    FontSize = 32,
+                    Foreground = (i <= ratingValue) ? Brushes.Gold : Brushes.LightGray,
+                    Margin = new Thickness(2, 0, 2, 0),
+                    Cursor = Cursors.Hand,
+                    Tag = i
+                };
+
+                star.MouseEnter += (s, e) =>
+                {
+                    if (s is TextBlock tb && tb.Tag != null)
+                    {
+                        int hoverRating = (int)tb.Tag;
+
+                        int index = 0;
+                        foreach (var starElement in starsPanel.Children.OfType<TextBlock>())
+                        {
+                            index++;
+                            starElement.Foreground = (index <= hoverRating) ? Brushes.Gold : Brushes.LightGray;
+                        }
+                    }
+                };
+
+                star.MouseLeave += (s, e) =>
+                {
+                    int index = 0;
+                    foreach (var starElement in starsPanel.Children.OfType<TextBlock>())
+                    {
+                        index++;
+                        starElement.Foreground = (index <= ratingValue) ? Brushes.Gold : Brushes.LightGray;
+                    }
+                };
+
+                star.MouseLeftButtonDown += (s, e) =>
+                {
+                    if (s is TextBlock tb && tb.Tag != null)
+                    {
+                        ratingValue = (int)tb.Tag;
+
+                        int index = 0;
+                        foreach (var starElement in starsPanel.Children.OfType<TextBlock>())
+                        {
+                            index++;
+                            starElement.Foreground = (index <= ratingValue) ? Brushes.Gold : Brushes.LightGray;
+                        }
+
+                        ratingValueText.Text = $"Kiválasztott értékelés: {ratingValue}/10";
+                    }
+                };
+
+                starsPanel.Children.Add(star);
+            }
+
+            ratingPanel.Children.Add(starsPanel);
+            ratingPanel.Children.Add(ratingValueText);
+            grid.Children.Add(ratingPanel);
+
+            var statusPanel = new StackPanel
+            {
+                Margin = new Thickness(10, 5, 10, 10)
+            };
+            Grid.SetRow(statusPanel, 3);
+
+            statusPanel.Children.Add(new TextBlock
+            {
+                Text = "Állapot:",
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, 0, 0, 5)
+            });
+
+            var statusCombo = new ComboBox
+            {
+                Width = 150,
+                HorizontalAlignment = HorizontalAlignment.Left
+            };
+            statusCombo.Items.Add("Új");
+            statusCombo.Items.Add("Feldolgozva");
+            statusCombo.Items.Add("Megoldva");
+            statusCombo.Items.Add("Elutasítva");
+            statusCombo.SelectedItem = feedback.Status;
+
+            statusPanel.Children.Add(statusCombo);
+            grid.Children.Add(statusPanel);
+
+            var commentPanel = new StackPanel
+            {
+                Margin = new Thickness(10, 5, 10, 10)
+            };
+            Grid.SetRow(commentPanel, 4);
+
+            commentPanel.Children.Add(new TextBlock
+            {
+                Text = "Megjegyzés:",
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, 0, 0, 5)
+            });
+
+            var commentTextBox = new TextBox
+            {
+                AcceptsReturn = true,
+                TextWrapping = TextWrapping.Wrap,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                Height = 100,
+                Text = feedback.Comments ?? ""
+            };
+            commentPanel.Children.Add(commentTextBox);
+            grid.Children.Add(commentPanel);
+
+            var buttonPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(0, 10, 10, 10)
+            };
+            Grid.SetRow(buttonPanel, 5);
+
+            var cancelButton = new Button
+            {
+                Content = "Mégse",
+                Padding = new Thickness(15, 8, 15, 8),
+                Margin = new Thickness(0, 0, 10, 0),
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#6B7280")),
+                Foreground = Brushes.White
+            };
+
+            cancelButton.Click += (s, e) => editWindow.Close();
+
+            var saveButton = new Button
+            {
+                Content = "Mentés",
+                Padding = new Thickness(15, 8, 15, 8),
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#16A34A")),
+                Foreground = Brushes.White
+            };
+
+            saveButton.Click += async (s, e) =>
+            {
+                try
+                {
+                    saveButton.IsEnabled = false;
+
+                    var updateData = new UpdateFeedback
+                    {
+                        Comment = commentTextBox.Text,
+                        Status = statusCombo.SelectedItem?.ToString(),
+                        Rating = ratingValue
+                    };
+
+                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                    var content = new StringContent(
+                        JsonSerializer.Serialize(updateData, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                        System.Text.Encoding.UTF8,
+                        "application/json");
+
+                    var response = await _httpClient.PutAsync($"Feedback/UpdateForFeedback/{feedback.FeedbackId}", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        feedback.Comments = updateData.Comment;
+                        feedback.Status = updateData.Status;
+                        feedback.Rating = updateData.Rating;
+
+                        MessageBox.Show("Visszajelzés sikeresen frissítve!", "Mentés sikeres",
+                                      MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        editWindow.Close();
+                    }
+                    else
+                    {
+                        string responseContent = await response.Content.ReadAsStringAsync();
+                        MessageBox.Show($"Hiba a visszajelzés frissítésekor: {responseContent}",
+                                      "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                        saveButton.IsEnabled = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    saveButton.IsEnabled = true;
+                }
+            };
+
+            buttonPanel.Children.Add(cancelButton);
+            buttonPanel.Children.Add(saveButton);
+            grid.Children.Add(buttonPanel);
+
+            editWindow.Content = grid;
+            editWindow.ShowDialog();
+        }
+
 
     }
 }
@@ -2394,6 +2970,8 @@ public class BookingViewModel
          public bool HasFeedback { get; set; }
 }
 
+
+
 //Feedback osztályok
 public class CreateFeedback
 {
@@ -2417,4 +2995,11 @@ public class Feedback
     public DateTime? DateAdded { get; set; }
     public int? GuestId { get; set; }
 }
+public class UpdateFeedback
+{
+    public string Comment { get; set; }
+    public string Status { get; set; }
+    public int? Rating { get; set; } 
+}
+
 
