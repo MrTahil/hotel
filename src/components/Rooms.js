@@ -14,7 +14,7 @@ function RoomCard() {
         const data = await response.json();
         console.log(data); // Ellenőrizd a szerver válaszát
         setRooms(data);
-        setFilteredRooms(data.filter(room => room.status.toLowerCase() === 'available'));
+        setFilteredRooms(data.filter(room => room.status.toLowerCase() !== null));
       } catch (error) {
         console.error('Error fetching rooms:', error);
       }
@@ -106,7 +106,6 @@ function RoomCard() {
                     <p><strong>Szobaszám:</strong> {room.roomNumber || 'N/A'}</p>
                     <p><strong>Befogadó képesség:</strong> {room.capacity ? `${room.capacity} fő` : 'N/A'}</p>
                     <p><strong>Ár / Éj / Fő:</strong> {room.pricePerNight ? `${room.pricePerNight} Ft` : 'N/A'}</p>
-                    <p><strong>Státusz:</strong> {room.status || 'No data'}</p>
                     <p><strong>Emelet:</strong> {room.floorNumber || 'N/A'}</p>
                     <p><strong>Kényelmi szolgáltatások:</strong> {room.amenities || 'No data'}</p>
                   </div>
