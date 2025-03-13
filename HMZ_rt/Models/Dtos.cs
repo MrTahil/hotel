@@ -332,3 +332,9 @@ public class UpdateFeedback
     public string? Status { get; set; }
 
 }
+
+public class UpdatePaymentInfo
+{
+    public string? Status { get; set; }
+    public string? PaymentMethod { get; set; }  
+}
