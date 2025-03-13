@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 function RoomCard() {
   const [rooms, setRooms] = useState([]);
   const [guestCount, setGuestCount] = useState('Bármennyi');
+  const [checkInDate, setCheckInDate] = useState('');
+  const [checkOutDate, setCheckOutDate] = useState('');
   const [filteredRooms, setFilteredRooms] = useState([]);
 
   useEffect(() => {
@@ -20,15 +22,25 @@ function RoomCard() {
     fetchRooms();
   }, []);
 
-  const handleSearch = () => {
-    setFilteredRooms(
-      guestCount === 'Bármennyi' 
-        ? rooms.filter(room => room.status.toLowerCase() === 'available')
-        : rooms.filter(room => room.status.toLowerCase() === 'available' && room.capacity === parseInt(guestCount))
-    );
+  const handleSearch = async () => {
+    try {
+      const response = await fetch('https://localhost:7047/Rooms/Searchwithparams', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          CheckInDate: checkInDate,
+          CheckOutDate: checkOutDate,
+          GuestNumber: guestCount === 'Bármennyi' ? 0 : parseInt(guestCount),
+        }),
+      });
+      const data = await response.json();
+      setFilteredRooms(data);
+    } catch (error) {
+      console.error('Error searching rooms:', error);
+    }
   };
-
-
 
   return (
     <main className="bg-gradient-to-b from-blue-100 via-blue-50 to-white min-h-screen pt-8 md:pt-16">
@@ -37,11 +49,21 @@ function RoomCard() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Érkezés</label>
-              <input type="date" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+              <input 
+                type="date" 
+                className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" 
+                value={checkInDate}
+                onChange={(e) => setCheckInDate(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Távozás</label>
-              <input type="date" className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+              <input 
+                type="date" 
+                className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" 
+                value={checkOutDate}
+                onChange={(e) => setCheckOutDate(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Vendégek száma</label>
@@ -56,6 +78,7 @@ function RoomCard() {
                 <option value="3">3 fő</option>
                 <option value="4">4 fő</option>
                 <option value="5">5 fő</option>
+                <option value="6">6 fő</option>
               </select>
             </div>
             <div className="flex items-end">
