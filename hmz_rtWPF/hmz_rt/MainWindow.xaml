@@ -10,6 +10,8 @@
 
     <Window.Resources>
         <local:StatusToButtonTextConverter x:Key="StatusToButtonTextConverter"/>
+        <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
         <!-- Card Style -->
         <Style x:Key="DashboardCard" TargetType="Border">
             <Setter Property="CornerRadius" Value="12"/>
@@ -1197,6 +1199,31 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
+                        <GridViewColumn Header="Visszajelzések" Width="120">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Visszajelzések" 
+                    Tag="{Binding BookingId}"
+                    Click="ViewFeedback_Click"
+                    Width="100"
+                    Height="30"
+                    Visibility="{Binding HasFeedback, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="6"/>
+                                            </Style>
+                                        </Button.Resources>
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Background" Value="#4B5563"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
                     </GridView>
                 </ListView.View>
 
