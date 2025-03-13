@@ -1199,14 +1199,14 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Header="Visszajelzések" Width="120">
+                        <GridViewColumn Header="Visszajelzések" Width="100">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button Content="Visszajelzések" 
+                                    <Button Content="Megtekintés" 
                     Tag="{Binding BookingId}"
                     Click="ViewFeedback_Click"
-                    Width="100"
-                    Height="30"
+                    Width="90"
+                    Height="28"
                     Visibility="{Binding HasFeedback, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <Button.Resources>
                                             <Style TargetType="Border">
@@ -1215,7 +1215,7 @@
                                         </Button.Resources>
                                         <Button.Style>
                                             <Style TargetType="Button">
-                                                <Setter Property="Background" Value="#4B5563"/>
+                                                <Setter Property="Background" Value="#3B82F6"/>
                                                 <Setter Property="Foreground" Value="White"/>
                                             </Style>
                                         </Button.Style>
