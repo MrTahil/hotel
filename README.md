@@ -28,7 +28,7 @@ A backend telepítéséhez kövesd az alábbi lépéseket:
   ```bash
   git clone https://github.com/username/HMZ-rt.git
 
-
+:)
 Dokumentációk
 A projekthez tartozó dokumentációkat az alábbiakban találhatók:
 
