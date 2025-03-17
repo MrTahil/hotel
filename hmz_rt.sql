@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Már 12. 13:56
+-- Létrehozás ideje: 2025. Már 17. 09:27
 -- Kiszolgáló verziója: 10.4.20-MariaDB
 -- PHP verzió: 7.3.29
 
@@ -79,7 +79,8 @@ CREATE TABLE `bookings` (
 --
 
 INSERT INTO `bookings` (`room_id`, `booking_id`, `guest_id`, `check_in_date`, `check_out_date`, `number_of_guests`, `total_price`, `booking_date`, `status`, `payment_status`) VALUES
-(20, 4, 3, '2025-03-12', '2025-03-15', 1, '195', '2025-03-10', 'Jóváhagyva', 'Fizetésre vár');
+(20, 4, 3, '2025-03-12', '2025-03-15', 1, '195', '2025-03-10', 'Checked In', 'Fizetésre vár'),
+(10, 6, 3, '2025-03-17', '2025-03-20', 1, '70000', '2025-03-17', 'Finished', 'Fizetve');
 
 -- --------------------------------------------------------
 
@@ -108,6 +109,7 @@ CREATE TABLE `eventbookings` (
 
 CREATE TABLE `events` (
   `capacity` int(11) DEFAULT NULL,
+  `price` decimal(10,0) NOT NULL,
   `status` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
   `event_id` int(11) NOT NULL,
   `event_name` varchar(255) COLLATE utf8mb4_hungarian_ci DEFAULT NULL,
@@ -124,16 +126,16 @@ CREATE TABLE `events` (
 -- A tábla adatainak kiíratása `events`
 --
 
-INSERT INTO `events` (`capacity`, `status`, `event_id`, `event_name`, `event_date`, `location`, `description`, `date_added`, `organizer_name`, `contact_info`, `images`) VALUES
-(50000, 'Available', 1, 'Hotel Fesztivál', '2025-03-15', 'Margit-sziget', 'Haverok? Buli? Hangos zene? Mi kell még?! Gyere el minden hétvégén megrendezett fesztiválunkra, biztos élvezni fogod!', '2025-03-12', 'Sike Domonkos', 'siked@kkszki.hu', '../img/fesztival.png'),
-(15, 'Available', 2, 'Főző tanfolyam', '2025-03-14', 'Recepciónál kell jelentkezni és abban a pillanatban vezetnek a konyhánkba!', 'Szeretnél belekóstolni a michelin csillagos éttermek titkaiba? Tarts velünk egy 2 órás tanfolyam keretein belül sok sok tapasztalatot szerezhetsz!', '2025-03-12', 'Séf Kovács Szabolcs', 'kovacssz@kkszki.hu', '../img/fozo.png'),
-(10, 'Available', 3, 'Bortúra', '2025-03-25', 'Tokaj szőlőhegyek', 'Szereted a természetet, a madárcsicsergést, és netán a bort? Ezesetben gyere kóstoljatok bele a Tokaji szőlőhegyek termésébe!', '2025-03-12', 'Zelenák Zalán Noel', '+36 70 323 7436', '../img/bor.png'),
-(5, 'Available', 4, 'Csillagászat', '2025-03-16', 'Hotelünk B2 épületének 15. emeletén található csillagászati szoba', 'Éjjeli bagoly vagy? Szereted az égitesteket? Gyere nézd meg őket!', '2025-03-12', 'Dr. Pozsgai Marcell TT.', 'pozsgaim@kkszki.hu', '../img/csillag.png'),
-(15, 'Available', 5, 'Fotótúra', '2025-03-19', 'Csanyik', 'Szeretnél megtanulni profi módon kamerával bánni? Gyere, megtanítjuk!', '2025-03-12', 'Ágoston Attila', 'agostona@kkszki.hu', '../img/foto.png'),
-(2, 'Available', 6, 'Horgászat', '2025-03-30', 'Csorba tó', 'Szeretnél egy kicsit elszakadni a világtól? Kapsz felszerelést, oktatást, mi kell még? Hal? Az is lesz....', '2025-03-12', 'Kovács Szabolcs', 'kovacssz@kszki.hu', '../img/horgaszat.png'),
-(20, 'Available', 7, 'Jóga hegyen', '2025-03-28', 'Kékes', 'Szeretsz jógázni? Gyere a PHD jógaoktatónnkkal egy spirituális utazásra!', '2025-03-12', 'Jánosi Marcell PHD , Pozsgai Marcell PHD', 'janosim@kkszki.hu , pozsgaim@kkszki.hu', '../img/jogahegyen.png'),
-(50, 'Available', 8, 'Múzeum túra', '2025-03-31', 'Pannon Tenger Múzeum', 'A világ egyik legelismertebb MD Doktorával körbenézhetsz és tanulhatsz a történelemről!', '2025-03-12', 'Mr. Dr. Jánosi MD. Marcell jr. sr.', 'janosim@kkszki.hu', '../img/muzeum.png'),
-(200, 'Available', 9, 'Téli Sport', '2025-03-14', 'Kékes', 'Minden Decembertől Februárig elérhető köreinkben az olimpia aranyérmes magyar nyrtesünkkel a sielés, snowboardozás, és ami még van!', '2025-03-12', 'Bódi Balázs 🥇', 'bodib@kkszki.hu', '../img/sieles.png');
+INSERT INTO `events` (`capacity`, `price`, `status`, `event_id`, `event_name`, `event_date`, `location`, `description`, `date_added`, `organizer_name`, `contact_info`, `images`) VALUES
+(50000, '0', 'Available', 1, 'Hotel Fesztivál', '2025-03-15', 'Margit-sziget', 'Haverok? Buli? Hangos zene? Mi kell még?! Gyere el minden hétvégén megrendezett fesztiválunkra, biztos élvezni fogod!', '2025-03-12', 'Sike Domonkos', 'siked@kkszki.hu', '../img/fesztival.png'),
+(15, '0', 'Available', 2, 'Főző tanfolyam', '2025-03-14', 'Recepciónál kell jelentkezni és abban a pillanatban vezetnek a konyhánkba!', 'Szeretnél belekóstolni a michelin csillagos éttermek titkaiba? Tarts velünk egy 2 órás tanfolyam keretein belül sok sok tapasztalatot szerezhetsz!', '2025-03-12', 'Séf Kovács Szabolcs', 'kovacssz@kkszki.hu', '../img/fozo.png'),
+(10, '0', 'Available', 3, 'Bortúra', '2025-03-25', 'Tokaj szőlőhegyek', 'Szereted a természetet, a madárcsicsergést, és netán a bort? Ezesetben gyere kóstoljatok bele a Tokaji szőlőhegyek termésébe!', '2025-03-12', 'Zelenák Zalán Noel', '+36 70 323 7436', '../img/bor.png'),
+(5, '0', 'Available', 4, 'Csillagászat', '2025-03-16', 'Hotelünk B2 épületének 15. emeletén található csillagászati szoba', 'Éjjeli bagoly vagy? Szereted az égitesteket? Gyere nézd meg őket!', '2025-03-12', 'Dr. Pozsgai Marcell TT.', 'pozsgaim@kkszki.hu', '../img/csillag.png'),
+(15, '0', 'Available', 5, 'Fotótúra', '2025-03-19', 'Csanyik', 'Szeretnél megtanulni profi módon kamerával bánni? Gyere, megtanítjuk!', '2025-03-12', 'Ágoston Attila', 'agostona@kkszki.hu', '../img/foto.png'),
+(2, '0', 'Available', 6, 'Horgászat', '2025-03-30', 'Csorba tó', 'Szeretnél egy kicsit elszakadni a világtól? Kapsz felszerelést, oktatást, mi kell még? Hal? Az is lesz....', '2025-03-12', 'Kovács Szabolcs', 'kovacssz@kszki.hu', '../img/horgaszat.png'),
+(20, '0', 'Available', 7, 'Jóga hegyen', '2025-03-28', 'Kékes', 'Szeretsz jógázni? Gyere a PHD jógaoktatónnkkal egy spirituális utazásra!', '2025-03-12', 'Jánosi Marcell PHD , Pozsgai Marcell PHD', 'janosim@kkszki.hu , pozsgaim@kkszki.hu', '../img/jogahegyen.png'),
+(50, '0', 'Available', 8, 'Múzeum túra', '2025-03-31', 'Pannon Tenger Múzeum', 'A világ egyik legelismertebb MD Doktorával körbenézhetsz és tanulhatsz a történelemről!', '2025-03-12', 'Mr. Dr. Jánosi MD. Marcell jr. sr.', 'janosim@kkszki.hu', '../img/muzeum.png'),
+(200, '0', 'Available', 9, 'Téli Sport', '2025-03-14', 'Kékes', 'Minden Decembertől Februárig elérhető köreinkben az olimpia aranyérmes magyar nyrtesünkkel a sielés, snowboardozás, és ami még van!', '2025-03-12', 'Bódi Balázs 🥇', 'bodib@kkszki.hu', '../img/sieles.png');
 
 -- --------------------------------------------------------
 
@@ -282,7 +284,8 @@ CREATE TABLE `payments` (
 --
 
 INSERT INTO `payments` (`payment_id`, `booking_id`, `payment_date`, `amount`, `payment_method`, `transaction_id`, `status`, `currency`, `payment_notes`, `date_added`) VALUES
-(3, 4, '0001-01-01', '195', 'string', '0', 'Fizetésre vár', 'Huf', '', '2025-03-10');
+(3, 4, '0001-01-01', '195', 'Készpénz', '0', 'Fizetve', 'Huf', '', '2025-03-10'),
+(5, 6, '0001-01-01', '70000', 'Készpénz', '0', 'Fizetve', 'Huf', '', '2025-03-17');
 
 -- --------------------------------------------------------
 
@@ -526,7 +529,7 @@ CREATE TABLE `useraccounts` (
 INSERT INTO `useraccounts` (`username`, `user_id`, `password`, `email`, `role`, `RefreshToken`, `RefreshTokenExpiryTime`, `status`, `date_created`, `last_login`, `date_updated`, `notes`, `authenticationcode`, `authenticationexpire`) VALUES
 ('Tahil', 3, 'hte+RnleAunUji+Bx3f7EPd8Nd2nOw82PS50E6kPBYOBYQ+8JUKlArMigzjZ1CM3', 'hiloczkit@kkszki.hu', 'System', 'OMPldv1Ly9+hEyF2hIEoAXEHpWJhBg2gtr216ykVIJM=', '2025-02-21', 'string', '2025-01-16', '2025-01-16', '2025-01-16', 'string', '111111', '2025-02-13'),
 ('asdasdasd', 4, '3S4JbEmjI0P69HENXf0Wp+u8teCyLgUPrKSYOMLRv91+ixql4MlfM4TWgeaJLIU/', 'hiloczkit12@kkszki.hu', 'Base', 'qiNaBxchix/fw5p2I6Bq0odyQmSo0CmQawB6MiPqVFc=', '2025-01-23', 'string', '2025-01-16', '2025-01-16', '2025-01-16', 'string', '111111', '2025-02-13'),
-('a_Beto', 5, 'u04oCPhO+K7Y9IBD+zsk/QP/jWnVhlEdpOyaWFAzwQjPvc0kubpehqBt15MLXuVv', 'monostorir@kkszki.hu', 'System', 'JqvjKG+yaMYoaZOHM9KSWNCO5uJCwGLd5hrviSgSLLs=', '2025-03-17', 'string', '2025-02-14', '2025-02-14', '2025-02-14', 'string', 'activated', '2025-02-20'),
+('a_Beto', 5, 'u04oCPhO+K7Y9IBD+zsk/QP/jWnVhlEdpOyaWFAzwQjPvc0kubpehqBt15MLXuVv', 'monostorir@kkszki.hu', 'System', 'GYmdQY9OZuKtolofd3QfQD5ausXAkECx3+6CJqUGRFM=', '2025-03-24', 'string', '2025-02-14', '2025-02-14', '2025-02-14', 'string', 'activated', '2025-02-20'),
 ('Bozsgai', 6, '48RL9zaxFrXNx3WQWwmErDml2gjVS/8N8ess8G65a4mMWb4VBkZqDJDsEki62YpY', 'monostori@kkszki.hu', 'Base', NULL, NULL, NULL, '2025-02-21', '2025-02-21', '2025-02-21', NULL, 'activated', '2025-02-21'),
 ('LoriAttila', 7, '92SGRkfIVMvNl6lr+bRfxUldVRoplekiF+3r/jgeepFxB/Ocq9d9egROEekm38P/', 'nokivagyok69420@gmail.com', 'Base', '6IAshvkZE4nL86EQQXMhOzTJCKchbWQtHGbU9AD4Ebk=', '2025-03-19', NULL, '2025-03-12', '2025-03-12', '2025-03-12', NULL, 'activated', NULL);
 
@@ -691,7 +694,7 @@ ALTER TABLE `amenities`
 -- AUTO_INCREMENT a táblához `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT a táblához `eventbookings`
@@ -745,7 +748,7 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT a táblához `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT a táblához `promotions`
