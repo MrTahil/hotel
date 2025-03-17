@@ -5,6 +5,7 @@ import { faUser } from "@fortawesome/free-regular-svg-icons";
 import RegisterModal from './RegisterModal';
 import LoginModal from './LoginModal';
 import ProfileModal from './ProfileModal';
+import { Link } from 'react-router-dom';
 
 function Navbar() {
     const [activeModal, setActiveModal] = useState(null);
@@ -95,15 +96,9 @@ function Navbar() {
                             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2">
                                 {user ? (
                                     <>
-                                        <button 
-                                            onClick={() => {
-                                                setMenuOpen(false);
-                                                setShowProfileModal(true);
-                                            }} 
-                                            className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
-                                        >
-                                            {user}
-                                        </button>
+                                        <Link to="/profile">
+                                        <button className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700">Profil megnyitása</button>
+                                        </Link>
                                         <button 
                                             onClick={handleLogout} 
                                             className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"

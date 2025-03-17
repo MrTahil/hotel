@@ -11,6 +11,8 @@ import './App.css';
 import './index.css';
 import Footer from './components/Footer';
 import Services from './components/Services';
+import Foglalas from './components/Foglalas';
+import ProfilePage from '../src/components/ProfileModal';
 
 
 function App() {
@@ -26,7 +28,9 @@ function App() {
                         <Route path="/kapcsolat" element={<Contact/>} />
                         <Route path="/programok" element={<Programs/>} />
                         <Route path="/szolgaltatasok" element={<Services />} />
-
+                        <Route path="/foglalas" element={<Foglalas />} />
+                        <Route path="*" element={<h1>404 - Az oldal nem található</h1>} />
+                        <Route path="/profile" element={<ProfilePage />} />
                     </Routes>
                 </div>
                 <Footer/>

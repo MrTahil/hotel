@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 function RoomCard() {
   const [rooms, setRooms] = useState([]);
@@ -6,6 +7,7 @@ function RoomCard() {
   const [checkInDate, setCheckInDate] = useState('');
   const [checkOutDate, setCheckOutDate] = useState('');
   const [filteredRooms, setFilteredRooms] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -109,7 +111,11 @@ function RoomCard() {
                     <p><strong>Emelet:</strong> {room.floorNumber || 'N/A'}</p>
                     <p><strong>Kényelmi szolgáltatások:</strong> {room.amenities || 'No data'}</p>
                   </div>
-                  <button className="w-full bg-blue-800 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-4">
+
+                  <button
+                    className="w-full bg-blue-800 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-4"
+                    onClick={() => navigate('/Foglalas', { state: { room } })}
+                  >
                     Foglalás
                   </button>
                 </div>
