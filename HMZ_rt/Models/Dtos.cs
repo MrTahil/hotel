@@ -18,8 +18,6 @@ namespace HMZ_rt.Models
         public string? Email { get; set; }
         public string? Status { get; set; }
         public string? Notes { get; set; }
-        public string? TwoFactorCode { get; set; }
-        public DateTime? TwoFactorCodeExpiry { get; set; }
     }
 
     public record CreateNotifiactionDto( string? Message, string? Status, string? Type, int? Priority, string? Notes, int UserId, string? Category);
@@ -237,6 +235,8 @@ public class CreateEvent
     public string? OrganizerName { get; set; }
     [Required(ErrorMessage = "A kontaktinfó megadása kötelező")]
     public string? ContactInfo { get; set; }
+    [Required(ErrorMessage = "Az ár megadása kötelező!")]
+    public decimal? Price { get; set; }
 }
 public class UpdateEvent
 {
@@ -256,6 +256,8 @@ public class UpdateEvent
     public string? OrganizerName { get; set; }
     [Required(ErrorMessage = "A kontaktinfó megadása kötelező")]
     public string? ContactInfo { get; set; }
+    [Required(ErrorMessage = "Az ár megadása kötelező!")]
+    public decimal? Price { get; set; }
 }
 
 
@@ -337,4 +339,13 @@ public class UpdatePaymentInfo
 {
     public string? Status { get; set; }
     public string? PaymentMethod { get; set; }  
+}
+
+public class CreateEventBooking
+{
+    public int GuestId { get; set; }
+    public int? NumberOfTickets { get; set; }
+    public string? Status { get; set; }
+    public string? PaymentStatus { get; set; }
+    public string? Notes {  get; set; }
 }

@@ -7,6 +7,8 @@ public partial class Event
 {
     public int? Capacity { get; set; }
 
+    public decimal? Price { get; set; }
+
     public string? Status { get; set; }
 
     public int EventId { get; set; }

@@ -55,7 +55,9 @@ namespace HMZ_rt.Controllers
                         Description = crtdto.Description,
                         OrganizerName = crtdto.OrganizerName,
                         ContactInfo = crtdto.ContactInfo,
-                        DateAdded = DateTime.Now
+                        DateAdded = DateTime.Now,
+                        Price = crtdto.Price
+                        
                     };
                     if (news != null) { 
                         await _context.Events.AddAsync(news);
@@ -89,6 +91,7 @@ namespace HMZ_rt.Controllers
                     egyevent.Description = udto.Description;
                     egyevent.OrganizerName = udto.OrganizerName;
                     egyevent.ContactInfo = udto.ContactInfo;
+                    egyevent.Price = udto.Price;
                     await _context.SaveChangesAsync();
                     return StatusCode(201, "Sikeres mentés");
                 }return StatusCode(404, "Valami nem jó");

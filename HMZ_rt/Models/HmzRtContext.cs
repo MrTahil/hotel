@@ -183,6 +183,10 @@ public partial class HmzRtContext : DbContext
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("int(11)")
                 .HasColumnName("capacity");
+            entity.Property(e => e.Price)
+                .HasDefaultValueSql("'NULL'")
+                .HasPrecision(10)
+                .HasColumnName("price");
             entity.Property(e => e.ContactInfo)
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")

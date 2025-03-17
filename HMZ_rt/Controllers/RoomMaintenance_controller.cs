@@ -17,7 +17,7 @@ namespace HMZ_rt.Controllers
             _context = context;
         }
         [Authorize(Roles = "Admin,System,Recept")]
-        [HttpGet]
+        [HttpGet("Getmaintance")]
         public async Task<ActionResult<Roommaintenance>> GetMain()
         {
             try
