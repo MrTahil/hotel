@@ -6,11 +6,13 @@
         xmlns:local="clr-namespace:RoomListApp"
         mc:Ignorable="d"
         Title="Hotel Management Dashboard" Height="800" Width="1200"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Icon="Assets/logo_hmz_icon.ico">
 
     <Window.Resources>
         <local:StatusToButtonTextConverter x:Key="StatusToButtonTextConverter"/>
         <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <local:PaymentStatusToColorConverter x:Key="PaymentStatusToColorConverter"/>
 
         <!-- Card Style -->
         <Style x:Key="DashboardCard" TargetType="Border">
@@ -62,37 +64,37 @@
             <Setter Property="TextWrapping" Value="Wrap"/>
         </Style>
         <!-- Button Styles -->
-            <Style x:Key="BackButtonStyle" TargetType="Button">
-                <Setter Property="Background" Value="#9333EA"/>
-                <Setter Property="Foreground" Value="White"/>
-                <Setter Property="Padding" Value="15,8"/>
-                <Setter Property="Margin" Value="20,0,0,10"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Border CornerRadius="6" Background="{TemplateBinding Background}">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
+        <Style x:Key="BackButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#9333EA"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="20,0,0,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="6" Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-            <Style x:Key="AddButtonStyle" TargetType="Button" BasedOn="{StaticResource BackButtonStyle}">
-                <Setter Property="Background" Value="#16A34A"/>
-            </Style>
+        <Style x:Key="AddButtonStyle" TargetType="Button" BasedOn="{StaticResource BackButtonStyle}">
+            <Setter Property="Background" Value="#16A34A"/>
+        </Style>
 
-            <Style x:Key="EditButtonStyle" TargetType="Button" BasedOn="{StaticResource BackButtonStyle}">
-                <Setter Property="Background" Value="#2563EB"/>
-            </Style>
+        <Style x:Key="EditButtonStyle" TargetType="Button" BasedOn="{StaticResource BackButtonStyle}">
+            <Setter Property="Background" Value="#2563EB"/>
+        </Style>
 
-            <Style x:Key="DeleteButtonStyle" TargetType="Button" BasedOn="{StaticResource BackButtonStyle}">
-                <Setter Property="Background" Value="#DC2626"/>
-            </Style>
+        <Style x:Key="DeleteButtonStyle" TargetType="Button" BasedOn="{StaticResource BackButtonStyle}">
+            <Setter Property="Background" Value="#DC2626"/>
+        </Style>
 
-            <!-- Edit Panel Style -->
-            <Style x:Key="EditPanelStyle" TargetType="Border">
+        <!-- Edit Panel Style -->
+        <Style x:Key="EditPanelStyle" TargetType="Border">
             <Setter Property="Padding" Value="20"/>
             <Setter Property="Margin" Value="20,0,20,10"/>
             <Setter Property="Background" Value="White"/>
@@ -1101,6 +1103,7 @@
                             <ComboBoxItem Content="Készpénz"/>
                             <ComboBoxItem Content="Bankkártya"/>
                             <ComboBoxItem Content="Átutalás"/>
+                            <ComboBoxItem Content="SZÉP kártya"/>
                         </ComboBox>
                     </StackPanel>
 
@@ -1156,7 +1159,44 @@
                         <!--<GridViewColumn Header="Létrehozva" DisplayMemberBinding="{Binding BookingDate, StringFormat='{}{0:yyyy.MM.dd HH:mm}'}" Width="150"/>-->
                         <GridViewColumn Header="Vendégek száma" DisplayMemberBinding="{Binding NumberOfGuests}" Width="120"/>
                         <GridViewColumn Header="Teljes ár" DisplayMemberBinding="{Binding TotalPrice, StringFormat='{}{0:N0} Ft'}" Width="120"/>
-                        <GridViewColumn Header="Fizetési státusz" DisplayMemberBinding="{Binding PaymentStatus}" Width="120"/>
+                        <GridViewColumn Header="Fizetés állapota" Width="120">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding PaymentStatus}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Fizetési mód" Width="120">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding PaymentMethod}"/>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Fizetés" Width="120">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Fizetés" 
+                    Tag="{Binding BookingId}"
+                    Click="PaymentButton_Click"
+                    Width="90"
+                    Height="28"
+                    Visibility="{Binding IsPaymentEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="6"/>
+                                            </Style>
+                                        </Button.Resources>
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Background" Value="#16A34A"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
                         <!-- Állapot oszlop gombbal -->
                         <GridViewColumn Header="Státusz" Width="120">
                             <GridViewColumn.CellTemplate>
@@ -1199,6 +1239,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
+
                         <GridViewColumn Header="Visszajelzések" Width="100">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -1223,7 +1264,6 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-
                     </GridView>
                 </ListView.View>
 
@@ -1245,6 +1285,88 @@
                 </ListView.ItemContainerStyle>
             </ListView>
         </Grid>
+        <!-- Fizetési mód választó panel -->
+        <Grid x:Name="paymentPanel" Grid.Row="1" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Vissza gomb -->
+            <Button Grid.Row="0" 
+            Content="Vissza a foglalásokhoz" 
+            HorizontalAlignment="Left" 
+            Margin="20,0,0,10" 
+            Padding="15,8" 
+            Background="#16A34A" 
+            Foreground="White" 
+            BorderThickness="0"
+            Click="PaymentBackButton_Click">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="6"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+
+            <!-- Fizetési mód választó űrlap -->
+            <Border Grid.Row="1" Background="White" Margin="100,20,100,100" CornerRadius="8">
+                <Grid Margin="30">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Válassza ki a fizetési módot" 
+                       FontSize="24" FontWeight="SemiBold" Margin="0,0,0,20"/>
+
+                    <StackPanel Grid.Row="1">
+                        <RadioButton x:Name="CashRadioButton" 
+                             Content="Készpénz" 
+                             GroupName="PaymentMethods" 
+                             Margin="0,10" 
+                             IsChecked="True"
+                             FontSize="16"/>
+
+                        <RadioButton x:Name="CardRadioButton" 
+                             Content="Bankkártya" 
+                             GroupName="PaymentMethods" 
+                             Margin="0,10"
+                             FontSize="16"/>
+
+                        <RadioButton x:Name="TransferRadioButton" 
+                             Content="Átutalás" 
+                             GroupName="PaymentMethods" 
+                             Margin="0,10"
+                             FontSize="16"/>
+
+                        <RadioButton x:Name="SzepCardRadioButton" 
+                             Content="SZÉP kártya" 
+                             GroupName="PaymentMethods" 
+                             Margin="0,10"
+                             FontSize="16"/>
+                    </StackPanel>
+
+                    <Button Grid.Row="2" 
+                    Content="Fizetés jóváhagyása" 
+                    HorizontalAlignment="Right"
+                    Margin="0,20,0,0" 
+                    Padding="20,10" 
+                    Background="#16A34A" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    Click="ConfirmPaymentButton_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="6"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </Grid>
+            </Border>
+        </Grid>
+
 
 
     </Grid>

@@ -19,7 +19,7 @@ namespace RoomListApp
         private readonly string _credentialsFile = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "RoomListApp", "user.dat");
-        
+
         private string _forgotPasswordEmail;
 
         public LoginWindow()
@@ -224,8 +224,10 @@ namespace RoomListApp
             ShowPanel("forgotCode");
         }
 
-        private async void SendCode_Click(object sender, RoutedEventArgs e) {
-            if (string.IsNullOrWhiteSpace(txtForgotEmail.Text)) {
+        private async void SendCode_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtForgotEmail.Text))
+            {
                 MessageBox.Show("Kérjük, adja meg az email címét!", "Hiányzó adat", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
@@ -233,7 +235,8 @@ namespace RoomListApp
             btnSendCode.IsEnabled = false;
             _forgotPasswordEmail = txtForgotEmail.Text;
 
-            try {
+            try
+            {
                 var response = await _httpClient.PostAsync($"ForgotPasswordsendemail/{_forgotPasswordEmail}", null);
 
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -241,30 +244,37 @@ namespace RoomListApp
                     MessageBox.Show("Az ellenőrző kódot elküldtük a megadott email címre.", "Kód elküldve", MessageBoxButton.OK, MessageBoxImage.Information);
                     ShowPanel("forgotCode");
                 }
-                else {
+                else
+                {
                     string responseContent = await response.Content.ReadAsStringAsync();
                     MessageBox.Show($"Hiba történt a kód küldésekor: {responseContent}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            finally {
+            finally
+            {
                 btnSendCode.IsEnabled = true;
             }
         }
 
 
-        private async void VerifyCode_Click(object sender, RoutedEventArgs e) {
-            if (string.IsNullOrWhiteSpace(txtVerificationCode.Text)) {
+        private async void VerifyCode_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtVerificationCode.Text))
+            {
                 MessageBox.Show("Kérjük, adja meg az ellenőrző kódot!", "Hiányzó adat", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             btnVerifyCode.IsEnabled = false;
 
-            try {
-                var verifyData = new Forgotpass {
+            try
+            {
+                var verifyData = new Forgotpass
+                {
                     Email = _forgotPasswordEmail,
                     Code = txtVerificationCode.Text
                 };
@@ -276,40 +286,48 @@ namespace RoomListApp
 
                 var response = await _httpClient.PutAsync("VerifyTheforgotpass", content);
 
-                if (response.StatusCode == HttpStatusCode.Created) 
+                if (response.StatusCode == HttpStatusCode.Created)
                 {
                     MessageBox.Show("A kód ellenőrzése sikeres! Most megadhatja az új jelszavát.", "Sikeres ellenőrzés", MessageBoxButton.OK, MessageBoxImage.Information);
                     ShowPanel("forgotNewPassword");
                 }
-                else {
+                else
+                {
                     string responseContent = await response.Content.ReadAsStringAsync();
                     MessageBox.Show("A megadott kód hibás vagy lejárt.", "Érvénytelen kód", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            finally {
+            finally
+            {
                 btnVerifyCode.IsEnabled = true;
             }
         }
 
 
-        private async void SetNewPassword_Click(object sender, RoutedEventArgs e) {
-            if (string.IsNullOrWhiteSpace(txtNewPassword.Password)) {
+        private async void SetNewPassword_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtNewPassword.Password))
+            {
                 MessageBox.Show("Kérjük, adja meg az új jelszavát!", "Hiányzó adat", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (txtNewPassword.Password != txtConfirmPassword.Password) {
+            if (txtNewPassword.Password != txtConfirmPassword.Password)
+            {
                 MessageBox.Show("Az új jelszó és a megerősítés nem egyezik!", "Eltérő jelszavak", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             btnSetNewPassword.IsEnabled = false;
 
-            try {
-                var resetData = new Forgotpass1 {
+            try
+            {
+                var resetData = new Forgotpass1
+                {
                     Email = _forgotPasswordEmail,
                     Password = txtNewPassword.Password
                 };
@@ -321,7 +339,7 @@ namespace RoomListApp
 
                 var response = await _httpClient.PutAsync("SetNewPassword", content);
 
-                if (response.StatusCode == HttpStatusCode.Created) 
+                if (response.StatusCode == HttpStatusCode.Created)
                 {
                     MessageBox.Show("Az új jelszó sikeresen beállítva! Most már bejelentkezhet az új jelszavával.", "Sikeres jelszóváltoztatás", MessageBoxButton.OK, MessageBoxImage.Information);
 
@@ -332,15 +350,18 @@ namespace RoomListApp
                     txtPassword.Password = string.Empty;
                     txtPassword.Focus();
                 }
-                else {
+                else
+                {
                     string responseContent = await response.Content.ReadAsStringAsync();
                     MessageBox.Show($"Hiba történt az új jelszó beállításakor: {responseContent}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            finally {
+            finally
+            {
                 btnSetNewPassword.IsEnabled = true;
             }
         }
@@ -360,12 +381,14 @@ namespace RoomListApp
         [JsonPropertyName("role")]
         public string Role { get; set; }
     }
-    public class Forgotpass {
+    public class Forgotpass
+    {
         public string Email { get; set; }
         public string Code { get; set; }
     }
 
-    public class Forgotpass1 {
+    public class Forgotpass1
+    {
         public string Email { get; set; }
         public string Password { get; set; }
     }

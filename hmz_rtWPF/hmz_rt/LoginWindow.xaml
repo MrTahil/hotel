@@ -4,7 +4,8 @@
         Title="Admin Bejelentkezés" Height="600" Width="400"
         WindowStyle="None" 
         AllowsTransparency="True"
-        Background="Transparent">
+        Background="Transparent"
+        Icon="Assets/logo_hmz_icon.ico">
 
     <Border Background="#FFFFFF" 
             CornerRadius="16"

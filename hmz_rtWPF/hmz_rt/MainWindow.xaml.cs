@@ -1,3 +1,4 @@
+using hmz_rt;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -23,7 +24,7 @@ namespace RoomListApp
         public static string Role { get; set; }
         public static string Username { get; set; }
 
-        public static int UserId { get; set; } 
+        public static int UserId { get; set; }
 
 
         public static void ClearTokens()
@@ -117,6 +118,32 @@ namespace RoomListApp
             int position = (int)parameter;
 
             return (position <= rating) ? Brushes.Gold : Brushes.LightGray;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class PaymentStatusToColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string status)
+            {
+                switch (status?.ToLower().Trim())
+                {
+                    case "fizetve":
+                        return Brushes.Green;
+                    case "fizetésre vár":
+                    case "fizetesre var":
+                        return Brushes.OrangeRed;
+                    default:
+                        return Brushes.Black;
+                }
+            }
+            return Brushes.Black;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -274,7 +301,7 @@ namespace RoomListApp
             catch (Exception ex)
             {
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                
+
                 dashboardGrid.Visibility = Visibility.Visible;
                 staffContainer.Visibility = Visibility.Collapsed;
             }
@@ -574,11 +601,11 @@ namespace RoomListApp
         {
             try
             {
-                
+
                 dashboardGrid.Visibility = Visibility.Collapsed;
                 promotionsContainer.Visibility = Visibility.Visible;
 
-                
+
                 promotionEditPanel.Visibility = Visibility.Collapsed;
                 isEditPromotion = false;
                 currentEditPromotionId = 0;
@@ -808,7 +835,7 @@ namespace RoomListApp
                         DiscountPercentage = discountPercentage,
                         TermsConditions = TermsConditionsTextBox.Text,
                         Status = selectedStatus,
-                        RoomId = roomId 
+                        RoomId = roomId
                     };
 
 
@@ -1544,9 +1571,7 @@ namespace RoomListApp
             isEditBooking = true;
             currentEditBookingId = selectedBooking.BookingId;
 
-            
             LoadRoomForEditAsync(selectedBooking.RoomId.Value);
-
 
             foreach (var item in GuestComboBox.Items)
             {
@@ -1558,13 +1583,35 @@ namespace RoomListApp
                 }
             }
 
-
             CheckInDatePicker.SelectedDate = selectedBooking.CheckInDate;
             CheckOutDatePicker.SelectedDate = selectedBooking.CheckOutDate;
-
-
             NumberOfGuestsTextBox.Text = selectedBooking.NumberOfGuests?.ToString();
             TotalPriceTextBox.Text = selectedBooking.TotalPrice?.ToString("N0") + " Ft";
+
+            
+            if (selectedBooking.PaymentStatus != null)
+            {
+                foreach (ComboBoxItem item in PaymentMethodComboBox.Items)
+                {
+                    if (item.Content.ToString() == selectedBooking.PaymentStatus)
+                    {
+                        PaymentMethodComboBox.SelectedItem = item;
+                        break;
+                    }
+                }
+            }
+
+            if (selectedBooking.PaymentMethod != null)
+            {
+                foreach (ComboBoxItem item in PaymentMethodComboBox.Items)
+                {
+                    if (item.Content.ToString() == selectedBooking.PaymentMethod)
+                    {
+                        PaymentMethodComboBox.SelectedItem = item;
+                        break;
+                    }
+                }
+            }
 
             bookingEditPanel.Visibility = Visibility.Visible;
         }
@@ -1588,7 +1635,7 @@ namespace RoomListApp
                 var room = allRooms?.FirstOrDefault(r => r.RoomId == roomId);
                 if (room != null)
                 {
-                    
+
                     var availableRooms = allRooms.Where(r => r.Status == "Szabad" || r.RoomId == roomId).ToList();
                     RoomComboBox.ItemsSource = availableRooms;
 
@@ -1667,7 +1714,7 @@ namespace RoomListApp
             currentEditBookingId = 0;
         }
 
-        
+
         private void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdateTotalPrice();
@@ -1721,7 +1768,9 @@ namespace RoomListApp
                     CheckInDatePicker.SelectedDate == null ||
                     CheckOutDatePicker.SelectedDate == null ||
                     string.IsNullOrWhiteSpace(NumberOfGuestsTextBox.Text) ||
-                    PaymentMethodComboBox.SelectedItem == null)
+                    PaymentMethodComboBox.SelectedItem == null
+                    )
+
                 {
                     MessageBox.Show("Kérjük, töltse ki az összes kötelező mezőt!", "Hiányzó adatok", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
@@ -1748,8 +1797,10 @@ namespace RoomListApp
 
                 var selectedPaymentMethod = (PaymentMethodComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
 
-                if (isEditBooking) {
-                    var updateDto = new UpdateBooking {
+                if (isEditBooking)
+                {
+                    var updateDto = new UpdateBooking
+                    {
                         CheckInDate = CheckInDatePicker.SelectedDate,
                         CheckOutDate = CheckOutDatePicker.SelectedDate,
                         NumberOfGuests = numberOfGuests
@@ -2046,7 +2097,7 @@ namespace RoomListApp
 
             grid.Children.Add(ratingPanel);
 
-            
+
             var commentPanel = new StackPanel
             {
                 Margin = new Thickness(10, 0, 10, 10)
@@ -2195,7 +2246,7 @@ namespace RoomListApp
                 var feedback = new CreateFeedback
                 {
                     Category = "Panasz",
-                    Rating = 1, 
+                    Rating = 1,
                     Status = "Új",
                     Response = complaintText,
                     GuestId = booking.GuestId.Value
@@ -2282,8 +2333,8 @@ namespace RoomListApp
             var feedbackWindow = new Window
             {
                 Title = $"Visszajelzések - {booking.GuestName}",
-                Width = 800, 
-                Height = 600, 
+                Width = 800,
+                Height = 600,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Owner = this
             };
@@ -2384,7 +2435,7 @@ namespace RoomListApp
             var responseColumn = new GridViewColumn
             {
                 Header = "Panasz",
-                Width = 200 
+                Width = 200
 
             };
 
@@ -2405,8 +2456,8 @@ namespace RoomListApp
                 Setters =
         {
             new Setter(ListViewItem.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch),
-            new Setter(ListViewItem.HeightProperty, double.NaN), 
-            new Setter(ListViewItem.MinHeightProperty, 50.0) 
+            new Setter(ListViewItem.HeightProperty, double.NaN),
+            new Setter(ListViewItem.MinHeightProperty, 50.0)
         }
             };
 
@@ -2735,208 +2786,326 @@ namespace RoomListApp
             editWindow.ShowDialog();
         }
 
+        private int currentPaymentBookingId = 0;
 
+        private void PaymentButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button == null) return;
+
+            currentPaymentBookingId = (int)button.Tag;
+
+            bookingsContainer.Visibility = Visibility.Collapsed;
+            paymentPanel.Visibility = Visibility.Visible;
+        }
+        private async Task UpdatePaymentStatus(int bookingId, string status, string paymentMethod)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var updateDto = new UpdatePaymentInfo
+                {
+                    Status = status,
+                    PaymentMethod = paymentMethod
+                };
+
+                var content = new StringContent(
+                    JsonSerializer.Serialize(updateDto, new JsonSerializerOptions
+                    { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                    System.Text.Encoding.UTF8,
+                    "application/json");
+
+                var response = await _httpClient.PutAsync(
+                    $"Payments/UpdatePaymentStatusByBookingId/{bookingId}", content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba a fizetési státusz frissítésekor: {errorResponse}",
+                        "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                MessageBox.Show("A fizetési státusz sikeresen frissítve!",
+                    "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                await LoadBookingsToListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private void PaymentBackButton_Click(object sender, RoutedEventArgs e)
+        {
+            paymentPanel.Visibility = Visibility.Collapsed;
+            bookingsContainer.Visibility = Visibility.Visible;
+            currentPaymentBookingId = 0;
+        }
+
+        private async void CashButton_Click(object sender, RoutedEventArgs e)
+        {
+            await UpdatePaymentStatus(currentPaymentBookingId, "Fizetve", "Készpénz");
+
+            paymentPanel.Visibility = Visibility.Collapsed;
+            bookingsContainer.Visibility = Visibility.Visible;
+            currentPaymentBookingId = 0;
+        }
+        private async void CardButton_Click(object sender, RoutedEventArgs e)
+        {
+            await UpdatePaymentStatus(currentPaymentBookingId, "Fizetve", "Bankkártya");
+
+            paymentPanel.Visibility = Visibility.Collapsed;
+            bookingsContainer.Visibility = Visibility.Visible;
+            currentPaymentBookingId = 0;
+        }
+        private async void ConfirmPaymentButton_Click(object sender, RoutedEventArgs e)
+        {
+            string paymentMethod = "Készpénz";
+
+            if (CashRadioButton.IsChecked == true)
+                paymentMethod = "Készpénz";
+            else if (CardRadioButton.IsChecked == true)
+                paymentMethod = "Bankkártya";
+            else if (TransferRadioButton.IsChecked == true)
+                paymentMethod = "Átutalás";
+            else if (SzepCardRadioButton.IsChecked == true)
+                paymentMethod = "SZÉP kártya";
+
+            await UpdatePaymentStatus(currentPaymentBookingId, "Fizetve", paymentMethod);
+
+           
+            paymentPanel.Visibility = Visibility.Collapsed;
+            bookingsContainer.Visibility = Visibility.Visible;
+            currentPaymentBookingId = 0;
+        }
+        private void CancelPaymentButton_Click(object sender, RoutedEventArgs e)
+        {
+            paymentPanel.Visibility = Visibility.Collapsed;
+            bookingsContainer.Visibility = Visibility.Visible;
+            currentPaymentBookingId = 0;
+        }
     }
 }
 
-    //Room osztályok
-    public class Room
-    {
-        public int RoomId { get; set; }
-        public string RoomType { get; set; }
-        public string RoomNumber { get; set; }
-        public int? Capacity { get; set; }
-        public decimal? PricePerNight { get; set; }
-        public string Status { get; set; }
-        public string Description { get; set; }
-        public int? FloorNumber { get; set; }
-        public string Amenities { get; set; }
-        public DateTime? DateAdded { get; set; }
-        public string Images { get; set; }
+//Room osztályok
+public class Room
+{
+    public int RoomId { get; set; }
+    public string RoomType { get; set; }
+    public string RoomNumber { get; set; }
+    public int? Capacity { get; set; }
+    public decimal? PricePerNight { get; set; }
+    public string Status { get; set; }
+    public string Description { get; set; }
+    public int? FloorNumber { get; set; }
+    public string Amenities { get; set; }
+    public DateTime? DateAdded { get; set; }
+    public string Images { get; set; }
 
-        public override string ToString()
-        {
-            return $"{RoomNumber} - {RoomType} ({PricePerNight} Ft/éj), Kapacitás: {Capacity} fő, Állapot: {Status}";
-        }
+    public override string ToString()
+    {
+        return $"{RoomNumber} - {RoomType} ({PricePerNight} Ft/éj), Kapacitás: {Capacity} fő, Állapot: {Status}";
     }
+}
 
-    //Staff Osztályok
-    public class Staff
+//Staff Osztályok
+public class Staff
+{
+    public int StaffId { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
+    public string PhoneNumber { get; set; }
+    public string Position { get; set; }
+    public decimal? Salary { get; set; }
+    public DateTime? DateHired { get; set; }
+    public string Status { get; set; }
+    public string Department { get; set; }
+
+    public override string ToString()
     {
-        public int StaffId { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public string PhoneNumber { get; set; }
-        public string Position { get; set; }
-        public decimal? Salary { get; set; }
-        public DateTime? DateHired { get; set; }
-        public string Status { get; set; }
-        public string Department { get; set; }
-
-        public override string ToString()
-        {
-            return $"{LastName} {FirstName} - {Position}, {Department}";
-        }
+        return $"{LastName} {FirstName} - {Position}, {Department}";
     }
+}
 
-    public class NewStaffDto
+public class NewStaffDto
+{
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
+    public string PhoneNumber { get; set; }
+    public string Position { get; set; }
+    public decimal? Salary { get; set; }
+    public string Status { get; set; }
+    public string Departmen { get; set; }
+}
+
+public class UpdateStaffDto
+{
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
+    public string PhoneNumber { get; set; }
+    public string Position { get; set; }
+    public decimal? Salary { get; set; }
+    public string Department { get; set; }
+    public string Status { get; set; }
+}
+
+// Promotion osztályok
+public class Promotion
+{
+    public int PromotionId { get; set; }
+    public string PromotionName { get; set; }
+    public string Description { get; set; }
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public int? DiscountPercentage { get; set; }
+    public string TermsConditions { get; set; }
+    public string Status { get; set; }
+    public int? RoomId { get; set; }
+    public DateTime? DateAdded { get; set; }
+
+    public override string ToString()
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public string PhoneNumber { get; set; }
-        public string Position { get; set; }
-        public decimal? Salary { get; set; }
-        public string Status { get; set; }
-        public string Departmen { get; set; }
+        return $"{PromotionName} - {DiscountPercentage}% kedvezmény, {StartDate?.ToString("yyyy.MM.dd")} - {EndDate?.ToString("yyyy.MM.dd")}";
     }
+}
 
-    public class UpdateStaffDto
-    {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public string PhoneNumber { get; set; }
-        public string Position { get; set; }
-        public decimal? Salary { get; set; }
-        public string Department { get; set; }
-        public string Status { get; set; }
-    }
+public class PromotionCreateDto
+{
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public int? DiscountPercentage { get; set; }
+    public string TermsConditions { get; set; }
+    public string Status { get; set; }
+    public int? RoomId { get; set; }
+}
 
-    // Promotion osztályok
-    public class Promotion
-    {
-        public int PromotionId { get; set; }
-        public string PromotionName { get; set; }
-        public string Description { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-        public int? DiscountPercentage { get; set; }
-        public string TermsConditions { get; set; }
-        public string Status { get; set; }
-        public int? RoomId { get; set; }
-        public DateTime? DateAdded { get; set; }
+public class PromotionUpdateDto
+{
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public int? DiscountPercentage { get; set; }
+    public string TermsConditions { get; set; }
+    public string Status { get; set; }
+    public int? RoomId { get; set; }
+}
 
-        public override string ToString()
-        {
-            return $"{PromotionName} - {DiscountPercentage}% kedvezmény, {StartDate?.ToString("yyyy.MM.dd")} - {EndDate?.ToString("yyyy.MM.dd")}";
-        }
-    }
+// Guest osztályok
+public class Guest
+{
+    public int GuestId { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
+    public string PhoneNumber { get; set; }
+    public string Address { get; set; }
+    public string City { get; set; }
+    public string Country { get; set; }
+    public DateTime? DateOfBirth { get; set; }
+    public string Gender { get; set; }
+    public int? UserId { get; set; }
+}
 
-    public class PromotionCreateDto
-    {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-        public int? DiscountPercentage { get; set; }
-        public string TermsConditions { get; set; }
-        public string Status { get; set; }
-        public int? RoomId { get; set; }
-    }
 
-    public class PromotionUpdateDto
-    {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-        public int? DiscountPercentage { get; set; }
-        public string TermsConditions { get; set; }
-        public string Status { get; set; }
-        public int? RoomId { get; set; } 
-    }
+public class CreateGuest
+{
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
+    public string PhoneNumber { get; set; }
+    public string Address { get; set; }
+    public string City { get; set; }
+    public string Country { get; set; }
+    public DateTime? DateOfBirth { get; set; }
+    public string Gender { get; set; }
+    public int? UserId { get; set; }
+}
 
-    // Guest osztályok
-    public class Guest
-    {
-        public int GuestId { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public string PhoneNumber { get; set; }
-        public string Address { get; set; }
-        public string City { get; set; }
-        public string Country { get; set; }
-        public DateTime? DateOfBirth { get; set; }
-        public string Gender { get; set; }
-        public int? UserId { get; set; }
-    }
 
-    
-    public class CreateGuest
-    {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public string PhoneNumber { get; set; }
-        public string Address { get; set; }
-        public string City { get; set; }
-        public string Country { get; set; }
-        public DateTime? DateOfBirth { get; set; }
-        public string Gender { get; set; }
-        public int? UserId { get; set; }
-    }
+public class UpdateGuest
+{
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
+    public string PhoneNumber { get; set; }
+    public string Address { get; set; }
+    public string City { get; set; }
+    public string Country { get; set; }
+    public DateTime? DateOfBirth { get; set; }
+    public string Gender { get; set; }
+}
 
-    
-    public class UpdateGuest
-    {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public string PhoneNumber { get; set; }
-        public string Address { get; set; }
-        public string City { get; set; }
-        public string Country { get; set; }
-        public DateTime? DateOfBirth { get; set; }
-        public string Gender { get; set; }
-    }
+// Booking osztályok
+public class Booking
+{
+    public int BookingId { get; set; }
+    public DateTime? CheckInDate { get; set; }
+    public DateTime? CheckOutDate { get; set; }
+    public int? GuestId { get; set; }
+    public int? RoomId { get; set; }
+    public decimal? TotalPrice { get; set; }
+    //public DateTime? BookingDate { get; set; }
+    public string PaymentStatus { get; set; }
 
-    // Booking osztályok
-    public class Booking
-    {
-        public int BookingId { get; set; }
-        public DateTime? CheckInDate { get; set; }
-        public DateTime? CheckOutDate { get; set; }
-        public int? GuestId { get; set; }
-        public int? RoomId { get; set; }
-        public decimal? TotalPrice { get; set; }
-        //public DateTime? BookingDate { get; set; }
-        public string PaymentStatus { get; set; }
-        public int? NumberOfGuests { get; set; }
-        public string Status { get; set; }
-        public List<Payment> Payments { get; set; }
-    }
+    public string PaymentMethod { get; set; }
 
-    public class Payment
-    {
-        public int PaymentId { get; set; }
-        public int? BookingId { get; set; }
-        public DateTime? PaymentDate { get; set; }
-        public decimal? Amount { get; set; }
-        public string PaymentMethod { get; set; }
-        public string TransactionId { get; set; }
-        public string Status { get; set; }
-        public string Currency { get; set; }
-        public string PaymentNotes { get; set; }
-        public DateTime? DateAdded { get; set; }
-    }
+    public int? NumberOfGuests { get; set; }
+    public string Status { get; set; }
+    public List<Payment> Payments { get; set; }
+}
 
-    public class CreateBookingDto
-    {
-        public DateTime? CheckInDate { get; set; }
-        public DateTime? CheckOutDate { get; set; }
-        public int GuestId { get; set; }
-        public int NumberOfGuests { get; set; }
-        public string PaymentMethod { get; set; }
-    }
+public class Payment
+{
+    public int PaymentId { get; set; }
+    public int? BookingId { get; set; }
+    public DateTime? PaymentDate { get; set; }
+    public decimal? Amount { get; set; }
+    public string PaymentMethod { get; set; }
+    public string TransactionId { get; set; }
+    public string Status { get; set; }
+    public string Currency { get; set; }
+    public string PaymentNotes { get; set; }
+    public DateTime? DateAdded { get; set; }
+}
 
-    public class UpdateBooking
-    {
-        public DateTime? CheckInDate { get; set; }
-        public DateTime? CheckOutDate { get; set; }
-        public int NumberOfGuests { get; set; }
+public class UpdatePaymentInfo
+{
+    public string Status { get; set; }
+    public string PaymentMethod { get; set; }
+}
+
+
+
+
+public class CreateBookingDto
+{
+    public DateTime? CheckInDate { get; set; }
+    public DateTime? CheckOutDate { get; set; }
+    public int GuestId { get; set; }
+    public int NumberOfGuests { get; set; }
+    public string PaymentMethod { get; set; }
+}
+
+public class UpdateBooking
+{
+    public DateTime? CheckInDate { get; set; }
+    public DateTime? CheckOutDate { get; set; }
+    public int NumberOfGuests { get; set; }
 }
 
 public class UpdateBookingStatus
@@ -2945,29 +3114,43 @@ public class UpdateBookingStatus
 }
 
 public class BookingViewModel
+{
+    public int BookingId { get; set; }
+    public int? GuestId { get; set; }
+    public string GuestName { get; set; }
+    public int? RoomId { get; set; }
+    public string RoomNumber { get; set; }
+    public DateTime? CheckInDate { get; set; }
+    public DateTime? CheckOutDate { get; set; }
+    //public DateTime? BookingDate { get; set; }
+    public int? NumberOfGuests { get; set; }
+    public decimal? TotalPrice { get; set; }
+    public string PaymentStatus { get; set; }
+
+    public string PaymentMethod { get; set; }
+
+    public string Status { get; set; }
+
+    public bool CanChangeStatus
     {
-        public int BookingId { get; set; }
-        public int? GuestId { get; set; }
-        public string GuestName { get; set; }
-        public int? RoomId { get; set; }
-        public string RoomNumber { get; set; }
-        public DateTime? CheckInDate { get; set; }
-        public DateTime? CheckOutDate { get; set; }
-        //public DateTime? BookingDate { get; set; }
-        public int? NumberOfGuests { get; set; }
-        public decimal? TotalPrice { get; set; }
-        public string PaymentStatus { get; set; }
-        public string Status { get; set; }
-
-        public bool CanChangeStatus
+        get
         {
-            get
-            {
-                return Status != "Finished" && Status != "Lemondva";
-            }
+            return Status != "Finished" && Status != "Lemondva";
         }
+    }
 
-         public bool HasFeedback { get; set; }
+    public bool HasFeedback { get; set; }
+    public bool IsPaymentEnabled
+    {
+        get
+        {
+            return (Status == "Jóváhagyva" || Status == "Checked In") &&
+                    PaymentStatus?.Trim().ToLower() != "fizetve";
+        }
+    }
+
+
+
 }
 
 
@@ -2999,7 +3182,7 @@ public class UpdateFeedback
 {
     public string Comment { get; set; }
     public string Status { get; set; }
-    public int? Rating { get; set; } 
+    public int? Rating { get; set; }
 }
 
 
