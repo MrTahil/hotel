@@ -94,16 +94,29 @@ namespace HMZ_rt.Controllers
 
         [Authorize(Roles = "Admin,System,Recept")]
         [HttpPut("UpdateRequestByManagger/{id}")]
-        public async Task<ActionResult<Roommaintenance>> Updatereq(int id)
+        public async Task<ActionResult<Roommaintenance>> Updatereq(int id, MaintanceUpdate udto)
         {
             try
             {
-                return StatusCode(500);
+                var data = _context.Roommaintenances.FirstOrDefault( x=> x.MaintenanceId ==id);
+                if (data != null)
+                {
+                    data.ResolutionDate = udto.ResolutionDate;
+                    data.Status = udto.Status;
+                    data.Cost = udto.Cost;
+                    data.Notes = udto.Notes;
+                    data.StaffId = udto.StaffId;
+                    _context.Roommaintenances.Update(data);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(201, "Sikeres frissítés");
+
+                }return StatusCode(404, "Nem található ez a szervízkérvény ezzel az id-val");
+
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { ex });
-                throw;
+                
             }
         }
     }
