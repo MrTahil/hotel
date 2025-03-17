@@ -1,6 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-const ProfilePage = ({ user }) => {
+const ProfilePage = () => {
+  const [user, setUser] = useState({
+    username: '',
+    email: '',
+    profileImage: 'https://randomuser.me/api/portraits/men/42.jpg',
+    registrationDate: '2023. szeptember 15.',
+  });
+
+  useEffect(() => {
+    // Felhasználó adatainak betöltése a localStorage-ből
+    const username = localStorage.getItem('username');
+    const email = localStorage.getItem('email');
+    console.log('Username:', username); // Ellenőrzés
+    console.log('Email:', email); // Ellenőrzés
+
+    if (username) {
+      setUser((prevUser) => ({
+        ...prevUser, // Megőrizzük a már meglévő mezőket
+        username,
+        email: email || 'Nincs email cím', // Ha az email null, akkor egy alapértelmezett értéket állítunk be
+      }));
+    } else {
+      console.error('Nincs username a localStorage-ben!');
+    }
+  }, []);
+
   return (
     <div className="bg-blue-50 min-h-screen p-6 sm:p-8">
       <div className="max-w-4xl mx-auto">
@@ -28,7 +53,7 @@ const ProfilePage = ({ user }) => {
             <div className="flex flex-col items-center mb-6">
               <div className="relative group mb-4">
                 <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-blue-100 group-hover:border-blue-300 transition-all duration-300">
-                  <img src="https://randomuser.me/api/portraits/men/42.jpg" alt="Profilkép" className="w-full h-full object-cover" />
+                  <img src={user.profileImage} alt="Profilkép" className="w-full h-full object-cover" />
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <label htmlFor="profile-upload" className="bg-blue-600/80 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700 transition-colors">
@@ -38,8 +63,8 @@ const ProfilePage = ({ user }) => {
                 </div>
               </div>
               
-              <h3 className="text-lg sm:text-xl font-semibold text-blue-800 mb-1">Kovács Péter</h3>
-              <p className="text-xs sm:text-sm text-blue-600 mb-4">Regisztrált: 2023. szeptember 15.</p>
+              <h3 className="text-lg sm:text-xl font-semibold text-blue-800 mb-1">{user.username}</h3>
+              <p className="text-xs sm:text-sm text-blue-600 mb-4">Regisztrált: {user.registrationDate}</p>
               
               <button className="text-blue-600 hover:text-blue-800 flex items-center transition-colors text-sm">
                 <span className="material-symbols-outlined mr-1 text-sm">edit</span>
@@ -50,12 +75,12 @@ const ProfilePage = ({ user }) => {
             <div className="space-y-4">
               <div className="border-t border-blue-100 pt-4">
                 <label className="block text-sm font-medium mb-1 text-blue-800">Felhasználónév</label>
-                <div className="px-3 sm:px-4 py-2 bg-blue-50 rounded-lg text-blue-700 text-sm sm:text-base">kovacsp85</div>
+                <div className="px-3 sm:px-4 py-2 bg-blue-50 rounded-lg text-blue-700 text-sm sm:text-base">{user.username}</div>
               </div>
               
               <div>
                 <label className="block text-sm font-medium mb-1 text-blue-800">Email cím</label>
-                <div className="px-3 sm:px-4 py-2 bg-blue-50 rounded-lg text-blue-700 text-sm sm:text-base break-all">kovacs.peter@example.com</div>
+                <div className="px-3 sm:px-4 py-2 bg-blue-50 rounded-lg text-blue-700 text-sm sm:text-base break-all">{user.email}</div>
               </div>
               
               <button
