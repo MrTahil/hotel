@@ -60,31 +60,31 @@ namespace HMZ_rt
                     };
                 options.Events = new JwtBearerEvents
                 {
-                    OnChallenge = async context =>
-                    {
-                        context.HandleResponse();
-                        context.Response.ContentType = "application/json";
+                    //OnChallenge = async context =>
+                    //{
+                    //    context.HandleResponse();
+                    //    context.Response.ContentType = "application/json";
 
-                        var message = "";
-                        if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
-                        {
-                            message = "Ehhez a művelethez be kell jelentkezned, vagy nincs elég jogosultságod";
-                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                        }
-                        else if (context.Response.StatusCode == StatusCodes.Status403Forbidden)
-                        {
-                            message = "Nincs elég jogosultságod, vagy még nem igazoltad vissza az emailed";
-                            context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                        }
-                        else
-                        {
-                            // Ha más státuszkód van beállítva, akkor is kezeljük, de itt most csak a 401 és 403-ra koncentrálunk
-                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                            message = "Ehhez a művelethez be kell jelentkezned";
-                        }
+                    //    var message = "";
+                    //    if (context.Response.StatusCode == StatusCodes.Status401Unauthorized)
+                    //    {
+                    //        message = "Ehhez a művelethez be kell jelentkezned, vagy nincs elég jogosultságod";
+                    //        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    //    }
+                    //    else if (context.Response.StatusCode == StatusCodes.Status403Forbidden)
+                    //    {
+                    //        message = "Nincs elég jogosultságod, vagy még nem igazoltad vissza az emailed";
+                    //        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    //    }
+                    //    else
+                    //    {
+                    //        // Ha más státuszkód van beállítva, akkor is kezeljük, de itt most csak a 401 és 403-ra koncentrálunk
+                    //        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    //        message = "Ehhez a művelethez be kell jelentkezned";
+                    //    }
 
-                        await context.Response.WriteAsync(JsonSerializer.Serialize(message));
-                    }
+                    //    await context.Response.WriteAsync(JsonSerializer.Serialize(message));
+                    //}
                 };
             });
             builder.Services.AddScoped<TokenService>();
