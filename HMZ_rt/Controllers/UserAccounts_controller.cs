@@ -155,7 +155,7 @@ namespace HMZ_rt.Controllers
             try
             {
                 string templatePath = Path.Combine(_env.ContentRootPath, "Html", "2fa.html");
-                string emailTemplate =  await System.IO.File.ReadAllTextAsync(templatePath);
+                string emailTemplate = await System.IO.File.ReadAllTextAsync(templatePath);
 
                 emailTemplate = emailTemplate
                     .Replace("{UserName}", userName)
@@ -228,7 +228,7 @@ namespace HMZ_rt.Controllers
 
                 await _context.Useraccounts.AddAsync(user);
                 await _context.SaveChangesAsync();
-                await Send2FACode(user.Username,user.Email, twoFactorCode);
+                await Send2FACode(user.Username, user.Email, twoFactorCode);
 
                 return StatusCode(201, new { message = "Sikeres regisztráció, emailben elküldtük az aktiváló kódot" });
             }
@@ -382,7 +382,7 @@ namespace HMZ_rt.Controllers
                 {
 
 
-                    return Ok(new { AccessToken = accessToken, RefreshToken = refreshToken , user.Role});
+                    return Ok(new { AccessToken = accessToken, RefreshToken = refreshToken, user.Role });
                 }
                 return Ok(new { AccesToken = accessToken, RefreshToken = refreshToken });
             }
@@ -454,7 +454,7 @@ namespace HMZ_rt.Controllers
                 if (await _context.Useraccounts.AnyAsync(x => x.Email == email))
                 {
                     string code = Generate2FACode();
-                    
+
                     var user = await _context.Useraccounts
                         .FirstOrDefaultAsync(x => x.Email == email);
 
@@ -462,7 +462,7 @@ namespace HMZ_rt.Controllers
                         return NotFound(new { message = "Felhasználó nem található!" });
                     user.Authenticationcode = code;
                     user.Authenticationexpire = DateTime.Now.AddDays(TwoFactorCodeExpiryDays);
-                    await Send2FACode(user.Username,email,code);
+                    await Send2FACode(user.Username, email, code);
                     _context.Useraccounts.Update(user);
                     await _context.SaveChangesAsync();
                     return StatusCode(200);
@@ -484,8 +484,8 @@ namespace HMZ_rt.Controllers
             var user = await _context.Useraccounts.FirstOrDefaultAsync(x => x.Email == frgdto.Email);
             if (user != null)
             {
-                
-                if (user.Authenticationcode== frgdto.Code)
+
+                if (user.Authenticationcode == frgdto.Code)
                 {
                     user.Authenticationcode = "confirmed";
                     _context.Useraccounts.Update(user);
@@ -500,9 +500,9 @@ namespace HMZ_rt.Controllers
         {
             var user = await _context.Useraccounts.FirstOrDefaultAsync(x => x.Email == frgdto.Email);
 
-            if ( user != null)
+            if (user != null)
             {
-                { if(user.Authenticationcode == "confirmed")
+                { if (user.Authenticationcode == "confirmed")
                     {
                         user.Password = PasswordHasher.HashPassword(frgdto.Password);
                         user.Authenticationcode = "000000";
@@ -520,14 +520,14 @@ namespace HMZ_rt.Controllers
         }
 
 
-        [Authorize(Roles ="System,Admin,Recept")]
+        [Authorize(Roles = "System,Admin,Recept")]
         [HttpGet("GetId/{email}")]
         public async Task<ActionResult<Useraccount>> GetUserIdByEmail(string email)
         {
             try
             {
-            var dat =await _context.Useraccounts.FirstOrDefaultAsync(x => x.Email == email);
-            return StatusCode(200, dat.UserId);
+                var dat = await _context.Useraccounts.FirstOrDefaultAsync(x => x.Email == email);
+                return StatusCode(200, dat.UserId);
             }
             catch (Exception ex)
             {
@@ -541,7 +541,7 @@ namespace HMZ_rt.Controllers
         {
             try
             {
-                var data = _context.Useraccounts.FirstOrDefaultAsync(x => x.Username == username);
+                var data =await _context.Useraccounts.FirstOrDefaultAsync(x => x.Username == username);
                 if (data != null)
                 {
                     return StatusCode(200, data);
@@ -553,5 +553,35 @@ namespace HMZ_rt.Controllers
                 return StatusCode(500, ex);
             }
         }
-    }
+
+        [Authorize(Roles = "System,Admin,Recept,Base")]
+        [HttpPut("Newpasswithknownpass/{username}")]
+        public async Task<ActionResult<Useraccount>> SetNewPassOnKnown(string username, SetNewPass udto)
+        {
+            try
+            {
+                var data =await _context.Useraccounts.FirstOrDefaultAsync(x => x.Username == username);
+                if (data != null)
+                {
+                    if (PasswordHasher.VerifyPassword(udto.OldPassword, data.Password))
+                    {
+                        data.Password = PasswordHasher.HashPassword(udto.Password);
+                        _context.Useraccounts.Update(data);
+                        await _context.SaveChangesAsync();
+                        return StatusCode(201, "Sikres jelszó változtatás");
+
+                    }
+                    return StatusCode(400, "Hibás jelszó");
+                    
+                }
+                return StatusCode(404, "Nem található a felhasználó(elrontotta a frontend)");
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
+            
+        }
+    } 
 }
