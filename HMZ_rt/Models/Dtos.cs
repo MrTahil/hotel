@@ -362,3 +362,15 @@ public class CreateEventBooking
     public string? PaymentStatus { get; set; }
     public string? Notes {  get; set; }
 }
+
+
+public class SetNewPass
+{
+    [Required(ErrorMessage = "Jelszó megadása kötelező!")]
+    [MinLength(8, ErrorMessage = "A jelszónak legalább 8 karakter hosszúnak kell lennie!")]
+    [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", ErrorMessage = "A jelszónak tartalmaznia kell legalább 1, kis és Nagy betűt illetve számot.")]
+    public string? Password { get; set; }
+
+    [Required(ErrorMessage = "A régi jelszó megadása kötelező!")]
+    public string? OldPassword { get; set; }
+}
