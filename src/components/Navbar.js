@@ -80,9 +80,7 @@ function Navbar() {
                         <NavLink to="/rolunk" className={({ isActive }) => `text-white hover:text-blue-200 transition-colors ${isActive ? 'text-blue-200' : ''}`}>
                             Rólunk
                         </NavLink>
-                        <NavLink to="/kapcsolat" className={({ isActive }) => `text-white hover:text-blue-200 transition-colors ${isActive ? 'text-blue-200' : ''}`}>
-                            Kapcsolat
-                        </NavLink>
+
                     </div>
                     
                     <div className="relative">
@@ -172,13 +170,7 @@ function Navbar() {
                             >
                                 Rólunk
                             </NavLink>
-                            <NavLink
-                                to="/kapcsolat"
-                                className={({ isActive }) => `block text-white hover:text-blue-200 py-2 px-4 ${isActive ? 'text-blue-200' : ''}`}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                            >
-                                Kapcsolat
-                            </NavLink>
+                        
                         </div>
                     </div>
                 )}

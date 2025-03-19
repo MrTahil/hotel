@@ -3,8 +3,6 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
-import Gallery from './components/Gallery';
-import Contact from './components/Contact';
 import Rooms from './components/Rooms';
 import Programs from './components/Programs'
 import './App.css';
@@ -25,7 +23,6 @@ function App() {
                         <Route path="/" element={<Hero/>} />
                         <Route path="/szobak" element={<Rooms/>} />
                         <Route path="/rolunk" element={<About/>} />
-                        <Route path="/kapcsolat" element={<Contact/>} />
                         <Route path="/programok" element={<Programs/>} />
                         <Route path="/szolgaltatasok" element={<Services />} />
                         <Route path="/foglalas" element={<Foglalas />} />
