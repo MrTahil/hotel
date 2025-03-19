@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text;
 
 namespace HMZ_rt.Controllers
@@ -531,6 +532,25 @@ namespace HMZ_rt.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
+            }
+        }
+
+        [Authorize(Roles = "System,Admin,Recept,Base")]
+        [HttpGet("GetOneUserData/{username}")]
+        public async Task<ActionResult<Useraccount>> GetOneUserDataByUsername(string username)
+        {
+            try
+            {
+                var data = _context.Useraccounts.FirstOrDefaultAsync(x => x.Username == username);
+                if (data != null)
+                {
+                    return StatusCode(200, data);
+                } return StatusCode(404, "Nem található felhasználó");
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
             }
         }
     }
