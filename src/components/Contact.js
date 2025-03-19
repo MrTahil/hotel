@@ -13,7 +13,7 @@ function Contact() {
   href="https://mail.google.com/mail/u/0/?view=cm&fs=1&to=hmzrtkando@gmail.com" 
   target="_blank" 
   rel="noopener noreferrer"
-  className="cta-button"
+  className="w-full bg-blue-800 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-4"
 >
   Írj nekünk
 </a>

@@ -26,7 +26,7 @@ function Hero() {
                             <h1 className="text-3xl md:text-5xl font-bold text-blue-900 mb-4 md:mb-6">Luxus Szálloda</h1>
                             <p className="text-lg md:text-xl text-blue-700 max-w-3xl mx-auto">Fedezze fel a kényelem és elegancia új dimenzióját</p>
                         </div>
-                    
+                    <Link to='/szobak'>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 mb-8 md:mb-16">
                             <div className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
                                 <div className="h-48 md:h-64 bg-cover bg-center" style={{backgroundImage: `url('https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-4.0.3')`}}></div>
@@ -52,7 +52,7 @@ function Hero() {
                                 </div>
                             </div>
                         </div>
-
+                        </Link>
                         <h2 className="text-2xl md:text-4xl font-bold text-center text-blue-900 mb-8 md:mb-16">Felkapott Események</h2>
                         <div className="relative h-[300px] md:h-[500px] rounded-2xl overflow-hidden shadow-xl">
                             <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-blue-800/80 z-10"></div>

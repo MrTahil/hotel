@@ -95,36 +95,35 @@ function RoomCard() {
         </form>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filteredRooms.length > 0 ? (
-            filteredRooms.map((room) => (
-              <div key={room.room_id || room.room_number || Math.random()} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
-                <div className="h-48 bg-gray-200">
-                  <img src={room.images} className="w-full h-full object-cover" />
-                </div>
-                <div className="p-4">
-                  <h3 className="text-xl font-bold text-blue-900 mb-2">{room.roomType || 'Not Available'}</h3>
-                  <p className="text-blue-700 mb-4">{room.description || 'No description available'}</p>
-                  <div className="space-y-1">
-                    <p><strong>Szobaszám:</strong> {room.roomNumber || 'N/A'}</p>
-                    <p><strong>Befogadó képesség:</strong> {room.capacity ? `${room.capacity} fő` : 'N/A'}</p>
-                    <p><strong>Ár / Éj / Fő:</strong> {room.pricePerNight ? `${room.pricePerNight} Ft` : 'N/A'}</p>
-                    <p><strong>Emelet:</strong> {room.floorNumber || 'N/A'}</p>
-                    <p><strong>Kényelmi szolgáltatások:</strong> {room.amenities || 'No data'}</p>
-                  </div>
-
-                  <button
-                    className="w-full bg-blue-800 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-4"
-                    onClick={() => navigate('/Foglalas', { state: { room } })}
-                  >
-                    Foglalás
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-center text-gray-600 col-span-full">Nincsenek elérhető szobák.</p>
-          )}
+  {filteredRooms.length > 0 ? (
+    filteredRooms.map((room) => (
+      <div key={room.room_id || room.room_number || Math.random()} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300 flex flex-col">
+        <div className="h-48 bg-gray-200">
+          <img src={room.images} className="w-full h-full object-cover" />
         </div>
+        <div className="p-4 flex flex-col flex-grow">
+          <h3 className="text-xl font-bold text-blue-900 mb-2">{room.roomType || 'Not Available'}</h3>
+          <p className="text-blue-700 mb-4">{room.description || 'No description available'}</p>
+          <div className="space-y-1 flex-grow">
+            <p><strong>Szobaszám:</strong> {room.roomNumber || 'N/A'}</p>
+            <p><strong>Befogadó képesség:</strong> {room.capacity ? `${room.capacity} fő` : 'N/A'}</p>
+            <p><strong>Ár / Éj / Fő:</strong> {room.pricePerNight ? `${room.pricePerNight} Ft` : 'N/A'}</p>
+            <p><strong>Emelet:</strong> {room.floorNumber || 'N/A'}</p>
+            <p><strong>Kényelmi szolgáltatások:</strong> {room.amenities || 'No data'}</p>
+          </div>
+          <button
+            className="w-full bg-blue-800 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-4"
+            onClick={() => navigate('/Foglalas', { state: { room } })}
+          >
+            Foglalás
+          </button>
+        </div>
+      </div>
+    ))
+  ) : (
+    <p className="text-center text-gray-600 col-span-full">Nincsenek elérhető szobák.</p>
+  )}
+</div>
       </section>
     </main>
   );

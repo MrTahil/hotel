@@ -39,7 +39,7 @@ function Services() {
                             <p>{service.description}</p>
 
                             <Link to={"/rolunk"}>
-                            <button className="service-button">További információ</button>
+                            <button className="w-full bg-blue-800 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-4">További információ</button>
                             </Link>
                         </div>
                     </div>

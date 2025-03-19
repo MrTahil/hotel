@@ -5,9 +5,6 @@ function Programs() {
     const [programs, setPrograms] = useState([]);
     const [selectedProgram, setSelectedProgram] = useState(null);
 
-    
-    
-
     useEffect(() => {
         // Az adatok lekérése a szerverről
         fetch('https://localhost:7047/Events/Geteents')
@@ -19,18 +16,16 @@ function Programs() {
                     name: event.eventName,
                     description: event.description,
                     images: event.images || '../img/lo.png', // Alapértelmezett kép, ha nincs megadva
-                    details: event.description,
                     schedule: event.eventDate,
                     organizerName: event.organizerName,
                     contactInfo: event.contactInfo,
                     location: event.location,
                     capacity: event.capacity,
-
+                    price: event.price,
                 }));
-                console.log(data)
+                console.log(data);
 
                 setPrograms(formattedPrograms);
-                
             })
             .catch(error => console.error('Hiba történt az adatok lekérésekor:', error));
     }, []);
@@ -43,7 +38,13 @@ function Programs() {
         setSelectedProgram(null);
     };
 
-
+    // Funkció a leírás levágásához
+    const truncateDescription = (description, maxLength) => {
+        if (description.length > maxLength) {
+            return description.substring(0, maxLength) + '...';
+        }
+        return description;
+    };
 
     return (
         <div className="programs-container">
@@ -56,27 +57,70 @@ function Programs() {
                         </div>
                         <div className="program-content">
                             <h2>{program.name}</h2>
-                            <p>{program.description}</p>
-                            <button className="program-button" onClick={() => openModal(program)}>Részletek</button>
+                            <p>{truncateDescription(program.description, 70)}</p> {/* Csak az első 100 karakter */}
+                            <button 
+                                className="w-full bg-blue-800 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-4" 
+                                onClick={() => openModal(program)}
+                            >
+                                Részletek
+                            </button>
                         </div>
                     </div>
                 ))}
             </div>
 
             {selectedProgram && (
-                <div className="modal-overlay">
-                    <div className="modal">
-                        <h2>{selectedProgram.name}</h2>
-                        <div className="modal-image">
-                            <img src={selectedProgram.images} alt={selectedProgram.name} />
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg shadow-lg overflow-hidden max-w-2xl w-full mx-4">
+                        <div className="p-6">
+                            <h2 className="text-2xl font-bold mb-4">{selectedProgram.name}</h2>
+                            <div className="flex flex-col md:flex-row gap-6">
+                                <div className="md:w-1/2">
+                                    <img 
+                                        src={selectedProgram.images} 
+                                        alt={selectedProgram.name} 
+                                        className="w-full h-48 object-cover rounded-lg"
+                                    />
+                                </div>
+                                <div className="md:w-1/2">
+                                    <p className="text-gray-700 mb-2">
+                                        <strong>Időpont:</strong> {selectedProgram.schedule}
+                                    </p>
+                                    <p className="text-gray-700 mb-2">
+                                        <strong>Szervező:</strong> {selectedProgram.organizerName}
+                                    </p>
+                                    <p className="text-gray-700 mb-2">
+                                        <strong>Elérhetőség:</strong> {selectedProgram.contactInfo}
+                                    </p>
+                                    <p className="text-gray-700 mb-2">
+                                        <strong>Helyszín:</strong> {selectedProgram.location}
+                                    </p>
+                                    <p className="text-gray-700 mb-4">
+                                        <strong>Férőhelyek:</strong> {selectedProgram.capacity}
+                                    </p>
+                                    <p className="text-gray-700 mb-4">
+                                        <strong>Leírás:</strong> {selectedProgram.description} {/* Teljes leírás */}
+                                    </p>
+
+                                    <p className="text-gray-700 mb-4">
+                                        <strong>Ár / Fő: {selectedProgram.price} Ft</strong>
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                        <p><strong>Időpont:</strong> {selectedProgram.schedule}</p>
-                        <p><strong>Szervező:</strong> {selectedProgram.organizerName}</p>
-                        <p><strong>Elérhetőség:</strong> {selectedProgram.contactInfo}</p>
-                        <p><strong>Helyszín:</strong> {selectedProgram.location}</p>
-                        <p><strong>Férőhelyek:</strong> {selectedProgram.capacity}</p>
-                        <button className="close-button" onClick={closeModal}>Bezárás</button>
-                        <button className="">Foglalás</button>
+                        <div className="bg-gray-50 px-6 py-4 flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
+                            <button 
+                                className="w-full md:w-auto bg-blue-800 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                            >
+                                Foglalás
+                            </button>
+                            <button 
+                                className="w-full md:w-auto bg-red-800 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition-colors"
+                                onClick={closeModal}
+                            >
+                                Bezárás
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
