@@ -109,7 +109,6 @@ function RoomCard() {
             <p><strong>Befogadó képesség:</strong> {room.capacity ? `${room.capacity} fő` : 'N/A'}</p>
             <p><strong>Ár / Éj / Fő:</strong> {room.pricePerNight ? `${room.pricePerNight} Ft` : 'N/A'}</p>
             <p><strong>Emelet:</strong> {room.floorNumber || 'N/A'}</p>
-            <p><strong>Kényelmi szolgáltatások:</strong> {room.amenities || 'No data'}</p>
           </div>
           <button
             className="w-full bg-blue-800 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-4"

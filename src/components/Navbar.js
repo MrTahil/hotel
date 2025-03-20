@@ -45,10 +45,8 @@ function Navbar() {
             <nav className="sticky top-0 bg-gradient-to-r from-blue-900 to-blue-800 shadow-lg w-full z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
                     <div className="flex items-center space-x-4">
-                        <img src="../logo_cutout.png" alt="Logó" className='h-9'/>
-                        <NavLink to="/" className="text-white text-xl md:text-2xl font-bold cursor-pointer hover:text-blue-200 transition-colors">
-                            HMZ Hotel
-                        </NavLink>
+                        <img src="../logo.png" alt="Logó" className='h-9 rounded-lg shadow-lg' style={{ maskImage: "radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)" }}/>
+                        
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                             className="md:hidden text-white hover:text-blue-200 transition-colors"
