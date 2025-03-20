@@ -8,6 +8,10 @@ using System.Linq;
 using System.Net.Mail;
 using System.Net;
 using static HMZ_rt.Controllers.UserAccounts_controller;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using System.Net.Mime;
 
 namespace HMZ_rt.Controllers
 {
@@ -77,29 +81,219 @@ namespace HMZ_rt.Controllers
                 //}
                 //emailTemplate = emailTemplate.Replace("{AdditionalItems}", additionalItemsHtml);
 
+                byte[] pdfBytes = GenerateInvoicePdf(booking, guestdata, roomdata, paymentdata);
+
                 using (MailMessage message = new MailMessage())
                 {
                     message.From = new MailAddress(_smtpSettings.FromEmail);
-                    message.Subject = $"Foglalás megerősítése - {Convert.ToString(booking.BookingId)}";
+                    message.Subject = $"Foglalás megerősítése - {booking.BookingId}";
                     message.Body = emailTemplate;
                     message.IsBodyHtml = true;
                     message.To.Add(recipientEmail);
 
                     
-                    using (SmtpClient client = new SmtpClient(_smtpSettings.Server, _smtpSettings.Port))
+                    using (var pdfStream = new MemoryStream(pdfBytes))
                     {
-                        client.EnableSsl = true;
-                        client.Credentials = new NetworkCredential(_smtpSettings.Username, _smtpSettings.Password);
-                        await client.SendMailAsync(message);
+                        var attachment = new Attachment(pdfStream, "foglalas_szamla.pdf", MediaTypeNames.Application.Pdf);
+                        message.Attachments.Add(attachment);
+
+                        using (SmtpClient client = new SmtpClient(_smtpSettings.Server, _smtpSettings.Port))
+                        {
+                            client.EnableSsl = true;
+                            client.Credentials = new NetworkCredential(_smtpSettings.Username, _smtpSettings.Password);
+                            await client.SendMailAsync(message);
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
                 
-                Console.WriteLine(ex);
+                Console.WriteLine($"Hiba e-mail küldéskor: {ex.Message}");
             }
         }
+
+        private byte[] GenerateInvoicePdf(Booking booking, Guest guest, Room room, Payment payment)
+        {
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(1, Unit.Centimetre);
+                    page.DefaultTextStyle(x => x.FontSize(10));
+                    page.Background().Border(1).BorderColor(Colors.Grey.Lighten2);
+
+                    
+                    page.Header().Padding(1, Unit.Centimetre).Column(column =>
+                    {
+                        column.Item().Row(row =>
+                        {
+                            
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text("HMZ RT").FontSize(22).Bold().FontColor(Colors.Indigo.Medium);
+                                c.Item().Text("Palóczy László utca 3, Miskolc, BAZ, 3531").FontSize(9).FontColor(Colors.Grey.Medium);
+                                c.Item().Text("Tel: +36 (70) 123-4567 | Email: hmzrtkando@gmail.com").FontSize(9).FontColor(Colors.Grey.Medium);
+                            });
+
+                            
+                            row.RelativeItem().AlignRight().Column(c =>
+                            {
+                                c.Item().Text("FOGLALÁSI VISSZAIGAZOLÁS").FontSize(16).Bold().FontColor(Colors.Indigo.Medium);
+                                c.Item().Text($"Foglalás száma: #{booking.BookingId}").FontSize(12).FontColor(Colors.Grey.Medium);
+                                c.Item().Text($"Dátum: {booking.BookingDate:yyyy.MM.dd}").FontSize(10).FontColor(Colors.Grey.Medium);
+                            });
+                        });
+                    });
+
+                    
+                    page.Content().PaddingVertical(1, Unit.Centimetre).Column(column =>
+                    {
+                        
+                        column.Item().PaddingBottom(10).Component(new TableComponent("VENDÉG ADATOK", new List<(string, string)>
+                {
+                    ("Név", $"{guest.FirstName} {guest.LastName}"),
+                    ("Email", guest.Email ?? "N/A"),
+                    ("Telefon", guest.PhoneNumber ?? "N/A"),
+                    ("Cím", guest.Address ?? "N/A")
+                }));
+
+                        
+                        column.Item().PaddingTop(10).PaddingBottom(10).Component(new TableComponent("FOGLALÁS RÉSZLETEI", new List<(string, string)>
+                {
+                    ("Szoba", $"{room.RoomNumber}-es számú szoba"),
+                    ("Érkezés", booking.CheckInDate?.ToString("yyyy.MM.dd") ?? "N/A"),
+                    ("Távozás", booking.CheckOutDate?.ToString("yyyy.MM.dd") ?? "N/A"),
+                    ("Időtartam", booking.CheckOutDate.HasValue && booking.CheckInDate.HasValue
+                        ? $"{(booking.CheckOutDate.Value - booking.CheckInDate.Value).TotalDays} nap"
+                        : "N/A")
+                }));
+
+                        
+                        column.Item().PaddingTop(10).PaddingBottom(10).Component(new TableComponent("FIZETÉSI INFORMÁCIÓK", new List<(string, string)>
+                {
+                    ("Fizetési mód", payment.PaymentMethod),
+                    ("Fizetés állapota", booking.PaymentStatus)
+                }));
+
+                        
+                        column.Item().PaddingTop(10).Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn();
+                                columns.RelativeColumn();
+                                columns.RelativeColumn();
+                            });
+
+                            
+                            table.Header(header =>
+                            {
+                                header.Cell().Background(Colors.Indigo.Medium).Padding(5).Text("Tétel").FontColor(Colors.White).Bold();
+                                header.Cell().Background(Colors.Indigo.Medium).Padding(5).Text("Részletek").FontColor(Colors.White).Bold();
+                                header.Cell().Background(Colors.Indigo.Medium).Padding(5).AlignRight().Text("Összeg").FontColor(Colors.White).Bold();
+                            });
+
+                            
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Text("Szobafoglalás");
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Text($"{room.RoomNumber}-es szoba, {(booking.CheckOutDate.Value - booking.CheckInDate.Value).TotalDays} nap");
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).AlignRight().Text($"{Math.Round(Convert.ToDecimal(booking.TotalPrice))} HUF");
+
+                           
+
+                            
+                            decimal subtotal = Math.Round(Convert.ToDecimal(booking.TotalPrice) * Convert.ToDecimal(0.73));
+                            table.Cell().Padding(5).Text("");
+                            table.Cell().Padding(5).AlignRight().Text("Részösszeg:").Bold();
+                            table.Cell().Padding(5).AlignRight().Text($"{subtotal} HUF");
+
+                            
+                            decimal tax = Math.Round(Convert.ToDecimal(booking.TotalPrice) * Convert.ToDecimal(0.27));
+                            table.Cell().Padding(5).Text("");
+                            table.Cell().Padding(5).AlignRight().Text("ÁFA (27%):").Bold();
+                            table.Cell().Padding(5).AlignRight().Text($"{tax} HUF");
+
+                            
+                            decimal total = Math.Round(Convert.ToDecimal(booking.TotalPrice));
+                            table.Cell().Padding(5).Text("");
+                            table.Cell().Padding(5).AlignRight().Text("Végösszeg:").Bold();
+                            table.Cell().Padding(5).AlignRight().Text($"{total} HUF").FontColor(Colors.Indigo.Medium).Bold();
+                        });
+
+                        
+                        column.Item().PaddingTop(20).Background(Colors.Grey.Lighten4).Padding(10).Column(c =>
+                        {
+                            c.Item().Text("Köszönjük a foglalását!").FontSize(14).Bold().FontColor(Colors.Indigo.Medium);
+                            c.Item().Text("Reméljük, hogy kellemes időt tölt nálunk. Ha bármilyen kérdése vagy kérése van, kérjük, vegye fel velünk a kapcsolatot.").FontSize(10);
+                        });
+                    });
+
+                    
+                    page.Footer().Padding(1, Unit.Centimetre).Column(column =>
+                    {
+                        column.Item().BorderTop(1).BorderColor(Colors.Grey.Lighten2).PaddingTop(10).Row(row =>
+                        {
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text($"© {DateTime.Now.Year} HMZ RT. Minden jog fenntartva.").FontSize(9).FontColor(Colors.Grey.Medium);
+                            });
+
+                            row.RelativeItem().AlignRight().Text(text =>
+                            {
+                                text.Span("Oldal ").FontSize(9).FontColor(Colors.Grey.Medium);
+                                text.CurrentPageNumber().FontSize(9).FontColor(Colors.Grey.Medium);
+                                text.Span(" / ").FontSize(9).FontColor(Colors.Grey.Medium);
+                                text.TotalPages().FontSize(9).FontColor(Colors.Grey.Medium);
+                            });
+                        });
+                    });
+                });
+            });
+
+            return document.GeneratePdf();
+        }
+
+        
+        public class TableComponent : IComponent
+        {
+            private readonly string _title;
+            private readonly List<(string Label, string Value)> _items;
+
+            public TableComponent(string title, List<(string, string)> items)
+            {
+                _title = title;
+                _items = items;
+            }
+
+            public void Compose(IContainer container)
+            {
+                container.Border(1).BorderColor(Colors.Grey.Lighten2).Column(column =>
+                {
+                    
+                    column.Item().Background(Colors.Indigo.Medium).Padding(10).Text(_title).FontColor(Colors.White).Bold();
+
+                    
+                    column.Item().Padding(10).Table(table =>
+                    {
+                        table.ColumnsDefinition(columns =>
+                        {
+                            columns.RelativeColumn(1);
+                            columns.RelativeColumn(3);
+                        });
+
+                        foreach (var (label, value) in _items)
+                        {
+                            table.Cell().Padding(5).Text(label).Bold().FontColor(Colors.Grey.Medium);
+                            table.Cell().Padding(5).Text(value);
+                        }
+                    });
+                });
+            }
+        }
+
 
 
 
@@ -125,22 +319,44 @@ namespace HMZ_rt.Controllers
             {
                 return BadRequest();
             }
+
+            if (!crtbooking.CheckInDate.HasValue || !crtbooking.CheckOutDate.HasValue)
+            {
+                return BadRequest("A kezdő és végdátum megadása kötelező.");
+            }
+
+            var checkInDate = crtbooking.CheckInDate.Value;
+            var checkOutDate = crtbooking.CheckOutDate.Value;
+
+            if (checkOutDate <= checkInDate)
+            {
+                return BadRequest("A foglalás végdátuma a kezdet után kell legyen.");
+            }
+
+            var bookingDuration = (checkOutDate - checkInDate).TotalDays;
+            if (bookingDuration < 2)
+            {
+                return StatusCode(400, "Minimum 2 napra kell foglalni");
+            }
+
             var roomData = await _context.Rooms.FirstOrDefaultAsync(x => x.RoomId == roomid);
             if (roomData == null)
             {
                 return StatusCode(404, "Nem létező szobára hivatkoztál");
             }
+
             var guestData = await _context.Guests.FirstOrDefaultAsync(x => x.GuestId == crtbooking.GuestId);
             if (guestData == null)
             {
                 return StatusCode(404, "Vendég megadása szükséges foglalás előtt");
             }
+
             var user = await _context.Useraccounts.FirstOrDefaultAsync(x => x.UserId == guestData.UserId);
             if (user == null)
             {
                 return StatusCode(404, "Nem található felhasználó a vendéghez");
             }
-                
+
             var existingBooking = await _context.Bookings
                 .AnyAsync(b => b.RoomId == roomid &&
                               ((crtbooking.CheckInDate >= b.CheckInDate && crtbooking.CheckInDate < b.CheckOutDate) ||
@@ -152,6 +368,10 @@ namespace HMZ_rt.Controllers
                 return StatusCode(409, "A szoba foglalt a kiválasztott időszakra");
             }
 
+            if (roomData.Capacity < crtbooking.NumberOfGuests)
+            {
+                return StatusCode(400, "Túl sok fővel próbáltál foglalni");
+            }
 
             var booking = new Booking
             {
@@ -159,19 +379,16 @@ namespace HMZ_rt.Controllers
                 CheckOutDate = crtbooking.CheckOutDate,
                 GuestId = crtbooking.GuestId,
                 RoomId = roomid,
-                TotalPrice = roomData.PricePerNight * crtbooking.NumberOfGuests, //without coc
+                TotalPrice = roomData.PricePerNight * crtbooking.NumberOfGuests,
                 BookingDate = DateTime.Now,
                 PaymentStatus = "Fizetésre vár",
                 NumberOfGuests = crtbooking.NumberOfGuests,
                 Status = "Jóváhagyva"
             };
 
-            if (roomData.Capacity < crtbooking.NumberOfGuests)
-            {
-                return StatusCode(400, "Túl sok fővel próbáltál foglalni");
-            }
             await _context.Bookings.AddAsync(booking);
             await _context.SaveChangesAsync();
+
             var payment = new Payment
             {
                 BookingId = booking.BookingId,
@@ -184,13 +401,13 @@ namespace HMZ_rt.Controllers
                 PaymentNotes = "",
                 DateAdded = DateTime.Now
             };
+
             await _context.Payments.AddAsync(payment);
             await _context.SaveChangesAsync();
             await SendBookingConfirmation(booking, user.Email, guestData, roomData, payment);
 
             return StatusCode(201, "Sikeres foglalás");
         }
-
 
 
 
