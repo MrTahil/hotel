@@ -24,6 +24,27 @@ namespace HMZ_rt.Controllers
         {
             try
             {
+                if (!crtdto.DateOfBirth.HasValue)
+                {
+                    return StatusCode(400, "A születési dátum megadása kötelező.");
+                }
+
+                var today = DateTime.Today;
+                var birthDate = crtdto.DateOfBirth.Value;
+                var age = today.Year - birthDate.Year;
+
+
+                if (birthDate > today.AddYears(-age))
+                {
+                    age--;
+                }
+
+                if (age < 17)
+                {
+                    return StatusCode(400, "17 évnél fiatalabb vendéget nem lehet hozzáadni!");
+                }
+
+
                 var guestss = new Guest
                 {
                     FirstName = crtdto.FirstName,
@@ -37,11 +58,13 @@ namespace HMZ_rt.Controllers
                     Gender = crtdto.Gender,
                     UserId = crtdto.UserId
                 };
+
+
                 if (guestss != null)
                 {
                     if (!_context.Guests.Contains(guestss))
                     {
-                        Useraccount test = _context.Useraccounts.FirstOrDefaultAsync(x => x.UserId == crtdto.UserId).Result;
+                        Useraccount test =await _context.Useraccounts.FirstOrDefaultAsync(x => x.UserId == crtdto.UserId);
                         if (_context.Useraccounts.Contains(test))
                         {
                             await _context.Guests.AddAsync(guestss);

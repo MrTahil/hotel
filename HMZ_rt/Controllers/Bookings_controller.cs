@@ -416,10 +416,10 @@ namespace HMZ_rt.Controllers
         [HttpGet("BookingsByUserId")]
         public async Task<ActionResult<Booking>> GetUserBookings(int UserIdd)
         {
-            var igen =await  _context.Guests.FirstOrDefaultAsync(x => x.UserId == UserIdd);
-            var foglalasok =  _context.Bookings.Where(x => x.GuestId == igen.GuestId).Include(x => x.Payments);
-            if (igen != null) {
-                return StatusCode(201, foglalasok);
+            var data =await  _context.Guests.FirstOrDefaultAsync(x => x.UserId == UserIdd);
+            var reservation =  _context.Bookings.Where(x => x.GuestId == data.GuestId).Include(x => x.Payments);
+            if (data != null) {
+                return StatusCode(201, reservation);
             }
             return BadRequest();
 
@@ -445,6 +445,7 @@ namespace HMZ_rt.Controllers
                 return StatusCode(500, ex);
             }
         }
+        //DO NOT USE
         [Authorize(Roles = "Base,Admin,System,Recept")]
         [HttpPut("UpdateBooking/{id}")]
         public async Task<ActionResult<Booking>> UpdateBookingByid(int id, UpdateBooking udto)
@@ -475,22 +476,25 @@ namespace HMZ_rt.Controllers
 
         [Authorize(Roles = "Base,Admin,System,Recept")]
         [HttpGet("Getalldat")]
-        public async Task<ActionResult<Booking>> GetallData()
+        public async Task<ActionResult<IEnumerable<Booking>>> GetallData()
         {
             try
             {
+                var oneMonthAgo = DateTime.UtcNow.AddMonths(-1);
+                var oneYearAway = DateTime.UtcNow.AddYears(1);
 
+                var data = await _context.Bookings
+                    .Where(b => b.CheckOutDate >= oneMonthAgo && b.CheckInDate <= oneYearAway)
+                    .ToListAsync();
 
-            var data = await _context.Bookings.ToListAsync();
-            if (data!= null)
-            {
-                return StatusCode(200, data);
-            }
-                return StatusCode(404, "Nincs adat a táblában");
+                if (data != null && data.Any())
+                {
+                    return Ok(data);
+                }
+                return NotFound("Nincsenek foglalások az elmúlt 1 hónapban vagy a közeljövőben");
             }
             catch (Exception ex)
             {
-
                 return StatusCode(500, ex);
             }
         }

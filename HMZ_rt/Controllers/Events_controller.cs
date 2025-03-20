@@ -80,18 +80,32 @@ namespace HMZ_rt.Controllers
         public async Task<ActionResult<Event>> Updateevent(int id, UpdateEvent udto) {
             try
             {
-                var egyevent = await _context.Events.FirstOrDefaultAsync(x => x.EventId == id); 
-                if (egyevent != null)
+                var data = await _context.Events.FirstOrDefaultAsync(x => x.EventId == id); 
+
+                if (data != null)
                 {
-                    egyevent.Status = udto.Status;
-                    egyevent.Capacity = udto.Capacity;
-                    egyevent.EventName = udto.EventName;
-                    egyevent.EventDate = udto.EventDate;
-                    egyevent.Location = udto.Location;
-                    egyevent.Description = udto.Description;
-                    egyevent.OrganizerName = udto.OrganizerName;
-                    egyevent.ContactInfo = udto.ContactInfo;
-                    egyevent.Price = udto.Price;
+                    data.Status = udto.Status;
+                    data.Capacity = udto.Capacity;
+                    data.EventName = udto.EventName;
+                    data.EventDate = udto.EventDate;
+                    data.Location = udto.Location;
+                    data.Description = udto.Description;
+                    data.OrganizerName = udto.OrganizerName;
+                    data.ContactInfo = udto.ContactInfo;
+                    data.Price = udto.Price;
+                    if (data.Price < 0)
+                    {
+                        return BadRequest("Nem lehet kevesebb mint 0 az ár");
+                    }
+                    if (data.EventDate > DateTime.Now.AddDays(1))
+                    {
+                        return BadRequest("Nem lehet 1 napnál hamarabbi eseményt hozzáadni");
+                    }
+                    if (data.Capacity < 0)
+                    {
+                        return BadRequest("A kapacitás nem lehet kevesebb mint 1");
+                    }
+
                     await _context.SaveChangesAsync();
                     return StatusCode(201, "Sikeres mentés");
                 }return StatusCode(404, "Valami nem jó");

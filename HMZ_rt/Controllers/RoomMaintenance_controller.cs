@@ -39,7 +39,7 @@ namespace HMZ_rt.Controllers
         {
             try
             {
-                var valami = new Roommaintenance
+                var data = new Roommaintenance
                 {
                     MaintenanceDate = dto.MaintenanceDate,
                     Description = dto.Description,
@@ -51,9 +51,13 @@ namespace HMZ_rt.Controllers
                     RoomId = dto.RoomId
 
                 };
-                if (valami != null)
+                if (data.MaintenanceDate < DateTime.Now.AddDays(1))
                 {
-                    await _context.Roommaintenances.AddAsync(valami);
+                    return BadRequest("Nem lehet hamarabbi dátum mint a mai nap");
+                }
+                if (data != null)
+                {
+                    await _context.Roommaintenances.AddAsync(data);
                     await _context.SaveChangesAsync();
                     return StatusCode(201, "Sikeres kérvény leadás!");
                 }
@@ -75,10 +79,10 @@ namespace HMZ_rt.Controllers
         {
             try
             {
-                var valami = await _context.Roommaintenances.FirstOrDefaultAsync(x => x.MaintenanceId == id);
-                if (valami != null)
+                var data = await _context.Roommaintenances.FirstOrDefaultAsync(x => x.MaintenanceId == id);
+                if (data != null)
                 {
-                    _context.Roommaintenances.Remove(valami);
+                    _context.Roommaintenances.Remove(data);
                     await _context.SaveChangesAsync();
                     return StatusCode(201, "Sikeres törlés");
                 }

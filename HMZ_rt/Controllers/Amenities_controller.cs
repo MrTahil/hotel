@@ -61,13 +61,13 @@ namespace HMZ_rt.Controllers
             {
 
 
-            var results = await _context.Amenities.Where(x => x.RoomId == Id).ToListAsync();
+            var data = await _context.Amenities.Where(x => x.RoomId == Id).ToListAsync();
 
-            if (!results.Any())
+            if (!data.Any())
             {
                 return NotFound(new { message = "Elfelejtetted feltölteni ezt a szekciót!" });
             }
-            return Ok(results);
+            return Ok(data);
             }
             catch (Exception ex)
             {
@@ -82,9 +82,9 @@ namespace HMZ_rt.Controllers
         {
             try
             {
-                var deletee = await _context.Amenities.FirstOrDefaultAsync(x => x.AmenityId == id);
-                if (deletee != null) { 
-                _context.Amenities.Remove(deletee);
+                var data = await _context.Amenities.FirstOrDefaultAsync(x => x.AmenityId == id);
+                if (data != null) { 
+                _context.Amenities.Remove(data);
                     await _context.SaveChangesAsync();
                     return StatusCode(201, "Sikeres törlés");
                 } return StatusCode(404, "Ez az adat nem található az adatbázisban!");
@@ -102,17 +102,17 @@ namespace HMZ_rt.Controllers
         {
             try
             {
-                var adat = await _context.Amenities.FirstOrDefaultAsync(x => x.AmenityId == id);
-                if (adat != null)
+                var data = await _context.Amenities.FirstOrDefaultAsync(x => x.AmenityId == id);
+                if (data != null)
                 {
-                    adat.AmenityName = udto.AmenityName;
-                    adat.Description = udto.Descript;
-                    adat.Availability = udto.Availability;
-                    adat.Status = udto.Status;
-                    adat.Icon = udto.Icon;
-                    adat.Category = udto.Category;
-                    adat.Priority = udto.Priority;
-                    _context.Amenities.Update(adat);
+                    data.AmenityName = udto.AmenityName;
+                    data.Description = udto.Descript;
+                    data.Availability = udto.Availability;
+                    data.Status = udto.Status;
+                    data.Icon = udto.Icon;
+                    data.Category = udto.Category;
+                    data.Priority = udto.Priority;
+                    _context.Amenities.Update(data);
                     await _context.SaveChangesAsync();
                     return StatusCode(201, "Sikeres frissítés");
                     

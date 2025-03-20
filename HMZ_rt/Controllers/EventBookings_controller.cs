@@ -22,10 +22,19 @@ namespace HMZ_rt.Controllers
         {
             try
             {
-                var adat = await _context.Eventbookings.ToListAsync();
-                if (adat != null)
+                var param = await _context.Events
+                    .Where(x => x.EventDate > DateTime.Now.AddDays(-1))
+                    .Select(x => x.EventId)
+                    .ToListAsync();
+
+                var paramHashSet = new HashSet<int>(param);
+
+                var data = await _context.Eventbookings
+                    .Where(x => paramHashSet.Contains(x.EventId))
+                    .ToListAsync(); 
+                if (data != null)
                 {
-                    return StatusCode(200, adat);
+                    return StatusCode(200, data);
                 }
                 return StatusCode(404, "Nincs adat a táblában");
             }
@@ -65,9 +74,9 @@ namespace HMZ_rt.Controllers
         {
             try
             {
-                var eventdata = _context.Events.FirstOrDefault(x => x.EventId == eventid);
+                var eventdata = _context.Events.FirstOrDefault(x => x.EventId == eventid && x.EventDate > DateTime.Now.AddDays(-1));
                 if (eventdata == null) {
-                    return StatusCode(404, "Ez az event Id nem létezik");
+                    return StatusCode(404, "Ez az esemény nem létezik vagy már véget ért.");
                 }
                 var guestdata = _context.Guests.FirstOrDefaultAsync(x => x.GuestId == crtdto.GuestId);
                 if (guestdata == null) {
