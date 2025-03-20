@@ -97,7 +97,7 @@ function RoomCard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
   {filteredRooms.length > 0 ? (
     filteredRooms.map((room) => (
-      <div key={room.room_id || room.room_number || Math.random()} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300 flex flex-col">
+      <div key={room.roomId || room.room_number || Math.random()} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300 flex flex-col">
         <div className="h-48 bg-gray-200">
           <img src={room.images} className="w-full h-full object-cover" />
         </div>
@@ -112,7 +112,7 @@ function RoomCard() {
           </div>
           <button
             className="w-full bg-blue-800 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors mt-4"
-            onClick={() => navigate('/Foglalas', { state: { room } })}
+            onClick={() => navigate(`/Foglalas/${room.roomId}`, { state: { room } })}
           >
             Foglalás
           </button>

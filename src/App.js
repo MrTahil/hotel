@@ -25,7 +25,7 @@ function App() {
                         <Route path="/rolunk" element={<About/>} />
                         <Route path="/programok" element={<Programs/>} />
                         <Route path="/szolgaltatasok" element={<Services />} />
-                        <Route path="/foglalas" element={<Foglalas />} />
+                        <Route path="/foglalas/:id" element={<Foglalas />} />
                         <Route path="*" element={<h1>404 - Az oldal nem található</h1>} />
                         <Route path="/profile" element={<ProfilePage />} />
                     </Routes>

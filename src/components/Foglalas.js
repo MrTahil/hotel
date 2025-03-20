@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 export const Foglalas = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { room } = location.state || {};
+  const { id } = useParams();
 
   const [guests, setGuests] = useState(1);
   const [additionalGuests, setAdditionalGuests] = useState(0);
   const [guestTypes, setGuestTypes] = useState([]);
-  const [mainGuestType, setMainGuestType] = useState("felnott"); // Alap foglaló korának állapota
+  const [mainGuestType, setMainGuestType] = useState("felnott");
+  const [amenities, setAmenities] = useState([]); // Kényelmi szolgáltatások
+  const [loading, setLoading] = useState(false); // Betöltési állapot
+  const [error, setError] = useState(null); // Hibaállapot
+
+  
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -24,6 +30,36 @@ export const Foglalas = () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
+ 
+  // Fetch a kényelmi szolgáltatásokhoz
+  useEffect(() => {
+    const fetchAmenities = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          console.log("Received room data:", room);
+          const response = await fetch(
+            `https://localhost:7047/Amenities/GetAmenitiesForRoom/${id}`
+          );
+          if (!response.ok) {
+            throw new Error("Hiba a kényelmi szolgáltatások lekérdezése során.");
+          }
+          
+          const data = await response.json();
+          
+          console.log("Lekért kényelmi szolgáltatások:", data); // Konzolos 
+          setAmenities(data);
+        } catch (error) {
+          console.error("Hiba a fetch során:", error);
+          setError(error.message);
+        } finally {
+          setLoading(false);
+        }
+      
+    };
+    
+    fetchAmenities();
+  }, [room]);
 
   if (!room) {
     return (
@@ -138,43 +174,22 @@ export const Foglalas = () => {
                     "A 45 négyzetméteres Deluxe Panoráma Szobánk modern eleganciát kínál gyönyörű panorámával a városra. A kényelmet a luxus matracokkal felszerelt king-size ágy biztosítja, míg a tágas fürdőszoba esőzuhannyal és prémium piperecikkekkel várja."}
                 </p>
                 <div className="grid grid-cols-2 gap-4 mt-6">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-blue-600">
-                      king_bed
-                    </span>
-                    <span>King méretű ágy</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-blue-600">
-                      wifi
-                    </span>
-                    <span>Ingyenes WiFi</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-blue-600">
-                      ac_unit
-                    </span>
-                    <span>Légkondicionáló</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-blue-600">
-                      local_bar
-                    </span>
-                    <span>Minibár</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-blue-600">
-                      tv
-                    </span>
-                    <span>Smart TV</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-blue-600">
-                      room_service
-                    </span>
-                    <span>Szobaszerviz</span>
-                  </div>
-                </div>
+  {loading && <p>Kényelmi szolgáltatások betöltése...</p>}
+  {error && <p className="text-red-500">{error}</p>}
+  {!loading && !error && amenities.length === 0 && (
+    <p>Nincsenek elérhető kényelmi szolgáltatások.</p>
+  )}
+  {!loading &&
+    !error &&
+    amenities.map((amenity, index) => (
+      <div key={index} className="flex items-center gap-2">
+        <span className="material-symbols-outlined text-blue-600">
+          {amenity.icon || "check"} {/* Alapértelmezett ikon, ha nincs megadva */}
+        </span>
+        <span>{amenity.amenityName}</span> {/* Kényelmi szolgáltatás neve */}
+      </div>
+    ))}
+</div>
               </div>
             </div>
             <div className="w-1/3">
