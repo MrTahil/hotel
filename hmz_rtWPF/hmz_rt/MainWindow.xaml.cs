@@ -14,143 +14,12 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-
+using hmz_rt.Dtos;
+using hmz_rt.Models.Dtos;
+using hmz_rt.Models.Converters;
 namespace RoomListApp
 {
-    public static class TokenStorage
-    {
-        public static string AuthToken { get; set; }
-        public static string RefreshToken { get; set; }
-        public static string Role { get; set; }
-        public static string Username { get; set; }
 
-        public static int UserId { get; set; }
-
-
-        public static void ClearTokens()
-        {
-            AuthToken = null;
-            RefreshToken = null;
-            Username = null;
-            Role = null;
-            UserId = 0;
-        }
-    }
-
-    public class StatusToButtonTextConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            string status = value?.ToString();
-            switch (status)
-            {
-                case "Jóváhagyva":
-                case "Függőben":
-                    return "Check In";
-                case "Checked In":
-                    return "Check Out";
-                case "Finished":
-                    return "Lezárva";
-                case "Lemondva":
-                    return "Lemondva";
-                default:
-                    return status;
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class BooleanToVisibilityConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return (bool)value ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return (Visibility)value == Visibility.Visible;
-        }
-    }
-
-    public class RatingToStarsConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value == null) return null;
-
-            int rating = (int)value;
-            StackPanel starPanel = new StackPanel { Orientation = Orientation.Horizontal };
-
-            for (int i = 1; i <= 10; i++)
-            {
-                TextBlock star = new TextBlock
-                {
-                    Text = "★",
-                    FontSize = 16,
-                    Foreground = i <= rating ? Brushes.Gold : Brushes.LightGray,
-                    Margin = new Thickness(1, 0, 1, 0)
-                };
-
-                starPanel.Children.Add(star);
-            }
-
-            return starPanel;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class StarColorConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value == null || parameter == null) return Brushes.LightGray;
-
-            int rating = (int)value;
-            int position = (int)parameter;
-
-            return (position <= rating) ? Brushes.Gold : Brushes.LightGray;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class PaymentStatusToColorConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value is string status)
-            {
-                switch (status?.ToLower().Trim())
-                {
-                    case "fizetve":
-                        return Brushes.Green;
-                    case "fizetésre vár":
-                    case "fizetesre var":
-                        return Brushes.OrangeRed;
-                    default:
-                        return Brushes.Black;
-                }
-            }
-            return Brushes.Black;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-    }
     public partial class MainWindow : Window
     {
         private readonly HttpClient _httpClient;
@@ -170,6 +39,9 @@ namespace RoomListApp
         //Változók a Booking szerkesztési módhoz
         private bool isEditBooking = false;
         private int currentEditBookingId = 0;
+        //Változók a Maintenance szerkesztési módhoz
+        private bool isEditMaintenance = false;
+        private int currentMaintenanceId = 0;
 
 
         public MainWindow()
@@ -301,7 +173,7 @@ namespace RoomListApp
             catch (Exception ex)
             {
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-
+                
                 dashboardGrid.Visibility = Visibility.Visible;
                 staffContainer.Visibility = Visibility.Collapsed;
             }
@@ -601,11 +473,11 @@ namespace RoomListApp
         {
             try
             {
-
+                
                 dashboardGrid.Visibility = Visibility.Collapsed;
                 promotionsContainer.Visibility = Visibility.Visible;
 
-
+                
                 promotionEditPanel.Visibility = Visibility.Collapsed;
                 isEditPromotion = false;
                 currentEditPromotionId = 0;
@@ -835,7 +707,7 @@ namespace RoomListApp
                         DiscountPercentage = discountPercentage,
                         TermsConditions = TermsConditionsTextBox.Text,
                         Status = selectedStatus,
-                        RoomId = roomId
+                        RoomId = roomId 
                     };
 
 
@@ -1589,29 +1461,6 @@ namespace RoomListApp
             TotalPriceTextBox.Text = selectedBooking.TotalPrice?.ToString("N0") + " Ft";
 
             
-            if (selectedBooking.PaymentStatus != null)
-            {
-                foreach (ComboBoxItem item in PaymentMethodComboBox.Items)
-                {
-                    if (item.Content.ToString() == selectedBooking.PaymentStatus)
-                    {
-                        PaymentMethodComboBox.SelectedItem = item;
-                        break;
-                    }
-                }
-            }
-
-            if (selectedBooking.PaymentMethod != null)
-            {
-                foreach (ComboBoxItem item in PaymentMethodComboBox.Items)
-                {
-                    if (item.Content.ToString() == selectedBooking.PaymentMethod)
-                    {
-                        PaymentMethodComboBox.SelectedItem = item;
-                        break;
-                    }
-                }
-            }
 
             bookingEditPanel.Visibility = Visibility.Visible;
         }
@@ -1635,7 +1484,7 @@ namespace RoomListApp
                 var room = allRooms?.FirstOrDefault(r => r.RoomId == roomId);
                 if (room != null)
                 {
-
+                    
                     var availableRooms = allRooms.Where(r => r.Status == "Szabad" || r.RoomId == roomId).ToList();
                     RoomComboBox.ItemsSource = availableRooms;
 
@@ -1714,7 +1563,7 @@ namespace RoomListApp
             currentEditBookingId = 0;
         }
 
-
+        
         private void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdateTotalPrice();
@@ -1767,8 +1616,8 @@ namespace RoomListApp
                     GuestComboBox.SelectedItem == null ||
                     CheckInDatePicker.SelectedDate == null ||
                     CheckOutDatePicker.SelectedDate == null ||
-                    string.IsNullOrWhiteSpace(NumberOfGuestsTextBox.Text) ||
-                    PaymentMethodComboBox.SelectedItem == null
+                    string.IsNullOrWhiteSpace(NumberOfGuestsTextBox.Text)
+                    
                     )
 
                 {
@@ -1795,10 +1644,8 @@ namespace RoomListApp
                     return;
                 }
 
-                var selectedPaymentMethod = (PaymentMethodComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
 
-                if (isEditBooking)
-                {
+                if (isEditBooking) {
                     var updateDto = new UpdateBooking
                     {
                         CheckInDate = CheckInDatePicker.SelectedDate,
@@ -1863,7 +1710,6 @@ namespace RoomListApp
             CheckInDatePicker.SelectedDate = null;
             CheckOutDatePicker.SelectedDate = null;
             NumberOfGuestsTextBox.Text = string.Empty;
-            PaymentMethodComboBox.SelectedIndex = -1;
             TotalPriceTextBox.Text = string.Empty;
         }
 
@@ -2097,7 +1943,7 @@ namespace RoomListApp
 
             grid.Children.Add(ratingPanel);
 
-
+            
             var commentPanel = new StackPanel
             {
                 Margin = new Thickness(10, 0, 10, 10)
@@ -2246,7 +2092,7 @@ namespace RoomListApp
                 var feedback = new CreateFeedback
                 {
                     Category = "Panasz",
-                    Rating = 1,
+                    Rating = 1, 
                     Status = "Új",
                     Response = complaintText,
                     GuestId = booking.GuestId.Value
@@ -2333,8 +2179,8 @@ namespace RoomListApp
             var feedbackWindow = new Window
             {
                 Title = $"Visszajelzések - {booking.GuestName}",
-                Width = 800,
-                Height = 600,
+                Width = 800, 
+                Height = 600, 
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Owner = this
             };
@@ -2435,7 +2281,7 @@ namespace RoomListApp
             var responseColumn = new GridViewColumn
             {
                 Header = "Panasz",
-                Width = 200
+                Width = 200 
 
             };
 
@@ -2456,8 +2302,8 @@ namespace RoomListApp
                 Setters =
         {
             new Setter(ListViewItem.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch),
-            new Setter(ListViewItem.HeightProperty, double.NaN),
-            new Setter(ListViewItem.MinHeightProperty, 50.0)
+            new Setter(ListViewItem.HeightProperty, double.NaN), 
+            new Setter(ListViewItem.MinHeightProperty, 50.0) 
         }
             };
 
@@ -2793,8 +2639,10 @@ namespace RoomListApp
             var button = sender as Button;
             if (button == null) return;
 
+            // Eltároljuk a foglalás azonosítóját
             currentPaymentBookingId = (int)button.Tag;
 
+            // Elrejtjük a foglalás konténert és megjelenítjük a fizetési panelt
             bookingsContainer.Visibility = Visibility.Collapsed;
             paymentPanel.Visibility = Visibility.Visible;
         }
@@ -2846,6 +2694,7 @@ namespace RoomListApp
         }
         private void PaymentBackButton_Click(object sender, RoutedEventArgs e)
         {
+            // Visszatérés a foglalások nézethez
             paymentPanel.Visibility = Visibility.Collapsed;
             bookingsContainer.Visibility = Visibility.Visible;
             currentPaymentBookingId = 0;
@@ -2855,6 +2704,7 @@ namespace RoomListApp
         {
             await UpdatePaymentStatus(currentPaymentBookingId, "Fizetve", "Készpénz");
 
+            // Visszatérés a foglalások nézethez
             paymentPanel.Visibility = Visibility.Collapsed;
             bookingsContainer.Visibility = Visibility.Visible;
             currentPaymentBookingId = 0;
@@ -2863,13 +2713,14 @@ namespace RoomListApp
         {
             await UpdatePaymentStatus(currentPaymentBookingId, "Fizetve", "Bankkártya");
 
+            // Visszatérés a foglalások nézethez
             paymentPanel.Visibility = Visibility.Collapsed;
             bookingsContainer.Visibility = Visibility.Visible;
             currentPaymentBookingId = 0;
         }
         private async void ConfirmPaymentButton_Click(object sender, RoutedEventArgs e)
         {
-            string paymentMethod = "Készpénz";
+            string paymentMethod = "Készpénz"; // Alapértelmezett
 
             if (CashRadioButton.IsChecked == true)
                 paymentMethod = "Készpénz";
@@ -2882,307 +2733,493 @@ namespace RoomListApp
 
             await UpdatePaymentStatus(currentPaymentBookingId, "Fizetve", paymentMethod);
 
-           
+            // Visszatérés a foglalások nézethez
             paymentPanel.Visibility = Visibility.Collapsed;
             bookingsContainer.Visibility = Visibility.Visible;
             currentPaymentBookingId = 0;
         }
         private void CancelPaymentButton_Click(object sender, RoutedEventArgs e)
         {
+            // Visszatérés a foglalások nézethez fizetés nélkül
             paymentPanel.Visibility = Visibility.Collapsed;
             bookingsContainer.Visibility = Visibility.Visible;
             currentPaymentBookingId = 0;
         }
-    }
-}
 
-//Room osztályok
-public class Room
-{
-    public int RoomId { get; set; }
-    public string RoomType { get; set; }
-    public string RoomNumber { get; set; }
-    public int? Capacity { get; set; }
-    public decimal? PricePerNight { get; set; }
-    public string Status { get; set; }
-    public string Description { get; set; }
-    public int? FloorNumber { get; set; }
-    public string Amenities { get; set; }
-    public DateTime? DateAdded { get; set; }
-    public string Images { get; set; }
-
-    public override string ToString()
-    {
-        return $"{RoomNumber} - {RoomType} ({PricePerNight} Ft/éj), Kapacitás: {Capacity} fő, Állapot: {Status}";
-    }
-}
-
-//Staff Osztályok
-public class Staff
-{
-    public int StaffId { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Email { get; set; }
-    public string PhoneNumber { get; set; }
-    public string Position { get; set; }
-    public decimal? Salary { get; set; }
-    public DateTime? DateHired { get; set; }
-    public string Status { get; set; }
-    public string Department { get; set; }
-
-    public override string ToString()
-    {
-        return $"{LastName} {FirstName} - {Position}, {Department}";
-    }
-}
-
-public class NewStaffDto
-{
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Email { get; set; }
-    public string PhoneNumber { get; set; }
-    public string Position { get; set; }
-    public decimal? Salary { get; set; }
-    public string Status { get; set; }
-    public string Departmen { get; set; }
-}
-
-public class UpdateStaffDto
-{
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Email { get; set; }
-    public string PhoneNumber { get; set; }
-    public string Position { get; set; }
-    public decimal? Salary { get; set; }
-    public string Department { get; set; }
-    public string Status { get; set; }
-}
-
-// Promotion osztályok
-public class Promotion
-{
-    public int PromotionId { get; set; }
-    public string PromotionName { get; set; }
-    public string Description { get; set; }
-    public DateTime? StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
-    public int? DiscountPercentage { get; set; }
-    public string TermsConditions { get; set; }
-    public string Status { get; set; }
-    public int? RoomId { get; set; }
-    public DateTime? DateAdded { get; set; }
-
-    public override string ToString()
-    {
-        return $"{PromotionName} - {DiscountPercentage}% kedvezmény, {StartDate?.ToString("yyyy.MM.dd")} - {EndDate?.ToString("yyyy.MM.dd")}";
-    }
-}
-
-public class PromotionCreateDto
-{
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public DateTime? StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
-    public int? DiscountPercentage { get; set; }
-    public string TermsConditions { get; set; }
-    public string Status { get; set; }
-    public int? RoomId { get; set; }
-}
-
-public class PromotionUpdateDto
-{
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public DateTime? StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
-    public int? DiscountPercentage { get; set; }
-    public string TermsConditions { get; set; }
-    public string Status { get; set; }
-    public int? RoomId { get; set; }
-}
-
-// Guest osztályok
-public class Guest
-{
-    public int GuestId { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Email { get; set; }
-    public string PhoneNumber { get; set; }
-    public string Address { get; set; }
-    public string City { get; set; }
-    public string Country { get; set; }
-    public DateTime? DateOfBirth { get; set; }
-    public string Gender { get; set; }
-    public int? UserId { get; set; }
-}
-
-
-public class CreateGuest
-{
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Email { get; set; }
-    public string PhoneNumber { get; set; }
-    public string Address { get; set; }
-    public string City { get; set; }
-    public string Country { get; set; }
-    public DateTime? DateOfBirth { get; set; }
-    public string Gender { get; set; }
-    public int? UserId { get; set; }
-}
-
-
-public class UpdateGuest
-{
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Email { get; set; }
-    public string PhoneNumber { get; set; }
-    public string Address { get; set; }
-    public string City { get; set; }
-    public string Country { get; set; }
-    public DateTime? DateOfBirth { get; set; }
-    public string Gender { get; set; }
-}
-
-// Booking osztályok
-public class Booking
-{
-    public int BookingId { get; set; }
-    public DateTime? CheckInDate { get; set; }
-    public DateTime? CheckOutDate { get; set; }
-    public int? GuestId { get; set; }
-    public int? RoomId { get; set; }
-    public decimal? TotalPrice { get; set; }
-    //public DateTime? BookingDate { get; set; }
-    public string PaymentStatus { get; set; }
-
-    public string PaymentMethod { get; set; }
-
-    public int? NumberOfGuests { get; set; }
-    public string Status { get; set; }
-    public List<Payment> Payments { get; set; }
-}
-
-public class Payment
-{
-    public int PaymentId { get; set; }
-    public int? BookingId { get; set; }
-    public DateTime? PaymentDate { get; set; }
-    public decimal? Amount { get; set; }
-    public string PaymentMethod { get; set; }
-    public string TransactionId { get; set; }
-    public string Status { get; set; }
-    public string Currency { get; set; }
-    public string PaymentNotes { get; set; }
-    public DateTime? DateAdded { get; set; }
-}
-
-public class UpdatePaymentInfo
-{
-    public string Status { get; set; }
-    public string PaymentMethod { get; set; }
-}
-
-
-
-
-public class CreateBookingDto
-{
-    public DateTime? CheckInDate { get; set; }
-    public DateTime? CheckOutDate { get; set; }
-    public int GuestId { get; set; }
-    public int NumberOfGuests { get; set; }
-    public string PaymentMethod { get; set; }
-}
-
-public class UpdateBooking
-{
-    public DateTime? CheckInDate { get; set; }
-    public DateTime? CheckOutDate { get; set; }
-    public int NumberOfGuests { get; set; }
-}
-
-public class UpdateBookingStatus
-{
-    public string Status { get; set; }
-}
-
-public class BookingViewModel
-{
-    public int BookingId { get; set; }
-    public int? GuestId { get; set; }
-    public string GuestName { get; set; }
-    public int? RoomId { get; set; }
-    public string RoomNumber { get; set; }
-    public DateTime? CheckInDate { get; set; }
-    public DateTime? CheckOutDate { get; set; }
-    //public DateTime? BookingDate { get; set; }
-    public int? NumberOfGuests { get; set; }
-    public decimal? TotalPrice { get; set; }
-    public string PaymentStatus { get; set; }
-
-    public string PaymentMethod { get; set; }
-
-    public string Status { get; set; }
-
-    public bool CanChangeStatus
-    {
-        get
+        private async void MaintenanceCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            return Status != "Finished" && Status != "Lemondva";
-        }
-    }
+            try
+            {
+                dashboardGrid.Visibility = Visibility.Collapsed;
+                maintenanceContainer.Visibility = Visibility.Visible;
 
-    public bool HasFeedback { get; set; }
-    public bool IsPaymentEnabled
-    {
-        get
+                maintenanceEditPanel.Visibility = Visibility.Collapsed;
+
+                await LoadMaintenanceToListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                dashboardGrid.Visibility = Visibility.Visible;
+                maintenanceContainer.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void MaintenanceBackButton_Click(object sender, RoutedEventArgs e)
+{
+    maintenanceContainer.Visibility = Visibility.Collapsed;
+    dashboardGrid.Visibility = Visibility.Visible;
+}
+
+        private async Task LoadMaintenanceToListView()
         {
-            return (Status == "Jóváhagyva" || Status == "Checked In") &&
-                    PaymentStatus?.Trim().ToLower() != "fizetve";
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                // Karbantartási kérelmek betöltése - módosított végpont
+                var response = await _httpClient.GetAsync("Maintenance/Getmaintance");
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba a karbantartási kérelmek lekérdezésekor: {response.StatusCode}\n{errorResponse}",
+                        "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // Szobák betöltése egy kérésben a szoba ComboBox számára
+                var roomsResponse = await _httpClient.GetAsync("Rooms/GetRoomWith");
+        List<Room> rooms = new List<Room>();
+        
+        if (roomsResponse.IsSuccessStatusCode)
+        {
+            var roomsString = await roomsResponse.Content.ReadAsStringAsync();
+            rooms = JsonSerializer.Deserialize<List<Room>>(roomsString, 
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            
+            // ComboBox feltöltése a szobákkal
+            MaintenanceRoomComboBox.ItemsSource = rooms;
+            MaintenanceRoomComboBox.DisplayMemberPath = "RoomNumber";
+            MaintenanceRoomComboBox.SelectedValuePath = "RoomId";
         }
+        else
+        {
+            MessageBox.Show("Nem sikerült betölteni a szobákat.", "Figyelmeztetés", 
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+
+        var responseString = await response.Content.ReadAsStringAsync();
+        var maintenanceItems = JsonSerializer.Deserialize<List<Roommaintenance>>(responseString,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        if (maintenanceItems == null || maintenanceItems.Count == 0)
+        {
+            MessageBox.Show("Nincsenek elérhető karbantartási kérelmek az adatbázisban.",
+                "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
+            maintenanceListView.ItemsSource = null;
+            return;
+        }
+
+        var maintenanceWithRoomDetails = new List<RoomMaintenanceViewModel>();
+
+        foreach (var item in maintenanceItems)
+        {
+            // Használjuk a már betöltött szobákat
+            var room = rooms.FirstOrDefault(r => r.RoomId == item.RoomId);
+
+            maintenanceWithRoomDetails.Add(new RoomMaintenanceViewModel
+            {
+                MaintenanceId = item.MaintenanceId,
+                MaintenanceDate = item.MaintenanceDate,
+                Description = item.Description,
+                Status = item.Status,
+                DateReported = item.DateReported,
+                ResolutionDate = item.ResolutionDate,
+                Cost = item.Cost,
+                Notes = item.Notes,
+                RoomId = item.RoomId,
+                RoomNumber = room != null ? room.RoomNumber : "Ismeretlen",
+                StaffId = item.StaffId
+            });
+        }
+
+        maintenanceListView.ItemsSource = maintenanceWithRoomDetails;
+    }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Új karbantartási kérelem gomb eseménykezelő
+        private void AddMaintenanceButton_Click(object sender, RoutedEventArgs e)
+        {
+            ClearMaintenanceFormFields();
+            SetMaintenancePanelState(false);
+            currentMaintenanceId = 0;
+            maintenanceEditPanel.Visibility = Visibility.Visible;
+        }
+
+        // Törlés gomb eseménykezelő
+        private async void DeleteMaintenanceButton_Click(object sender, RoutedEventArgs e)
+{
+    var selectedMaintenance = maintenanceListView.SelectedItem as RoomMaintenanceViewModel;
+    if (selectedMaintenance == null)
+    {
+        MessageBox.Show("Kérjük, válasszon ki egy karbantartási kérelmet a törléshez!",
+            "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+        return;
     }
 
+    var result = MessageBox.Show(
+        $"Biztosan törölni szeretné a(z) {selectedMaintenance.MaintenanceId} azonosítójú karbantartási kérelmet?",
+        "Törlés megerősítése",
+        MessageBoxButton.YesNo,
+        MessageBoxImage.Question);
 
-
+    if (result == MessageBoxResult.Yes)
+    {
+        await DeleteMaintenance(selectedMaintenance.MaintenanceId);
+    }
 }
 
-
-
-//Feedback osztályok
-public class CreateFeedback
+// Mégse gomb eseménykezelő
+        private void CancelMaintenanceEditButton_Click(object sender, RoutedEventArgs e)
 {
-    public string Category { get; set; }
-    public int? Rating { get; set; }
-    public string Status { get; set; }
-    public string Response { get; set; }
-    public int GuestId { get; set; }
+    maintenanceEditPanel.Visibility = Visibility.Collapsed;
+
+}
+        private async void ReloadRoomsButton_Click(object sender, RoutedEventArgs e)
+        {
+            await LoadRoomsComboBox();
+            MessageBox.Show($"Betöltött szobák száma: {MaintenanceRoomComboBox.Items.Count}");
+        }
+
+        private void SetMaintenancePanelState(bool isEdit)
+        {
+            isEditMaintenance = isEdit;
+            maintenanceEditTitle.Text = isEdit ? "Karbantartási kérelem szerkesztése" : "Új karbantartási kérelem";
+
+            // A szoba és leírás csak létrehozásnál legyen szerkeszthető
+            MaintenanceRoomComboBox.IsEnabled = !isEdit;
+            MaintenanceDescriptionTextBox.IsReadOnly = isEdit;
+
+            // Státusz, költség, stb. csak szerkesztésnél legyen látható
+            StatusPanel.Visibility = isEdit ? Visibility.Visible : Visibility.Collapsed;
+            ResolutionDatePanel.Visibility = isEdit ? Visibility.Visible : Visibility.Collapsed;
+            CostPanel.Visibility = isEdit ? Visibility.Visible : Visibility.Collapsed;
+            StaffPanel.Visibility = isEdit ? Visibility.Visible : Visibility.Collapsed;
+
+            if (!isEdit)
+            {
+                // Új kérelem esetén alapértelmezett értékek
+                MaintenanceStatusComboBox.SelectedIndex = 0; // "Not resolved yet"
+                CostTextBox.Text = "0";
+                MaintenanceDatePicker.SelectedDate = DateTime.Today;
+            }
+        }
+
+
+        // Mentés gomb eseménykezelő
+        private async void SaveMaintenanceButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (MaintenanceRoomComboBox.SelectedItem == null ||
+                    string.IsNullOrWhiteSpace(MaintenanceDescriptionTextBox.Text) ||
+                    MaintenanceDatePicker.SelectedDate == null)
+                {
+                    MessageBox.Show("Kérjük, töltse ki az összes kötelező mezőt!",
+                        "Hiányzó adatok", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (isEditMaintenance)
+                {
+                    if (MaintenanceStatusComboBox.SelectedItem == null)
+                    {
+                        MessageBox.Show("Kérjük, válasszon státuszt!", "Hiányzó adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    if (!decimal.TryParse(CostTextBox.Text, out decimal cost))
+                    {
+                        MessageBox.Show("Kérjük, adjon meg érvényes költséget!", "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    var updateDto = new MaintanceUpdate
+                    {
+                        Status = (MaintenanceStatusComboBox.SelectedItem as ComboBoxItem)?.Content.ToString(),
+                        ResolutionDate = ResolutionDatePicker.SelectedDate,
+                        Cost = cost,
+                        Notes = NotesTextBox.Text,
+                        StaffId = StaffComboBox.SelectedValue != null ? (int?)StaffComboBox.SelectedValue : null
+                    };
+
+                    // Ha a státusz "Resolved", állítsa be a ResolutionDate-et az aktuális dátumra
+                    if (updateDto.Status == "Resolved" && !updateDto.ResolutionDate.HasValue)
+                    {
+                        updateDto.ResolutionDate = DateTime.Now;
+                        ResolutionDatePicker.SelectedDate = updateDto.ResolutionDate;
+                    }
+
+                    await UpdateMaintenance(currentMaintenanceId, updateDto);
+                }
+                else
+                {
+                    var createDto = new MaintenanceCreateDto
+                    {
+                        MaintenanceDate = MaintenanceDatePicker.SelectedDate,
+                        Description = MaintenanceDescriptionTextBox.Text,
+                        Notes = NotesTextBox.Text,
+                        RoomId = (int)MaintenanceRoomComboBox.SelectedValue
+                    };
+
+                    await CreateMaintenance(createDto);
+                }
+
+                maintenanceEditPanel.Visibility = Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private async Task CreateMaintenance(MaintenanceCreateDto newMaintenance)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                // Debug információ: A szerializált JSON megtekintése
+                string jsonContent = JsonSerializer.Serialize(newMaintenance,
+                    new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+                Console.WriteLine($"JSON tartalom: {jsonContent}");
+
+                var content = new StringContent(
+                    jsonContent,
+                    System.Text.Encoding.UTF8,
+                    "application/json");
+
+                var response = await _httpClient.PostAsync("Maintenance/MakeARequest", content);
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Backend hibaüzenet:\n\nHiba kód: {(int)response.StatusCode} ({response.StatusCode})\n\nRészletek: {errorResponse}\n\nElküldött adatok: {jsonContent}",
+                        "Szerver hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                MessageBox.Show("Az új karbantartási kérelem sikeresen létrehozva!",
+                    "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                await LoadMaintenanceToListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Részletes hiba: {ex.Message}\n\nStack trace: {ex.StackTrace}",
+                    "Kivétel történt", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task UpdateMaintenance(int maintenanceId, MaintanceUpdate updateDto)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var content = new StringContent(
+                    JsonSerializer.Serialize(updateDto, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                    System.Text.Encoding.UTF8,
+                    "application/json");
+
+                var response = await _httpClient.PutAsync($"Maintenance/UpdateRequestByManagger/{maintenanceId}", content);
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba a karbantartási kérelem frissítésekor: {response.StatusCode}\n{errorResponse}",
+                        "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                MessageBox.Show("A karbantartási kérelem sikeresen frissítve!",
+                    "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                await LoadMaintenanceToListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // Karbantartási kérelem törlése
+        private async Task DeleteMaintenance(int maintenanceId)
+{
+    try
+    {
+        if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+        {
+            MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+        var response = await _httpClient.DeleteAsync($"Maintenance/DeleteRequest/{maintenanceId}");
+        if (!response.IsSuccessStatusCode)
+        {
+            string errorResponse = await response.Content.ReadAsStringAsync();
+            MessageBox.Show($"Hiba a karbantartási kérelem törlésekor: {response.StatusCode}\n{errorResponse}",
+                "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
+        MessageBox.Show("A karbantartási kérelem sikeresen törölve!",
+            "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+
+        await LoadMaintenanceToListView();
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+    }
 }
 
-public class Feedback
-{
-    public int FeedbackId { get; set; }
-    public DateTime? FeedbackDate { get; set; }
-    public string Comments { get; set; }
-    public string Category { get; set; }
-    public int? Rating { get; set; }
-    public string Status { get; set; }
-    public string Response { get; set; }
-    public DateTime? ResponseDate { get; set; }
-    public DateTime? DateAdded { get; set; }
-    public int? GuestId { get; set; }
+        // Űrlap mezők törlése
+        private void ClearMaintenanceFormFields()
+        {
+            if (MaintenanceRoomComboBox.Items.Count > 0)
+                MaintenanceRoomComboBox.SelectedIndex = 0;
+            else
+                MaintenanceRoomComboBox.SelectedIndex = -1;
+
+            MaintenanceDatePicker.SelectedDate = DateTime.Today;
+            MaintenanceDescriptionTextBox.Text = string.Empty;
+            NotesTextBox.Text = string.Empty;
+
+            // Szerkesztési mezők alaphelyzetbe állítása
+            MaintenanceStatusComboBox.SelectedIndex = 0;
+            ResolutionDatePicker.SelectedDate = DateTime.Today;
+            CostTextBox.Text = "0";
+            if (StaffComboBox.Items.Count > 0)
+                StaffComboBox.SelectedIndex = 0;
+            else
+                StaffComboBox.SelectedIndex = -1;
+        }
+        private void EditMaintenanceButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedMaintenance = maintenanceListView.SelectedItem as RoomMaintenanceViewModel;
+            if (selectedMaintenance == null)
+            {
+                MessageBox.Show("Kérjük, válasszon ki egy karbantartási kérelmet a szerkesztéshez!",
+                    "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            SetMaintenancePanelState(true);
+            currentMaintenanceId = selectedMaintenance.MaintenanceId;
+
+            // Alapadatok betöltése
+            var room = MaintenanceRoomComboBox.Items.Cast<Room>()
+                .FirstOrDefault(r => r.RoomId == selectedMaintenance.RoomId);
+            if (room != null)
+                MaintenanceRoomComboBox.SelectedItem = room;
+
+            MaintenanceDatePicker.SelectedDate = selectedMaintenance.MaintenanceDate;
+            MaintenanceDescriptionTextBox.Text = selectedMaintenance.Description;
+            NotesTextBox.Text = selectedMaintenance.Notes;
+
+            // Szerkesztés specifikus adatok betöltése
+            foreach (ComboBoxItem item in MaintenanceStatusComboBox.Items)
+            {
+                if (item.Content.ToString() == selectedMaintenance.Status)
+                {
+                    MaintenanceStatusComboBox.SelectedItem = item;
+                    break;
+                }
+            }
+            ResolutionDatePicker.SelectedDate = selectedMaintenance.ResolutionDate;
+            CostTextBox.Text = selectedMaintenance.Cost?.ToString() ?? "0";
+
+            // Személyzet betöltése
+            LoadStaffComboBox(selectedMaintenance.StaffId);
+            maintenanceEditPanel.Visibility = Visibility.Visible;
+        }
+        private async Task LoadStaffComboBox(int? selectedStaffId = null)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var response = await _httpClient.GetAsync("Staff/ListStaff");
+                if (!response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show($"Hiba a személyzet lekérdezésekor: {response.StatusCode}",
+                        "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                var staffMembers = JsonSerializer.Deserialize<List<Staff>>(responseString,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (staffMembers != null && staffMembers.Count > 0)
+                {
+                    var staffViewModel = staffMembers.Select(s => new
+                    {
+                        StaffId = s.StaffId,
+                        FullName = $"{s.LastName} {s.FirstName}"
+                    }).ToList();
+
+                    StaffComboBox.ItemsSource = staffViewModel;
+
+                    if (selectedStaffId.HasValue)
+                    {
+                        var staff = staffViewModel.FirstOrDefault(s => s.StaffId == selectedStaffId.Value);
+                        if (staff != null)
+                        {
+                            StaffComboBox.SelectedItem = staff;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
+    }
 }
-public class UpdateFeedback
-{
-    public string Comment { get; set; }
-    public string Status { get; set; }
-    public int? Rating { get; set; }
-}
+
 
 

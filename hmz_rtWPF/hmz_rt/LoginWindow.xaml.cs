@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.IO;
 using System.Security.Cryptography;
+using hmz_rt.Models.Dtos;
 
 namespace RoomListApp
 {
@@ -142,34 +143,41 @@ namespace RoomListApp
                 var loginData = new { Username = username, Password = password };
                 string json = JsonSerializer.Serialize(loginData);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-
                 HttpResponseMessage response = await _httpClient.PostAsync("Login", content);
                 string responseString = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show($"Bejelentkezési hiba ({response.StatusCode}): {responseString}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Bejelentkezési hiba ({response.StatusCode}): {responseString}",
+                        "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                     return false;
                 }
 
-                var result = JsonSerializer.Deserialize<AuthResponse>(responseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var result = JsonSerializer.Deserialize<AuthResponse>(responseString,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
+                // Szerepkör ellenőrzése - csak System vagy Admin belépését engedélyezzük
+                if (result.Role != "System" && result.Role != "Admin")
+                {
+                    MessageBox.Show("Nincs megfelelő jogosultsága a rendszer használatához.\n" +
+                        "Csak System vagy Admin felhasználók jelentkezhetnek be.",
+                        "Jogosultság hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+
+                // Ha megfelelő a szerepkör, tároljuk a token adatokat
                 TokenStorage.AuthToken = result.AccessToken;
                 TokenStorage.RefreshToken = result.RefreshToken;
                 TokenStorage.Role = result.Role;
                 TokenStorage.Username = username;
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
 
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", result.AccessToken);
                 return true;
-            }
-            catch (HttpRequestException ex)
-            {
-                MessageBox.Show($"Hálózati hiba: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ismeretlen hiba történt: {ex.Message}\n{ex.StackTrace}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
         }
@@ -368,28 +376,5 @@ namespace RoomListApp
 
 
         #endregion
-    }
-
-    public class AuthResponse
-    {
-        [JsonPropertyName("accessToken")]
-        public string AccessToken { get; set; }
-
-        [JsonPropertyName("refreshToken")]
-        public string RefreshToken { get; set; }
-
-        [JsonPropertyName("role")]
-        public string Role { get; set; }
-    }
-    public class Forgotpass
-    {
-        public string Email { get; set; }
-        public string Code { get; set; }
-    }
-
-    public class Forgotpass1
-    {
-        public string Email { get; set; }
-        public string Password { get; set; }
     }
 }
