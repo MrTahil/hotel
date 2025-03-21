@@ -36,7 +36,7 @@ namespace HMZ_rt.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin,System,Recept")]
+               [Authorize(Roles = "Admin,System,Recept")]
         [HttpPost("CreateEvent")]
         public async Task<ActionResult<Event>> Createevent(CreateEvent crtdto)
         {
@@ -56,11 +56,12 @@ namespace HMZ_rt.Controllers
                         OrganizerName = crtdto.OrganizerName,
                         ContactInfo = crtdto.ContactInfo,
                         DateAdded = DateTime.Now,
-                        Price = crtdto.Price
+                        Price = crtdto.Price,
+                        Images = ""
                         
                     };
                     if (news != null) { 
-                        await _context.Events.AddAsync(news);
+                         _context.Events.Add(news);
                         await _context.SaveChangesAsync();
                         return StatusCode(201, "Sikeres mentés");
                     } return StatusCode(404, "Valami üres");
