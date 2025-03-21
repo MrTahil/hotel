@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Már 21. 13:34
+-- Létrehozás ideje: 2025. Már 21. 13:38
 -- Kiszolgáló verziója: 10.4.32-MariaDB
 -- PHP verzió: 8.2.12
 
@@ -499,25 +499,6 @@ INSERT INTO `rooms` (`room_type`, `room_id`, `room_number`, `capacity`, `price_p
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `roomtypes`
---
-
-CREATE TABLE `roomtypes` (
-  `type_name` varchar(255) DEFAULT NULL,
-  `room_type_id` int(11) NOT NULL,
-  `description` text DEFAULT NULL,
-  `base_price` decimal(10,0) DEFAULT NULL,
-  `max_capacity` int(11) DEFAULT NULL,
-  `amenities` text DEFAULT NULL,
-  `status` varchar(255) DEFAULT NULL,
-  `date_added` date DEFAULT NULL,
-  `image_url` varchar(255) DEFAULT NULL,
-  `priority` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
-
--- --------------------------------------------------------
-
---
 -- Tábla szerkezet ehhez a táblához `services`
 --
 
@@ -561,26 +542,6 @@ INSERT INTO `staff` (`first_name`, `staff_id`, `last_name`, `email`, `phone_numb
 ('Pozsgai', 1, 'Marcell', 'pozsgaim@kkszki.hu', '+36 2013747285', 'Tomo arus', -1000, '2025-02-21', 'Aktív', 'Tomo king'),
 ('Jánosi', 2, 'Marcell', 'janosim@kkszki.hu', '+36 2019855222', 'Hotel Manager', 10000000, '2025-02-21', 'Inaktív', 'Manager'),
 ('Zalán', 5, 'Zelenák', 'zelenakz@kkszki.hu', '+36 209548099', 'Karbantartó', 100000000, '2025-02-25', 'Szabadságon', 'IT');
-
--- --------------------------------------------------------
-
---
--- Tábla szerkezet ehhez a táblához `taxrates`
---
-
-CREATE TABLE `taxrates` (
-  `tax_rate_id` int(11) NOT NULL,
-  `tax_name` varchar(255) DEFAULT NULL,
-  `rate` decimal(10,0) DEFAULT NULL,
-  `effective_date` date DEFAULT NULL,
-  `status` varchar(255) DEFAULT NULL,
-  `description` text DEFAULT NULL,
-  `date_added` date DEFAULT NULL,
-  `country` varchar(255) DEFAULT NULL,
-  `state` varchar(255) DEFAULT NULL,
-  `city` varchar(255) DEFAULT NULL,
-  `payment_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 -- --------------------------------------------------------
 
@@ -733,12 +694,6 @@ ALTER TABLE `rooms`
   ADD PRIMARY KEY (`room_id`);
 
 --
--- A tábla indexei `roomtypes`
---
-ALTER TABLE `roomtypes`
-  ADD PRIMARY KEY (`room_type_id`);
-
---
 -- A tábla indexei `services`
 --
 ALTER TABLE `services`
@@ -749,13 +704,6 @@ ALTER TABLE `services`
 --
 ALTER TABLE `staff`
   ADD PRIMARY KEY (`staff_id`);
-
---
--- A tábla indexei `taxrates`
---
-ALTER TABLE `taxrates`
-  ADD PRIMARY KEY (`tax_rate_id`),
-  ADD KEY `payment` (`payment_id`);
 
 --
 -- A tábla indexei `useraccounts`
@@ -864,12 +812,6 @@ ALTER TABLE `rooms`
   MODIFY `room_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
--- AUTO_INCREMENT a táblához `roomtypes`
---
-ALTER TABLE `roomtypes`
-  MODIFY `room_type_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT a táblához `services`
 --
 ALTER TABLE `services`
@@ -880,12 +822,6 @@ ALTER TABLE `services`
 --
 ALTER TABLE `staff`
   MODIFY `staff_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT a táblához `taxrates`
---
-ALTER TABLE `taxrates`
-  MODIFY `tax_rate_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT a táblához `useraccounts`
@@ -972,12 +908,6 @@ ALTER TABLE `roominventory`
 ALTER TABLE `roommaintenance`
   ADD CONSTRAINT `RoomMaintenance_fk1` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   ADD CONSTRAINT `RoomMaintenance_fk5` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`staff_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
---
--- Megkötések a táblához `taxrates`
---
-ALTER TABLE `taxrates`
-  ADD CONSTRAINT `taxrates_ibfk_1` FOREIGN KEY (`payment_id`) REFERENCES `payments` (`payment_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
