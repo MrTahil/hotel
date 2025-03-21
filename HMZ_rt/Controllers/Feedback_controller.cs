@@ -28,7 +28,7 @@ namespace HMZ_rt.Controllers
                 if (data != null) {
                     return StatusCode(200, data);
                 }
-                return StatusCode(400, "Ez biza üres");
+                return StatusCode(404, "Nem található");
             }
             catch (Exception ex)
             {
@@ -58,7 +58,10 @@ namespace HMZ_rt.Controllers
                         DateAdded = DateTime.Now,
                         GuestId = crtdto.GuestId
                     };
-
+                    var guest = await _context.Guests.FirstOrDefaultAsync(x => x.GuestId == crtdto.GuestId);
+                    if (guest == null) {
+                        return StatusCode(404, "Nem található ezzel az Id-val vendég");
+                    }
                     if (feed != null)
                     {
                         _context.Feedbacks.Add(feed);
@@ -91,6 +94,27 @@ namespace HMZ_rt.Controllers
                     await _context.SaveChangesAsync();
                     return StatusCode(201, "Sikeres mentés");
                 } return StatusCode(404, "Nem található id");
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
+        }
+
+        [Authorize(Roles = "Admin,System,Recept")]
+        [HttpDelete("DeleteFeedback/{id}")]
+        public async Task<ActionResult<Feedback>> DeleteFeedback(int id)
+        {
+            try
+            {
+                var data = await _context.Feedbacks.FirstOrDefaultAsync(x => x.FeedbackId == id);
+                if (data != null)
+                {
+                    _context.Feedbacks.Remove(data);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(201, "Sikeres törlés");
+                } return StatusCode(404, "Nem található adat");
             }
             catch (Exception ex)
             {

@@ -382,7 +382,7 @@ namespace HMZ_rt.Controllers
                 {
 
 
-                    return Ok(new { AccessToken = accessToken, RefreshToken = refreshToken, user.Role });
+                    return Ok(new { AccesToken = accessToken, RefreshToken = refreshToken, user.Role });
                 }
                 return Ok(new { AccesToken = accessToken, RefreshToken = refreshToken });
             }

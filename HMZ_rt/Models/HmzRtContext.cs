@@ -47,13 +47,12 @@ public partial class HmzRtContext : DbContext
 
     public virtual DbSet<Roommaintenance> Roommaintenances { get; set; }
 
-    public virtual DbSet<Roomtype> Roomtypes { get; set; }
 
     public virtual DbSet<Service> Services { get; set; }
 
     public virtual DbSet<Staff> Staff { get; set; }
 
-    public virtual DbSet<Taxrate> Taxrates { get; set; }
+
 
     public virtual DbSet<Useraccount> Useraccounts { get; set; }
 
@@ -913,52 +912,6 @@ public partial class HmzRtContext : DbContext
                 .HasConstraintName("RoomMaintenance_fk5");
         });
 
-        modelBuilder.Entity<Roomtype>(entity =>
-        {
-            entity.HasKey(e => e.RoomTypeId).HasName("PRIMARY");
-
-            entity.ToTable("roomtypes");
-
-            entity.Property(e => e.RoomTypeId)
-                .HasColumnType("int(11)")
-                .HasColumnName("room_type_id");
-            entity.Property(e => e.Amenities)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnType("text")
-                .HasColumnName("amenities");
-            entity.Property(e => e.BasePrice)
-                .HasPrecision(10)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnName("base_price");
-            entity.Property(e => e.DateAdded)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnType("date")
-                .HasColumnName("date_added");
-            entity.Property(e => e.Description)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnType("text")
-                .HasColumnName("description");
-            entity.Property(e => e.ImageUrl)
-                .HasMaxLength(255)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnName("image_url");
-            entity.Property(e => e.MaxCapacity)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnType("int(11)")
-                .HasColumnName("max_capacity");
-            entity.Property(e => e.Priority)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnType("int(11)")
-                .HasColumnName("priority");
-            entity.Property(e => e.Status)
-                .HasMaxLength(255)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnName("status");
-            entity.Property(e => e.TypeName)
-                .HasMaxLength(255)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnName("type_name");
-        });
 
         modelBuilder.Entity<Service>(entity =>
         {
@@ -1054,61 +1007,7 @@ public partial class HmzRtContext : DbContext
                 .HasColumnName("status");
         });
 
-        modelBuilder.Entity<Taxrate>(entity =>
-        {
-            entity.HasKey(e => e.TaxRateId).HasName("PRIMARY");
-
-            entity.ToTable("taxrates");
-
-            entity.HasIndex(e => e.PaymentId, "payment");
-
-            entity.Property(e => e.TaxRateId)
-                .HasColumnType("int(11)")
-                .HasColumnName("tax_rate_id");
-            entity.Property(e => e.City)
-                .HasMaxLength(255)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnName("city");
-            entity.Property(e => e.Country)
-                .HasMaxLength(255)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnName("country");
-            entity.Property(e => e.DateAdded)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnType("date")
-                .HasColumnName("date_added");
-            entity.Property(e => e.Description)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnType("text")
-                .HasColumnName("description");
-            entity.Property(e => e.EffectiveDate)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnType("date")
-                .HasColumnName("effective_date");
-            entity.Property(e => e.PaymentId)
-                .HasColumnType("int(11)")
-                .HasColumnName("payment_id");
-            entity.Property(e => e.Rate)
-                .HasPrecision(10)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnName("rate");
-            entity.Property(e => e.State)
-                .HasMaxLength(255)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnName("state");
-            entity.Property(e => e.Status)
-                .HasMaxLength(255)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnName("status");
-            entity.Property(e => e.TaxName)
-                .HasMaxLength(255)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnName("tax_name");
-
-            entity.HasOne(d => d.Payment).WithMany(p => p.Taxrates)
-                .HasForeignKey(d => d.PaymentId)
-                .HasConstraintName("taxrates_ibfk_1");
-        });
+        
 
         modelBuilder.Entity<Useraccount>(entity =>
         {

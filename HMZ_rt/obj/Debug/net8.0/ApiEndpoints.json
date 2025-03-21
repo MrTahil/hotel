@@ -1,8 +1,34 @@
 [
   {
     "ContainingType": "HMZ_rt.Controllers.Amenities_controller",
+    "Method": "Deleteamenity",
+    "RelativePath": "Amenities/DeleteAmenity/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Amenity",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Amenities_controller",
     "Method": "GetResultsForRunner",
-    "RelativePath": "Amenities/GetAmenitiesForRoom{Id}",
+    "RelativePath": "Amenities/GetAmenitiesForRoom/{Id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -52,9 +78,112 @@
     ]
   },
   {
+    "ContainingType": "HMZ_rt.Controllers.Amenities_controller",
+    "Method": "UpdateAmenity",
+    "RelativePath": "Amenities/UpdateAmenity/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "udto",
+        "Type": "UpdateAmenity",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Amenity",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Bookings_controller",
+    "Method": "GetUserBookings",
+    "RelativePath": "Bookings/BookingsByUserId",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "UserIdd",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Booking",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Bookings_controller",
+    "Method": "DeleteBooking",
+    "RelativePath": "Bookings/DeleteBooking/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Booking",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Bookings_controller",
+    "Method": "GetallData",
+    "RelativePath": "Bookings/Getalldat",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[HMZ_rt.Models.Booking, HMZ_rt, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
     "ContainingType": "HMZ_rt.Controllers.Bookings_controller",
     "Method": "Booking",
-    "RelativePath": "Bookings/New_Booking{RoomId}",
+    "RelativePath": "Bookings/New_Booking/{roomid}",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -73,6 +202,762 @@
     "ReturnTypes": [
       {
         "Type": "HMZ_rt.Models.Booking",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Bookings_controller",
+    "Method": "UpdateBookingByid",
+    "RelativePath": "Bookings/UpdateBooking/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "udto",
+        "Type": "UpdateBooking",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Booking",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Bookings_controller",
+    "Method": "UpdateBookingStatusByid",
+    "RelativePath": "Bookings/UpdateBookingStatus/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "udto",
+        "Type": "UpdateBookingStatus",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Booking",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Events_controller",
+    "Method": "Createevent",
+    "RelativePath": "Events/CreateEvent",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "crtdto",
+        "Type": "CreateEvent",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Event",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Events_controller",
+    "Method": "DeleteEvent",
+    "RelativePath": "Events/DeleteEvenet/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Event",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Events_controller",
+    "Method": "getevents",
+    "RelativePath": "Events/Geteents",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Event",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Events_controller",
+    "Method": "Getallevent",
+    "RelativePath": "Events/Geteventsadmin",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Event",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Events_controller",
+    "Method": "Updateevent",
+    "RelativePath": "Events/UpdateEvent/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "udto",
+        "Type": "UpdateEvent",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Event",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.EventBookings_controller",
+    "Method": "DeleteBooking",
+    "RelativePath": "Feedback/DeleteBookingById/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Eventbooking",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Feedback_controller",
+    "Method": "DeleteFeedback",
+    "RelativePath": "Feedback/DeleteFeedback/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Feedback",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Feedback_controller",
+    "Method": "Getallfeedback",
+    "RelativePath": "Feedback/GetallFeedback",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Feedback",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.EventBookings_controller",
+    "Method": "Getalleventbooking",
+    "RelativePath": "Feedback/GetEventBookings",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Eventbooking",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.EventBookings_controller",
+    "Method": "CreateBooking",
+    "RelativePath": "Feedback/NewEvenBooking/{eventid}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "crtdto",
+        "Type": "CreateEventBooking",
+        "IsRequired": true
+      },
+      {
+        "Name": "eventid",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Eventbooking",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Feedback_controller",
+    "Method": "UpdateFeedback",
+    "RelativePath": "Feedback/UpdateForFeedback/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "udto",
+        "Type": "UpdateFeedback",
+        "IsRequired": true
+      },
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Feedback",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Feedback_controller",
+    "Method": "Uploadnewfeedback",
+    "RelativePath": "Feedback/UploadFeedback",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "crtdto",
+        "Type": "CreateFeedback",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Feedback",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Guests_controller",
+    "Method": "Createguest",
+    "RelativePath": "Guests/Addnewguest",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "crtdto",
+        "Type": "CreateGuest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Guest",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Guests_controller",
+    "Method": "DeleteGuest",
+    "RelativePath": "Guests/DeleteGuest/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Guest",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Guests_controller",
+    "Method": "Getallguestsinsystem",
+    "RelativePath": "Guests/GetAllGuestever",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Guest",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Guests_controller",
+    "Method": "Getpplcurrentlyhere",
+    "RelativePath": "Guests/GetcurrentGuests",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Guest",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Guests_controller",
+    "Method": "UpdateGuest",
+    "RelativePath": "Guests/UpdateGuest/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "udto",
+        "Type": "UpdateGuest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Guest",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.RoomMaintenance_controller",
+    "Method": "Deleteareq",
+    "RelativePath": "Maintenance/DeleteRequest/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Roommaintenance",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.RoomMaintenance_controller",
+    "Method": "GetMain",
+    "RelativePath": "Maintenance/Getmaintance",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Roommaintenance",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.RoomMaintenance_controller",
+    "Method": "Makeareq",
+    "RelativePath": "Maintenance/MakeARequest",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "kacsa",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Roommaintenance",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.RoomMaintenance_controller",
+    "Method": "Updatereq",
+    "RelativePath": "Maintenance/UpdateRequestByManagger/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "udto",
+        "Type": "MaintanceUpdate",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Roommaintenance",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Payments_controller",
+    "Method": "UpdateStatus",
+    "RelativePath": "Payments/UpdatePaymentStatusByBookingId/{bookid}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookid",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "udto",
+        "Type": "UpdatePaymentInfo",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Payment",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Promotions_controller",
+    "Method": "CreatePromotion",
+    "RelativePath": "Promotions/CreatePromotion",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "crtdto",
+        "Type": "promotioncreate",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Promotion",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Promotions_controller",
+    "Method": "DeletePromotion",
+    "RelativePath": "Promotions/Deletepromotion/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Promotion",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Promotions_controller",
+    "Method": "getpromotions",
+    "RelativePath": "Promotions/Getpromotions",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Promotion",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Promotions_controller",
+    "Method": "UpdatePromotion",
+    "RelativePath": "Promotions/UpdatePromotion/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "udto",
+        "Type": "promotionupdate",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Promotion",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Promotions_controller",
+    "Method": "UpdateStatusofpromotion",
+    "RelativePath": "Promotions/UpdateStatusofpromotion/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "udto",
+        "Type": "PromotionStatus",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Promotion",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -131,7 +1016,7 @@
   {
     "ContainingType": "HMZ_rt.Controllers.Rooms_controller",
     "Method": "DeleteRoomById",
-    "RelativePath": "Rooms/DeleteRoomById{Id}",
+    "RelativePath": "Rooms/DeleteRoomById/{Id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
@@ -176,6 +1061,32 @@
   },
   {
     "ContainingType": "HMZ_rt.Controllers.Rooms_controller",
+    "Method": "GetroomsWithparams",
+    "RelativePath": "Rooms/Searchwithparams",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "gtdto",
+        "Type": "Getrooms",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Room",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Rooms_controller",
     "Method": "UpdateRoomById",
     "RelativePath": "Rooms/SzobaUpdate",
     "HttpMethod": "PUT",
@@ -208,7 +1119,7 @@
   {
     "ContainingType": "HMZ_rt.Controllers.Staff_controller",
     "Method": "CreateStaff",
-    "RelativePath": "Staff",
+    "RelativePath": "Staff/CreateStaff",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -217,6 +1128,83 @@
         "Name": "nwstdto",
         "Type": "NewStaffDto",
         "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Staff",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Staff_controller",
+    "Method": "DeleteStafff",
+    "RelativePath": "Staff/DeleteStaff/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Staff",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Staff_controller",
+    "Method": "Getstaff",
+    "RelativePath": "Staff/ListStaff",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Staff",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.Staff_controller",
+    "Method": "UpdateStaff",
+    "RelativePath": "Staff/UpdateStaff",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "crtdto",
+        "Type": "UpdateStaffDto",
+        "IsRequired": true
+      },
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": [
@@ -242,9 +1230,35 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "HMZ_rt.Controllers.Notifiactions_controller",
+    "Method": "DeleteNoti",
+    "RelativePath": "UserAccounts/DeleteNoti/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Notification",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
     "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
     "Method": "DeleteAccount",
-    "RelativePath": "UserAccounts/DeleteUserById{InUserId}",
+    "RelativePath": "UserAccounts/DeleteUserById/{InUserId}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
@@ -270,7 +1284,7 @@
   {
     "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
     "Method": "DeleteAccountByName",
-    "RelativePath": "UserAccounts/DeleteUserByUsername{Username}",
+    "RelativePath": "UserAccounts/DeleteUserByUsername/{Username}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
@@ -296,7 +1310,7 @@
   {
     "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
     "Method": "Forgotpass",
-    "RelativePath": "UserAccounts/ForgotPasswordsendemail",
+    "RelativePath": "UserAccounts/ForgotPasswordsendemail/{email}",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -304,7 +1318,59 @@
       {
         "Name": "email",
         "Type": "System.String",
-        "IsRequired": false
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Useraccount",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
+    "Method": "GetUserIdByEmail",
+    "RelativePath": "UserAccounts/GetId/{email}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "email",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Useraccount",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
+    "Method": "GetOneUserDataByUsername",
+    "RelativePath": "UserAccounts/GetOneUserData/{username}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "username",
+        "Type": "System.String",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": [
@@ -334,6 +1400,37 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
+    "Method": "SetNewPassOnKnown",
+    "RelativePath": "UserAccounts/Newpasswithknownpass/{username}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "username",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "udto",
+        "Type": "SetNewPass",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Useraccount",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
@@ -412,14 +1509,9 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "email",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "pass",
-        "Type": "System.String",
-        "IsRequired": false
+        "Name": "frgdto",
+        "Type": "Forgotpass1",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": [
@@ -437,7 +1529,7 @@
   {
     "ContainingType": "HMZ_rt.Controllers.Notifiactions_controller",
     "Method": "UpdateOnOpened",
-    "RelativePath": "UserAccounts/UpdateOpenedTime{NotiId}",
+    "RelativePath": "UserAccounts/UpdateOpenedTime/{NotiId}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
@@ -463,7 +1555,7 @@
   {
     "ContainingType": "HMZ_rt.Controllers.Notifiactions_controller",
     "Method": "UpdateOnSent",
-    "RelativePath": "UserAccounts/UpdateSentTime{NotiId}",
+    "RelativePath": "UserAccounts/UpdateSentTime/{NotiId}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
@@ -487,9 +1579,40 @@
     ]
   },
   {
+    "ContainingType": "HMZ_rt.Controllers.Notifiactions_controller",
+    "Method": "UpdateNotificationStatus",
+    "RelativePath": "UserAccounts/UpdateStatusofNoti/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "udto",
+        "Type": "UpdateNotiStatus",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "HMZ_rt.Models.Notification",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
     "ContainingType": "HMZ_rt.Controllers.UserAccounts_controller",
     "Method": "GetAllNotification",
-    "RelativePath": "UserAccounts/UsersWithNotifications{UserIdd}",
+    "RelativePath": "UserAccounts/UsersWithNotifications/{UserIdd}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -521,14 +1644,9 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "email",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "code",
-        "Type": "System.String",
-        "IsRequired": false
+        "Name": "dto",
+        "Type": "fa2",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": []
@@ -542,14 +1660,9 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "email",
-        "Type": "System.String",
-        "IsRequired": false
-      },
-      {
-        "Name": "code",
-        "Type": "System.String",
-        "IsRequired": false
+        "Name": "frgdto",
+        "Type": "Forgotpass",
+        "IsRequired": true
       }
     ],
     "ReturnTypes": [

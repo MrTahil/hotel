@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\hiloczkit\\source\\repos\\MrTahil\\hotel\\HMZ_rt\\HMZ_rt.csproj": {}
+    "C:\\Users\\Tanulo\\source\\repos\\MrTahil\\hotel\\HMZ_rt\\HMZ_rt.csproj": {}
   },
   "projects": {
-    "C:\\Users\\hiloczkit\\source\\repos\\MrTahil\\hotel\\HMZ_rt\\HMZ_rt.csproj": {
+    "C:\\Users\\Tanulo\\source\\repos\\MrTahil\\hotel\\HMZ_rt\\HMZ_rt.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\hiloczkit\\source\\repos\\MrTahil\\hotel\\HMZ_rt\\HMZ_rt.csproj",
+        "projectUniqueName": "C:\\Users\\Tanulo\\source\\repos\\MrTahil\\hotel\\HMZ_rt\\HMZ_rt.csproj",
         "projectName": "HMZ_rt",
-        "projectPath": "C:\\Users\\hiloczkit\\source\\repos\\MrTahil\\hotel\\HMZ_rt\\HMZ_rt.csproj",
-        "packagesPath": "C:\\Users\\hiloczkit\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\hiloczkit\\source\\repos\\MrTahil\\hotel\\HMZ_rt\\obj\\",
+        "projectPath": "C:\\Users\\Tanulo\\source\\repos\\MrTahil\\hotel\\HMZ_rt\\HMZ_rt.csproj",
+        "packagesPath": "C:\\Users\\Tanulo\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Tanulo\\source\\repos\\MrTahil\\hotel\\HMZ_rt\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\hiloczkit\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Tanulo\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -45,7 +45,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net8.0": {
@@ -68,6 +68,10 @@
             "MySql.EntityFrameworkCore": {
               "target": "Package",
               "version": "[8.0.8, )"
+            },
+            "QuestPDF": {
+              "target": "Package",
+              "version": "[2025.1.6, )"
             },
             "Stripe.net": {
               "target": "Package",
@@ -101,7 +105,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

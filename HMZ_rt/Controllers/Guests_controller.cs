@@ -91,8 +91,12 @@ namespace HMZ_rt.Controllers
         {
             try
             {
-            var all =await _context.Guests.Include(x => x.Bookings).Include(a => a.Feedbacks).Include(z => z.Reviews).ToListAsync();
-            return StatusCode(201, all);
+            var data =await _context.Guests.Include(x => x.Bookings).Include(a => a.Feedbacks).Include(z => z.Reviews).ToListAsync();
+                if (data != null)
+                {
+                    return StatusCode(201, data);
+                } return StatusCode(404, "Üres tábla");
+            
             }
             catch (Exception ex)
             {

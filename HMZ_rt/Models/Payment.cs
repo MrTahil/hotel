@@ -28,5 +28,4 @@ public partial class Payment
     [JsonIgnore]
     public virtual Booking Booking { get; set; } = null!;
 
-    public virtual ICollection<Taxrate> Taxrates { get; set; } = new List<Taxrate>();
 }
