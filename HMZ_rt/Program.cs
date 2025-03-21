@@ -22,7 +22,7 @@ namespace HMZ_rt
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowFrontend",
-                    policy => policy.WithOrigins(["http://localhost:3000", "http://5.204.160.231:3000"])
+                    policy => policy.WithOrigins(["http://localhost:3000", "https://5.204.160.231:3000"])
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials());
