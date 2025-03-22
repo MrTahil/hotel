@@ -24,8 +24,8 @@ function LoginModal({ onClose, switchToRegister, setUser }) {
       const data = await response.json();
       console.log('Sikeres bejelentkezés:', data);
       onClose();
-      localStorage.setItem('authToken', data.accesToken);
-      console.log(data.accesToken)
+      localStorage.setItem('authToken', data.accessToken);
+      console.log(data.accessToken)
       localStorage.setItem('username', username);
       localStorage.setItem('email', data.email); // Az email mentése
       setUser(username);
