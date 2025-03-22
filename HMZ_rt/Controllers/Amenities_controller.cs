@@ -52,7 +52,7 @@ namespace HMZ_rt.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin,System,Recept")]
+        //[Authorize(Roles = "Admin,System,Recept")]
         [HttpGet("GetAmenitiesForRoom/{Id}")]
 
         public async Task<ActionResult<IEnumerable<Amenity>>> GetResultsForRunner(int Id)

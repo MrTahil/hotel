@@ -182,5 +182,31 @@ namespace HMZ_rt.Controllers
             
 
         }
+
+        [Authorize(Roles = "Admin,System,Recept,Base")]
+        [HttpGet("GetGuestData/{useranem}")]
+        public async Task<ActionResult<Guest>> GetOneUsersGuests(string useranem)
+        {
+            try
+            {
+                var userid = await _context.Useraccounts.FirstOrDefaultAsync(x => x.Username == useranem);
+                if (userid != null)
+                {
+
+
+                    var data = await _context.Guests.FirstOrDefaultAsync(x => x.UserId == userid.UserId);
+                    if (data != null)
+                    {
+                        return StatusCode(200, data);
+                    }
+                    return StatusCode(404, "Nincs mentett vendég");
+                } return StatusCode(404, "nem található felhasználó");
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
+        }
     }
 }
