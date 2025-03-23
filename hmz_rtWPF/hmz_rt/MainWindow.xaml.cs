@@ -43,6 +43,10 @@ namespace RoomListApp
         private bool isEditMaintenance = false;
         private int currentMaintenanceId = 0;
 
+        // Változók az Event szerkesztési módhoz
+        private bool isEditEvent = false;
+        private int currentEventId = 0;
+
 
         public MainWindow()
         {
@@ -555,7 +559,7 @@ namespace RoomListApp
 
 
             PromotionNameTextBox.Text = selectedPromotion.PromotionName;
-            DescriptionTextBox.Text = selectedPromotion.Description;
+            PromotionDescriptionTextBox.Text = selectedPromotion.Description;
             StartDatePicker.SelectedDate = selectedPromotion.StartDate;
             EndDatePicker.SelectedDate = selectedPromotion.EndDate;
             DiscountPercentageTextBox.Text = selectedPromotion.DiscountPercentage?.ToString();
@@ -683,7 +687,7 @@ namespace RoomListApp
                     var updateDto = new PromotionUpdateDto
                     {
                         Name = PromotionNameTextBox.Text,
-                        Description = DescriptionTextBox.Text,
+                        Description = PromotionDescriptionTextBox.Text,
                         StartDate = StartDatePicker.SelectedDate,
                         EndDate = EndDatePicker.SelectedDate,
                         DiscountPercentage = discountPercentage,
@@ -701,7 +705,7 @@ namespace RoomListApp
                     var newDto = new PromotionCreateDto
                     {
                         Name = PromotionNameTextBox.Text,
-                        Description = DescriptionTextBox.Text,
+                        Description = PromotionDescriptionTextBox.Text,
                         StartDate = StartDatePicker.SelectedDate,
                         EndDate = EndDatePicker.SelectedDate,
                         DiscountPercentage = discountPercentage,
@@ -798,7 +802,7 @@ namespace RoomListApp
         private void ClearPromotionFormFields()
         {
             PromotionNameTextBox.Text = string.Empty;
-            DescriptionTextBox.Text = string.Empty;
+            PromotionDescriptionTextBox.Text = string.Empty;
             StartDatePicker.SelectedDate = DateTime.Today;
             EndDatePicker.SelectedDate = DateTime.Today.AddDays(30);
             DiscountPercentageTextBox.Text = string.Empty;
@@ -2639,10 +2643,8 @@ namespace RoomListApp
             var button = sender as Button;
             if (button == null) return;
 
-            // Eltároljuk a foglalás azonosítóját
             currentPaymentBookingId = (int)button.Tag;
 
-            // Elrejtjük a foglalás konténert és megjelenítjük a fizetési panelt
             bookingsContainer.Visibility = Visibility.Collapsed;
             paymentPanel.Visibility = Visibility.Visible;
         }
@@ -2694,7 +2696,6 @@ namespace RoomListApp
         }
         private void PaymentBackButton_Click(object sender, RoutedEventArgs e)
         {
-            // Visszatérés a foglalások nézethez
             paymentPanel.Visibility = Visibility.Collapsed;
             bookingsContainer.Visibility = Visibility.Visible;
             currentPaymentBookingId = 0;
@@ -2704,7 +2705,6 @@ namespace RoomListApp
         {
             await UpdatePaymentStatus(currentPaymentBookingId, "Fizetve", "Készpénz");
 
-            // Visszatérés a foglalások nézethez
             paymentPanel.Visibility = Visibility.Collapsed;
             bookingsContainer.Visibility = Visibility.Visible;
             currentPaymentBookingId = 0;
@@ -2713,14 +2713,13 @@ namespace RoomListApp
         {
             await UpdatePaymentStatus(currentPaymentBookingId, "Fizetve", "Bankkártya");
 
-            // Visszatérés a foglalások nézethez
             paymentPanel.Visibility = Visibility.Collapsed;
             bookingsContainer.Visibility = Visibility.Visible;
             currentPaymentBookingId = 0;
         }
         private async void ConfirmPaymentButton_Click(object sender, RoutedEventArgs e)
         {
-            string paymentMethod = "Készpénz"; // Alapértelmezett
+            string paymentMethod = "Készpénz"; 
 
             if (CashRadioButton.IsChecked == true)
                 paymentMethod = "Készpénz";
@@ -2733,14 +2732,12 @@ namespace RoomListApp
 
             await UpdatePaymentStatus(currentPaymentBookingId, "Fizetve", paymentMethod);
 
-            // Visszatérés a foglalások nézethez
             paymentPanel.Visibility = Visibility.Collapsed;
             bookingsContainer.Visibility = Visibility.Visible;
             currentPaymentBookingId = 0;
         }
         private void CancelPaymentButton_Click(object sender, RoutedEventArgs e)
         {
-            // Visszatérés a foglalások nézethez fizetés nélkül
             paymentPanel.Visibility = Visibility.Collapsed;
             bookingsContainer.Visibility = Visibility.Visible;
             currentPaymentBookingId = 0;
@@ -2767,10 +2764,10 @@ namespace RoomListApp
         }
 
         private void MaintenanceBackButton_Click(object sender, RoutedEventArgs e)
-{
-    maintenanceContainer.Visibility = Visibility.Collapsed;
-    dashboardGrid.Visibility = Visibility.Visible;
-}
+        {
+                maintenanceContainer.Visibility = Visibility.Collapsed;
+                dashboardGrid.Visibility = Visibility.Visible;
+        }
 
         private async Task LoadMaintenanceToListView()
         {
@@ -2784,7 +2781,6 @@ namespace RoomListApp
 
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
 
-                // Karbantartási kérelmek betöltése - módosított végpont
                 var response = await _httpClient.GetAsync("Maintenance/Getmaintance");
                 if (!response.IsSuccessStatusCode)
                 {
@@ -2794,71 +2790,67 @@ namespace RoomListApp
                     return;
                 }
 
-                // Szobák betöltése egy kérésben a szoba ComboBox számára
                 var roomsResponse = await _httpClient.GetAsync("Rooms/GetRoomWith");
-        List<Room> rooms = new List<Room>();
+            List<Room> rooms = new List<Room>();
         
-        if (roomsResponse.IsSuccessStatusCode)
-        {
-            var roomsString = await roomsResponse.Content.ReadAsStringAsync();
-            rooms = JsonSerializer.Deserialize<List<Room>>(roomsString, 
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            
-            // ComboBox feltöltése a szobákkal
-            MaintenanceRoomComboBox.ItemsSource = rooms;
-            MaintenanceRoomComboBox.DisplayMemberPath = "RoomNumber";
-            MaintenanceRoomComboBox.SelectedValuePath = "RoomId";
-        }
-        else
-        {
-            MessageBox.Show("Nem sikerült betölteni a szobákat.", "Figyelmeztetés", 
-                MessageBoxButton.OK, MessageBoxImage.Warning);
-        }
-
-        var responseString = await response.Content.ReadAsStringAsync();
-        var maintenanceItems = JsonSerializer.Deserialize<List<Roommaintenance>>(responseString,
-            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-        if (maintenanceItems == null || maintenanceItems.Count == 0)
-        {
-            MessageBox.Show("Nincsenek elérhető karbantartási kérelmek az adatbázisban.",
-                "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
-            maintenanceListView.ItemsSource = null;
-            return;
-        }
-
-        var maintenanceWithRoomDetails = new List<RoomMaintenanceViewModel>();
-
-        foreach (var item in maintenanceItems)
-        {
-            // Használjuk a már betöltött szobákat
-            var room = rooms.FirstOrDefault(r => r.RoomId == item.RoomId);
-
-            maintenanceWithRoomDetails.Add(new RoomMaintenanceViewModel
+            if (roomsResponse.IsSuccessStatusCode)
             {
-                MaintenanceId = item.MaintenanceId,
-                MaintenanceDate = item.MaintenanceDate,
-                Description = item.Description,
-                Status = item.Status,
-                DateReported = item.DateReported,
-                ResolutionDate = item.ResolutionDate,
-                Cost = item.Cost,
-                Notes = item.Notes,
-                RoomId = item.RoomId,
-                RoomNumber = room != null ? room.RoomNumber : "Ismeretlen",
-                StaffId = item.StaffId
-            });
-        }
+                    var roomsString = await roomsResponse.Content.ReadAsStringAsync();
+                    rooms = JsonSerializer.Deserialize<List<Room>>(roomsString, 
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            
+                    MaintenanceRoomComboBox.ItemsSource = rooms;
+                    MaintenanceRoomComboBox.DisplayMemberPath = "RoomNumber";
+                    MaintenanceRoomComboBox.SelectedValuePath = "RoomId";
+            }
+            else
+            {
+                MessageBox.Show("Nem sikerült betölteni a szobákat.", "Figyelmeztetés", 
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
 
-        maintenanceListView.ItemsSource = maintenanceWithRoomDetails;
-    }
+                var responseString = await response.Content.ReadAsStringAsync();
+                var maintenanceItems = JsonSerializer.Deserialize<List<Roommaintenance>>(responseString,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (maintenanceItems == null || maintenanceItems.Count == 0)
+            {
+                MessageBox.Show("Nincsenek elérhető karbantartási kérelmek az adatbázisban.",
+                "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
+                maintenanceListView.ItemsSource = null;
+                return;
+            }
+
+            var maintenanceWithRoomDetails = new List<RoomMaintenanceViewModel>();
+
+            foreach (var item in maintenanceItems)
+            {
+                var room = rooms.FirstOrDefault(r => r.RoomId == item.RoomId);
+
+                maintenanceWithRoomDetails.Add(new RoomMaintenanceViewModel
+                {
+                    MaintenanceId = item.MaintenanceId,
+                    MaintenanceDate = item.MaintenanceDate,
+                    Description = item.Description,
+                    Status = item.Status,
+                    DateReported = item.DateReported,
+                    ResolutionDate = item.ResolutionDate,
+                    Cost = item.Cost,
+                    Notes = item.Notes,
+                    RoomId = item.RoomId,
+                    RoomNumber = room != null ? room.RoomNumber : "Ismeretlen",
+                    StaffId = item.StaffId
+                });
+            }
+
+            maintenanceListView.ItemsSource = maintenanceWithRoomDetails;
+            }
             catch (Exception ex)
             {
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        // Új karbantartási kérelem gomb eseménykezelő
         private void AddMaintenanceButton_Click(object sender, RoutedEventArgs e)
         {
             ClearMaintenanceFormFields();
@@ -2867,7 +2859,6 @@ namespace RoomListApp
             maintenanceEditPanel.Visibility = Visibility.Visible;
         }
 
-        // Törlés gomb eseménykezelő
         private async void DeleteMaintenanceButton_Click(object sender, RoutedEventArgs e)
 {
     var selectedMaintenance = maintenanceListView.SelectedItem as RoomMaintenanceViewModel;
@@ -2890,7 +2881,6 @@ namespace RoomListApp
     }
 }
 
-// Mégse gomb eseménykezelő
         private void CancelMaintenanceEditButton_Click(object sender, RoutedEventArgs e)
 {
     maintenanceEditPanel.Visibility = Visibility.Collapsed;
@@ -2907,11 +2897,9 @@ namespace RoomListApp
             isEditMaintenance = isEdit;
             maintenanceEditTitle.Text = isEdit ? "Karbantartási kérelem szerkesztése" : "Új karbantartási kérelem";
 
-            // A szoba és leírás csak létrehozásnál legyen szerkeszthető
             MaintenanceRoomComboBox.IsEnabled = !isEdit;
             MaintenanceDescriptionTextBox.IsReadOnly = isEdit;
 
-            // Státusz, költség, stb. csak szerkesztésnél legyen látható
             StatusPanel.Visibility = isEdit ? Visibility.Visible : Visibility.Collapsed;
             ResolutionDatePanel.Visibility = isEdit ? Visibility.Visible : Visibility.Collapsed;
             CostPanel.Visibility = isEdit ? Visibility.Visible : Visibility.Collapsed;
@@ -2919,15 +2907,13 @@ namespace RoomListApp
 
             if (!isEdit)
             {
-                // Új kérelem esetén alapértelmezett értékek
-                MaintenanceStatusComboBox.SelectedIndex = 0; // "Not resolved yet"
+                MaintenanceStatusComboBox.SelectedIndex = 0;
                 CostTextBox.Text = "0";
                 MaintenanceDatePicker.SelectedDate = DateTime.Today;
             }
         }
 
 
-        // Mentés gomb eseménykezelő
         private async void SaveMaintenanceButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -2964,7 +2950,6 @@ namespace RoomListApp
                         StaffId = StaffComboBox.SelectedValue != null ? (int?)StaffComboBox.SelectedValue : null
                     };
 
-                    // Ha a státusz "Resolved", állítsa be a ResolutionDate-et az aktuális dátumra
                     if (updateDto.Status == "Resolved" && !updateDto.ResolutionDate.HasValue)
                     {
                         updateDto.ResolutionDate = DateTime.Now;
@@ -3005,7 +2990,6 @@ namespace RoomListApp
 
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
 
-                // Debug információ: A szerializált JSON megtekintése
                 string jsonContent = JsonSerializer.Serialize(newMaintenance,
                     new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
 
@@ -3074,7 +3058,6 @@ namespace RoomListApp
             }
         }
 
-        // Karbantartási kérelem törlése
         private async Task DeleteMaintenance(int maintenanceId)
 {
     try
@@ -3107,7 +3090,6 @@ namespace RoomListApp
     }
 }
 
-        // Űrlap mezők törlése
         private void ClearMaintenanceFormFields()
         {
             if (MaintenanceRoomComboBox.Items.Count > 0)
@@ -3119,7 +3101,6 @@ namespace RoomListApp
             MaintenanceDescriptionTextBox.Text = string.Empty;
             NotesTextBox.Text = string.Empty;
 
-            // Szerkesztési mezők alaphelyzetbe állítása
             MaintenanceStatusComboBox.SelectedIndex = 0;
             ResolutionDatePicker.SelectedDate = DateTime.Today;
             CostTextBox.Text = "0";
@@ -3141,7 +3122,6 @@ namespace RoomListApp
             SetMaintenancePanelState(true);
             currentMaintenanceId = selectedMaintenance.MaintenanceId;
 
-            // Alapadatok betöltése
             var room = MaintenanceRoomComboBox.Items.Cast<Room>()
                 .FirstOrDefault(r => r.RoomId == selectedMaintenance.RoomId);
             if (room != null)
@@ -3151,7 +3131,6 @@ namespace RoomListApp
             MaintenanceDescriptionTextBox.Text = selectedMaintenance.Description;
             NotesTextBox.Text = selectedMaintenance.Notes;
 
-            // Szerkesztés specifikus adatok betöltése
             foreach (ComboBoxItem item in MaintenanceStatusComboBox.Items)
             {
                 if (item.Content.ToString() == selectedMaintenance.Status)
@@ -3163,7 +3142,6 @@ namespace RoomListApp
             ResolutionDatePicker.SelectedDate = selectedMaintenance.ResolutionDate;
             CostTextBox.Text = selectedMaintenance.Cost?.ToString() ?? "0";
 
-            // Személyzet betöltése
             LoadStaffComboBox(selectedMaintenance.StaffId);
             maintenanceEditPanel.Visibility = Visibility.Visible;
         }
@@ -3217,6 +3195,342 @@ namespace RoomListApp
             }
         }
 
+        private async void EventsCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                dashboardGrid.Visibility = Visibility.Collapsed;
+                eventsContainer.Visibility = Visibility.Visible;
+                eventEditPanel.Visibility = Visibility.Collapsed;
+
+                await LoadEventsToListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                dashboardGrid.Visibility = Visibility.Visible;
+                eventsContainer.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void EventsBackButton_Click(object sender, RoutedEventArgs e)
+        {
+            eventsContainer.Visibility = Visibility.Collapsed;
+            dashboardGrid.Visibility = Visibility.Visible;
+        }
+
+        private async Task LoadEventsToListView()
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+                var response = await _httpClient.GetAsync("Events/Geteventsadmin");
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba az események lekérdezésekor: {response.StatusCode}\n{errorResponse}",
+                        "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                var events = JsonSerializer.Deserialize<List<Event>>(responseString,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (events == null || events.Count == 0)
+                {
+                    MessageBox.Show("Nincsenek elérhető események az adatbázisban.",
+                        "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
+                    eventsListView.ItemsSource = null;
+                    return;
+                }
+
+                eventsListView.ItemsSource = events;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void AddEventButton_Click(object sender, RoutedEventArgs e)
+        {
+            ClearEventFormFields();
+            isEditEvent = false;
+            currentEventId = 0;
+            eventEditTitle.Text = "Új esemény";
+            eventEditPanel.Visibility = Visibility.Visible;
+        }
+
+        private void EditEventButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedEvent = eventsListView.SelectedItem as Event;
+            if (selectedEvent == null)
+            {
+                MessageBox.Show("Kérjük, válasszon ki egy eseményt a szerkesztéshez!",
+                    "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            isEditEvent = true;
+            currentEventId = selectedEvent.EventId;
+            eventEditTitle.Text = "Esemény szerkesztése";
+
+            EventNameTextBox.Text = selectedEvent.EventName;
+            CapacityTextBox.Text = selectedEvent.Capacity?.ToString();
+            foreach (ComboBoxItem item in EventStatusComboBox.Items)
+            {
+                if (item.Content.ToString() == selectedEvent.Status)
+                {
+                    EventStatusComboBox.SelectedItem = item;
+                    break;
+                }
+            }
+            EventDatePicker.SelectedDate = selectedEvent.EventDate;
+            LocationTextBox.Text = selectedEvent.Location;
+            PriceTextBox.Text = selectedEvent.Price?.ToString();
+            EventDescriptionTextBox.Text = selectedEvent.Description;
+            OrganizerNameTextBox.Text = selectedEvent.OrganizerName;
+            ContactInfoTextBox.Text = selectedEvent.ContactInfo;
+
+            eventEditPanel.Visibility = Visibility.Visible;
+        }
+
+        private async void DeleteEventButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedEvent = eventsListView.SelectedItem as Event;
+            if (selectedEvent == null)
+            {
+                MessageBox.Show("Kérjük, válasszon ki egy eseményt a törléshez!",
+                    "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Biztosan törölni szeretné a(z) {selectedEvent.EventName} eseményt?",
+                "Törlés megerősítése",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                await DeleteEvent(selectedEvent.EventId);
+            }
+        }
+
+        private void CancelEventEditButton_Click(object sender, RoutedEventArgs e)
+        {
+            eventEditPanel.Visibility = Visibility.Collapsed;
+            isEditEvent = false;
+            currentEventId = 0;
+        }
+
+        private async void SaveEventButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(EventNameTextBox.Text) ||
+                    string.IsNullOrWhiteSpace(CapacityTextBox.Text) ||
+                    EventStatusComboBox.SelectedItem == null ||
+                    EventDatePicker.SelectedDate == null ||
+                    string.IsNullOrWhiteSpace(LocationTextBox.Text) ||
+                    string.IsNullOrWhiteSpace(PriceTextBox.Text))
+                {
+                    MessageBox.Show("Kérjük, töltse ki az összes kötelező mezőt!",
+                        "Hiányzó adatok", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (!int.TryParse(CapacityTextBox.Text, out int capacity) || capacity < 1)
+                {
+                    MessageBox.Show("Kérjük, adjon meg érvényes kapacitást (legalább 1)!",
+                        "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                
+                if (!decimal.TryParse(PriceTextBox.Text, out decimal price) || price < 0)
+                {
+                    MessageBox.Show("Kérjük, adjon meg érvényes árat (nem lehet negatív)!",
+                        "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (EventDatePicker.SelectedDate <= DateTime.Now.AddDays(1))
+                {
+                    MessageBox.Show("Az esemény dátuma legalább 1 nappal későbbi kell, hogy legyen a mai napnál!",
+                        "Érvénytelen dátum", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var selectedStatus = (EventStatusComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+
+                if (isEditEvent)
+                {
+                    var updateDto = new UpdateEvent
+                    {
+                        EventName = EventNameTextBox.Text,
+                        Capacity = capacity,
+                        Status = selectedStatus,
+                        EventDate = EventDatePicker.SelectedDate,
+                        Location = LocationTextBox.Text,
+                        Description = EventDescriptionTextBox.Text,
+                        OrganizerName = OrganizerNameTextBox.Text,
+                        ContactInfo = ContactInfoTextBox.Text,
+                        Price = price
+                    };
+
+                    await UpdateEvent(currentEventId, updateDto);
+                }
+                else
+                {
+                    var createDto = new CreateEvent
+                    {
+                        EventName = EventNameTextBox.Text,
+                        Capacity = capacity,
+                        Status = selectedStatus,
+                        EventDate = EventDatePicker.SelectedDate,
+                        Location = LocationTextBox.Text,
+                        Description = EventDescriptionTextBox.Text,
+                        OrganizerName = OrganizerNameTextBox.Text,
+                        ContactInfo = ContactInfoTextBox.Text,
+                        Price = price
+                    };
+
+                    await CreateEvent(createDto);
+                }
+
+                eventEditPanel.Visibility = Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task CreateEvent(CreateEvent newEvent)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var content = new StringContent(
+                    JsonSerializer.Serialize(newEvent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                    System.Text.Encoding.UTF8,
+                    "application/json");
+
+                var response = await _httpClient.PostAsync("Events/CreateEvent", content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba az esemény létrehozásakor: {response.StatusCode}\n{errorResponse}",
+                        "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                MessageBox.Show("Az új esemény sikeresen létrehozva!",
+                    "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                await LoadEventsToListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task UpdateEvent(int eventId, UpdateEvent updateEvent)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var content = new StringContent(
+                    JsonSerializer.Serialize(updateEvent, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                    System.Text.Encoding.UTF8,
+                    "application/json");
+
+                var response = await _httpClient.PutAsync($"Events/UpdateEvent/{eventId}", content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba az esemény frissítésekor: {response.StatusCode}\n{errorResponse}",
+                        "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                MessageBox.Show("Az esemény sikeresen frissítve!",
+                    "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                await LoadEventsToListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async Task DeleteEvent(int eventId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+                var response = await _httpClient.DeleteAsync($"Events/DeleteEvenet/{eventId}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba az esemény törlésekor: {response.StatusCode}\n{errorResponse}",
+                        "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                MessageBox.Show("Az esemény sikeresen törölve!",
+                    "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                await LoadEventsToListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ClearEventFormFields()
+        {
+            EventNameTextBox.Text = string.Empty;
+            CapacityTextBox.Text = string.Empty;
+            EventStatusComboBox.SelectedIndex = 0;
+            EventDatePicker.SelectedDate = DateTime.Now.AddDays(2);
+            LocationTextBox.Text = string.Empty;
+            PriceTextBox.Text = "0";
+            EventDescriptionTextBox.Text = string.Empty;
+            OrganizerNameTextBox.Text = string.Empty;
+            ContactInfoTextBox.Text = string.Empty;
+        }
 
     }
 }
