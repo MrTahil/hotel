@@ -7,6 +7,14 @@ export const Foglalas = () => {
   const { room } = location.state || {};
   const { id } = useParams();
 
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      alert("Kérjük, jelentkezzen be a foglalás megkezdéséhez!");
+      navigate("/"); // Átirányítás a bejelentkezés oldalra
+    }
+  }, [navigate]);
+
   const [additionalGuests, setAdditionalGuests] = useState(0);
   const [savedGuests, setSavedGuests] = useState([]);
   const [mainGuest, setMainGuest] = useState(null);
