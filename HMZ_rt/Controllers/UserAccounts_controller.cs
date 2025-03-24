@@ -565,6 +565,10 @@ namespace HMZ_rt.Controllers
                 {
                     if (PasswordHasher.VerifyPassword(udto.OldPassword, data.Password))
                     {
+                        if (PasswordHasher.VerifyPassword(udto.Password, data.Password))
+                        {
+                            return StatusCode(400, "Az új jelszavad nem eggyezhet a régivel.");
+                        }
                         data.Password = PasswordHasher.HashPassword(udto.Password);
                         _context.Useraccounts.Update(data);
                         await _context.SaveChangesAsync();

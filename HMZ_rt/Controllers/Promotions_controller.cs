@@ -88,40 +88,30 @@ namespace HMZ_rt.Controllers
         {
             try
             {
-                var existingpromotion = await _context.Promotions.FirstOrDefaultAsync(x => x.PromotionName == crtdto.Name);
-                if (existingpromotion == null)
+
+
+                var promotion = new Promotion
                 {
+                    PromotionName = crtdto.Name,
+                    Description = crtdto.Description,
+                    StartDate = crtdto.StartDate,
+                    TermsConditions = crtdto.TermsConditions,
+                    EndDate = crtdto.EndDate,
+                    DiscountPercentage = crtdto.DiscountPercentage,
+                    RoomId = crtdto.RoomId,
+                    Status = crtdto.Status,
+                    DateAdded = DateTime.Now
 
-                    var promotion = new Promotion
-                    {
-                        PromotionName = crtdto.Name,
-                        Description = crtdto.Description,
-                        StartDate = crtdto.StartDate,
-                        TermsConditions = crtdto.TermsConditions,
-                        EndDate = crtdto.EndDate,
-                        DiscountPercentage = crtdto.DiscountPercentage,
-                        RoomId = crtdto.RoomId,
-                        Status = crtdto.Status,
-                        DateAdded = DateTime.Now
-
-                    };
-                    if (promotion != null)
-                    {
-                        await _context.Promotions.AddAsync(promotion);
-                        await _context.SaveChangesAsync();
-                        return StatusCode(201, "Sikeres mentés!");
-                    }
-                    return StatusCode(418, "Ha ide jutsz az baj");
-                }
-                if (existingpromotion != null)
+                };
+                if (promotion != null)
                 {
-                    return StatusCode(404, "Már létező promotion");
+                    await _context.Promotions.AddAsync(promotion);
+                    await _context.SaveChangesAsync();
+                    return StatusCode(201, "Sikeres mentés!");
                 }
-                return BadRequest();
-            }
-
-
-
+                return StatusCode(418, "Ha ide jutsz az baj");
+            
+           
             catch (Exception ex)
             {
 
