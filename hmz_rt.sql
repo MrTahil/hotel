@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Már 22. 12:21
--- Kiszolgáló verziója: 10.4.32-MariaDB
--- PHP verzió: 8.0.30
+-- Host: 127.0.0.1
+-- Generation Time: Mar 24, 2025 at 03:21 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Adatbázis: `hmz_rt`
+-- Database: `hmz_rt`
 --
 CREATE DATABASE IF NOT EXISTS `hmz_rt` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_hungarian_ci;
 USE `hmz_rt`;
@@ -26,7 +26,7 @@ USE `hmz_rt`;
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `amenities`
+-- Table structure for table `amenities`
 --
 
 CREATE TABLE `amenities` (
@@ -43,7 +43,7 @@ CREATE TABLE `amenities` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 --
--- A tábla adatainak kiíratása `amenities`
+-- Dumping data for table `amenities`
 --
 
 INSERT INTO `amenities` (`amenity_name`, `description`, `amenity_id`, `availability`, `date_added`, `room_id`, `status`, `icon`, `category`, `priority`) VALUES
@@ -140,7 +140,7 @@ INSERT INTO `amenities` (`amenity_name`, `description`, `amenity_id`, `availabil
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `bookings`
+-- Table structure for table `bookings`
 --
 
 CREATE TABLE `bookings` (
@@ -157,17 +157,20 @@ CREATE TABLE `bookings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 --
--- A tábla adatainak kiíratása `bookings`
+-- Dumping data for table `bookings`
 --
 
 INSERT INTO `bookings` (`room_id`, `booking_id`, `guest_id`, `check_in_date`, `check_out_date`, `number_of_guests`, `total_price`, `booking_date`, `status`, `payment_status`) VALUES
 (20, 4, 3, '2025-03-12', '2025-03-15', 1, 195, '2025-03-10', 'Finished', 'Fizetve'),
-(10, 6, 3, '2025-03-17', '2025-03-20', 1, 70000, '2025-03-17', 'Finished', 'Fizetve');
+(10, 6, 3, '2025-03-17', '2025-03-20', 1, 70000, '2025-03-17', 'Finished', 'Fizetve'),
+(18, 7, 3, '2025-03-25', '2025-03-29', 4, 800000, '2025-03-23', 'Jóváhagyva', 'Fizetésre vár'),
+(3, 8, 4, '2025-03-28', '2025-03-31', 2, 70000, '2025-03-24', 'Jóváhagyva', 'Fizetésre vár'),
+(5, 11, 4, '2025-03-25', '2025-03-28', 1, 15000, '2025-03-24', 'Jóváhagyva', 'Fizetésre vár');
 
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `eventbookings`
+-- Table structure for table `eventbookings`
 --
 
 CREATE TABLE `eventbookings` (
@@ -186,7 +189,7 @@ CREATE TABLE `eventbookings` (
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `events`
+-- Table structure for table `events`
 --
 
 CREATE TABLE `events` (
@@ -205,7 +208,7 @@ CREATE TABLE `events` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 --
--- A tábla adatainak kiíratása `events`
+-- Dumping data for table `events`
 --
 
 INSERT INTO `events` (`capacity`, `price`, `status`, `event_id`, `event_name`, `event_date`, `location`, `description`, `date_added`, `organizer_name`, `contact_info`, `images`) VALUES
@@ -222,7 +225,7 @@ INSERT INTO `events` (`capacity`, `price`, `status`, `event_id`, `event_name`, `
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `feedback`
+-- Table structure for table `feedback`
 --
 
 CREATE TABLE `feedback` (
@@ -241,7 +244,7 @@ CREATE TABLE `feedback` (
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `guests`
+-- Table structure for table `guests`
 --
 
 CREATE TABLE `guests` (
@@ -259,17 +262,18 @@ CREATE TABLE `guests` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 --
--- A tábla adatainak kiíratása `guests`
+-- Dumping data for table `guests`
 --
 
 INSERT INTO `guests` (`first_name`, `guest_id`, `last_name`, `email`, `phone_number`, `address`, `city`, `country`, `date_of_birth`, `gender`, `user_id`) VALUES
-('Róbert', 3, 'Monostori', 'monostorir@kkszki.hu', '06707026565', 'Josika utca 17', 'Miskolc', 'Hungary', '2025-02-24', 'Férfi', 5),
-('Tamás', 4, 'Hilóczki', 'hiloczkit@kkszki.hu', '065254587', 'Nagy Lajos utca 12', 'Szeged', 'Hungary', '2005-03-06', 'Férfi', 3);
+('Róbert', 3, 'Monostori', 'monostorir@kkszki.hu', '06707026565', 'Nagyi', 'Miskolc', 'Magyarország', '2025-02-24', 'Férfi', 5),
+('Tamás', 4, 'Hilóczki', 'hiloczkit@kkszki.hu', '065254587', 'Nagy Lajos utca 12', 'Szeged', 'Magyarország', '2005-03-06', 'Férfi', 3),
+('Zalán', 16, 'Zelenák', 'csaknevess1410@gmail.com', '+36703237436', 'Pozsonyi u 90', 'Miskolc', 'Magyarország', '2000-01-01', 'Férfi', 19);
 
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `invoices`
+-- Table structure for table `invoices`
 --
 
 CREATE TABLE `invoices` (
@@ -288,7 +292,7 @@ CREATE TABLE `invoices` (
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `loyaltyprograms`
+-- Table structure for table `loyaltyprograms`
 --
 
 CREATE TABLE `loyaltyprograms` (
@@ -307,7 +311,7 @@ CREATE TABLE `loyaltyprograms` (
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `marketing`
+-- Table structure for table `marketing`
 --
 
 CREATE TABLE `marketing` (
@@ -326,7 +330,7 @@ CREATE TABLE `marketing` (
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `notifications`
+-- Table structure for table `notifications`
 --
 
 CREATE TABLE `notifications` (
@@ -345,7 +349,7 @@ CREATE TABLE `notifications` (
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `payments`
+-- Table structure for table `payments`
 --
 
 CREATE TABLE `payments` (
@@ -362,17 +366,20 @@ CREATE TABLE `payments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 --
--- A tábla adatainak kiíratása `payments`
+-- Dumping data for table `payments`
 --
 
 INSERT INTO `payments` (`payment_id`, `booking_id`, `payment_date`, `amount`, `payment_method`, `transaction_id`, `status`, `currency`, `payment_notes`, `date_added`) VALUES
 (3, 4, '0001-01-01', 195, 'Készpénz', '0', 'Fizetve', 'Huf', '', '2025-03-10'),
-(5, 6, '0001-01-01', 70000, 'Készpénz', '0', 'Fizetve', 'Huf', '', '2025-03-17');
+(5, 6, '0001-01-01', 70000, 'Készpénz', '0', 'Fizetve', 'Huf', '', '2025-03-17'),
+(6, 7, '0001-01-01', 800000, 'Fizetés érkezéskor', '0', 'Fizetésre vár', 'Huf', '', '2025-03-23'),
+(7, 8, '0001-01-01', 70000, 'Bankkártya', '0', 'Fizetésre vár', 'Huf', '', '2025-03-24'),
+(10, 11, '0001-01-01', 15000, 'Fizetés érkezéskor', '0', 'Fizetésre vár', 'Huf', '', '2025-03-24');
 
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `promotions`
+-- Table structure for table `promotions`
 --
 
 CREATE TABLE `promotions` (
@@ -388,10 +395,22 @@ CREATE TABLE `promotions` (
   `date_added` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
+--
+-- Dumping data for table `promotions`
+--
+
+INSERT INTO `promotions` (`promotion_id`, `promotion_name`, `description`, `start_date`, `terms_conditions`, `end_date`, `discount_percentage`, `room_id`, `status`, `date_added`) VALUES
+(3, 'Tavaszi Szállás Kedvezmény', '15% kedvezmény a szállásokra a tavaszi időszakban', '2025-03-24', 'A kedvezmény csak a honlapunkon foglalható szobákra érvényes', '2025-04-23', 15, 10, 'Aktív', '2025-03-24'),
+(4, 'Hétvégi Pihenés', '20% kedvezmény a hétvégi szállásokra', '2025-03-24', 'Csak szombat és vasárnap érvényes, minimum 2 éjszaka', '2025-12-31', 20, 3, 'Aktív', '2025-03-24'),
+(5, 'Deluxe Szoba Kedvezmény', '30% kedvezmény a deluxe szobákra', '2025-03-24', 'Csak a deluxe szobákra érvényes', '2025-05-31', 30, 12, 'Aktív', '2025-03-24'),
+(6, 'Deluxe Szoba Kedvezmény', '30% kedvezmény a deluxe szobákra', '2025-03-24', 'Csak a deluxe szobákra érvényes', '2025-05-31', 30, 15, 'Aktív', '2025-03-24'),
+(7, 'Deluxe Szoba Kedvezmény', '30% kedvezmény a deluxe szobákra', '2025-03-24', 'Csak a deluxe szobákra érvényes', '2025-04-23', 30, 20, 'Aktív', '2025-03-24'),
+(8, 'Nyári Szezon Kedvezmény', '18% kedvezmény a nyári szállásokra', '2025-06-01', 'A kedvezmény csak a honlapunkon foglalható szobákra érvényes', '2025-08-31', 18, 12, 'Tervezett', '2025-03-24');
+
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `reviews`
+-- Table structure for table `reviews`
 --
 
 CREATE TABLE `reviews` (
@@ -410,7 +429,7 @@ CREATE TABLE `reviews` (
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `roominventory`
+-- Table structure for table `roominventory`
 --
 
 CREATE TABLE `roominventory` (
@@ -429,7 +448,7 @@ CREATE TABLE `roominventory` (
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `roommaintenance`
+-- Table structure for table `roommaintenance`
 --
 
 CREATE TABLE `roommaintenance` (
@@ -446,7 +465,7 @@ CREATE TABLE `roommaintenance` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 --
--- A tábla adatainak kiíratása `roommaintenance`
+-- Dumping data for table `roommaintenance`
 --
 
 INSERT INTO `roommaintenance` (`maintenance_id`, `room_id`, `maintenance_date`, `description`, `status`, `staff_id`, `date_reported`, `resolution_date`, `cost`, `notes`) VALUES
@@ -456,7 +475,7 @@ INSERT INTO `roommaintenance` (`maintenance_id`, `room_id`, `maintenance_date`, 
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `rooms`
+-- Table structure for table `rooms`
 --
 
 CREATE TABLE `rooms` (
@@ -474,7 +493,7 @@ CREATE TABLE `rooms` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 --
--- A tábla adatainak kiíratása `rooms`
+-- Dumping data for table `rooms`
 --
 
 INSERT INTO `rooms` (`room_type`, `room_id`, `room_number`, `capacity`, `price_per_night`, `status`, `description`, `floor_number`, `amenities`, `date_added`, `images`) VALUES
@@ -499,7 +518,7 @@ INSERT INTO `rooms` (`room_type`, `room_id`, `room_number`, `capacity`, `price_p
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `services`
+-- Table structure for table `services`
 --
 
 CREATE TABLE `services` (
@@ -518,7 +537,7 @@ CREATE TABLE `services` (
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `staff`
+-- Table structure for table `staff`
 --
 
 CREATE TABLE `staff` (
@@ -535,7 +554,7 @@ CREATE TABLE `staff` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 --
--- A tábla adatainak kiíratása `staff`
+-- Dumping data for table `staff`
 --
 
 INSERT INTO `staff` (`first_name`, `staff_id`, `last_name`, `email`, `phone_number`, `position`, `salary`, `date_hired`, `status`, `department`) VALUES
@@ -546,7 +565,7 @@ INSERT INTO `staff` (`first_name`, `staff_id`, `last_name`, `email`, `phone_numb
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `useraccounts`
+-- Table structure for table `useraccounts`
 --
 
 CREATE TABLE `useraccounts` (
@@ -567,29 +586,29 @@ CREATE TABLE `useraccounts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 --
--- A tábla adatainak kiíratása `useraccounts`
+-- Dumping data for table `useraccounts`
 --
 
 INSERT INTO `useraccounts` (`username`, `user_id`, `password`, `email`, `role`, `RefreshToken`, `RefreshTokenExpiryTime`, `status`, `date_created`, `last_login`, `date_updated`, `notes`, `authenticationcode`, `authenticationexpire`) VALUES
-('Tahil', 3, 'hte+RnleAunUji+Bx3f7EPd8Nd2nOw82PS50E6kPBYOBYQ+8JUKlArMigzjZ1CM3', 'hiloczkit@kkszki.hu', 'System', 'STT3E/DkU4gYFi4ujB5VxAPZLyM5pT4/zktx3tyfybQ=', '2025-03-26', 'string', '2025-01-16', '2025-01-16', '2025-01-16', 'string', '111111', '2025-02-13'),
+('Tahil', 3, 'hte+RnleAunUji+Bx3f7EPd8Nd2nOw82PS50E6kPBYOBYQ+8JUKlArMigzjZ1CM3', 'hiloczkit@kkszki.hu', 'System', '7KtT/DvGYFVfUsDpILNiBTRTt+O+WW1ZdmmlRAIWzbw=', '2025-03-31', 'string', '2025-01-16', '2025-01-16', '2025-01-16', 'string', '111111', '2025-02-13'),
 ('asdasdasd', 4, '3S4JbEmjI0P69HENXf0Wp+u8teCyLgUPrKSYOMLRv91+ixql4MlfM4TWgeaJLIU/', 'hiloczkit12@kkszki.hu', 'Base', 'qiNaBxchix/fw5p2I6Bq0odyQmSo0CmQawB6MiPqVFc=', '2025-01-23', 'string', '2025-01-16', '2025-01-16', '2025-01-16', 'string', '111111', '2025-02-13'),
-('a_Beto', 5, 'u04oCPhO+K7Y9IBD+zsk/QP/jWnVhlEdpOyaWFAzwQjPvc0kubpehqBt15MLXuVv', 'monostori@kkszki.hu', 'System', 'nYMM+d0U7e4z0oS0HO+j6irZ3FG2q+kwy8aib5vSPhA=', '2025-03-28', 'string', '2025-02-14', '2025-02-14', '2025-02-14', 'string', 'activated', '2025-02-20'),
-('Bozsgai', 6, 'qcFvcMo+qVpNxTezQhvnNO1acWKoZ1LEuvTFPrpsF48g/IL7vNu9jxt9epGzeLWA', 'monostorir@kkszki.hu', 'Base', 'U6f5AAfK8ktMD/pD3HWcMQIIlPIl6kiWMmRX6Dm2HFQ=', '2025-03-26', NULL, '2025-02-21', '2025-02-21', '2025-02-21', NULL, '000000', '2025-03-20'),
-('LoriAttila', 7, '92SGRkfIVMvNl6lr+bRfxUldVRoplekiF+3r/jgeepFxB/Ocq9d9egROEekm38P/', 'nokivagyok69420@gmail.com', 'Base', '6IAshvkZE4nL86EQQXMhOzTJCKchbWQtHGbU9AD4Ebk=', '2025-03-19', NULL, '2025-03-12', '2025-03-12', '2025-03-12', NULL, 'activated', NULL);
+('a_Beto', 5, 'u04oCPhO+K7Y9IBD+zsk/QP/jWnVhlEdpOyaWFAzwQjPvc0kubpehqBt15MLXuVv', 'monostorir@kkszki.hu', 'System', 'k62Rs9DbYzhW5rR5EparQXopXocrK4VoeVSRMhX7YKM=', '2025-03-31', 'string', '2025-02-14', '2025-02-14', '2025-02-14', 'string', 'activated', '2025-02-20'),
+('Bozsgai', 6, 'qcFvcMo+qVpNxTezQhvnNO1acWKoZ1LEuvTFPrpsF48g/IL7vNu9jxt9epGzeLWA', 'monostorir@kkszki.hu', 'Base', 'gAuQy6/FuHKA0O1HEhZ4/d4iecZg8P88EprvucvItbA=', '2025-03-31', NULL, '2025-02-21', '2025-02-21', '2025-02-21', NULL, '000000', '2025-03-20'),
+('LoriAttila', 19, '4lzqAoEJpCQkHIvbmbgFvq4wFTHy5FJOVUzZHwlyJcZk95dGqUzMT227lcbRVYOa', 'nokivagyok69420@gmail.com', 'Base', 'duvmMf4Ca6j3XPG/RwxIjPApcO7kXW8A9sRRzBUCZLo=', '2025-03-31', NULL, '2025-03-24', '2025-03-24', '2025-03-24', NULL, 'activated', NULL);
 
 --
--- Indexek a kiírt táblákhoz
+-- Indexes for dumped tables
 --
 
 --
--- A tábla indexei `amenities`
+-- Indexes for table `amenities`
 --
 ALTER TABLE `amenities`
   ADD PRIMARY KEY (`amenity_id`),
   ADD KEY `Amenities_fk5` (`room_id`);
 
 --
--- A tábla indexei `bookings`
+-- Indexes for table `bookings`
 --
 ALTER TABLE `bookings`
   ADD PRIMARY KEY (`booking_id`),
@@ -597,7 +616,7 @@ ALTER TABLE `bookings`
   ADD KEY `Bookings_fk2` (`guest_id`);
 
 --
--- A tábla indexei `eventbookings`
+-- Indexes for table `eventbookings`
 --
 ALTER TABLE `eventbookings`
   ADD PRIMARY KEY (`event_booking_id`),
@@ -605,67 +624,67 @@ ALTER TABLE `eventbookings`
   ADD KEY `EventBookings_fk2` (`guest_id`);
 
 --
--- A tábla indexei `events`
+-- Indexes for table `events`
 --
 ALTER TABLE `events`
   ADD PRIMARY KEY (`event_id`);
 
 --
--- A tábla indexei `feedback`
+-- Indexes for table `feedback`
 --
 ALTER TABLE `feedback`
   ADD PRIMARY KEY (`feedback_id`),
   ADD KEY `Feedback_fk9` (`guest_id`);
 
 --
--- A tábla indexei `guests`
+-- Indexes for table `guests`
 --
 ALTER TABLE `guests`
   ADD PRIMARY KEY (`guest_id`),
   ADD KEY `fk_guests_useraccounts` (`user_id`);
 
 --
--- A tábla indexei `invoices`
+-- Indexes for table `invoices`
 --
 ALTER TABLE `invoices`
   ADD PRIMARY KEY (`invoice_id`),
   ADD KEY `Invoices_fk2` (`booking_id`);
 
 --
--- A tábla indexei `loyaltyprograms`
+-- Indexes for table `loyaltyprograms`
 --
 ALTER TABLE `loyaltyprograms`
   ADD PRIMARY KEY (`loyalty_program_id`);
 
 --
--- A tábla indexei `marketing`
+-- Indexes for table `marketing`
 --
 ALTER TABLE `marketing`
   ADD PRIMARY KEY (`marketing_id`);
 
 --
--- A tábla indexei `notifications`
+-- Indexes for table `notifications`
 --
 ALTER TABLE `notifications`
   ADD PRIMARY KEY (`notification_id`),
   ADD KEY `Notifications_fk8` (`user_id`);
 
 --
--- A tábla indexei `payments`
+-- Indexes for table `payments`
 --
 ALTER TABLE `payments`
   ADD PRIMARY KEY (`payment_id`),
   ADD KEY `Payments_fk1` (`booking_id`);
 
 --
--- A tábla indexei `promotions`
+-- Indexes for table `promotions`
 --
 ALTER TABLE `promotions`
   ADD PRIMARY KEY (`promotion_id`),
   ADD KEY `Promotions_fk7` (`room_id`);
 
 --
--- A tábla indexei `reviews`
+-- Indexes for table `reviews`
 --
 ALTER TABLE `reviews`
   ADD PRIMARY KEY (`review_id`),
@@ -673,14 +692,14 @@ ALTER TABLE `reviews`
   ADD KEY `Reviews_fk3` (`room_id`);
 
 --
--- A tábla indexei `roominventory`
+-- Indexes for table `roominventory`
 --
 ALTER TABLE `roominventory`
   ADD PRIMARY KEY (`inventory_id`),
   ADD KEY `RoomInventory_fk8` (`room_id`);
 
 --
--- A tábla indexei `roommaintenance`
+-- Indexes for table `roommaintenance`
 --
 ALTER TABLE `roommaintenance`
   ADD PRIMARY KEY (`maintenance_id`),
@@ -688,222 +707,222 @@ ALTER TABLE `roommaintenance`
   ADD KEY `RoomMaintenance_fk5` (`staff_id`);
 
 --
--- A tábla indexei `rooms`
+-- Indexes for table `rooms`
 --
 ALTER TABLE `rooms`
   ADD PRIMARY KEY (`room_id`);
 
 --
--- A tábla indexei `services`
+-- Indexes for table `services`
 --
 ALTER TABLE `services`
   ADD PRIMARY KEY (`service_id`);
 
 --
--- A tábla indexei `staff`
+-- Indexes for table `staff`
 --
 ALTER TABLE `staff`
   ADD PRIMARY KEY (`staff_id`);
 
 --
--- A tábla indexei `useraccounts`
+-- Indexes for table `useraccounts`
 --
 ALTER TABLE `useraccounts`
   ADD PRIMARY KEY (`user_id`);
 
 --
--- A kiírt táblák AUTO_INCREMENT értéke
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT a táblához `amenities`
+-- AUTO_INCREMENT for table `amenities`
 --
 ALTER TABLE `amenities`
   MODIFY `amenity_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
 
 --
--- AUTO_INCREMENT a táblához `bookings`
+-- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
--- AUTO_INCREMENT a táblához `eventbookings`
+-- AUTO_INCREMENT for table `eventbookings`
 --
 ALTER TABLE `eventbookings`
   MODIFY `event_booking_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT a táblához `events`
+-- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
--- AUTO_INCREMENT a táblához `feedback`
+-- AUTO_INCREMENT for table `feedback`
 --
 ALTER TABLE `feedback`
   MODIFY `feedback_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT a táblához `guests`
+-- AUTO_INCREMENT for table `guests`
 --
 ALTER TABLE `guests`
-  MODIFY `guest_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `guest_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
--- AUTO_INCREMENT a táblához `invoices`
+-- AUTO_INCREMENT for table `invoices`
 --
 ALTER TABLE `invoices`
   MODIFY `invoice_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT a táblához `loyaltyprograms`
+-- AUTO_INCREMENT for table `loyaltyprograms`
 --
 ALTER TABLE `loyaltyprograms`
   MODIFY `loyalty_program_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT a táblához `marketing`
+-- AUTO_INCREMENT for table `marketing`
 --
 ALTER TABLE `marketing`
   MODIFY `marketing_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT a táblához `notifications`
+-- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
   MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT a táblához `payments`
+-- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT a táblához `promotions`
+-- AUTO_INCREMENT for table `promotions`
 --
 ALTER TABLE `promotions`
-  MODIFY `promotion_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `promotion_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT a táblához `reviews`
+-- AUTO_INCREMENT for table `reviews`
 --
 ALTER TABLE `reviews`
   MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT a táblához `roominventory`
+-- AUTO_INCREMENT for table `roominventory`
 --
 ALTER TABLE `roominventory`
   MODIFY `inventory_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT a táblához `roommaintenance`
+-- AUTO_INCREMENT for table `roommaintenance`
 --
 ALTER TABLE `roommaintenance`
   MODIFY `maintenance_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT a táblához `rooms`
+-- AUTO_INCREMENT for table `rooms`
 --
 ALTER TABLE `rooms`
   MODIFY `room_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
--- AUTO_INCREMENT a táblához `services`
+-- AUTO_INCREMENT for table `services`
 --
 ALTER TABLE `services`
   MODIFY `service_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT a táblához `staff`
+-- AUTO_INCREMENT for table `staff`
 --
 ALTER TABLE `staff`
   MODIFY `staff_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT a táblához `useraccounts`
+-- AUTO_INCREMENT for table `useraccounts`
 --
 ALTER TABLE `useraccounts`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
--- Megkötések a kiírt táblákhoz
+-- Constraints for dumped tables
 --
 
 --
--- Megkötések a táblához `amenities`
+-- Constraints for table `amenities`
 --
 ALTER TABLE `amenities`
   ADD CONSTRAINT `Amenities_fk5` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
--- Megkötések a táblához `bookings`
+-- Constraints for table `bookings`
 --
 ALTER TABLE `bookings`
   ADD CONSTRAINT `Bookings_fk0` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   ADD CONSTRAINT `Bookings_fk2` FOREIGN KEY (`guest_id`) REFERENCES `guests` (`guest_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
--- Megkötések a táblához `eventbookings`
+-- Constraints for table `eventbookings`
 --
 ALTER TABLE `eventbookings`
   ADD CONSTRAINT `EventBookings_fk1` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   ADD CONSTRAINT `EventBookings_fk2` FOREIGN KEY (`guest_id`) REFERENCES `guests` (`guest_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
--- Megkötések a táblához `feedback`
+-- Constraints for table `feedback`
 --
 ALTER TABLE `feedback`
   ADD CONSTRAINT `Feedback_fk9` FOREIGN KEY (`guest_id`) REFERENCES `guests` (`guest_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
--- Megkötések a táblához `guests`
+-- Constraints for table `guests`
 --
 ALTER TABLE `guests`
-  ADD CONSTRAINT `fk_guests_useraccounts` FOREIGN KEY (`user_id`) REFERENCES `useraccounts` (`user_id`) ON DELETE SET NULL ON UPDATE NO ACTION;
+  ADD CONSTRAINT `fk_guests_useraccounts` FOREIGN KEY (`user_id`) REFERENCES `useraccounts` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Megkötések a táblához `invoices`
+-- Constraints for table `invoices`
 --
 ALTER TABLE `invoices`
   ADD CONSTRAINT `Invoices_fk2` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`booking_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
--- Megkötések a táblához `notifications`
+-- Constraints for table `notifications`
 --
 ALTER TABLE `notifications`
   ADD CONSTRAINT `Notifications_fk8` FOREIGN KEY (`user_id`) REFERENCES `useraccounts` (`user_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
--- Megkötések a táblához `payments`
+-- Constraints for table `payments`
 --
 ALTER TABLE `payments`
   ADD CONSTRAINT `Payments_fk1` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`booking_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
--- Megkötések a táblához `promotions`
+-- Constraints for table `promotions`
 --
 ALTER TABLE `promotions`
   ADD CONSTRAINT `Promotions_fk7` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
--- Megkötések a táblához `reviews`
+-- Constraints for table `reviews`
 --
 ALTER TABLE `reviews`
   ADD CONSTRAINT `Reviews_fk2` FOREIGN KEY (`guest_id`) REFERENCES `guests` (`guest_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT `Reviews_fk3` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
--- Megkötések a táblához `roominventory`
+-- Constraints for table `roominventory`
 --
 ALTER TABLE `roominventory`
   ADD CONSTRAINT `RoomInventory_fk8` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
--- Megkötések a táblához `roommaintenance`
+-- Constraints for table `roommaintenance`
 --
 ALTER TABLE `roommaintenance`
   ADD CONSTRAINT `RoomMaintenance_fk1` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE CASCADE ON UPDATE NO ACTION,
