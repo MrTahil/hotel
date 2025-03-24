@@ -36,6 +36,8 @@ namespace RoomListApp
             _httpClient = new HttpClient(handler) { BaseAddress = new Uri("https://localhost:7047/UserAccounts/") };
 
             LoadSavedCredentials();
+            Loaded += LoginWindow_Loaded;
+
         }
 
         private void LoadSavedCredentials()
@@ -376,5 +378,20 @@ namespace RoomListApp
 
 
         #endregion
+
+
+
+        private void LoginWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            btnLogin.Focus();
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                btnLogin_Click(sender, e);
+            }
+        }
     }
 }
