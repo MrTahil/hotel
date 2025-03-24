@@ -679,9 +679,9 @@ const ProfilePage = () => {
                       className="w-full p-2 border border-blue-200 rounded-lg"
                     >
                       <option value="">Válasszon</option>
-                      <option value="Male">Férfi</option>
-                      <option value="Female">Nő</option>
-                      <option value="Other">Kalács</option>
+                      <option value="Férfi">Férfi</option>
+                      <option value="Nő">Nő</option>
+                      <option value="Egyéb">Kalács</option>
                     </select>
                   </div>
                 </div>

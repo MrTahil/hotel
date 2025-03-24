@@ -4,7 +4,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 export const Foglalas = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { room } = location.state || {};
+  const { room, checkInDate: initialCheckInDate, checkOutDate: initialCheckOutDate } = location.state || {};
   const { id } = useParams();
 
   useEffect(() => {
@@ -22,9 +22,9 @@ export const Foglalas = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-
-  const [checkInDate, setCheckInDate] = useState("");
-  const [checkOutDate, setCheckOutDate] = useState("");
+  // Az átadott időpontokat használjuk alapértelmezettként
+  const [checkInDate, setCheckInDate] = useState(initialCheckInDate || "");
+  const [checkOutDate, setCheckOutDate] = useState(initialCheckOutDate || "");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [bookingError, setBookingError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,7 +34,6 @@ export const Foglalas = () => {
     setBookingError("");
     
     try {
-      // Alap validációk
       if (!checkInDate || !checkOutDate) {
         throw new Error("Kérjük töltsd ki mindkét dátum mezőt");
       }
@@ -47,7 +46,7 @@ export const Foglalas = () => {
         throw new Error("Válassz fizetési módot");
       }
 
-      const totalGuests = additionalGuests + 1; // Fővendég + többi
+      const totalGuests = additionalGuests + 1;
 
       const bookingData = {
         GuestId: mainGuest,
@@ -72,7 +71,6 @@ export const Foglalas = () => {
         throw new Error(errorData.message || "Hiba a foglalás során");
       }
 
-      // Sikeres foglalás
       navigate("/", {
         state: {
           success: true,
@@ -88,7 +86,6 @@ export const Foglalas = () => {
     }
   };
 
-  // Dátum validációkhoz segédfüggvények
   const getMinCheckoutDate = () => {
     if (!checkInDate) return "";
     const minDate = new Date(checkInDate);
@@ -96,13 +93,6 @@ export const Foglalas = () => {
     return minDate.toISOString().split("T")[0];
   };
 
-
-
-
-
-
-
-  // Vendégadatok lekérése
   useEffect(() => {
     const fetchGuests = async () => {
       const username = localStorage.getItem('username');
@@ -119,22 +109,19 @@ export const Foglalas = () => {
         if (!response.ok) throw new Error('Nem sikerült lekérni a vendégeket');
         
         const data = await response.json();
-        
-        // Ha az adat nem tömb, akkor tömbbé alakítjuk
         const guestsArray = Array.isArray(data) ? data : [data];
         
-        setSavedGuests(guestsArray); // Tömb beállítása
+        setSavedGuests(guestsArray);
         if (guestsArray.length > 0) setMainGuest(guestsArray[0].guestId);
       } catch (error) {
         console.error('Hiba a vendégek lekérésekor:', error);
-        setSavedGuests([]); // Üres tömb beállítása hiba esetén
+        setSavedGuests([]);
       }
     };
   
     fetchGuests();
   }, []);
 
-  // Kényelmi szolgáltatások
   useEffect(() => {
     const fetchAmenities = async () => {
       setLoading(true);
@@ -164,7 +151,7 @@ export const Foglalas = () => {
   };
 
   const calculateTotalPrice = () => {
-    if (!room?.pricePerNight) return 0;
+    if (!room?.pricePerNight || !checkInDate || !checkOutDate) return 0;
     
     const basePrice = room.pricePerNight;
     const selectedGuest = savedGuests.find(g => g.guestId === mainGuest);
@@ -178,33 +165,29 @@ export const Foglalas = () => {
       'felnott': 0
     };
 
-    const mainGuestPrice = basePrice * (1 - (discounts[guestType] || 0));
-    const additionalPrice = additionalGuests * basePrice;
+    const nights = Math.ceil((new Date(checkOutDate) - new Date(checkInDate)) / (1000 * 3600 * 24));
+    const mainGuestPrice = basePrice * (1 - (discounts[guestType] || 0)) * nights;
+    const additionalPrice = additionalGuests * basePrice * nights;
     
     return mainGuestPrice + additionalPrice;
   };
 
-
-
   return (
- 
-      <div id="webcrumbs">
+    <div id="webcrumbs">
       <div className="w-full max-w-[1200px] mx-auto bg-gradient-to-b from-blue-50 to-blue-100 font-sans">
         <section className="py-6 md:py-10 px-4 md:px-8">
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Bal oldali tartalom (2/3 széles) */}
             <div className="w-full lg:w-2/3">
               <h2 className="text-3xl md:text-4xl font-bold text-blue-800 mb-4 md:mb-6">
-                {room.roomType || "Deluxe Panoráma Szoba"}
+                {room?.roomType || "Deluxe Panoráma Szoba"}
               </h2>
 
-              {/* Szoba kép */}
               <div className="bg-white rounded-xl overflow-hidden shadow-lg mb-6 transform hover:scale-[1.01] transition-transform duration-300">
                 <div className="relative h-[300px] md:h-[400px]">
                   <div className="absolute inset-0 flex">
                     <img
                       src={
-                        room.images ||
+                        room?.images ||
                         "https://images.unsplash.com/photo-1566665797739-1674de7a421a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2574&q=80"
                       }
                       alt="Deluxe szoba"
@@ -219,7 +202,6 @@ export const Foglalas = () => {
                 </div>
               </div>
 
-              {/* További képek (grid reszponzív) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                 <img
                   src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80"
@@ -238,13 +220,12 @@ export const Foglalas = () => {
                 />
               </div>
 
-              {/* Szoba leírása */}
               <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg mb-6">
                 <h3 className="text-2xl font-bold text-blue-700 mb-4">
                   Szoba leírása
                 </h3>
                 <p className="text-gray-700 mb-4">
-                  {room.description ||
+                  {room?.description ||
                     "A 45 négyzetméteres Deluxe Panoráma Szobánk modern eleganciát kínál gyönyörű panorámával a városra. A kényelmet a luxus matracokkal felszerelt king-size ágy biztosítja, míg a tágas fürdőszoba esőzuhannyal és prémium piperecikkekkel várja."}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
@@ -267,9 +248,7 @@ export const Foglalas = () => {
               </div>
             </div>
 
-            {/* Jobb oldali űrlap (1/3 széles) */}
             <div className="w-full lg:w-1/3">
-              {/* Alap foglaló (reszponzív dropdown) */}
               <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg mb-6 border-t-4 border-blue-600">
                 <h3 className="text-2xl font-bold text-blue-700 mb-4">Alap foglaló</h3>
                 <div className="mb-4 relative">
@@ -318,8 +297,7 @@ export const Foglalas = () => {
                 </div>
               </div>
 
-              {/* További vendégek (csak ha a szoba kapacitása > 1) */}
-              {room.capacity > 1 && (
+              {room?.capacity > 1 && (
                 <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg mb-6 border-t-4 border-blue-600">
                   <h3 className="text-2xl font-bold text-blue-700 mb-4">
                     További vendégek
@@ -342,7 +320,7 @@ export const Foglalas = () => {
                 </div>
               )}
 
-<div className="bg-white rounded-xl p-4 md:p-6 shadow-lg border-t-4 border-blue-600 mb-6">
+              <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg border-t-4 border-blue-600 mb-6">
                 <h3 className="text-2xl font-bold text-blue-700 mb-4">Időpontok</h3>
                 
                 <div className="space-y-4">
@@ -375,7 +353,6 @@ export const Foglalas = () => {
                 </div>
               </div>
 
-              {/* Fizetési mód */}
               <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg border-t-4 border-blue-600 mb-6">
                 <h3 className="text-2xl font-bold text-blue-700 mb-4">Fizetési mód</h3>
                 <select
@@ -390,7 +367,6 @@ export const Foglalas = () => {
                 </select>
               </div>
 
-              {/* Összegzés és hibaüzenet */}
               <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg border-t-4 border-blue-600 space-y-4 mb-6">
                 {bookingError && (
                   <div className="p-3 bg-red-100 text-red-700 rounded-lg">
@@ -401,7 +377,7 @@ export const Foglalas = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-700">Alapár/éj:</span>
-                    <span className="font-semibold">{room.pricePerNight} Ft</span>
+                    <span className="font-semibold">{room?.pricePerNight} Ft</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-700">Éjszakák száma:</span>
@@ -433,7 +409,6 @@ export const Foglalas = () => {
                 </button>
               </div>
 
-              {/* További szolgáltatások */}
               <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg">
                 <h3 className="text-2xl font-bold text-blue-700 mb-4">
                   További szolgáltatások
