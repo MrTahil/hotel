@@ -47,16 +47,12 @@ namespace HMZ_rt.Controllers
                 {
                     string imagePath = "";
 
-                    // Kép feltöltése, ha van
                     if (crtdto.ImageFile != null && crtdto.ImageFile.Length > 0)
                     {
-                        // Egyedi fájlnév generálása
                         string fileName = Guid.NewGuid().ToString() + Path.GetExtension(crtdto.ImageFile.FileName);
 
-                        // Feltöltési útvonal meghatározása (ezt a mappát létre kell hozni)
                         string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "events");
 
-                        // Ha nem létezik, létrehozza a mappát
                         if (!Directory.Exists(uploadsFolder))
                         {
                             Directory.CreateDirectory(uploadsFolder);
@@ -64,13 +60,11 @@ namespace HMZ_rt.Controllers
 
                         string filePath = Path.Combine(uploadsFolder, fileName);
 
-                        // Fájl mentése
                         using (var fileStream = new FileStream(filePath, FileMode.Create))
                         {
                             await crtdto.ImageFile.CopyToAsync(fileStream);
                         }
 
-                        // Relatív útvonal mentése az adatbázisba
                         imagePath = "/images/events/" + fileName;
                     }
 
