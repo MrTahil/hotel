@@ -36,15 +36,44 @@ namespace HMZ_rt.Controllers
             }
         }
 
-               [Authorize(Roles = "Admin,System,Recept")]
+        [Authorize(Roles = "Admin,System,Recept")]
         [HttpPost("CreateEvent")]
-        public async Task<ActionResult<Event>> Createevent(CreateEvent crtdto)
+        public async Task<ActionResult<Event>> Createevent([FromForm] CreateEvent crtdto)
         {
             try
             {
                 var existing = await _context.Events.FirstOrDefaultAsync(x => x.EventName == crtdto.EventName);
                 if (existing == null)
                 {
+                    string imagePath = "";
+
+                    // Kép feltöltése, ha van
+                    if (crtdto.ImageFile != null && crtdto.ImageFile.Length > 0)
+                    {
+                        // Egyedi fájlnév generálása
+                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(crtdto.ImageFile.FileName);
+
+                        // Feltöltési útvonal meghatározása (ezt a mappát létre kell hozni)
+                        string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "events");
+
+                        // Ha nem létezik, létrehozza a mappát
+                        if (!Directory.Exists(uploadsFolder))
+                        {
+                            Directory.CreateDirectory(uploadsFolder);
+                        }
+
+                        string filePath = Path.Combine(uploadsFolder, fileName);
+
+                        // Fájl mentése
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await crtdto.ImageFile.CopyToAsync(fileStream);
+                        }
+
+                        // Relatív útvonal mentése az adatbázisba
+                        imagePath = "/images/events/" + fileName;
+                    }
+
                     var news = new Event
                     {
                         EventName = crtdto.EventName,
@@ -57,23 +86,24 @@ namespace HMZ_rt.Controllers
                         ContactInfo = crtdto.ContactInfo,
                         DateAdded = DateTime.Now,
                         Price = crtdto.Price,
-                        Images = ""
-                        
+                        Images = imagePath
                     };
-                    if (news != null) { 
-                         _context.Events.Add(news);
+
+                    if (news != null)
+                    {
+                        _context.Events.Add(news);
                         await _context.SaveChangesAsync();
                         return StatusCode(201, "Sikeres mentés");
-                    } return StatusCode(404, "Valami üres");
-                } return StatusCode(201);
+                    }
+                    return StatusCode(404, "Valami üres");
+                }
+                return StatusCode(201);
             }
             catch (Exception ex)
             {
-
                 return StatusCode(500, ex);
             }
         }
-
 
 
         [Authorize(Roles = "Admin,System,Recept")]

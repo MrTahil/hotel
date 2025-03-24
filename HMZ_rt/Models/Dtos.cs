@@ -234,22 +234,33 @@ public class CreateEvent
 {
     [Required(ErrorMessage = "Kapacitás megadása kötelező!")]
     public int? Capacity { get; set; }
+
     [Required(ErrorMessage = "A státusz megadása kötelező!")]
     public string? Status { get; set; }
+
     [Required(ErrorMessage = "Az esemény nem szerepelhet név nélkül")]
     public string? EventName { get; set; }
-    [Required(ErrorMessage = "Az esemény időpontjának megadásakötelező!")]
+
+    [Required(ErrorMessage = "Az esemény időpontjának megadása kötelező!")]
     public DateTime? EventDate { get; set; }
+
     [Required(ErrorMessage = "A hely megadása kötelező!")]
     public string? Location { get; set; }
-    [Required(ErrorMessage = "A leírás megadásakötelező!")]
+
+    [Required(ErrorMessage = "A leírás megadása kötelező!")]
     public string? Description { get; set; }
+
     [Required(ErrorMessage = "Szervező nevének megadása kötelező!")]
     public string? OrganizerName { get; set; }
+
     [Required(ErrorMessage = "A kontaktinfó megadása kötelező")]
     public string? ContactInfo { get; set; }
+
     [Required(ErrorMessage = "Az ár megadása kötelező!")]
     public decimal? Price { get; set; }
+
+    [DataType(DataType.Upload)]
+    public IFormFile? ImageFile { get; set; }
 }
 public class UpdateEvent
 {
