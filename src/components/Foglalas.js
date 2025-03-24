@@ -65,7 +65,7 @@ export const Foglalas = () => {
       }
 
       // Sikeres foglalás
-      navigate("/foglalasok", {
+      navigate("/", {
         state: {
           success: true,
           message: "Foglalásodat rögzítettük! Hamarosan emailt kapsz visszaigazolással."

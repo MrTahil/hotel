@@ -22,19 +22,16 @@ const ProfilePage = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [deletePassword, setDeletePassword] = useState('');
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        
-        // 1. Token lekérése
         const token = localStorage.getItem('authToken');
-        console.log('Token értéke:', token); // Debug
         if (!token) {
           throw new Error('Nincs token elmentve! Jelentkezz be újra.');
         }
-            console.log(token)
-        // 2. Kérés küldése
+
         const response = await fetch(`https://localhost:7047/UserAccounts/GetOneUserData/${localStorage.getItem('username')}`, {
           method: 'GET',
           headers: {
@@ -43,7 +40,6 @@ const ProfilePage = () => {
           },
         });
 
-        // 3. Hibakezelés
         if (response.status === 401) {
           throw new Error('Token érvénytelen vagy lejárt!');
         }
@@ -52,10 +48,7 @@ const ProfilePage = () => {
           throw new Error(`HTTP hiba! Státusz: ${response.status}`);
         }
 
-        // 4. Adatok feldolgozása
         const data = await response.json();
-        console.log('Szerver válasza:', data);
-
         setUser(prev => ({
           ...prev,
           username: data.username,
@@ -63,14 +56,11 @@ const ProfilePage = () => {
           userId: data.userId,
           role: data.role,
           dateCreated: new Date(data.dateCreated).toLocaleDateString('hu-HU'),
-          // ... egyéb mezők
         }));
 
       } catch (error) {
         console.error('Hiba történt:', error.message);
         setError(error.message);
-        
-        // Átirányítás bejelentkezésre
         if (error.message.includes('token') || error.message.includes('401')) {
           window.location.href = '/login';
         }
@@ -82,22 +72,61 @@ const ProfilePage = () => {
     fetchUserData();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="bg-blue-50 min-h-screen p-6 sm:p-8 flex items-center justify-center">
-        <div className="text-blue-800 text-xl">Adatok betöltése...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-blue-50 min-h-screen p-6 sm:p-8 flex items-center justify-center">
-        <div className="text-red-600 text-xl">{error}</div>
-      </div>
-    );
-  }
-
+  const handleDeleteAccount = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.error('❌ Nincs token elmentve! Jelentkezz be újra.');
+        throw new Error('Nincs token elmentve! Jelentkezz be újra.');
+      }
+  
+      const username = localStorage.getItem('username');
+      if (!username) {
+        console.error('❌ Nincs felhasználónév elmentve!');
+        throw new Error('Nincs felhasználónév elmentve!');
+      }
+  
+      console.log(`🔄 Törlési kérés indítása a következő felhasználónévvel: ${username}`);
+  
+      const response = await fetch(`https://localhost:7047/UserAccounts/DeleteUserByUsername/${username}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ Password: deletePassword }), // A jelszó küldése a megfelelő formátumban
+      });
+  
+      console.log(`📡 HTTP státusz: ${response.status}`);
+  
+      // Ellenőrizzük az állapotkódokat és naplózzuk
+      if (response.status === 401) {
+        console.error('❌ Token érvénytelen vagy lejárt!');
+        throw new Error('Token érvénytelen vagy lejárt!');
+      }
+  
+      if (response.status === 404) {
+        console.error('❌ Felhasználó nem található!');
+        throw new Error('Felhasználó nem található!');
+      }
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ Hiba történt:', errorData);
+        throw new Error(errorData.message || `HTTP hiba! Státusz: ${response.status}`);
+      }
+  
+      console.log('✅ Fiók sikeresen törölve!');
+  
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('username');
+      window.location.href = '/';
+  
+    } catch (error) {
+      console.error('🚨 Hiba történt a fiók törlése közben:', error.message);
+      setError(error.message);
+    }
+  };
   return (
     <div className="bg-blue-50 min-h-screen p-6 sm:p-8">
       <div className="max-w-4xl mx-auto">
@@ -292,46 +321,50 @@ const ProfilePage = () => {
           </details>
         </div>
         
-        {/* Fiók törlés szekció */}
-        <div className="border-t border-blue-200 pt-6 sm:pt-8 mt-6 sm:mt-8">
-          <div className="bg-red-50 p-4 sm:p-6 rounded-lg border border-red-200">
-            <h2 className="text-lg sm:text-xl font-semibold text-red-600 mb-2 flex items-center">
-              <span className="material-symbols-outlined mr-2">warning</span>
-              Fiók törlése
-            </h2>
-            <p className="text-xs sm:text-sm text-blue-700 mb-4">
-              A fiók törlése végleges művelet, és nem vonható vissza. Az összes adat, beleértve a mentett vendég adatokat is, véglegesen törlődni fog.
-            </p>
-            <details className="group">
-              <summary className="list-none cursor-pointer">
-                <button className="px-4 sm:px-5 py-2 bg-white text-red-600 border border-red-300 rounded-lg hover:bg-red-100 transition-colors flex items-center">
-                  <span className="material-symbols-outlined mr-2">delete_forever</span>
-                  Fiók törlése
-                </button>
-              </summary>
-              <div className="mt-4 p-3 sm:p-4 bg-white border border-red-200 rounded-lg animate-[fadeIn_0.2s_ease-in-out]">
-                <p className="font-medium text-red-600 mb-4 text-sm sm:text-base">Biztosan törölni szeretné a fiókját? Ez a művelet nem visszavonható.</p>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1 text-blue-800" htmlFor="confirm-delete">Írja be a jelszavát a megerősítéshez:</label>
-                  <input
-                    type="password"
-                    id="confirm-delete"
-                    className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
-                    placeholder="Jelszó"
-                  />
-                </div>
-                <button
-                  type="button"
-                  className="w-full md:w-auto bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-red-700 transform hover:scale-105 transition-all duration-200"
-                >
-                  Végleges törlés
-                </button>
-              </div>
-            </details>
-          </div>
+{/* Fiók törlés szekció */}
+<div className="border-t border-blue-200 pt-6 sm:pt-8 mt-6 sm:mt-8">
+  <div className="bg-red-50 p-4 sm:p-6 rounded-lg border border-red-200">
+    <h2 className="text-lg sm:text-xl font-semibold text-red-600 mb-2 flex items-center">
+      <span className="material-symbols-outlined mr-2">warning</span>
+      Fiók törlése
+    </h2>
+    <p className="text-xs sm:text-sm text-blue-700 mb-4">
+      A fiók törlése végleges művelet, és nem vonható vissza. Az összes adat, beleértve a mentett vendég adatokat is, véglegesen törlődni fog.
+    </p>
+    <details className="group">
+      <summary className="list-none cursor-pointer flex items-center">
+        <span className="material-symbols-outlined mr-2">delete_forever</span>
+        <span>Fiók törlése</span>
+      </summary>
+      <div className="mt-4 p-3 sm:p-4 bg-white border border-red-200 rounded-lg animate-[fadeIn_0.2s_ease-in-out]">
+        <p className="font-medium text-red-600 mb-4 text-sm sm:text-base">Biztosan törölni szeretné a fiókját? Ez a művelet nem visszavonható.</p>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1 text-blue-800" htmlFor="confirm-delete">Írja be a jelszavát a megerősítéshez:</label>
+          <input
+            type="password"
+            id="confirm-delete"
+            className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
+            placeholder="Jelszó"
+            value={deletePassword}
+            onChange={(e) => setDeletePassword(e.target.value)}
+          />
         </div>
+        <button
+          type="button"
+          className="w-full md:w-auto bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-red-700 transform hover:scale-105 transition-all duration-200"
+          onClick={() => {
+            console.log("❗ Gombra nyomtam!");
+            handleDeleteAccount();
+          }}
+        >
+          Végleges törlés
+        </button>
       </div>
-    </div>
+    </details>
+  </div>
+</div>
+</div>
+</div>
   );
 };
 
