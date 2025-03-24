@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-regular-svg-icons";
@@ -14,7 +14,6 @@ function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
-    const menuRef = useRef(null); // Ref a legördülő menühöz
 
     const closeModal = () => setActiveModal(null);
 
@@ -29,28 +28,22 @@ function Navbar() {
                 setIsMobileMenuOpen(false);
             }
         };
-
-        const handleClickOutside = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
-                setMenuOpen(false); // Menü bezárása, ha a menün kívülre kattintanak
-            }
-        };
-
+        
         window.addEventListener('resize', handleResize);
-        document.addEventListener('mousedown', handleClickOutside); // Eseményfigyelő a kikattintáshoz
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     const handleLogout = () => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('username');
         setUser(null);
-        setMenuOpen(false);
+        setMenuOpen(false); // Menü bezárása kijelentkezéskor
         setShowProfileModal(false);
         navigate('/'); // React Router navigáció a főoldalra
+    };
+
+    const handleMenuItemClick = () => {
+        setMenuOpen(false); // Menü bezárása minden kattintáskor
     };
 
     return (
@@ -58,15 +51,7 @@ function Navbar() {
             <nav className="sticky top-0 bg-gradient-to-r from-blue-900 to-blue-800 shadow-lg w-full z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
                     <div className="flex items-center space-x-4">
-                        <img
-                            src="../logo.png"
-                            alt="Logó"
-                            className='h-9 rounded-lg shadow-lg'
-                            style={{
-                                maskImage: "radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)",
-                                WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)"
-                            }}
-                        />
+                        <img src="../logo.png" alt="Logó" className='h-9 rounded-lg shadow-lg' style={{ maskImage: "radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)" }}/>
                         
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -102,7 +87,7 @@ function Navbar() {
                         </NavLink>
                     </div>
                     
-                    <div className="relative" ref={menuRef}>
+                    <div className="relative">
                         <button 
                             onClick={() => setMenuOpen(!menuOpen)} 
                             className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
@@ -113,13 +98,16 @@ function Navbar() {
                             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2">
                                 {user ? (
                                     <>
-                                        <Link to="/profile" onClick={() => setMenuOpen(false)}>
+                                        <Link to="/profile" onClick={handleMenuItemClick}>
                                             <button className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700">
                                                 Profil megnyitása
                                             </button>
                                         </Link>
                                         <button 
-                                            onClick={handleLogout} 
+                                            onClick={() => {
+                                                handleLogout();
+                                                handleMenuItemClick();
+                                            }} 
                                             className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
                                         >
                                             Kijelentkezés
@@ -130,7 +118,7 @@ function Navbar() {
                                         <button 
                                             onClick={() => { 
                                                 setActiveModal('login'); 
-                                                setMenuOpen(false); 
+                                                handleMenuItemClick(); 
                                             }} 
                                             className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
                                         >
@@ -139,7 +127,7 @@ function Navbar() {
                                         <button 
                                             onClick={() => { 
                                                 setActiveModal('register'); 
-                                                setMenuOpen(false); 
+                                                handleMenuItemClick(); 
                                             }} 
                                             className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
                                         >

@@ -3,25 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState({
-    username: '',
-    email: '',
-    profileImage: 'https://randomuser.me/api/portraits/men/42.jpg',
-    registrationDate: '2023. szeptember 15.',
-    userId: 0,
-    password: '',
-    role: '',
-    refreshToken: '',
-    refreshTokenExpiryTime: '',
-    status: '',
-    dateCreated: '',
-    lastLogin: '',
-    dateUpdated: '',
-    notes: '',
-    authenticationcode: '',
-    authenticationexpire: '',
-  });
-
+  const [user, setUser] = useState(null); // Inicializálás null-ra
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deletePassword, setDeletePassword] = useState('');
@@ -65,14 +47,14 @@ const ProfilePage = () => {
         }
 
         const data = await response.json();
-        setUser(prev => ({
-          ...prev,
+        setUser({
           username: data.username,
           email: data.email,
+          profileImage: data.profileImage || 'https://randomuser.me/api/portraits/men/42.jpg',
           userId: data.userId,
           role: data.role,
           dateCreated: new Date(data.dateCreated).toLocaleDateString('hu-HU'),
-        }));
+        });
       } catch (error) {
         console.error('Hiba történt:', error.message);
         setError(error.message);
@@ -178,7 +160,7 @@ const ProfilePage = () => {
         throw new Error('Nincs token elmentve! Jelentkezz be újra.');
       }
 
-      if (!user.userId) {
+      if (!user?.userId) {
         throw new Error('Felhasználói azonosító nem található!');
       }
 
@@ -338,8 +320,21 @@ const ProfilePage = () => {
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('username');
-    navigate('/');
+    setUser(null); // Felhasználói állapot nullázása
+    navigate('/'); // Átirányítás a főoldalra
   };
+
+  if (loading) {
+    return <div className="bg-blue-50 min-h-screen p-6 sm:p-8">Betöltés...</div>;
+  }
+
+  if (error) {
+    return <div className="bg-blue-50 min-h-screen p-6 sm:p-8">Hiba: {error}</div>;
+  }
+
+  if (!user) {
+    return null; // Ha nincs user (pl. kijelentkezés után), ne rendereljen semmit
+  }
 
   return (
     <div className="bg-blue-50 min-h-screen p-6 sm:p-8">
@@ -552,7 +547,7 @@ const ProfilePage = () => {
                 
                 <button
                   type="submit"
-                  className="w-full md:w-auto bg-indigo-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-indigo-700 transform hover:scale-105 transition-all duration-200"
+                  className="w-full md:w-auto bg-indigo-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-indigo-700 transform hover:scale-105 transitionomba-all duration-200"
                 >
                   Visszaállítási link küldése
                 </button>
