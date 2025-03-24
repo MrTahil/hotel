@@ -21,13 +21,23 @@ export const Foglalas = () => {
   const [amenities, setAmenities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  // Az átadott időpontokat használjuk alapértelmezettként
   const [checkInDate, setCheckInDate] = useState(initialCheckInDate || "");
   const [checkOutDate, setCheckOutDate] = useState(initialCheckOutDate || "");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [bookingError, setBookingError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showGuestModal, setShowGuestModal] = useState(false);
+  const [guestData, setGuestData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    address: '',
+    city: '',
+    country: '',
+    dateOfBirth: '',
+    gender: '',
+  });
 
   const handleBooking = async () => {
     setIsSubmitting(true);
@@ -112,7 +122,7 @@ export const Foglalas = () => {
         const guestsArray = Array.isArray(data) ? data : [data];
         
         setSavedGuests(guestsArray);
-        if (guestsArray.length > 0) setMainGuest(guestsArray[0].guestId);
+        if (guestsArray.length > 0 && !mainGuest) setMainGuest(guestsArray[0].guestId);
       } catch (error) {
         console.error('Hiba a vendégek lekérésekor:', error);
         setSavedGuests([]);
@@ -120,7 +130,7 @@ export const Foglalas = () => {
     };
   
     fetchGuests();
-  }, []);
+  }, [mainGuest]);
 
   useEffect(() => {
     const fetchAmenities = async () => {
@@ -170,6 +180,72 @@ export const Foglalas = () => {
     const additionalPrice = additionalGuests * basePrice * nights;
     
     return mainGuestPrice + additionalPrice;
+  };
+
+  const handleAddGuest = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Nincs token elmentve! Jelentkezz be újra.');
+      }
+
+      const username = localStorage.getItem('username');
+      const userResponse = await fetch(`https://localhost:7047/UserAccounts/GetOneUserData/${username}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const userData = await userResponse.json();
+      const userId = userData.userId;
+
+      if (!userId) {
+        throw new Error('Felhasználói azonosító nem található!');
+      }
+
+      if (!guestData.firstName || !guestData.lastName || !guestData.dateOfBirth) {
+        throw new Error('A vezetéknév, keresztnév és születési dátum megadása kötelező!');
+      }
+
+      const payload = {
+        ...guestData,
+        userId: userId,
+        dateOfBirth: guestData.dateOfBirth ? new Date(guestData.dateOfBirth).toISOString() : null,
+      };
+
+      const response = await fetch('https://localhost:7047/Guests/Addnewguest', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Hiba a vendég hozzáadása során: ${errorText}`);
+      }
+
+      const newGuest = await response.json();
+      setSavedGuests([...savedGuests, newGuest]);
+      setMainGuest(newGuest.guestId);
+      setShowGuestModal(false);
+      setGuestData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phoneNumber: '',
+        address: '',
+        city: '',
+        country: '',
+        dateOfBirth: '',
+        gender: '',
+      });
+      setError(null);
+      alert('Vendég sikeresen hozzáadva!');
+    } catch (err) {
+      console.error('Hiba a vendég hozzáadása közben:', err.message);
+      setError(err.message);
+    }
   };
 
   return (
@@ -254,7 +330,13 @@ export const Foglalas = () => {
                 <div className="mb-4 relative">
                   <select
                     value={mainGuest || ""}
-                    onChange={(e) => setMainGuest(Number(e.target.value))}
+                    onChange={(e) => {
+                      if (e.target.value === "new") {
+                        setShowGuestModal(true);
+                      } else {
+                        setMainGuest(Number(e.target.value));
+                      }
+                    }}
                     className="w-full p-2 md:p-3 lg:p-4 text-sm md:text-base lg:text-lg pl-4 pr-10 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white cursor-pointer"
                   >
                     <option value="" disabled className="text-gray-400">
@@ -450,6 +532,139 @@ export const Foglalas = () => {
           </div>
         </section>
       </div>
+
+      {showGuestModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl">
+            <h3 className="text-xl font-semibold text-blue-800 mb-4">
+              Új vendég hozzáadása
+            </h3>
+            <form onSubmit={handleAddGuest} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-blue-800">Vezetéknév</label>
+                  <input
+                    type="text"
+                    value={guestData.lastName}
+                    onChange={(e) => setGuestData({ ...guestData, lastName: e.target.value })}
+                    className="w-full p-2 border border-blue-200 rounded-lg"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-blue-800">Keresztnév</label>
+                  <input
+                    type="text"
+                    value={guestData.firstName}
+                    onChange={(e) => setGuestData({ ...guestData, firstName: e.target.value })}
+                    className="w-full p-2 border border-blue-200 rounded-lg"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-blue-800">Email</label>
+                  <input
+                    type="email"
+                    value={guestData.email}
+                    onChange={(e) => setGuestData({ ...guestData, email: e.target.value })}
+                    className="w-full p-2 border border-blue-200 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-blue-800">Telefonszám</label>
+                  <input
+                    type="text"
+                    value={guestData.phoneNumber}
+                    onChange={(e) => setGuestData({ ...guestData, phoneNumber: e.target.value })}
+                    className="w-full p-2 border border-blue-200 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-blue-800">Születési dátum</label>
+                  <input
+                    type="date"
+                    value={guestData.dateOfBirth}
+                    onChange={(e) => setGuestData({ ...guestData, dateOfBirth: e.target.value })}
+                    className="w-full p-2 border border-blue-200 rounded-lg"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-blue-800">Cím</label>
+                  <input
+                    type="text"
+                    value={guestData.address}
+                    onChange={(e) => setGuestData({ ...guestData, address: e.target.value })}
+                    className="w-full p-2 border border-blue-200 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-blue-800">Város</label>
+                  <input
+                    type="text"
+                    value={guestData.city}
+                    onChange={(e) => setGuestData({ ...guestData, city: e.target.value })}
+                    className="w-full p-2 border border-blue-200 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-blue-800">Ország</label>
+                  <input
+                    type="text"
+                    value={guestData.country}
+                    onChange={(e) => setGuestData({ ...guestData, country: e.target.value })}
+                    className="w-full p-2 border border-blue-200 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-blue-800">Nem</label>
+                  <select
+                    value={guestData.gender}
+                    onChange={(e) => setGuestData({ ...guestData, gender: e.target.value })}
+                    className="w-full p-2 border border-blue-200 rounded-lg"
+                  >
+                    <option value="">Válasszon</option>
+                    <option value="Férfi">Férfi</option>
+                    <option value="Nő">Nő</option>
+                    <option value="Egyéb">Egyéb</option>
+                  </select>
+                </div>
+              </div>
+              <div className="sm:col-span-2 flex gap-2 justify-end mt-4">
+                <button
+                  type="submit"
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                >
+                  Hozzáadás
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowGuestModal(false);
+                    setGuestData({
+                      firstName: '',
+                      lastName: '',
+                      email: '',
+                      phoneNumber: '',
+                      address: '',
+                      city: '',
+                      country: '',
+                      dateOfBirth: '',
+                      gender: '',
+                    });
+                  }}
+                  className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                >
+                  Mégse
+                </button>
+              </div>
+            </form>
+            {error && <p className="text-red-600 mt-2">{error}</p>}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

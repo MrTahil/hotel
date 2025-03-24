@@ -28,6 +28,46 @@ function RoomCard() {
     fetchRooms();
   }, []);
 
+  // Mai dátum lekérése YYYY-MM-DD formátumban
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
+  // Minimális távozási dátum kiszámítása (érkezés + 2 nap)
+  const getMinCheckOutDate = () => {
+    if (!checkInDate) return getTodayDate();
+    const checkIn = new Date(checkInDate);
+    checkIn.setDate(checkIn.getDate() + 2); // Minimum 2 nap eltérés
+    return checkIn.toISOString().split('T')[0];
+  };
+
+  // Érkezés dátum változásának kezelése
+  const handleCheckInChange = (e) => {
+    const newCheckInDate = e.target.value;
+    setCheckInDate(newCheckInDate);
+
+    // Ha a távozási dátum kisebb, mint az érkezés + 2 nap, akkor frissítjük
+    const minCheckOut = new Date(newCheckInDate);
+    minCheckOut.setDate(minCheckOut.getDate() + 2);
+    if (checkOutDate && new Date(checkOutDate) < minCheckOut) {
+      setCheckOutDate(minCheckOut.toISOString().split('T')[0]);
+    }
+  };
+
+  // Távozás dátum változásának kezelése
+  const handleCheckOutChange = (e) => {
+    const newCheckOutDate = e.target.value;
+    const minCheckOut = new Date(checkInDate);
+    minCheckOut.setDate(minCheckOut.getDate() + 2);
+
+    if (new Date(newCheckOutDate) >= minCheckOut) {
+      setCheckOutDate(newCheckOutDate);
+    } else {
+      setCheckOutDate(minCheckOut.toISOString().split('T')[0]);
+    }
+  };
+
   const handleSearch = async () => {
     try {
       const response = await fetch('https://localhost:7047/Rooms/Searchwithparams', {
@@ -51,9 +91,8 @@ function RoomCard() {
   const handleBookingClick = (roomId, room) => {
     const token = localStorage.getItem('authToken');
     if (!token) {
-      setShowLoginModal(true); // Login modál megjelenítése
+      setShowLoginModal(true);
     } else {
-      // Átadjuk a checkInDate és checkOutDate értékeket a Foglalas oldalnak
       navigate(`/Foglalas/${roomId}`, { 
         state: { 
           room, 
@@ -90,22 +129,38 @@ function RoomCard() {
           onSubmit={(e) => e.preventDefault()}
         >
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {[['Érkezés', checkInDate, setCheckInDate], ['Távozás', checkOutDate, setCheckOutDate]].map(([label, value, setter]) => (
-              <div className="space-y-2 relative" key={label}>
-                <label className="block text-sm font-medium text-gray-600">{label}</label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border-0 bg-gray-50/70 shadow-sm text-gray-700 font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-                    value={value}
-                    onChange={(e) => setter(e.target.value)}
-                  />
-                  <svg className="w-5 h-5 absolute left-3 top-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                  </svg>
-                </div>
+            <div className="space-y-2 relative">
+              <label className="block text-sm font-medium text-gray-600">Érkezés</label>
+              <div className="relative">
+                <input
+                  type="date"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border-0 bg-gray-50/70 shadow-sm text-gray-700 font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                  value={checkInDate}
+                  onChange={handleCheckInChange}
+                  min={getTodayDate()} // Mai dátumtól lehet választani
+                />
+                <svg className="w-5 h-5 absolute left-3 top-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
               </div>
-            ))}
+            </div>
+
+            <div className="space-y-2 relative">
+              <label className="block text-sm font-medium text-gray-600">Távozás</label>
+              <div className="relative">
+                <input
+                  type="date"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border-0 bg-gray-50/70 shadow-sm text-gray-700 font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+                  value={checkOutDate}
+                  onChange={handleCheckOutChange}
+                  min={getMinCheckOutDate()} // Érkezés + 2 nap a minimum
+                  disabled={!checkInDate} // Távozás csak érkezés után választható
+                />
+                <svg className="w-5 h-5 absolute left-3 top-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+              </div>
+            </div>
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-600">Vendégek száma</label>
