@@ -47,6 +47,9 @@ namespace RoomListApp
         private bool isEditEvent = false;
         private int currentEventId = 0;
 
+        // Változók az EventBooking szerkesztési módhoz
+        private bool isEditEventBooking = false;
+        private int currentEditEventBookingId = 0;
 
         public MainWindow()
         {
@@ -3531,6 +3534,8 @@ namespace RoomListApp
             OrganizerNameTextBox.Text = string.Empty;
             ContactInfoTextBox.Text = string.Empty;
         }
+
+
 
     }
 }
