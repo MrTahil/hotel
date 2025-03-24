@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-regular-svg-icons";
 import RegisterModal from './RegisterModal';
@@ -8,6 +8,7 @@ import ProfileModal from './ProfileModal';
 import { Link } from 'react-router-dom';
 
 function Navbar() {
+    const navigate = useNavigate();
     const [activeModal, setActiveModal] = useState(null);
     const [user, setUser] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -38,6 +39,7 @@ function Navbar() {
         setUser(null);
         setMenuOpen(false);
         setShowProfileModal(false);
+        navigate('/'); // React Router navigáció a főoldalra
     };
 
     return (
@@ -79,7 +81,6 @@ function Navbar() {
                         <NavLink to="/rolunk" className={({ isActive }) => `text-white hover:text-blue-200 transition-colors ${isActive ? 'text-blue-200' : ''}`}>
                             Rólunk
                         </NavLink>
-
                     </div>
                     
                     <div className="relative">
@@ -94,7 +95,7 @@ function Navbar() {
                                 {user ? (
                                     <>
                                         <Link to="/profile">
-                                        <button className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700">Profil megnyitása</button>
+                                            <button className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700">Profil megnyitása</button>
                                         </Link>
                                         <button 
                                             onClick={handleLogout} 
@@ -130,7 +131,6 @@ function Navbar() {
                     </div>
                 </div>
 
-                {/* Mobile Menu */}
                 {isMobileMenuOpen && (
                     <div className="md:hidden absolute top-full left-0 w-full bg-gradient-to-r from-blue-900 to-blue-800 z-50">
                         <div className="px-4 py-2 space-y-2">
@@ -169,13 +169,11 @@ function Navbar() {
                             >
                                 Rólunk
                             </NavLink>
-                        
                         </div>
                     </div>
                 )}
             </nav>
 
-            {/* Modals */}
             {activeModal === 'register' && (
                 <RegisterModal 
                     onClose={closeModal} 

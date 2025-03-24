@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState({
     username: '',
     email: '',
@@ -75,7 +77,7 @@ const ProfilePage = () => {
         console.error('Hiba történt:', error.message);
         setError(error.message);
         if (error.message.includes('token') || error.message.includes('401')) {
-          window.location.href = '/login';
+          navigate('/login');
         }
       } finally {
         setLoading(false);
@@ -83,7 +85,7 @@ const ProfilePage = () => {
     };
 
     fetchUserData();
-  }, []);
+  }, [navigate]);
 
   const fetchGuests = async () => {
     try {
@@ -161,7 +163,7 @@ const ProfilePage = () => {
 
       localStorage.removeItem('authToken');
       localStorage.removeItem('username');
-      window.location.href = '/';
+      navigate('/');
     } catch (error) {
       console.error('Hiba történt a fiók törlése közben:', error.message);
       setError(error.message);
@@ -332,6 +334,13 @@ const ProfilePage = () => {
     }
   };
 
+  // Kijelentkezés funkció
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('username');
+    navigate('/');
+  };
+
   return (
     <div className="bg-blue-50 min-h-screen p-6 sm:p-8">
       <div className="max-w-4xl mx-auto">
@@ -344,6 +353,13 @@ const ProfilePage = () => {
             Vissza a főoldalra
           </button>
           <h1 className="text-2xl sm:text-3xl font-bold text-blue-800">Profil kezelése</h1>
+          <button
+            onClick={handleLogout}
+            className="flex items-center bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+          >
+            <span className="material-symbols-outlined mr-2">logout</span>
+            Kijelentkezés
+          </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 md:gap-8 mb-8">
@@ -591,7 +607,6 @@ const ProfilePage = () => {
                 {editGuestId ? 'Vendég szerkesztése' : 'Új vendég hozzáadása'}
               </h3>
               <form onSubmit={editGuestId ? handleUpdateGuest : handleAddGuest} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Bal oszlop (5 adat) */}
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-blue-800">Vezetéknév</label>
@@ -642,7 +657,6 @@ const ProfilePage = () => {
                     />
                   </div>
                 </div>
-                {/* Jobb oszlop (4 adat) */}
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-blue-800">Cím</label>
