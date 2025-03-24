@@ -541,5 +541,29 @@ namespace HMZ_rt.Controllers
             }
         }
 
+
+        [Authorize(Roles = "Admin,Base,Recept,System")]
+        [HttpGet("GetBookedDates/{roomid}")]
+        public async Task<ActionResult<Booking>> GetBookeddates(int roomid)
+        {
+            try
+            {
+                var booksdata = _context.Bookings.Where(x => x.RoomId == roomid);
+                if (booksdata != null)
+                {
+                  var data= await booksdata.Select(b => new { b.CheckInDate, b.CheckOutDate }).ToListAsync();
+
+                    return Ok(data);
+                } return StatusCode(404, "Nem található szoba");
+                
+       
+            }
+            catch ( Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
+        }
+
     }
 }

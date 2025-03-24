@@ -155,3 +155,40 @@ namespace HMZ_rt.Controllers
         }
     }
 }
+
+
+
+
+
+
+
+//public async Task<IActionResult> UploadProfilePicture(IFormFile file, [FromForm] string email)
+//{
+//    if (file == null || file.Length == 0)
+//    {
+//        return BadRequest("Nincs kiválasztott fájl.");
+//    }
+
+//    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "profile_pictures");
+//    if (!Directory.Exists(uploadsFolder))
+//    {
+//        Directory.CreateDirectory(uploadsFolder);
+//    }
+
+//    var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
+//    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+//    using (var stream = new FileStream(filePath, FileMode.Create))
+//    {
+//        await file.CopyToAsync(stream);
+//    }
+
+//    var imageUrl = $"/profile_pictures/{uniqueFileName}";
+
+
+//    user.ProfilePictureUrl = imageUrl;
+//    _context.users.Update(user);
+//    await _context.SaveChangesAsync();
+
+//    return Ok(new { imageUrl });
+//}

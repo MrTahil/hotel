@@ -11,6 +11,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Policy;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace HMZ_rt.Controllers
 {
@@ -299,29 +300,9 @@ namespace HMZ_rt.Controllers
             await _context.SaveChangesAsync();
         }
 
-        [HttpDelete("DeleteUserById/{InUserId}")]
-        public async Task<ActionResult<Useraccount>> DeleteAccount(int InUserId)
-        {
-            try
-            {
-                var user = await _context.Useraccounts
-                    .FirstOrDefaultAsync(x => x.UserId == InUserId);
-
-                if (user == null)
-                    return NotFound(new { message = "Felhasználó nem található" });
-
-                _context.Useraccounts.Remove(user);
-                await _context.SaveChangesAsync();
-                return Ok(new { message = "Sikeres törlés" });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Szerverhiba miatt sikertelen törlés" });
-            }
-        }
 
         [HttpDelete("DeleteUserByUsername/{Username}")]
-        public async Task<ActionResult<Useraccount>> DeleteAccountByName(string Username)
+        public async Task<ActionResult<Useraccount>> DeleteAccountByName(string Username, DeleteAccount ddto)
         {
             try
             {
@@ -330,10 +311,16 @@ namespace HMZ_rt.Controllers
 
                 if (user == null)
                     return NotFound(new { message = "Felhasználó nem található" });
-
-                _context.Useraccounts.Remove(user);
-                await _context.SaveChangesAsync();
-                return Ok(new { message = "Sikeres törlés" });
+                if (ddto != null) {
+                    return StatusCode(404, "Nem lehet üres a jelszó");
+                }
+                if (PasswordHasher.VerifyPassword(ddto.Password, user.Password))
+                {
+                    _context.Useraccounts.Remove(user);
+                    await _context.SaveChangesAsync();
+                    return Ok("Sikeres törlés");
+                } return BadRequest("Hibás jelszó");
+                
             }
             catch (Exception ex)
             {
@@ -504,8 +491,12 @@ namespace HMZ_rt.Controllers
             {
                 { if (user.Authenticationcode == "confirmed")
                     {
+                        if (PasswordHasher.VerifyPassword(frgdto.Password, user.Password))
+                        {
+                            return StatusCode(400, "Az új jelszavad nem eggyezhet a régivel.");
+                        }
                         user.Password = PasswordHasher.HashPassword(frgdto.Password);
-                        user.Authenticationcode = "000000";
+                        user.Authenticationcode = "activated";
                         _context.Useraccounts.Update(user);
                         await _context.SaveChangesAsync();
                         return StatusCode(201, new { message = "Sikeres jelszóváltoztatás!" });

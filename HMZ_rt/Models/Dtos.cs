@@ -374,3 +374,11 @@ public class SetNewPass
     [Required(ErrorMessage = "A régi jelszó megadása kötelező!")]
     public string? OldPassword { get; set; }
 }
+
+
+
+public class DeleteAccount
+{
+    [Required(ErrorMessage ="A jelszó megadása törléshez szükséges")]
+    public string Password { get; set; }
+}

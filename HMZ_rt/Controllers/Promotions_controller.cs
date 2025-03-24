@@ -110,8 +110,8 @@ namespace HMZ_rt.Controllers
                     return StatusCode(201, "Sikeres mentés!");
                 }
                 return StatusCode(418, "Ha ide jutsz az baj");
-            
-           
+
+            }
             catch (Exception ex)
             {
 
