@@ -10,7 +10,8 @@ import './index.css';
 import Footer from './components/Footer';
 import Services from './components/Services';
 import Foglalas from './components/Foglalas';
-import ProfilePage from './components/ProfileModal'; // Ha ProfileModal-t külön útvonalon akarod tartani
+import ProfilePage from './components/ProfileModal';
+import LoginModal from './components/LoginModal';
 
 function App() {
   return (
@@ -21,10 +22,11 @@ function App() {
           <Routes>
             <Route path="/" element={<Hero />} />
             <Route path="/szobak" element={<Rooms />} />
+            <Route path="/szobak/:roomId" element={<Foglalas />} /> {/* Changed from /foglalas/:id to match room navigation */}
             <Route path="/rolunk" element={<About />} />
             <Route path="/programok" element={<Programs />} />
             <Route path="/szolgaltatasok" element={<Services />} />
-            <Route path="/foglalas/:id" element={<Foglalas />} />
+            <Route path="/login" element={<LoginModal />} /> {/* Added login route */}
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<h1>404 - Az oldal nem található</h1>} />
           </Routes>

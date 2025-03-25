@@ -1,3 +1,4 @@
+/* Hero.css */
 .hero {
     background-image: url('https://www.santoriniview-hotel.gr/media/q3gdkrso/santorini-view-hotel-deluxe-double-panoramic-caldera-view-9.jpg?width=1920&height=1080&rnd=133330436406030000&quality=70');
     background-size: cover;
@@ -7,22 +8,52 @@
     padding: 100px 0;
     box-shadow: inset 0 0 200px rgba(0, 0, 0, 0.4);
 }
-.hero h1 {
-    font-size: 56px;
+
+/* Room cards container */
+.rooms-container {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 0 1rem;
+    margin: 0 auto;
+    max-width: 1200px;
 }
-.hero p {
-    font-size: 24px;
+
+/* Individual room card */
+.room-card {
+    flex: 0 0 calc(33.333% - 1rem);
+    transition: transform 0.3s ease;
 }
-.cta-button {
-    background-color: #01497C;
-    color: #fff;
-    padding: 15px 30px;
-    text-decoration: none;
-    font-size: 20px;
-    border-radius: 50px;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-.cta-button:hover {
-    background-color: #61A5C2;
+
+.room-card:hover {
     transform: scale(1.05);
+    z-index: 10;
+}
+
+/* Image styling */
+.room-image {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .room-card {
+        flex: 0 0 calc(50% - 1rem);
+    }
+}
+
+@media (max-width: 640px) {
+    .rooms-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .room-card {
+        flex: 0 0 100%;
+        max-width: 300px;
+    }
 }

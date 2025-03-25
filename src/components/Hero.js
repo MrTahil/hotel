@@ -1,12 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../styles/Hero.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Hero() {
+    const [rooms, setRooms] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [transitionEnabled, setTransitionEnabled] = useState(true);
     const [programs, setPrograms] = useState([]);
+    const navigate = useNavigate();
+    const sliderRef = useRef(null);
 
     useEffect(() => {
-        // Az adatok lekérése a szerverről
+        // Szobák lekérése
+        fetch('https://localhost:7047/Rooms/GetRoomWith')
+            .then(response => response.json())
+            .then(data => {
+                const availableRooms = data
+                    .filter(room => room.status?.toLowerCase() !== 'unavailable')
+                    .map(room => ({
+                        id: room.roomId,
+                        name: room.roomType,
+                        description: room.description,
+                        image: room.images || 'https://via.placeholder.com/300',
+                        price: room.pricePerNight
+                    }));
+                setRooms(availableRooms);
+            })
+            .catch(error => console.error('Error fetching rooms:', error));
+
+        // Események lekérése
         fetch('https://localhost:7047/Events/Geteents')
             .then(response => response.json())
             .then(data => {
@@ -14,7 +36,7 @@ function Hero() {
                     id: event.eventId,
                     name: event.eventName,
                     description: event.description,
-                    images: event.images || 'https://via.placeholder.com/300', // Alapértelmezett kép, ha nincs megadva
+                    images: event.images || 'https://via.placeholder.com/300',
                     schedule: event.eventDate,
                     organizerName: event.organizerName,
                     contactInfo: event.contactInfo,
@@ -22,19 +44,58 @@ function Hero() {
                     capacity: event.capacity,
                     price: event.price,
                 }));
-                // Az első 3 program kiválasztása a "Felkapott Események" szekcióhoz
                 setPrograms(formattedPrograms.slice(0, 3));
             })
-            .catch(error => console.error('Hiba történt az adatok lekérésekor:', error));
+            .catch(error => console.error('Error fetching events:', error));
     }, []);
 
-    // Funkció a leírás levágásához
     const truncateDescription = (description, maxLength) => {
-        if (description && description.length > maxLength) {
-            return description.substring(0, maxLength) + '...';
-        }
-        return description || 'Nincs leírás';
+        return description && description.length > maxLength 
+            ? description.substring(0, maxLength) + '...' 
+            : description || 'Nincs leírás';
     };
+
+    const handleRoomClick = (roomId) => {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            navigate(`/szobak/${roomId}`);
+        } else {
+            navigate('/login');
+        }
+    };
+
+    // Körkörös navigáció balra
+    const handleSlideLeft = () => {
+        setCurrentIndex(prev => {
+            const newIndex = prev - 1;
+            if (newIndex < 0) {
+                setTransitionEnabled(false);
+                setTimeout(() => {
+                    setTransitionEnabled(true);
+                }, 0);
+                return rooms.length - 1;
+            }
+            return newIndex;
+        });
+    };
+
+    // Körkörös navigáció jobbra
+    const handleSlideRight = () => {
+        setCurrentIndex(prev => {
+            const newIndex = prev + 1;
+            if (newIndex >= rooms.length) {
+                setTransitionEnabled(false);
+                setTimeout(() => {
+                    setTransitionEnabled(true);
+                }, 0);
+                return 0;
+            }
+            return newIndex;
+        });
+    };
+
+    // Többszörösen duplikált szobák a zökkenőmentes végtelen csúszáshoz
+    const duplicatedRooms = [...rooms, ...rooms, ...rooms]; // Háromszoros duplikáció
 
     return (
         <div>
@@ -63,70 +124,64 @@ function Hero() {
                                 Fedezze fel a kényelem és elegancia új dimenzióját
                             </p>
                         </div>
-                        <Link to="/szobak">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 mb-8 md:mb-16">
-                                <div className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
-                                    <div
-                                        className="h-48 md:h-64 bg-cover bg-center"
-                                        style={{ backgroundImage: `url('https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-4.0.3')` }}
-                                    ></div>
-                                    <div className="p-4 md:p-6">
-                                        <h3 className="text-xl md:text-2xl font-bold text-blue-900 mb-2">Deluxe Szoba</h3>
-                                        <p className="text-blue-700">Luxus és kényelem találkozása</p>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
-                                    <div
-                                        className="h-48 md:h-64 bg-cover bg-center"
-                                        style={{ backgroundImage: `url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3')` }}
-                                    ></div>
-                                    <div className="p-4 md:p-6">
-                                        <h3 className="text-xl md:text-2xl font-bold text-blue-900 mb-2">Páros Szoba</h3>
-                                        <p className="text-blue-700">Páratlan elegancia</p>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
-                                    <div
-                                        className="h-48 md:h-64 bg-cover bg-center"
-                                        style={{ backgroundImage: `url('https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-4.0.3')` }}
-                                    ></div>
-                                    <div className="p-4 md:p-6">
-                                        <h3 className="text-xl md:text-2xl font-bold text-blue-900 mb-2">Királyi Lakosztály</h3>
-                                        <p className="text-blue-700">A tökéletesség új szintje</p>
-                                    </div>
+                        
+                        {/* Szobák csúszkája */}
+                        <div className="relative max-w-5xl mx-auto mb-8 md:mb-16">
+                            <button 
+                                onClick={handleSlideLeft} 
+                                className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-md text-blue-900 z-10"
+                            >
+                                ←
+                            </button>
+                            <div className="overflow-hidden">
+                                <div 
+                                    ref={sliderRef}
+                                    className={`flex ${transitionEnabled ? 'transition-transform duration-500' : ''} gap-6`}
+                                    style={{ transform: `translateX(-${currentIndex * (100 / 3)}%)` }}
+                                >
+                                    {duplicatedRooms.map((room, index) => (
+                                        <div key={`${room.id}-${index}`} className="flex-shrink-0 w-full sm:w-1/2 md:w-1/3">
+                                            <div className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transform hover:scale-105 transition-all duration-300">
+                                                <div
+                                                    className="h-48 bg-cover bg-center"
+                                                    style={{ backgroundImage: `url(${room.image})` }}
+                                                ></div>
+                                                <div className="p-4">
+                                                    <h3 className="text-lg font-bold text-blue-900 mb-2">{room.name}</h3>
+                                                    <p className="text-sm text-blue-700 mb-2">{truncateDescription(room.description, 50)}</p>
+                                                    <p className="text-blue-600 text-sm">Ár: {room.price} Ft/éj</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        </Link>
+                            <button 
+                                onClick={handleSlideRight} 
+                                className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-md text-blue-900 z-10"
+                            >
+                                →
+                            </button>
+                        </div>
 
+                        {/* Események szekció */}
                         <h2 className="text-2xl md:text-4xl font-bold text-center text-blue-900 mb-8 md:mb-16">Felkapott Események</h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
-                            {programs.length > 0 ? (
-                                programs.map((program) => (
-                                    <div
-                                        key={program.id}
-                                        className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300"
-                                    >
-                                        <div
-                                            className="h-48 md:h-64 bg-cover bg-center"
-                                            style={{ backgroundImage: `url(${program.images})` }}
-                                        ></div>
-                                        <div className="p-4 md:p-6">
-                                            <h3 className="text-xl md:text-2xl font-bold text-blue-900 mb-2">{program.name}</h3>
-                                            <p className="text-blue-700 mb-2">{truncateDescription(program.description, 50)}</p>
-                                            <p className="text-blue-600 text-sm">Időpont: {new Date(program.schedule).toLocaleDateString('hu-HU')}</p>
-                                            <Link to="/programok">
-                                                <button className="mt-4 w-full bg-blue-800 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                                                    Részletek
-                                                </button>
-                                            </Link>
-                                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
+                            {programs.map((program) => (
+                                <div key={program.id} className="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
+                                    <div className="h-48 bg-cover bg-center" style={{ backgroundImage: `url(${program.images})` }}></div>
+                                    <div className="p-4">
+                                        <h3 className="text-lg font-bold text-blue-900 mb-2">{program.name}</h3>
+                                        <p className="text-sm text-blue-700 mb-2">{truncateDescription(program.description, 50)}</p>
+                                        <p className="text-blue-600 text-sm">Időpont: {new Date(program.schedule).toLocaleDateString('hu-HU')}</p>
+                                        <Link to="/programok">
+                                            <button className="mt-4 w-full bg-blue-800 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm">
+                                                Részletek
+                                            </button>
+                                        </Link>
                                     </div>
-                                ))
-                            ) : (
-                                <p className="text-center text-blue-700 col-span-full">Jelenleg nincsenek felkapott események.</p>
-                            )}
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </section>
