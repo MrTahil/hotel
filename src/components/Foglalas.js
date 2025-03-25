@@ -67,7 +67,7 @@ export const Foglalas = () => {
       };
 
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`https://localhost:7047/Bookings/New_Booking/${id}`, {
+      const response = await fetch(process.env.REACT_APP_API_BASE_URL+`/Bookings/New_Booking/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -110,7 +110,7 @@ export const Foglalas = () => {
 
       try {
         const response = await fetch(
-          `https://localhost:7047/Guests/GetGuestData/${username}`,
+          process.env.REACT_APP_API_BASE_URL+`/Guests/GetGuestData/${username}`,
           {
             headers: { 'Authorization': `Bearer ${token}` },
           }
@@ -136,7 +136,7 @@ export const Foglalas = () => {
     const fetchAmenities = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`https://localhost:7047/Amenities/GetAmenitiesForRoom/${id}`);
+        const response = await fetch(process.env.REACT_APP_API_BASE_URL+`/Amenities/GetAmenitiesForRoom/${id}`);
         if (!response.ok) throw new Error("Hiba a kényelmi szolgáltatások lekérdezése során.");
         setAmenities(await response.json());
       } catch (error) {
@@ -191,7 +191,7 @@ export const Foglalas = () => {
       }
 
       const username = localStorage.getItem('username');
-      const userResponse = await fetch(`https://localhost:7047/UserAccounts/GetOneUserData/${username}`, {
+      const userResponse = await fetch(process.env.REACT_APP_API_BASE_URL+`/GetOneUserData/${username}`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       const userData = await userResponse.json();
@@ -211,7 +211,7 @@ export const Foglalas = () => {
         dateOfBirth: guestData.dateOfBirth ? new Date(guestData.dateOfBirth).toISOString() : null,
       };
 
-      const response = await fetch('https://localhost:7047/Guests/Addnewguest', {
+      const response = await fetch(process.env.REACT_APP_API_BASE_URL+'/Guests/Addnewguest', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

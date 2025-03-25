@@ -20,7 +20,7 @@ function VerificationModal({ email, onClose, onSuccess }) {
             console.log(email + ",")
             console.log(String(code) + ",")
             // A kód és email stringként történő elküldése
-            const response = await axios.post('https://localhost:7047/UserAccounts/Verify2FA', 
+            const response = await axios.post(process.env.REACT_APP_API_BASE_URL+'/UserAccounts/Verify2FA', 
                 {
                     email: email,  // Email
                     code: String(code) // A kódot stringként küldjük

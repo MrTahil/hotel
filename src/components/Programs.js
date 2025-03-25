@@ -7,7 +7,7 @@ function Programs() {
 
     useEffect(() => {
         // Az adatok lekérése a szerverről
-        fetch('https://localhost:7047/Events/Geteents')
+        fetch(process.env.REACT_APP_API_BASE_URL+'/Events/Geteents')
             .then(response => response.json())
             .then(data => {
                 // Az adatok átalakítása a komponens által várt formátumra

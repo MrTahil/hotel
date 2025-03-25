@@ -11,7 +11,7 @@ function LoginModal({ onClose, switchToRegister, setUser }) {
     setError('');
 
     try {
-      const response = await fetch('https://localhost:7047/UserAccounts/Login', {
+      const response = await fetch(process.env.REACT_APP_API_BASE_URL+'/UserAccounts/Login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),

@@ -46,7 +46,7 @@ function RegisterModal({ onClose, switchToLogin }) {
     }
 
     try {
-      const response = await fetch('https://localhost:7047/UserAccounts/Register', {
+      const response = await fetch(process.env.REACT_APP_API_BASE_URL+'/UserAccounts/Register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email, password }),

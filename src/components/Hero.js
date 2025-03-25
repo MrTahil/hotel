@@ -12,7 +12,7 @@ function Hero() {
 
     useEffect(() => {
         // Szobák lekérése
-        fetch('https://localhost:7047/Rooms/GetRoomWith')
+        fetch(process.env.REACT_APP_API_BASE_URL+'/Rooms/GetRoomWith')
             .then(response => response.json())
             .then(data => {
                 const availableRooms = data
@@ -29,7 +29,7 @@ function Hero() {
             .catch(error => console.error('Error fetching rooms:', error));
 
         // Események lekérése
-        fetch('https://localhost:7047/Events/Geteents')
+        fetch(process.env.REACT_APP_API_BASE_URL+`/Events/Geteents`)
             .then(response => response.json())
             .then(data => {
                 const formattedPrograms = data.map(event => ({

@@ -30,7 +30,7 @@ const ProfilePage = () => {
           throw new Error('Nincs token elmentve! Jelentkezz be újra.');
         }
 
-        const response = await fetch(`https://localhost:7047/UserAccounts/GetOneUserData/${localStorage.getItem('username')}`, {
+        const response = await fetch(process.env.REACT_APP_API_BASE_URL+`/UserAccounts/GetOneUserData/${localStorage.getItem('username')}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -79,7 +79,7 @@ const ProfilePage = () => {
         return;
       }
 
-      const response = await fetch(`https://localhost:7047/Guests/GetGuestData/${username}`, {
+      const response = await fetch(process.env.REACT_APP_API_BASE_URL+`/Guests/GetGuestData/${username}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ const ProfilePage = () => {
         throw new Error('Nincs felhasználónév elmentve!');
       }
 
-      const response = await fetch(`https://localhost:7047/UserAccounts/DeleteUserByUsername/${username}`, {
+      const response = await fetch(process.env.REACT_APP_API_BASE_URL+`/UserAccounts/DeleteUserByUsername/${username}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -174,7 +174,7 @@ const ProfilePage = () => {
         dateOfBirth: guestData.dateOfBirth ? new Date(guestData.dateOfBirth).toISOString() : null,
       };
 
-      const response = await fetch('https://localhost:7047/Guests/Addnewguest', {
+      const response = await fetch(process.env.REACT_APP_API_BASE_URL+'/Guests/Addnewguest', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -221,7 +221,7 @@ const ProfilePage = () => {
         throw new Error('Nincs token elmentve! Jelentkezz be újra.');
       }
 
-      const response = await fetch(`https://localhost:7047/Guests/DeleteGuest/${guestId}`, {
+      const response = await fetch(process.env.REACT_APP_API_BASE_URL+`/Guests/DeleteGuest/${guestId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -275,7 +275,7 @@ const ProfilePage = () => {
         dateOfBirth: guestData.dateOfBirth ? new Date(guestData.dateOfBirth).toISOString() : null,
       };
 
-      const response = await fetch(`https://localhost:7047/Guests/UpdateGuest/${editGuestId}`, {
+      const response = await fetch(process.env.REACT_APP_API_BASE_URL+`/Guests/UpdateGuest/${editGuestId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
