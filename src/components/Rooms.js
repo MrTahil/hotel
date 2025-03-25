@@ -4,99 +4,165 @@ import LoginModal from './LoginModal';
 import RegisterModal from './RegisterModal';
 
 function RoomCard() {
+  // Állapotok
   const [rooms, setRooms] = useState([]);
+  const [filteredRooms, setFilteredRooms] = useState([]);
   const [guestCount, setGuestCount] = useState('Bármennyi');
   const [checkInDate, setCheckInDate] = useState('');
   const [checkOutDate, setCheckOutDate] = useState('');
-  const [filteredRooms, setFilteredRooms] = useState([]);
+  const [selectedRoomTypes, setSelectedRoomTypes] = useState([]);
+  const [selectedAmenities, setSelectedAmenities] = useState([]);
+  const [priceRange, setPriceRange] = useState([0, 500000]);
+  const [allRoomTypes, setAllRoomTypes] = useState([]);
+  const [allAmenities, setAllAmenities] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  
   const navigate = useNavigate();
 
+  // Szobák betöltése
   useEffect(() => {
     const fetchRooms = async () => {
+      setIsLoading(true);
+      setError(null);
       try {
         const response = await fetch('https://localhost:7047/Rooms/GetRoomWith');
+        if (!response.ok) throw new Error('Hálózati hiba történt');
         const data = await response.json();
-        console.log(data);
         setRooms(data);
-        setFilteredRooms(data.filter(room => room.status.toLowerCase() !== null));
+        setFilteredRooms(data);
+        
+        // Szobatípusok és kényelmi szolgáltatások kinyerése
+        const types = [...new Set(data.map(room => room.roomType))];
+        const amenities = [...new Set(data.flatMap(room => room.amenities || []))];
+        setAllRoomTypes(types);
+        setAllAmenities(amenities);
       } catch (error) {
-        console.error('Error fetching rooms:', error);
+        console.error('Szobák betöltése sikertelen:', error);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchRooms();
   }, []);
 
-  // Mai dátum lekérése YYYY-MM-DD formátumban
-  const getTodayDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  };
-
-  // Minimális távozási dátum kiszámítása (érkezés + 2 nap)
+  // Dátumkezelés
+  const getTodayDate = () => new Date().toISOString().split('T')[0];
+  
   const getMinCheckOutDate = () => {
     if (!checkInDate) return getTodayDate();
     const checkIn = new Date(checkInDate);
-    checkIn.setDate(checkIn.getDate() + 2); // Minimum 2 nap eltérés
+    checkIn.setDate(checkIn.getDate() + 2);
     return checkIn.toISOString().split('T')[0];
   };
 
-  // Érkezés dátum változásának kezelése
   const handleCheckInChange = (e) => {
-    const newCheckInDate = e.target.value;
-    setCheckInDate(newCheckInDate);
-
-    // Ha a távozási dátum kisebb, mint az érkezés + 2 nap, akkor frissítjük
-    const minCheckOut = new Date(newCheckInDate);
-    minCheckOut.setDate(minCheckOut.getDate() + 2);
-    if (checkOutDate && new Date(checkOutDate) < minCheckOut) {
-      setCheckOutDate(minCheckOut.toISOString().split('T')[0]);
-    }
+    const newDate = e.target.value;
+    setCheckInDate(newDate);
+    // Ne módosítsuk automatikusan a távozási dátumot
   };
 
-  // Távozás dátum változásának kezelése
   const handleCheckOutChange = (e) => {
-    const newCheckOutDate = e.target.value;
-    const minCheckOut = new Date(checkInDate);
-    minCheckOut.setDate(minCheckOut.getDate() + 2);
-
-    if (new Date(newCheckOutDate) >= minCheckOut) {
-      setCheckOutDate(newCheckOutDate);
-    } else {
-      setCheckOutDate(minCheckOut.toISOString().split('T')[0]);
-    }
+    setCheckOutDate(e.target.value);
   };
 
-  const handleSearch = async () => {
+  // Szűrők kezelése
+  const handleRoomTypeChange = (type) => {
+    setSelectedRoomTypes(prev => 
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    );
+  };
+
+  const handleAmenityChange = (amenity) => {
+    setSelectedAmenities(prev => 
+      prev.includes(amenity) ? prev.filter(a => a !== amenity) : [...prev, amenity]
+    );
+  };
+
+  const handlePriceChange = (e, index) => {
+    const value = parseInt(e.target.value) || 0;
+    const newRange = [...priceRange];
+    newRange[index] = value;
+    setPriceRange(newRange.sort((a, b) => a - b));
+  };
+
+  // Szűrés alkalmazása
+  const applyFilters = async () => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      const response = await fetch('https://localhost:7047/Rooms/Searchwithparams', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          CheckInDate: checkInDate,
-          CheckOutDate: checkOutDate,
-          GuestNumber: guestCount === 'Bármennyi' ? 0 : parseInt(guestCount),
-        }),
-      });
-      const data = await response.json();
-      setFilteredRooms(data);
+      let result = [...rooms];
+
+      // 1. Dátum alapú szűrés (ha van megadva dátum)
+      if (checkInDate && checkOutDate) {
+        try {
+          const response = await fetch('https://localhost:7047/Rooms/Searchwithparams', {
+            method: 'POST', // PUT helyett POST
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              CheckInDate: checkInDate,
+              CheckOutDate: checkOutDate,
+              GuestNumber: guestCount === 'Bármennyi' ? 0 : parseInt(guestCount),
+            }),
+          });
+
+          if (!response.ok) throw new Error('Hiba a dátum alapú szűrésben');
+          result = await response.json();
+        } catch (err) {
+          console.warn('API szűrés sikertelen, lokális szűrés alkalmazva', err);
+          // Ha nem sikerül az API hívás, folytatjuk a lokális szűréssel
+        }
+      }
+
+      // 2. Lokális szűrések
+      // Vendégek száma
+      if (guestCount !== 'Bármennyi') {
+        const numGuests = parseInt(guestCount);
+        result = result.filter(room => room.capacity >= numGuests);
+      }
+
+      // Szobatípus
+      if (selectedRoomTypes.length > 0) {
+        result = result.filter(room => selectedRoomTypes.includes(room.roomType));
+      }
+
+      // Kényelmi szolgáltatások
+      if (selectedAmenities.length > 0) {
+        result = result.filter(room => 
+          selectedAmenities.every(amenity => room.amenities?.includes(amenity))
+        );
+      }
+
+      // Ár tartomány
+      result = result.filter(room => 
+        room.pricePerNight >= priceRange[0] && room.pricePerNight <= priceRange[1]
+      );
+
+      setFilteredRooms(result);
     } catch (error) {
-      console.error('Error searching rooms:', error);
+      console.error('Szűrési hiba:', error);
+      setError('Hiba történt a szűrés során');
+    } finally {
+      setIsLoading(false);
+      setShowFilters(false);
     }
   };
 
+  // Foglalás gomb
   const handleBookingClick = (roomId, room) => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
+    if (!localStorage.getItem('authToken')) {
       setShowLoginModal(true);
     } else {
       navigate(`/Foglalas/${roomId}`, { 
         state: { 
-          room: room,
-          // Nem kötelező dátumok átadása
+          room,
           checkInDate: checkInDate || '', 
           checkOutDate: checkOutDate || '' 
         } 
@@ -104,19 +170,24 @@ function RoomCard() {
     }
   };
 
-  const handleCloseLogin = () => {
-    setShowLoginModal(false);
+  // Szűrők alaphelyzetbe
+  const resetFilters = () => {
+    setSelectedRoomTypes([]);
+    setSelectedAmenities([]);
+    setPriceRange([0, 500000]);
+    setGuestCount('Bármennyi');
+    setCheckInDate('');
+    setCheckOutDate('');
+    setFilteredRooms(rooms);
   };
 
-  const handleCloseRegister = () => {
-    setShowRegisterModal(false);
-  };
-
+  // Bejelentkezési modal kezelése
+  const handleCloseLogin = () => setShowLoginModal(false);
+  const handleCloseRegister = () => setShowRegisterModal(false);
   const switchToRegister = () => {
     setShowLoginModal(false);
     setShowRegisterModal(true);
   };
-
   const switchToLogin = () => {
     setShowRegisterModal(false);
     setShowLoginModal(true);
@@ -125,163 +196,184 @@ function RoomCard() {
   return (
     <main className="bg-gradient-to-b from-blue-50 to-indigo-50 min-h-screen pt-8 md:pt-16">
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <form
-          className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-8 md:mb-16 ring-1 ring-gray-100/50 hover:ring-blue-200/50 transition-all duration-500"
-          onSubmit={(e) => e.preventDefault()}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="space-y-2 relative">
-              <label className="block text-sm font-medium text-gray-600">Érkezés</label>
-              <div className="relative">
-                <input
-                  type="date"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border-0 bg-gray-50/70 shadow-sm text-gray-700 font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-                  value={checkInDate}
-                  onChange={handleCheckInChange}
-                  min={getTodayDate()} // Mai dátumtól lehet választani
-                />
-                <svg className="w-5 h-5 absolute left-3 top-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
+        {/* Szűrő gomb */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">Szobák</h2>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm text-gray-700 hover:bg-gray-50"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+            </svg>
+            Szűrők
+          </button>
+        </div>
+
+        {/* Szűrő panel */}
+        {showFilters && (
+          <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 ring-1 ring-gray-100/50">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Dátum és vendégek */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-gray-700">Dátum és vendégek</h3>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-600">Érkezés</label>
+                  <input
+                    type="date"
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300"
+                    value={checkInDate}
+                    onChange={handleCheckInChange}
+                    min={getTodayDate()}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-600">Távozás</label>
+                  <input
+                    type="date"
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300"
+                    value={checkOutDate}
+                    onChange={handleCheckOutChange}
+                    min={getMinCheckOutDate()}
+                    disabled={!checkInDate}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-600">Vendégek száma</label>
+                  <select
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300"
+                    value={guestCount}
+                    onChange={(e) => setGuestCount(e.target.value)}
+                  >
+                    <option value="Bármennyi">Bármennyi</option>
+                    {[1, 2, 3, 4, 5, 6].map(num => (
+                      <option key={num} value={num}>{num} fő</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Szobatípusok */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-gray-700">Szobatípus</h3>
+                <div className="grid grid-cols-1 gap-2">
+                  {allRoomTypes.map(type => (
+                    <label key={type} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedRoomTypes.includes(type)}
+                        onChange={() => handleRoomTypeChange(type)}
+                        className="rounded text-blue-600"
+                      />
+                      <span>{type}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* További szűrők */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-gray-700">Kényelmi szolgáltatások</h3>
+                <div className="grid grid-cols-1 gap-2">
+                  {allAmenities.map(amenity => (
+                    <label key={amenity} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedAmenities.includes(amenity)}
+                        onChange={() => handleAmenityChange(amenity)}
+                        className="rounded text-blue-600"
+                      />
+                      <span>{amenity}</span>
+                    </label>
+                  ))}
+                </div>
+
+                <div className="pt-4">
+                  <h3 className="font-semibold text-gray-700 mb-2">Ár tartomány (Ft/éj)</h3>
+                  <div className="flex items-center space-x-4">
+                    <input
+                      type="number"
+                      value={priceRange[0]}
+                      onChange={(e) => handlePriceChange(e, 0)}
+                      className="w-24 px-3 py-2 border border-gray-300 rounded-lg"
+                      min="0"
+                      placeholder="Minimum"
+                    />
+                    <span>-</span>
+                    <input
+                      type="number"
+                      value={priceRange[1]}
+                      onChange={(e) => handlePriceChange(e, 1)}
+                      className="w-24 px-3 py-2 border border-gray-300 rounded-lg"
+                      min={priceRange[0]}
+                      placeholder="Maximum"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2 relative">
-              <label className="block text-sm font-medium text-gray-600">Távozás</label>
-              <div className="relative">
-                <input
-                  type="date"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border-0 bg-gray-50/70 shadow-sm text-gray-700 font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-                  value={checkOutDate}
-                  onChange={handleCheckOutChange}
-                  min={getMinCheckOutDate()} // Érkezés + 2 nap a minimum
-                  disabled={!checkInDate} // Távozás csak érkezés után választható
-                />
-                <svg className="w-5 h-5 absolute left-3 top-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-600">Vendégek száma</label>
-              <div className="relative">
-                <select
-                  className="w-full pl-10 pr-4 py-3 appearance-none rounded-xl border-0 bg-gray-50/70 shadow-sm text-gray-700 font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-                  value={guestCount}
-                  onChange={(e) => setGuestCount(e.target.value)}
-                >
-                  <option value="Bármennyi">Bármennyi</option>
-                  <option value="1">1 fő</option>
-                  <option value="2">2 fő</option>
-                  <option value="3">3 fő</option>
-                  <option value="4">4 fő</option>
-                  <option value="5">5 fő</option>
-                  <option value="6">6 fő</option>
-                </select>
-                <svg className="w-5 h-5 absolute left-3 top-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-              </div>
-            </div>
-
-            <div className="flex items-end">
+            <div className="flex justify-between mt-6">
               <button
-                className="w-full bg-gradient-to-br from-blue-600 to-indigo-700 text-white px-6 py-4 rounded-xl font-bold hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all duration-200 shadow-lg flex items-center justify-center gap-2"
-                onClick={handleSearch}
+                onClick={resetFilters}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
               >
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-                Keresés
+                Szűrők törlése
               </button>
+              <div className="space-x-3">
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Mégse
+                </button>
+                <button
+                  onClick={applyFilters}
+                  disabled={isLoading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400"
+                >
+                  {isLoading ? 'Keresés...' : 'Szűrés alkalmazása'}
+                </button>
+              </div>
             </div>
           </div>
-        </form>
+        )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-16">
-          {filteredRooms.length > 0 ? (
-            filteredRooms.map((room) => (
-              <div 
-                key={room.roomId} 
-                className="group bg-white rounded-2xl shadow-xl hover:shadow-2xl overflow-hidden transform transition-all duration-300 ease-out hover:-translate-y-2 flex flex-col"
-              >
-                <div className="relative h-56 bg-gray-200 overflow-hidden flex-shrink-0">
-                  <img 
-                    src={room.images} 
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-all duration-500" 
-                    alt={room.roomType}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
-                  <span className="absolute top-4 right-4 bg-blue-800/90 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
-                    {room.pricePerNight ? `${room.pricePerNight.toLocaleString()} Ft` : 'N/A'}
-                  </span>
-                </div>
+        {/* Hibaüzenet */}
+        {error && (
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+            <p>{error}</p>
+          </div>
+        )}
 
-                <div className="p-5 flex flex-col flex-grow relative pb-16">
-                  <h3 className="text-xl font-extrabold text-gray-900 mb-2">{room.roomType}</h3>
-                  <p className="text-gray-600 line-clamp-2 mb-4">{room.description}</p>
-                  
-                  <div className="space-y-2.5 text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                      </svg>
-                      <span>Szoba #{room.roomNumber}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                      </svg>
-                      <span>{room.capacity} fő</span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                      </svg>
-                      <span>{room.floorNumber}. emelet</span>
-                    </div>
-                    <span>
-                      <br></br>
-                      <br></br>
-                    </span>
-                  </div>
-
-                  <div className="absolute bottom-5 left-5 right-5">
-                    <button
-                      className="w-full bg-blue-700/90 text-white px-6 py-3 rounded-xl font-semibold bg-blue-800 transition-colors flex items-center justify-center gap-2 group/button shadow-lg"
-                      onClick={() => handleBookingClick(room.roomId, room)}
-                    >
-                      Foglalás
-                      <svg className="w-4 h-4 transition-transform group-hover/button:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="col-span-full py-24 text-center">
-              <div className="max-w-md mx-auto space-y-4">
-                <svg className="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <h3 className="text-2xl font-bold text-gray-800">Nincsenek elérhető szobák</h3>
-                <p className="text-gray-600">Próbáljon meg más szűrőfeltételeket megadni!</p>
-              </div>
-            </div>
-          )}
-        </div>
+        {/* Betöltés */}
+        {isLoading ? (
+          <div className="flex justify-center items-center py-24">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        ) : (
+          /* Szobák megjelenítése */
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-16">
+            {filteredRooms.length > 0 ? (
+              filteredRooms.map(room => (
+                <RoomItem 
+                  key={room.roomId} 
+                  room={room} 
+                  onBookingClick={handleBookingClick}
+                />
+              ))
+            ) : (
+              <NoRoomsAvailable />
+            )}
+          </div>
+        )}
       </section>
 
+      {/* Modális ablakok */}
       {showLoginModal && (
         <LoginModal 
           onClose={handleCloseLogin} 
           switchToRegister={switchToRegister} 
-          setUser={(username) => console.log('User set:', username)}
         />
       )}
 
@@ -292,6 +384,104 @@ function RoomCard() {
         />
       )}
     </main>
+  );
+}
+
+// Segédkomponens egy szoba megjelenítéséhez
+function RoomItem({ room, onBookingClick }) {
+  return (
+    <div className="group bg-white rounded-2xl shadow-xl hover:shadow-2xl overflow-hidden transform transition-all duration-300 ease-out hover:-translate-y-2 flex flex-col">
+      <div className="relative h-56 bg-gray-200 overflow-hidden flex-shrink-0">
+        <img 
+          src={room.images || 'https://via.placeholder.com/300'} 
+          className="w-full h-full object-cover transform group-hover:scale-105 transition-all duration-500" 
+          alt={room.roomType}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+        <span className="absolute top-4 right-4 bg-blue-800/90 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
+          {room.pricePerNight ? `${room.pricePerNight.toLocaleString('hu-HU')} Ft` : 'Ár igénylés'}
+        </span>
+      </div>
+
+      <div className="p-5 flex flex-col flex-grow relative pb-16">
+        <h3 className="text-xl font-extrabold text-gray-900 mb-2">{room.roomType}</h3>
+        <p className="text-gray-600 line-clamp-2 mb-4">{room.description || 'Nincs leírás megadva'}</p>
+        
+        <RoomDetails room={room} />
+        
+        <div className="absolute bottom-5 left-5 right-5">
+          <button
+            className="w-full bg-blue-700/90 text-white px-6 py-3 rounded-xl font-semibold bg-blue-800 transition-colors flex items-center justify-center gap-2 group/button shadow-lg hover:bg-blue-900"
+            onClick={() => onBookingClick(room.roomId, room)}
+          >
+            Foglalás
+            <svg className="w-4 h-4 transition-transform group-hover/button:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Szoba részletek
+function RoomDetails({ room }) {
+  return (
+    <div className="space-y-2.5 text-gray-600">
+      <div className="flex items-center gap-2">
+        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        <span>Szoba #{room.roomNumber}</span>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+        </svg>
+        <span>{room.capacity} fő</span>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+        </svg>
+        <span>{room.floorNumber}. emelet</span>
+      </div>
+
+      {room.amenities?.length > 0 && (
+        <div className="pt-2">
+          <div className="flex flex-wrap gap-1">
+            {room.amenities.slice(0, 3).map(amenity => (
+              <span key={amenity} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                {amenity}
+              </span>
+            ))}
+            {room.amenities.length > 3 && (
+              <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                +{room.amenities.length - 3} további
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Nincs elérhető szoba üzenet
+function NoRoomsAvailable() {
+  return (
+    <div className="col-span-full py-24 text-center">
+      <div className="max-w-md mx-auto space-y-4">
+        <svg className="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <h3 className="text-2xl font-bold text-gray-800">Nincsenek elérhető szobák</h3>
+        <p className="text-gray-600">Próbáljon meg más szűrőfeltételeket megadni!</p>
+      </div>
+    </div>
   );
 }
 
