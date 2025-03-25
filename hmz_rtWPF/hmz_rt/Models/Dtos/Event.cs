@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +19,8 @@ namespace hmz_rt.Models.Dtos
         public string ContactInfo { get; set; }
         public DateTime? DateAdded { get; set; }
         public decimal? Price { get; set; }
+
+        public string Images { get; set; }
         public List<EventBooking> Eventbookings { get; set; }
     }
 
