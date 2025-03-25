@@ -31,7 +31,7 @@ function RoomCard() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}${process.envREACT_APP_API_ROOMS_URL}`);
+        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_API_ROOMS_URL}`);
         if (!response.ok) throw new Error(process.env.REACT_APP_ERROR_NETWORK);
         const data = await response.json();
         setRooms(data);
