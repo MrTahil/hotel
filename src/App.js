@@ -28,6 +28,7 @@ function App() {
             <Route path="/szolgaltatasok" element={<Services />} />
             <Route path="/login" element={<LoginModal />} /> {/* Added login route */}
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/Foglalas/:id" element={<Foglalas />} />
             <Route path="*" element={<h1>404 - Az oldal nem található</h1>} />
           </Routes>
         </div>

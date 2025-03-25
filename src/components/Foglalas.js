@@ -42,7 +42,7 @@ export const Foglalas = () => {
   const handleBooking = async () => {
     setIsSubmitting(true);
     setBookingError("");
-    
+
     try {
       if (!checkInDate || !checkOutDate) {
         throw new Error("Kérjük töltsd ki mindkét dátum mezőt");
@@ -107,7 +107,7 @@ export const Foglalas = () => {
     const fetchGuests = async () => {
       const username = localStorage.getItem('username');
       const token = localStorage.getItem('authToken');
-      
+
       try {
         const response = await fetch(
           `https://localhost:7047/Guests/GetGuestData/${username}`,
@@ -115,12 +115,12 @@ export const Foglalas = () => {
             headers: { 'Authorization': `Bearer ${token}` },
           }
         );
-        
+
         if (!response.ok) throw new Error('Nem sikerült lekérni a vendégeket');
-        
+
         const data = await response.json();
         const guestsArray = Array.isArray(data) ? data : [data];
-        
+
         setSavedGuests(guestsArray);
         if (guestsArray.length > 0 && !mainGuest) setMainGuest(guestsArray[0].guestId);
       } catch (error) {
@@ -128,7 +128,7 @@ export const Foglalas = () => {
         setSavedGuests([]);
       }
     };
-  
+
     fetchGuests();
   }, [mainGuest]);
 
@@ -152,7 +152,7 @@ export const Foglalas = () => {
   const calculateGuestType = (dateOfBirth) => {
     const birthDate = new Date(dateOfBirth);
     const age = new Date().getFullYear() - birthDate.getFullYear();
-    
+
     if (age < 3) return '0-3';
     if (age < 18) return 'gyermekkoru';
     if (age < 26) return 'diak';
@@ -162,11 +162,11 @@ export const Foglalas = () => {
 
   const calculateTotalPrice = () => {
     if (!room?.pricePerNight || !checkInDate || !checkOutDate) return 0;
-    
+
     const basePrice = room.pricePerNight;
     const selectedGuest = savedGuests.find(g => g.guestId === mainGuest);
     const guestType = selectedGuest ? calculateGuestType(selectedGuest.dateOfBirth) : 'felnott';
-    
+
     const discounts = {
       '0-3': 0.95,
       'gyermekkoru': 0.8,
@@ -178,7 +178,7 @@ export const Foglalas = () => {
     const nights = Math.ceil((new Date(checkOutDate) - new Date(checkInDate)) / (1000 * 3600 * 24));
     const mainGuestPrice = basePrice * (1 - (discounts[guestType] || 0)) * nights;
     const additionalPrice = additionalGuests * basePrice * nights;
-    
+
     return mainGuestPrice + additionalPrice;
   };
 
@@ -254,7 +254,17 @@ export const Foglalas = () => {
         <section className="py-6 md:py-10 px-4 md:px-8">
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="w-full lg:w-2/3">
-              <h2 className="text-3xl md:text-4xl font-bold text-blue-800 mb-4 md:mb-6">
+              <h2 className="text-3xl md:text-4xl font-bold text-blue-800 mb-4 md:mb-6 flex items-center gap-4">
+                <button
+                  onClick={() => navigate("/szobak")}  // Vagy "/szobak" ha van külön szobák oldal
+                  className="p-2 rounded-full hover:bg-blue-100 transition-colors"
+                  title="Vissza a szobákhoz"
+                  aria-label="Vissza"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                </button>
                 {room?.roomType || "Deluxe Panoráma Szoba"}
               </h2>
 
@@ -404,7 +414,7 @@ export const Foglalas = () => {
 
               <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg border-t-4 border-blue-600 mb-6">
                 <h3 className="text-2xl font-bold text-blue-700 mb-4">Időpontok</h3>
-                
+
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -464,7 +474,7 @@ export const Foglalas = () => {
                   <div className="flex justify-between">
                     <span className="text-gray-700">Éjszakák száma:</span>
                     <span className="font-semibold">
-                      {checkInDate && checkOutDate ? 
+                      {checkInDate && checkOutDate ?
                         Math.ceil(
                           (new Date(checkOutDate) - new Date(checkInDate)) / (1000 * 3600 * 24)
                         ) : 0}
@@ -481,11 +491,10 @@ export const Foglalas = () => {
                 <button
                   onClick={handleBooking}
                   disabled={isSubmitting}
-                  className={`w-full py-3 rounded-lg font-bold transition-colors ${
-                    isSubmitting 
-                      ? "bg-gray-400 cursor-not-allowed" 
+                  className={`w-full py-3 rounded-lg font-bold transition-colors ${isSubmitting
+                      ? "bg-gray-400 cursor-not-allowed"
                       : "bg-blue-600 hover:bg-blue-700 text-white"
-                  }`}
+                    }`}
                 >
                   {isSubmitting ? "Feldolgozás..." : "Foglalás megerősítése"}
                 </button>

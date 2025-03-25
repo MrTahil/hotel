@@ -95,9 +95,10 @@ function RoomCard() {
     } else {
       navigate(`/Foglalas/${roomId}`, { 
         state: { 
-          room, 
-          checkInDate, 
-          checkOutDate 
+          room: room,
+          // Nem kötelező dátumok átadása
+          checkInDate: checkInDate || '', 
+          checkOutDate: checkOutDate || '' 
         } 
       });
     }
