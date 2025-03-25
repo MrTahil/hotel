@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,5 +24,29 @@ namespace hmz_rt.Dtos
         {
             return $"{RoomNumber} - {RoomType} ({PricePerNight} Ft/éj), Kapacitás: {Capacity} fő, Állapot: {Status}";
         }
+    }
+
+    public class CreateRoom
+    {
+        public string RoomNumber { get; set; }
+        public string RoomType { get; set; }
+        public int Capacity { get; set; }
+        public decimal PricePerNight { get; set; }
+        public string Status { get; set; }
+        public int FloorNumber { get; set; }
+        public string Description { get; set; }
+        public string Amenities { get; set; }
+    }
+
+    public class UpdateRoom
+    {
+        public string RoomNumber { get; set; }
+        public string RoomType { get; set; }
+        public int Capacity { get; set; }
+        public decimal PricePerNight { get; set; }
+        public string Status { get; set; }
+        public int FloorNumber { get; set; }
+        public string Description { get; set; }
+        public string Amenities { get; set; }
     }
 }
