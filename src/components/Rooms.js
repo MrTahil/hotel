@@ -198,17 +198,24 @@ function RoomCard() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Szűrő gomb */}
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Szobák</h2>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm text-gray-700 hover:bg-gray-50"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-            </svg>
-            Szűrők
-          </button>
-        </div>
+  <div className="relative inline-block">
+    <h2 className="text-3xl font-bold text-gray-800 relative z-10">
+      <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+        Szobák
+      </span>
+    </h2>
+    <div className="absolute bottom-0 left-0 w-full h-2 bg-blue-100 rounded-full z-0"></div>
+  </div>
+  <button
+    onClick={() => setShowFilters(!showFilters)}
+    className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+  >
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+    </svg>
+    Szűrők
+  </button>
+</div>
 
         {/* Szűrő panel */}
         {showFilters && (
@@ -398,20 +405,21 @@ function RoomItem({ room, onBookingClick }) {
           alt={room.roomType}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
-        <span className="absolute top-4 right-4 bg-blue-800/90 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
+        <span className="absolute top-4 right-4 bg-blue-800 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg backdrop-blur-sm bg-opacity-90">
           {room.pricePerNight ? `${room.pricePerNight.toLocaleString('hu-HU')} Ft` : 'Ár igénylés'}
         </span>
       </div>
 
-      <div className="p-5 flex flex-col flex-grow relative pb-16">
+      <div className="p-5 flex flex-col flex-grow">
         <h3 className="text-xl font-extrabold text-gray-900 mb-2">{room.roomType}</h3>
         <p className="text-gray-600 line-clamp-2 mb-4">{room.description || 'Nincs leírás megadva'}</p>
         
         <RoomDetails room={room} />
         
-        <div className="absolute bottom-5 left-5 right-5">
+        {/* Javított foglalás gomb */}
+        <div className="mt-auto pt-4">
           <button
-            className="w-full bg-blue-700/90 text-white px-6 py-3 rounded-xl font-semibold bg-blue-800 transition-colors flex items-center justify-center gap-2 group/button shadow-lg hover:bg-blue-900"
+            className="w-full bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 group/button shadow-lg hover:bg-blue-800"
             onClick={() => onBookingClick(room.roomId, room)}
           >
             Foglalás
