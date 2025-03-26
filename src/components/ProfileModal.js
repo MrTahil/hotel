@@ -34,6 +34,9 @@ const ProfilePage = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Forgot password states
   const [forgotEmail, setForgotEmail] = useState('');
@@ -43,6 +46,8 @@ const ProfilePage = () => {
     confirmPassword: ''
   });
   const [forgotStep, setForgotStep] = useState(1);
+  const [showNewPasswordForgot, setShowNewPasswordForgot] = useState(false);
+  const [showConfirmPasswordForgot, setShowConfirmPasswordForgot] = useState(false);
 
   useEffect(() => {
     if (message) {
@@ -140,55 +145,48 @@ const ProfilePage = () => {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    setPasswordErrors({ currentPassword: '', newPassword: '', confirmPassword: '' }); // Reset errors
+    setPasswordErrors({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setMessage(null);
 
     try {
       const token = localStorage.getItem('authToken');
       const username = localStorage.getItem('username');
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*?])[A-Za-z\d!@#$%^&*?]{8,}$/;
 
       if (!token || !username) {
         throw new Error('Hiányzó autentikációs adatok');
       }
 
+      // Validation checks...
       if (passwordData.newPassword !== passwordData.confirmPassword) {
-        setPasswordErrors((prev) => ({
-          ...prev,
-          confirmPassword: 'Az új jelszavak nem egyeznek!',
-        }));
+        setPasswordErrors(prev => ({ ...prev, confirmPassword: 'Az új jelszavak nem egyeznek!' }));
         return;
       }
 
       if (!passwordRegex.test(passwordData.newPassword)) {
-        setPasswordErrors((prev) => ({
+        setPasswordErrors(prev => ({
           ...prev,
-          newPassword: 'Az új jelszónak legalább 8 karakterből kell állnia, és tartalmaznia kell kisbetűt, nagybetűt, számot és speciális karaktert (!@#$%^&*?)!',
+          newPassword: 'Az új jelszónak legalább 8 karakterből kell állnia, és tartalmaznia kell kisbetűt, nagybetűt, számot és speciális karaktert (!@#$%^&*?)!'
         }));
         return;
       }
 
-      const response = await fetch(process.env.REACT_APP_API_BASE_URL + `/UserAccounts/Newpasswithknownpass/${username}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { response, data } = await handleApiCall(
+        `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/Newpasswithknownpass/${username}`,
+        'PUT',
+        {
           OldPassword: passwordData.currentPassword,
-          Password: passwordData.newPassword,
-        }),
-      });
-
-      const data = await response.json();
+          Password: passwordData.newPassword
+        }
+      );
 
       if (!response.ok) {
-        if (data.message.includes('jelenlegi jelszó')) {
-          setPasswordErrors((prev) => ({
-            ...prev,
-            currentPassword: 'Helytelen jelenlegi jelszó!',
-          }));
+        if (data.message && (data.message.includes('jelenlegi jelszó') || data.message.includes('Incorrect password'))) {
+          setPasswordErrors(prev => ({ ...prev, currentPassword: 'Helytelen jelenlegi jelszó!' }));
+        } else {
+          throw new Error(data.message || `Hiba a jelszó változtatásakor: ${response.status}`);
         }
-        throw new Error(data.message || `Hiba a jelszó változtatásakor: ${response.status}`);
+        return;
       }
 
       setMessage({ type: 'success', text: 'Jelszó sikeresen megváltoztatva!' });
@@ -204,85 +202,130 @@ const ProfilePage = () => {
 
   const handleForgotPasswordStep1 = async (e) => {
     e.preventDefault();
+    setMessage(null);
+
     try {
-      const response = await fetch(process.env.REACT_APP_API_BASE_URL + `/UserAccounts/ForgotPasswordsendemail/${forgotEmail}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/ForgotPasswordsendemail/${forgotEmail}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 418) {
+        throw new Error("Ez az email cím nem szerepel az adatbázisban!");
+      }
 
       if (!response.ok) {
-        throw new Error('Hiba történt a jelszó visszaállítási kérelem során');
+        throw new Error("Hiba történt a jelszó-visszaállítási kérelem során!");
       }
 
       setMessage({
-        type: 'success',
-        text: 'Ellenőrizze email fiókját a 6 számjegyű kódért!'
+        type: "success",
+        text: "Ellenőrizze email fiókját a 6 számjegyű kódért!",
       });
       setForgotStep(2);
     } catch (err) {
-      setMessage({ type: 'error', text: err.message });
+      console.error("Hiba a kód küldése során:", err.message);
+      setMessage({ type: "error", text: err.message });
     }
   };
 
   const handleForgotPasswordStep2 = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch(process.env.REACT_APP_API_BASE_URL + '/UserAccounts/VerifyTheforgotpass', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          Email: forgotEmail,
-          Code: verificationCode
-        }),
-      });
+    setMessage(null);
 
-      if (!response.ok) {
-        throw new Error('Hibás ellenőrző kód vagy email!');
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/VerifyTheforgotpass`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            Email: forgotEmail,
+            Code: verificationCode,
+          }),
+        }
+      );
+
+      if (response.status === 202) {
+        throw new Error("Hibás kód vagy email!");
       }
 
-      setMessage({ type: 'success', text: 'Kód sikeresen ellenőrizve!' });
+      if (!response.ok) {
+        throw new Error(`Hiba az ellenőrzés során: ${response.status}`);
+      }
+
+      setMessage({ type: "success", text: "Kód elfogadva!" });
       setForgotStep(3);
     } catch (err) {
-      setMessage({ type: 'error', text: err.message });
+      console.error("Hiba az ellenőrzés során:", err.message);
+      setMessage({ type: "error", text: err.message });
     }
   };
 
   const handleForgotPasswordStep3 = async (e) => {
     e.preventDefault();
+    setPasswordErrors({ newPassword: "", confirmPassword: "" });
+    setMessage(null);
+
     try {
+      const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*?])[A-Za-z\d!@#$%^&*?]{8,}$/;
+
       if (newPasswordData.newPassword !== newPasswordData.confirmPassword) {
-        setMessage({ type: 'error', text: 'Az új jelszavak nem egyeznek!' });
+        setPasswordErrors((prev) => ({
+          ...prev,
+          confirmPassword: "Az új jelszavak nem egyeznek!",
+        }));
         return;
       }
 
-      const response = await fetch(process.env.REACT_APP_API_BASE_URL + '/UserAccounts/SetNewPassword', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          Email: forgotEmail,
-          Password: newPasswordData.newPassword
-        }),
-      });
+      if (!passwordRegex.test(newPasswordData.newPassword)) {
+        setPasswordErrors((prev) => ({
+          ...prev,
+          newPassword:
+            "Az új jelszónak legalább 8 karakterből kell állnia, és tartalmaznia kell kisbetűt, nagybetűt, számot és speciális karaktert (!@#$%^&*?)!",
+        }));
+        return;
+      }
+
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/SetNewPassword`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            Email: forgotEmail,
+            Password: newPasswordData.newPassword,
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Hiba történt az új jelszó beállításakor');
+        throw new Error(data.message || "Hiba történt az új jelszó beállításakor!");
       }
 
-      setMessage({ type: 'success', text: 'Jelszó sikeresen visszaállítva! Jelentkezzen be az új jelszóval.' });
-      setForgotEmail('');
-      setVerificationCode('');
-      setNewPasswordData({ newPassword: '', confirmPassword: '' });
+      setMessage({
+        type: "success",
+        text: data.message || "Jelszó sikeresen visszaállítva! Jelentkezzen be az új jelszóval.",
+      });
+      setForgotEmail("");
+      setVerificationCode("");
+      setNewPasswordData({ newPassword: "", confirmPassword: "" });
       setForgotStep(1);
     } catch (err) {
-      setMessage({ type: 'error', text: err.message });
+      console.error("Hiba az új jelszó beállításakor:", err.message);
+      setMessage({ type: "error", text: err.message });
     }
   };
 
@@ -316,8 +359,8 @@ const ProfilePage = () => {
       }
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `HTTP hiba! Státusz: ${response.status}`);
+        const errorData = await response.text();
+        throw new Error(errorData || `HTTP hiba! Státusz: ${response.status}`);
       }
 
       localStorage.removeItem('authToken');
@@ -326,6 +369,38 @@ const ProfilePage = () => {
     } catch (error) {
       console.error('Hiba történt a fiók törlése közben:', error.message);
       setError(error.message);
+    }
+  };
+  const handleApiCall = async (url, method, body, requiresAuth = true) => {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    if (requiresAuth) {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication token missing');
+      }
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(url, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+    // Clone the response to read it as both text and JSON if needed
+    const responseClone = response.clone();
+
+    try {
+      // First try to parse as JSON
+      const data = await response.json();
+      return { response, data };
+    } catch (error) {
+      // If JSON parsing fails, read as text
+      const text = await responseClone.text();
+      return { response, data: { message: text } };
     }
   };
 
@@ -360,14 +435,13 @@ const ProfilePage = () => {
         body: JSON.stringify(payload),
       });
 
-      // Ellenőrizzük a Content-Type-ot
       const contentType = response.headers.get('Content-Type');
       let data;
 
       if (contentType && contentType.includes('application/json')) {
-        data = await response.json(); // Ha JSON, akkor parse-oljuk
+        data = await response.json();
       } else {
-        data = await response.text(); // Ha nem JSON, akkor szövegként kezeljük
+        data = await response.text();
       }
 
       if (!response.ok) {
@@ -426,11 +500,74 @@ const ProfilePage = () => {
   };
 
   const handleEditGuest = (guest) => {
-    // ... (unchanged)
+    setGuestData({
+      firstName: guest.firstName,
+      lastName: guest.lastName,
+      email: guest.email || '',
+      phoneNumber: guest.phoneNumber || '',
+      address: guest.address || '',
+      city: guest.city || '',
+      country: guest.country || '',
+      dateOfBirth: guest.dateOfBirth ? new Date(guest.dateOfBirth).toISOString().split('T')[0] : '',
+      gender: guest.gender || '',
+    });
+    setEditGuestId(guest.guestId);
+    setShowGuestModal(true);
   };
 
   const handleUpdateGuest = async (e) => {
-    // ... (unchanged)
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Nincs token elmentve! Jelentkezz be újra.');
+      }
+
+      if (!editGuestId) {
+        throw new Error('Nincs kiválasztott vendég a szerkesztéshez!');
+      }
+
+      const payload = {
+        ...guestData,
+        dateOfBirth: guestData.dateOfBirth ? new Date(guestData.dateOfBirth).toISOString() : null,
+      };
+
+      const response = await fetch(process.env.REACT_APP_API_BASE_URL + `/Guests/UpdateGuest/${editGuestId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.message || `Hiba a vendég módosítása során: ${response.status}`);
+      }
+
+      await fetchGuests();
+      setShowGuestModal(false);
+      setGuestData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phoneNumber: '',
+        address: '',
+        city: '',
+        country: '',
+        dateOfBirth: '',
+        gender: '',
+      });
+      setEditGuestId(null);
+      setError(null);
+      setMessage({ type: 'success', text: responseData.message || 'Vendég sikeresen módosítva!' });
+    } catch (err) {
+      console.error('Hiba a vendég módosítása közben:', err.message);
+      setError(err.message);
+      setMessage({ type: 'error', text: err.message });
+    }
   };
 
   const handleLogout = () => {
@@ -587,56 +724,91 @@ const ProfilePage = () => {
                 <div className="p-3 sm:p-4 border-t border-blue-100 animate-[fadeIn_0.2s_ease-in-out]">
                   <form className="space-y-4" onSubmit={handleChangePassword}>
                     <div>
+                      {passwordErrors.currentPassword && (
+                        <p className="text-red-600 text-xs mb-1">{passwordErrors.currentPassword}</p>
+                      )}
                       <label className="block text-sm font-medium mb-1 text-blue-800" htmlFor="current-password">
                         Jelenlegi jelszó
                       </label>
-                      <input
-                        type="password"
-                        id="current-password"
-                        className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                        placeholder="Jelenlegi jelszó"
-                        value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                        required
-                      />
-                      {passwordErrors.currentPassword && (
-                        <p className="text-red-600 text-xs mt-1">{passwordErrors.currentPassword}</p>
-                      )}
+                      <div className="relative">
+                        <input
+                          type={showCurrentPassword ? 'text' : 'password'}
+                          id="current-password"
+                          className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                          placeholder="Jelenlegi jelszó"
+                          value={passwordData.currentPassword}
+                          onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600"
+                        >
+                          {showCurrentPassword ? 'Elrejtés' : 'Megjelenítés'}
+                        </button>
+                      </div>
                     </div>
                     <div>
+                      {passwordErrors.newPassword && (
+                        <p className="text-red-600 text-xs mb-1">{passwordErrors.newPassword}</p>
+                      )}
                       <label className="block text-sm font-medium mb-1 text-blue-800" htmlFor="new-password">
                         Új jelszó
                       </label>
-                      <input
-                        type="password"
-                        id="new-password"
-                        className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                        placeholder="Új jelszó"
-                        value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                        required
-                      />
-                      {passwordErrors.newPassword && (
-                        <p className="text-red-600 text-xs mt-1">{passwordErrors.newPassword}</p>
-                      )}
+                      <div className="relative">
+                        <input
+                          type={showNewPassword ? 'text' : 'password'}
+                          id="new-password"
+                          className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                          placeholder="Új jelszó"
+                          value={passwordData.newPassword}
+                          onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600"
+                        >
+                          {showNewPassword ? 'Elrejtés' : 'Megjelenítés'}
+                        </button>
+                      </div>
                     </div>
                     <div>
+                      {passwordErrors.confirmPassword && (
+                        <p className="text-red-600 text-xs mb-1">{passwordErrors.confirmPassword}</p>
+                      )}
                       <label className="block text-sm font-medium mb-1 text-blue-800" htmlFor="confirm-password">
                         Új jelszó megerősítése
                       </label>
-                      <input
-                        type="password"
-                        id="confirm-password"
-                        className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                        placeholder="Új jelszó megerősítése"
-                        value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                        required
-                      />
-                      {passwordErrors.confirmPassword && (
-                        <p className="text-red-600 text-xs mt-1">{passwordErrors.confirmPassword}</p>
-                      )}
+                      <div className="relative">
+                        <input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          id="confirm-password"
+                          className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                          placeholder="Új jelszó megerősítése"
+                          value={passwordData.confirmPassword}
+                          onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600"
+                        >
+                          {showConfirmPassword ? 'Elrejtés' : 'Megjelenítés'}
+                        </button>
+                      </div>
                     </div>
+
+                    {/* Message display above the button */}
+                    {message && (
+                      <div className={`p-3 rounded-lg ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {message.text}
+                      </div>
+                    )}
+
                     <button
                       type="submit"
                       className="w-full md:w-auto bg-indigo-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-indigo-700 transform hover:scale-105 transition-all duration-200"
@@ -687,7 +859,10 @@ const ProfilePage = () => {
                   {forgotStep === 2 && (
                     <form className="space-y-4" onSubmit={handleForgotPasswordStep2}>
                       <div>
-                        <label className="block text-sm font-medium mb-1 text-blue-800" htmlFor="verification-code">
+                        <label
+                          className="block text-sm font-medium mb-1 text-blue-800"
+                          htmlFor="verification-code"
+                        >
                           Ellenőrző kód
                         </label>
                         <input
@@ -696,11 +871,21 @@ const ProfilePage = () => {
                           className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                           placeholder="6 számjegyű kód"
                           value={verificationCode}
-                          onChange={(e) => setVerificationCode(e.target.value)}
-                          maxLength="6"
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, "");
+                            setVerificationCode(value.slice(0, 6));
+                          }}
                           required
                         />
                       </div>
+                      {message && (
+                        <div
+                          className={`p-3 rounded-lg ${message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                            }`}
+                        >
+                          {message.text}
+                        </div>
+                      )}
                       <button
                         type="submit"
                         className="w-full md:w-auto bg-indigo-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-indigo-700 transform hover:scale-105 transition-all duration-200"
@@ -709,35 +894,60 @@ const ProfilePage = () => {
                       </button>
                     </form>
                   )}
+
                   {forgotStep === 3 && (
                     <form className="space-y-4" onSubmit={handleForgotPasswordStep3}>
                       <div>
+                        {passwordErrors.newPassword && (
+                          <p className="text-red-600 text-xs mb-1">{passwordErrors.newPassword}</p>
+                        )}
                         <label className="block text-sm font-medium mb-1 text-blue-800" htmlFor="new-password-forgot">
                           Új jelszó
                         </label>
-                        <input
-                          type="password"
-                          id="new-password-forgot"
-                          className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                          placeholder="Új jelszó"
-                          value={newPasswordData.newPassword}
-                          onChange={(e) => setNewPasswordData({ ...newPasswordData, newPassword: e.target.value })}
-                          required
-                        />
+                        <div className="relative">
+                          <input
+                            type={showNewPasswordForgot ? 'text' : 'password'}
+                            id="new-password-forgot"
+                            className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                            placeholder="Új jelszó"
+                            value={newPasswordData.newPassword}
+                            onChange={(e) => setNewPasswordData({ ...newPasswordData, newPassword: e.target.value })}
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewPasswordForgot(!showNewPasswordForgot)}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600"
+                          >
+                            {showNewPasswordForgot ? 'Elrejtés' : 'Megjelenítés'}
+                          </button>
+                        </div>
                       </div>
                       <div>
+                        {passwordErrors.confirmPassword && (
+                          <p className="text-red-600 text-xs mb-1">{passwordErrors.confirmPassword}</p>
+                        )}
                         <label className="block text-sm font-medium mb-1 text-blue-800" htmlFor="confirm-password-forgot">
                           Új jelszó megerősítése
                         </label>
-                        <input
-                          type="password"
-                          id="confirm-password-forgot"
-                          className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                          placeholder="Új jelszó megerősítése"
-                          value={newPasswordData.confirmPassword}
-                          onChange={(e) => setNewPasswordData({ ...newPasswordData, confirmPassword: e.target.value })}
-                          required
-                        />
+                        <div className="relative">
+                          <input
+                            type={showConfirmPasswordForgot ? 'text' : 'password'}
+                            id="confirm-password-forgot"
+                            className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                            placeholder="Új jelszó megerősítése"
+                            value={newPasswordData.confirmPassword}
+                            onChange={(e) => setNewPasswordData({ ...newPasswordData, confirmPassword: e.target.value })}
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPasswordForgot(!showConfirmPasswordForgot)}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600"
+                          >
+                            {showConfirmPasswordForgot ? 'Elrejtés' : 'Megjelenítés'}
+                          </button>
+                        </div>
                       </div>
                       <button
                         type="submit"
