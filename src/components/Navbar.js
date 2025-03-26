@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-regular-svg-icons";
@@ -10,40 +10,25 @@ import { Link } from 'react-router-dom';
 function Navbar() {
     const navigate = useNavigate();
     const [activeModal, setActiveModal] = useState(null);
-    const [user, setUser] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
 
+    // Minden rendereléskor ellenőrizzük a localStorage-ot
+    const user = localStorage.getItem('username');
+
     const closeModal = () => setActiveModal(null);
-
-    useEffect(() => {
-        const loggedUser = localStorage.getItem('username');
-        if (loggedUser) {
-            setUser(loggedUser);
-        }
-
-        const handleResize = () => {
-            if (window.innerWidth >= 768) {
-                setIsMobileMenuOpen(false);
-            }
-        };
-        
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('username');
-        setUser(null);
-        setMenuOpen(false); // Menü bezárása kijelentkezéskor
+        setMenuOpen(false); // Menü bezárása
         setShowProfileModal(false);
-        navigate('/'); // React Router navigáció a főoldalra
+        navigate('/'); // Visszatérés a főoldalra
     };
 
     const handleMenuItemClick = () => {
-        setMenuOpen(false); // Menü bezárása minden kattintáskor
+        setMenuOpen(false); // Menü bezárása kattintáskor
     };
 
     return (
@@ -51,8 +36,15 @@ function Navbar() {
             <nav className="sticky top-0 bg-gradient-to-r from-blue-900 to-blue-800 shadow-lg w-full z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
                     <div className="flex items-center space-x-4">
-                        <img src="../logo.png" alt="Logó" className='h-9 rounded-lg shadow-lg' style={{ maskImage: "radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)" }}/>
-                        
+                        <img
+                            src="../logo.png"
+                            alt="Logó"
+                            className="h-9 rounded-lg shadow-lg"
+                            style={{
+                                maskImage: "radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)",
+                                WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)",
+                            }}
+                        />
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                             className="md:hidden text-white hover:text-blue-200 transition-colors"
@@ -68,7 +60,7 @@ function Navbar() {
                             )}
                         </button>
                     </div>
-                    
+
                     <div className="hidden md:flex space-x-8">
                         <NavLink to="/" className={({ isActive }) => `text-white hover:text-blue-200 transition-colors ${isActive ? 'text-blue-200' : ''}`}>
                             Kezdőlap
@@ -86,10 +78,10 @@ function Navbar() {
                             Rólunk
                         </NavLink>
                     </div>
-                    
+
                     <div className="relative">
-                        <button 
-                            onClick={() => setMenuOpen(!menuOpen)} 
+                        <button
+                            onClick={() => setMenuOpen(!menuOpen)}
                             className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
                         >
                             <FontAwesomeIcon icon={faUser} className="text-white text-xl" />
@@ -103,11 +95,11 @@ function Navbar() {
                                                 Profil megnyitása
                                             </button>
                                         </Link>
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 handleLogout();
                                                 handleMenuItemClick();
-                                            }} 
+                                            }}
                                             className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
                                         >
                                             Kijelentkezés
@@ -115,20 +107,20 @@ function Navbar() {
                                     </>
                                 ) : (
                                     <>
-                                        <button 
-                                            onClick={() => { 
-                                                setActiveModal('login'); 
-                                                handleMenuItemClick(); 
-                                            }} 
+                                        <button
+                                            onClick={() => {
+                                                setActiveModal('login');
+                                                handleMenuItemClick();
+                                            }}
                                             className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
                                         >
                                             Bejelentkezés
                                         </button>
-                                        <button 
-                                            onClick={() => { 
-                                                setActiveModal('register'); 
-                                                handleMenuItemClick(); 
-                                            }} 
+                                        <button
+                                            onClick={() => {
+                                                setActiveModal('register');
+                                                handleMenuItemClick();
+                                            }}
                                             className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
                                         >
                                             Regisztráció
@@ -184,28 +176,25 @@ function Navbar() {
             </nav>
 
             {activeModal === 'register' && (
-                <RegisterModal 
-                    onClose={closeModal} 
-                    switchToLogin={() => setActiveModal('login')} 
+                <RegisterModal
+                    onClose={closeModal}
+                    switchToLogin={() => setActiveModal('login')}
                 />
             )}
-            
+
             {activeModal === 'login' && (
-                <LoginModal 
-                    onClose={closeModal} 
-                    switchToRegister={() => setActiveModal('register')} 
-                    setUser={setUser}
+                <LoginModal
+                    onClose={closeModal}
+                    switchToRegister={() => setActiveModal('register')}
+                    setUser={() => {}}
                 />
             )}
-            
+
             {showProfileModal && (
-                <ProfileModal 
+                <ProfileModal
                     user={user}
                     onClose={() => setShowProfileModal(false)}
-                    onLogout={() => {
-                        handleLogout();
-                        setShowProfileModal(false);
-                    }}
+                    onLogout={handleLogout}
                 />
             )}
         </>
