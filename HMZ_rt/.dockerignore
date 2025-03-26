@@ -1,0 +1,12 @@
+**/.dockerignore
+**/.git
+**/.vs
+**/bin
+**/obj
+**/node_modules
+*.log
+Dockerfile*
+docker-compose*
+**/*.sln
+**/*.user
+**/*.lock.json

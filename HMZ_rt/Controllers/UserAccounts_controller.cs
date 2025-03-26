@@ -5,13 +5,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net;
 using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Security.Policy;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using MailKit.Net.Smtp;
+using MimeKit;
+using MailKit.Security;
+using MimeKit.Text;
+using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 namespace HMZ_rt.Controllers
 {
@@ -168,28 +170,28 @@ namespace HMZ_rt.Controllers
                     .Replace("{PrivacyPolicyUrl}", "https://yourcompany.com/privacy")
                     .Replace("{TermsUrl}", "https://yourcompany.com/terms");
 
-                using MailMessage message = new()
-                {
-                    From = new MailAddress(_smtpSettings.FromEmail),
-                    Subject = "Biztonsági Kód - Az Ön hitelesítési kódja",
-                    Body = emailTemplate,
-                    IsBodyHtml = true,
-                    Priority = MailPriority.High
-                };
-                message.To.Add(recipientEmail);
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("HMZ RT", _smtpSettings.FromEmail));
+                message.To.Add(MailboxAddress.Parse(recipientEmail));
+                message.Subject = "Biztonsági Kód - Az Ön hitelesítési kódja";
+                message.Body = new TextPart(TextFormat.Html) { Text = emailTemplate };
 
-                using SmtpClient client = new(_smtpSettings.Server, _smtpSettings.Port)
-                {
-                    EnableSsl = true,
-                    UseDefaultCredentials = false,
-                    Credentials = new NetworkCredential(_smtpSettings.Username, _smtpSettings.Password)
-                };
+                using var client = new SmtpClient();
+                await client.ConnectAsync(
+                    _smtpSettings.Server,
+                    _smtpSettings.Port,
+                    SecureSocketOptions.StartTls);
 
-                await client.SendMailAsync(message);
+                await client.AuthenticateAsync(
+                    _smtpSettings.Username,
+                    _smtpSettings.Password);
+
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Failed to send 2FA email", ex);
+                throw new InvalidOperationException( ex.Message);
             }
         }
 

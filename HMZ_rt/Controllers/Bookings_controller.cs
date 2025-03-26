@@ -1,17 +1,18 @@
 using HMZ_rt.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using System.Linq;
 using System.Net.Mail;
-using System.Net;
 using static HMZ_rt.Controllers.UserAccounts_controller;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using System.Net.Mime;
+using MimeKit;
+using MimeKit.Text;
+using MailKit.Security;
+using MailKit.Net.Smtp;
+using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 namespace HMZ_rt.Controllers
 {
@@ -83,28 +84,36 @@ namespace HMZ_rt.Controllers
 
                 byte[] pdfBytes = GenerateInvoicePdf(booking, guestdata, roomdata, paymentdata);
 
-                using (MailMessage message = new MailMessage())
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("HMZ RT", _smtpSettings.FromEmail));
+                message.To.Add(MailboxAddress.Parse(recipientEmail));
+                message.Subject = $"Foglalás megerősítése - {booking.BookingId}";
+
+                var body = new TextPart(TextFormat.Html)
                 {
-                    message.From = new MailAddress(_smtpSettings.FromEmail);
-                    message.Subject = $"Foglalás megerősítése - {booking.BookingId}";
-                    message.Body = emailTemplate;
-                    message.IsBodyHtml = true;
-                    message.To.Add(recipientEmail);
+                    Text = emailTemplate
+                };
 
-                    
-                    using (var pdfStream = new MemoryStream(pdfBytes))
-                    {
-                        var attachment = new Attachment(pdfStream, "foglalas_szamla.pdf", MediaTypeNames.Application.Pdf);
-                        message.Attachments.Add(attachment);
+                var multipart = new Multipart("mixed");
+                multipart.Add(body);
 
-                        using (SmtpClient client = new SmtpClient(_smtpSettings.Server, _smtpSettings.Port))
-                        {
-                            client.EnableSsl = true;
-                            client.Credentials = new NetworkCredential(_smtpSettings.Username, _smtpSettings.Password);
-                            await client.SendMailAsync(message);
-                        }
-                    }
-                }
+                // PDF csatolmány hozzáadása
+                var attachment = new MimePart("application", "pdf")
+                {
+                    Content = new MimeContent(new MemoryStream(pdfBytes)),
+                    ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                    ContentTransferEncoding = ContentEncoding.Base64,
+                    FileName = "foglalas_szamla.pdf"
+                };
+
+                multipart.Add(attachment);
+                message.Body = multipart;
+
+                using var client = new SmtpClient();
+                await client.ConnectAsync(_smtpSettings.Server, _smtpSettings.Port, SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync(_smtpSettings.Username, _smtpSettings.Password);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
             }
             catch (Exception ex)
             {

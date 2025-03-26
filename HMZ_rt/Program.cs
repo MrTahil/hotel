@@ -25,17 +25,14 @@ namespace HMZ_rt
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowHmztr",
-                    policy => policy.WithOrigins(["http://localhost:3000","http://localhost:81", "https://5.204.160.231:3000", "https://hmzrt.eu","https://api.hmzrt.eu"])
+                    policy => policy.WithOrigins(["http://localhost:3000", "https://hmzrt.eu","https://api.hmzrt.eu"])
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials());
             });
 
 
-            var smtpSettings = builder.Configuration.GetSection("SmtpSettings").Get<SmtpSettings>();
-
-            // SmtpSettings hozzáadása a DI konténerhez
-            builder.Services.AddSingleton(smtpSettings);
+            builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
             builder.Services.AddTransient<IEmailService, EmailService>();
 
 
@@ -43,7 +40,7 @@ namespace HMZ_rt
             {
                 var connection = builder.Configuration.GetConnectionString("MySql");
                 o.UseMySQL(connection);
-            });
+            }); 
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -126,26 +123,7 @@ namespace HMZ_rt
                     }
                 });
             });
-            var certPath = builder.Configuration["Kestrel:Certificates:Default:Path"]
-    ?? Path.Combine(Directory.GetCurrentDirectory(), "certs/api.hmzrt.eu_full.pfx");
-            var certPassword = builder.Configuration["Kestrel:Certificates:Default:Password"];
-            builder.WebHost.ConfigureKestrel(serverOptions =>
-            {
-                serverOptions.ConfigureHttpsDefaults(httpsOptions =>
-                {
-                    httpsOptions.ServerCertificate = new X509Certificate2(
-    certPath,
-    certPassword
-);
-                    httpsOptions.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
-                });
 
-                serverOptions.Listen(IPAddress.Any, 81);
-                serverOptions.Listen(IPAddress.Any, 443, listenOptions =>
-                {
-                    listenOptions.UseHttps();
-                });
-            });
 
 
 
@@ -153,7 +131,7 @@ namespace HMZ_rt
             
 
             var app = builder.Build();
-            //app.MapGet("/", () => "HMZ_rt API v1.0");
+            app.MapGet("/", () => "HMZ_rt API v1.0");
             // Configure the HTTP request pipeline.
                 app.UseSwagger();
                 app.UseSwaggerUI();
