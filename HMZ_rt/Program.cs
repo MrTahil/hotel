@@ -10,6 +10,9 @@ using Microsoft.Extensions.Hosting;
 using static HMZ_rt.Controllers.UserAccounts_controller;
 using HMZ_rt.Controllers;
 using System.Text.Json;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+using static System.Net.WebRequestMethods;
 
 namespace HMZ_rt
 {
@@ -21,8 +24,8 @@ namespace HMZ_rt
 
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowFrontend",
-                    policy => policy.WithOrigins(["http://localhost:3000", "https://5.204.160.231:3000"])
+                options.AddPolicy("AllowHmztr",
+                    policy => policy.WithOrigins(["http://localhost:3000","http://localhost:81", "https://5.204.160.231:3000", "https://hmzrt.eu","https://api.hmzrt.eu"])
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials());
@@ -123,17 +126,39 @@ namespace HMZ_rt
                     }
                 });
             });
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            var certPath = builder.Configuration["Kestrel:Certificates:Default:Path"]
+    ?? Path.Combine(Directory.GetCurrentDirectory(), "certs/api.hmzrt.eu_full.pfx");
+            var certPassword = builder.Configuration["Kestrel:Certificates:Default:Password"];
+            builder.WebHost.ConfigureKestrel(serverOptions =>
             {
+                serverOptions.ConfigureHttpsDefaults(httpsOptions =>
+                {
+                    httpsOptions.ServerCertificate = new X509Certificate2(
+    certPath,
+    certPassword
+);
+                    httpsOptions.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
+                });
+
+                serverOptions.Listen(IPAddress.Any, 81);
+                serverOptions.Listen(IPAddress.Any, 443, listenOptions =>
+                {
+                    listenOptions.UseHttps();
+                });
+            });
+
+
+
+
+            
+
+            var app = builder.Build();
+            //app.MapGet("/", () => "HMZ_rt API v1.0");
+            // Configure the HTTP request pipeline.
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
-            app.UseCors("AllowFrontend");
-            app.UseHttpsRedirection();
-            app.Urls.Add("https://0.0.0.0:7047");
+            //app.UseHttpsRedirection();
+            app.UseCors("AllowHmztr");
             app.UseAuthorization();
             //app.UseAuthentication();
 
