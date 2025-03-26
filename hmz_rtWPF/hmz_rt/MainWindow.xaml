@@ -282,7 +282,6 @@
 
         </UniformGrid>
 
-        <!-- Rooms Container -  -->
         <!-- Rooms Container -->
         <Grid x:Name="roomsContainer" Grid.Row="1" Visibility="Collapsed">
             <Grid.RowDefinitions>
@@ -290,23 +289,90 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                <Button Content="Vissza a főmenübe" 
-                Style="{StaticResource BackButtonStyle}"
-                Click="BackButton_Click"/>
-                <Button Content="Új szoba" 
-                Style="{StaticResource AddButtonStyle}"
-                Margin="10,0,0,0"
-                Click="AddRoomButton_Click"/>
-                <Button Content="Szerkesztés" 
-                Style="{StaticResource EditButtonStyle}"
-                Margin="10,0,0,0"
-                Click="EditRoomButton_Click"/>
-                <Button Content="Törlés" 
-                Style="{StaticResource DeleteButtonStyle}"
-                Margin="10,0,0,0"
-                Click="DeleteRoomButton_Click"/>
-            </StackPanel>
+            <!-- Felső fejléc és menü -->
+            <Grid Grid.Row="0" Background="#1E293B" Margin="0,0,0,25">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Vissza gomb -->
+                <Button Grid.Column="0" 
+                Content="⬅ Vissza" 
+                HorizontalAlignment="Left" 
+                Margin="30,20" 
+                Padding="25,15" 
+                Background="#3B82F6" 
+                Foreground="White" 
+                BorderThickness="0"
+                FontSize="18"
+                Click="BackButton_Click">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <!-- Cím -->
+                <TextBlock Grid.Column="1" 
+                   Text="Szobák Kezelése" 
+                   VerticalAlignment="Center" 
+                   HorizontalAlignment="Center" 
+                   FontSize="32" 
+                   FontWeight="SemiBold" 
+                   Foreground="White"/>
+
+                <!-- Műveleti gombok -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="30,20">
+                    <Button x:Name="AddRoomButton"
+                    Content="➕ Új szoba" 
+                    Margin="15,0" 
+                    Padding="25,15" 
+                    Background="#16A34A" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    FontSize="18"
+                    Click="AddRoomButton_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="8"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                    <Button x:Name="EditRoomButton"
+                    Content="✏️ Szerkesztés" 
+                    Margin="15,0" 
+                    Padding="25,15" 
+                    Background="#2563EB" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    FontSize="18"
+                    Click="EditRoomButton_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="8"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                    <Button x:Name="DeleteRoomButton"
+                    Content="🗑️ Törlés" 
+                    Margin="15,0" 
+                    Padding="25,15" 
+                    Background="#DC2626" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    FontSize="18"
+                    Click="DeleteRoomButton_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="8"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </StackPanel>
+            </Grid>
 
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
@@ -314,11 +380,16 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Rooms list -->
-                <ListView x:Name="roomsListView" Grid.Column="0" Margin="20,0,0,0">
+                <!-- Szobák listája -->
+                <ListView x:Name="roomsListView" 
+                  Grid.Column="0" 
+                  Margin="40,0,40,40" 
+                  BorderThickness="1"
+                  BorderBrush="#E2E8F0"
+                  FontSize="16">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="ID" DisplayMemberBinding="{Binding RoomId}" Width="50"/>
+                            <!--<GridViewColumn Header="ID" DisplayMemberBinding="{Binding RoomId}" Width="50"/>-->
                             <GridViewColumn Header="Szobaszám" DisplayMemberBinding="{Binding RoomNumber}" Width="100"/>
                             <GridViewColumn Header="Típus" DisplayMemberBinding="{Binding RoomType}" Width="120"/>
                             <GridViewColumn Header="Kapacitás" DisplayMemberBinding="{Binding Capacity}" Width="80"/>
@@ -333,7 +404,7 @@
                                         <Button Content="Megtekintés" 
                                         Click="ViewRoomImage_Click" 
                                         Tag="{Binding RoomId}"
-                                        Visibility="{Binding Images, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                        Visibility="Visible"
                                         Padding="5,2" Background="#2563EB" Foreground="White" BorderThickness="0">
                                             <Button.Resources>
                                                 <Style TargetType="Border">
@@ -350,6 +421,8 @@
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Padding" Value="10,8" />
+                            <Setter Property="Height" Value="45" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding Status}" Value="Foglalt">
                                     <Setter Property="Background" Value="#FEE2E2" />
@@ -365,17 +438,31 @@
                     </ListView.ItemContainerStyle>
                 </ListView>
 
-                <!-- Room Edit Panel -->
-                <Border x:Name="roomEditPanel" Grid.Column="1" Style="{StaticResource EditPanelStyle}" Width="400" Visibility="Collapsed">
+                <!-- Szoba szerkesztő panel -->
+                <Border x:Name="roomEditPanel" 
+                Grid.Column="1" 
+                Padding="40" 
+                Margin="0,0,40,40" 
+                Background="White" 
+                CornerRadius="16" 
+                BorderThickness="1"
+                BorderBrush="#E2E8F0"
+                Effect="{StaticResource BoxShadow}"
+                Width="400" 
+                Visibility="Collapsed">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
-                            <TextBlock x:Name="roomEditTitle" Text="Szoba szerkesztése" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+                            <TextBlock x:Name="roomEditTitle" 
+                               Text="Szoba szerkesztése" 
+                               FontSize="28" 
+                               FontWeight="SemiBold" 
+                               Margin="0,0,0,30"/>
 
-                            <TextBlock Text="Szobaszám:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox x:Name="RoomNumberTextBox" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Szobaszám:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <TextBox x:Name="RoomNumberTextBox" Padding="15,12" FontSize="16" Margin="0,0,0,20"/>
 
-                            <TextBlock Text="Szoba típusa:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <ComboBox x:Name="RoomTypeComboBox" Padding="5" Margin="0,0,0,10">
+                            <TextBlock Text="Szoba típusa:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <ComboBox x:Name="RoomTypeComboBox" Padding="15,12" FontSize="16" Margin="0,0,0,20">
                                 <ComboBoxItem Content="Egyágyas"/>
                                 <ComboBoxItem Content="Kétágyas"/>
                                 <ComboBoxItem Content="Családi"/>
@@ -383,14 +470,14 @@
                                 <ComboBoxItem Content="Luxus"/>
                             </ComboBox>
 
-                            <TextBlock Text="Kapacitás:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox x:Name="CapacityTextBox" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Kapacitás:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <TextBox x:Name="CapacityTextBox" Padding="15,12" FontSize="16" Margin="0,0,0,20"/>
 
-                            <TextBlock Text="Ár/éj:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox x:Name="PricePerNightTextBox" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Ár/éj:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <TextBox x:Name="PricePerNightTextBox" Padding="15,12" FontSize="16" Margin="0,0,0,20"/>
 
-                            <TextBlock Text="Állapot:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <ComboBox x:Name="RoomStatusComboBox" Padding="5" Margin="0,0,0,10">
+                            <TextBlock Text="Állapot:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <ComboBox x:Name="RoomStatusComboBox" Padding="15,12" FontSize="16" Margin="0,0,0,20">
                                 <ComboBoxItem Content="Szabad"/>
                                 <ComboBoxItem Content="Foglalt"/>
                                 <ComboBoxItem Content="Takarítás alatt"/>
@@ -398,80 +485,114 @@
                                 <ComboBoxItem Content="Nem elérhető"/>
                             </ComboBox>
 
-                            <TextBlock Text="Emelet:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox x:Name="FloorNumberTextBox" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Emelet:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <TextBox x:Name="FloorNumberTextBox" Padding="15,12" FontSize="16" Margin="0,0,0,20"/>
 
-                            <TextBlock Text="Leírás:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox x:Name="RoomDescriptionTextBox" TextWrapping="Wrap" AcceptsReturn="True" Height="80" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Leírás:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <TextBox x:Name="RoomDescriptionTextBox" 
+                             TextWrapping="Wrap" 
+                             AcceptsReturn="True" 
+                             Height="80" 
+                             Padding="15,12" 
+                             FontSize="16" 
+                             Margin="0,0,0,20"/>
 
-                            <TextBlock Text="Felszereltség:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox x:Name="AmenitiesTextBox" TextWrapping="Wrap" AcceptsReturn="True" Height="60" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Felszereltség:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <TextBox x:Name="AmenitiesTextBox" 
+                             TextWrapping="Wrap" 
+                             AcceptsReturn="True" 
+                             Height="60" 
+                             Padding="15,12" 
+                             FontSize="16" 
+                             Margin="0,0,0,20"/>
 
                             <!-- Kép feltöltés panel -->
-                            <StackPanel Margin="0,10,0,0">
-                                <TextBlock Text="Szoba képe:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Image x:Name="RoomImagePreview" Width="150" Height="100" Stretch="Uniform" 
-                                   Margin="0,0,10,0" Grid.Column="0"/>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <Button x:Name="SelectRoomImageButton" Content="Kép kiválasztása" 
-                                        Click="SelectRoomImageButton_Click" Margin="0,0,0,5"
-                                        Padding="10,5" Background="#2563EB" Foreground="White" BorderThickness="0">
-                                            <Button.Resources>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="CornerRadius" Value="4"/>
-                                                </Style>
-                                            </Button.Resources>
-                                        </Button>
-                                        <Button x:Name="ClearRoomImageButton" Content="Kép törlése" 
-                                        Click="ClearRoomImageButton_Click" Margin="0,0,0,5"
-                                        Padding="10,5" Background="#DC2626" Foreground="White" BorderThickness="0">
-                                            <Button.Resources>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="CornerRadius" Value="4"/>
-                                                </Style>
-                                            </Button.Resources>
-                                        </Button>
-                                        <Button x:Name="ViewRoomImageButton" Content="Kép megtekintése" 
-                                        Click="ViewRoomImageButton_Click" IsEnabled="False"
-                                        Padding="10,5" Background="#16A34A" Foreground="White" BorderThickness="0">
-                                            <Button.Resources>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="CornerRadius" Value="4"/>
-                                                </Style>
-                                            </Button.Resources>
-                                        </Button>
-                                    </StackPanel>
-                                </Grid>
-                            </StackPanel>
+                            <TextBlock Text="Szoba képe:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Image x:Name="RoomImagePreview" 
+                               Width="150" 
+                               Height="100" 
+                               Stretch="Uniform" 
+                               Margin="0,0,10,0" 
+                               Grid.Column="0"/>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <Button x:Name="SelectRoomImageButton" 
+                                    Content="Kép kiválasztása" 
+                                    Click="SelectRoomImageButton_Click" 
+                                    Margin="0,0,0,5"
+                                    Padding="15,12" 
+                                    Background="#2563EB" 
+                                    Foreground="White" 
+                                    BorderThickness="0"
+                                    FontSize="16">
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="8"/>
+                                            </Style>
+                                        </Button.Resources>
+                                    </Button>
+                                    <Button x:Name="ClearRoomImageButton" 
+                                    Content="Kép törlése" 
+                                    Click="ClearRoomImageButton_Click" 
+                                    Margin="0,5,0,5"
+                                    Padding="15,12" 
+                                    Background="#DC2626" 
+                                    Foreground="White" 
+                                    BorderThickness="0"
+                                    FontSize="16">
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="8"/>
+                                            </Style>
+                                        </Button.Resources>
+                                    </Button>
+                                    <Button x:Name="ViewRoomImageButton" 
+                                    Content="Kép megtekintése" 
+                                    Click="ViewRoomImageButton_Click" 
+                                    IsEnabled="False"
+                                    Padding="15,12" 
+                                    Background="#16A34A" 
+                                    Foreground="White" 
+                                    BorderThickness="0"
+                                    FontSize="16">
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="8"/>
+                                            </Style>
+                                        </Button.Resources>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
                                 <Button Content="Mégse" 
-                                Padding="15,8" 
+                                Padding="30,15" 
                                 Margin="0,0,10,0" 
                                 Background="#6B7280" 
                                 Foreground="White" 
                                 BorderThickness="0"
+                                FontSize="18"
                                 Click="CancelRoomEditButton_Click">
                                     <Button.Resources>
                                         <Style TargetType="Border">
-                                            <Setter Property="CornerRadius" Value="6"/>
+                                            <Setter Property="CornerRadius" Value="8"/>
                                         </Style>
                                     </Button.Resources>
                                 </Button>
                                 <Button Content="Mentés" 
-                                Padding="15,8" 
+                                Padding="30,15" 
                                 Background="#16A34A" 
                                 Foreground="White" 
                                 BorderThickness="0"
+                                FontSize="18"
                                 Click="SaveRoomButton_Click">
                                     <Button.Resources>
                                         <Style TargetType="Border">
-                                            <Setter Property="CornerRadius" Value="6"/>
+                                            <Setter Property="CornerRadius" Value="8"/>
                                         </Style>
                                     </Button.Resources>
                                 </Button>
@@ -745,7 +866,7 @@
           FontSize="16">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="ID" DisplayMemberBinding="{Binding StaffId}" Width="Auto"/>
+                            <!--<GridViewColumn Header="ID" DisplayMemberBinding="{Binding StaffId}" Width="Auto"/>-->
                             <GridViewColumn Header="Vezetéknév" DisplayMemberBinding="{Binding LastName}" Width="Auto"/>
                             <GridViewColumn Header="Keresztnév" DisplayMemberBinding="{Binding FirstName}" Width="Auto"/>
                             <GridViewColumn Header="Email" DisplayMemberBinding="{Binding Email}" Width="Auto"/>
@@ -1033,7 +1154,7 @@
           FontSize="16">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="ID" DisplayMemberBinding="{Binding PromotionId}" Width="Auto"/>
+                            <!--<GridViewColumn Header="ID" DisplayMemberBinding="{Binding PromotionId}" Width="Auto"/>-->
                             <GridViewColumn Header="Név" DisplayMemberBinding="{Binding PromotionName}" Width="Auto"/>
                             <GridViewColumn Header="Leírás" DisplayMemberBinding="{Binding Description}" Width="Auto"/>
                             <GridViewColumn Header="Kezdés" DisplayMemberBinding="{Binding StartDate, StringFormat='{}{0:yyyy.MM.dd}'}" Width="Auto"/>
@@ -1342,7 +1463,7 @@
                 <ListView x:Name="guestsListView" Grid.Row="1" Margin="40,0,40,40" BorderThickness="1" BorderBrush="#E2E8F0" FontSize="16">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="ID" DisplayMemberBinding="{Binding GuestId}" Width="Auto"/>
+                            <!--<GridViewColumn Header="ID" DisplayMemberBinding="{Binding GuestId}" Width="Auto"/>-->
                             <GridViewColumn Header="Vezetéknév" DisplayMemberBinding="{Binding LastName}" Width="Auto"/>
                             <GridViewColumn Header="Keresztnév" DisplayMemberBinding="{Binding FirstName}" Width="Auto"/>
                             <GridViewColumn Header="Email" DisplayMemberBinding="{Binding Email}" Width="Auto"/>
@@ -1577,7 +1698,7 @@
           FontSize="16">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="ID" DisplayMemberBinding="{Binding BookingId}" Width="Auto"/>
+                            <!--<GridViewColumn Header="ID" DisplayMemberBinding="{Binding BookingId}" Width="Auto"/>-->
                             <GridViewColumn Header="Vendég" DisplayMemberBinding="{Binding GuestName}" Width="Auto"/>
                             <GridViewColumn Header="Szoba" DisplayMemberBinding="{Binding RoomNumber}" Width="Auto"/>
                             <GridViewColumn Header="Bejelentkezés" DisplayMemberBinding="{Binding CheckInDate, StringFormat='{}{0:yyyy.MM.dd}'}" Width="Auto"/>
@@ -2054,7 +2175,7 @@
           FontSize="16">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="ID" DisplayMemberBinding="{Binding MaintenanceId}" Width="Auto"/>
+                            <!--<GridViewColumn Header="ID" DisplayMemberBinding="{Binding MaintenanceId}" Width="Auto"/>-->
                             <GridViewColumn Header="Szoba" DisplayMemberBinding="{Binding RoomNumber}" Width="Auto"/>
                             <GridViewColumn Header="Probléma leírása" DisplayMemberBinding="{Binding Description}" Width="Auto"/>
                             <GridViewColumn Header="Karbantartás dátuma" DisplayMemberBinding="{Binding MaintenanceDate, StringFormat='{}{0:yyyy.MM.dd}'}" Width="Auto"/>
@@ -2087,48 +2208,120 @@
             </Grid>
         </Grid>
         <!-- Események konténer -->
-        <!-- Events Container -->
         <Grid x:Name="eventsContainer" Grid.Row="1" Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-                <Button Content="Vissza a főmenübe" 
-                Style="{StaticResource BackButtonStyle}"
-                Click="EventsBackButton_Click"/>
-                <Button Content="Új esemény" 
-                Style="{StaticResource AddButtonStyle}"
-                Margin="10,0,0,0"
-                Click="AddEventButton_Click"/>
-                <Button Content="Szerkesztés" 
-                Style="{StaticResource EditButtonStyle}"
-                Margin="10,0,0,0"
-                Click="EditEventButton_Click"/>
-                <Button Content="Törlés" 
-                Style="{StaticResource DeleteButtonStyle}"
-                Margin="10,0,0,0"
-                Click="DeleteEventButton_Click"/>
-            </StackPanel>
+            <!-- Felső fejléc és menü -->
+            <Grid Grid.Row="0" Background="#1E293B" Margin="0,0,0,25">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
+                <!-- Vissza gomb -->
+                <Button Grid.Column="0" 
+                Content="⬅ Vissza" 
+                HorizontalAlignment="Left" 
+                Margin="30,20" 
+                Padding="25,15" 
+                Background="#3B82F6" 
+                Foreground="White" 
+                BorderThickness="0"
+                FontSize="18"
+                Click="EventsBackButton_Click">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <!-- Cím -->
+                <TextBlock Grid.Column="1" 
+                   Text="Események Kezelése" 
+                   VerticalAlignment="Center" 
+                   HorizontalAlignment="Center" 
+                   FontSize="32" 
+                   FontWeight="SemiBold" 
+                   Foreground="White"/>
+
+                <!-- Műveleti gombok -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="30,20">
+                    <Button x:Name="AddEventButton"
+                    Content="➕ Új esemény" 
+                    Margin="15,0" 
+                    Padding="25,15" 
+                    Background="#16A34A" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    FontSize="18"
+                    Click="AddEventButton_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="8"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                    <Button x:Name="EditEventButton"
+                    Content="✏️ Szerkesztés" 
+                    Margin="15,0" 
+                    Padding="25,15" 
+                    Background="#2563EB" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    FontSize="18"
+                    Click="EditEventButton_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="8"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                    <Button x:Name="DeleteEventButton"
+                    Content="🗑️ Törlés" 
+                    Margin="15,0" 
+                    Padding="25,15" 
+                    Background="#DC2626" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    FontSize="18"
+                    Click="DeleteEventButton_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="8"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Tartalom -->
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Events list -->
-                <ListView x:Name="eventsListView" Grid.Column="0" Margin="20,0,0,0">
+                <!-- Események listája -->
+                <ListView x:Name="eventsListView" 
+                  Grid.Column="0" 
+                  Margin="40,0,40,40" 
+                  BorderThickness="1"
+                  BorderBrush="#E2E8F0"
+                  FontSize="16">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="ID" DisplayMemberBinding="{Binding EventId}" Width="50"/>
+                            <!--<GridViewColumn Header="ID" DisplayMemberBinding="{Binding EventId}" Width="50"/>-->
                             <GridViewColumn Header="Esemény neve" DisplayMemberBinding="{Binding EventName}" Width="200"/>
                             <GridViewColumn Header="Kapacitás" DisplayMemberBinding="{Binding Capacity}" Width="80"/>
                             <GridViewColumn Header="Státusz" DisplayMemberBinding="{Binding Status}" Width="100"/>
-                            <GridViewColumn Header="Dátum" DisplayMemberBinding="{Binding EventDate, StringFormat=\{0:yyyy.MM.dd\}}" Width="100"/>
+                            <GridViewColumn Header="Dátum" DisplayMemberBinding="{Binding EventDate, StringFormat='{}{0:yyyy.MM.dd}'}" Width="100"/>
                             <GridViewColumn Header="Helyszín" DisplayMemberBinding="{Binding Location}" Width="150"/>
-                            <GridViewColumn Header="Ár" DisplayMemberBinding="{Binding Price, StringFormat=\{0:N0\} Ft}" Width="100"/>
+                            <GridViewColumn Header="Ár" DisplayMemberBinding="{Binding Price, StringFormat='{}{0:N0} Ft'}" Width="100"/>
                             <GridViewColumn Header="Szervező" DisplayMemberBinding="{Binding OrganizerName}" Width="150"/>
                             <GridViewColumn Header="Kép" Width="80">
                                 <GridViewColumn.CellTemplate>
@@ -2136,7 +2329,7 @@
                                         <Button Content="Megtekintés" 
                                         Click="ViewEventImage_Click" 
                                         Tag="{Binding EventId}"
-                                        Visibility="{Binding Images, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                        Visibility="Visible"
                                         Padding="5,2" Background="#2563EB" Foreground="White" BorderThickness="0">
                                             <Button.Resources>
                                                 <Style TargetType="Border">
@@ -2151,20 +2344,34 @@
                     </ListView.View>
                 </ListView>
 
-                <!-- Event Edit Panel -->
-                <Border x:Name="eventEditPanel" Grid.Column="1" Style="{StaticResource EditPanelStyle}" Width="400" Visibility="Collapsed">
+                <!-- Esemény szerkesztő panel -->
+                <Border x:Name="eventEditPanel" 
+                Grid.Column="1" 
+                Padding="40" 
+                Margin="0,0,40,40" 
+                Background="White" 
+                CornerRadius="16" 
+                BorderThickness="1"
+                BorderBrush="#E2E8F0"
+                Effect="{StaticResource BoxShadow}"
+                Width="400" 
+                Visibility="Collapsed">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
-                            <TextBlock x:Name="eventEditTitle" Text="Esemény szerkesztése" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+                            <TextBlock x:Name="eventEditTitle" 
+                               Text="Esemény szerkesztése" 
+                               FontSize="28" 
+                               FontWeight="SemiBold" 
+                               Margin="0,0,0,30"/>
 
-                            <TextBlock Text="Esemény neve:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox x:Name="EventNameTextBox" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Esemény neve:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <TextBox x:Name="EventNameTextBox" Padding="15,12" FontSize="16" Margin="0,0,0,20"/>
 
-                            <TextBlock Text="Kapacitás:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox x:Name="EventCapacityTextBox" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Kapacitás:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <TextBox x:Name="EventCapacityTextBox" Padding="15,12" FontSize="16" Margin="0,0,0,20"/>
 
-                            <TextBlock Text="Státusz:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <ComboBox x:Name="EventStatusComboBox" Padding="5" Margin="0,0,0,10">
+                            <TextBlock Text="Státusz:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <ComboBox x:Name="EventStatusComboBox" Padding="15,12" FontSize="16" Margin="0,0,0,20">
                                 <ComboBoxItem Content="Aktív"/>
                                 <ComboBoxItem Content="Inaktív"/>
                                 <ComboBoxItem Content="Telt ház"/>
@@ -2172,89 +2379,117 @@
                                 <ComboBoxItem Content="Törölve"/>
                             </ComboBox>
 
-                            <TextBlock Text="Esemény dátuma:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <DatePicker x:Name="EventDatePicker" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Esemény dátuma:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <DatePicker x:Name="EventDatePicker" Padding="15,12" FontSize="16" Margin="0,0,0,20"/>
 
-                            <TextBlock Text="Helyszín:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox x:Name="LocationTextBox" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Helyszín:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <TextBox x:Name="LocationTextBox" Padding="15,12" FontSize="16" Margin="0,0,0,20"/>
 
-                            <TextBlock Text="Ár:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox x:Name="PriceTextBox" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Ár:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <TextBox x:Name="PriceTextBox" Padding="15,12" FontSize="16" Margin="0,0,0,20"/>
 
-                            <TextBlock Text="Leírás:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox x:Name="EventDescriptionTextBox" TextWrapping="Wrap" AcceptsReturn="True" Height="80" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Leírás:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <TextBox x:Name="EventDescriptionTextBox" 
+                             TextWrapping="Wrap" 
+                             AcceptsReturn="True" 
+                             Height="80" 
+                             Padding="15,12" 
+                             FontSize="16" 
+                             Margin="0,0,0,20"/>
 
-                            <TextBlock Text="Szervező neve:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox x:Name="OrganizerNameTextBox" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Szervező neve:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <TextBox x:Name="OrganizerNameTextBox" Padding="15,12" FontSize="16" Margin="0,0,0,20"/>
 
-                            <TextBlock Text="Kapcsolattartási információ:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                            <TextBox x:Name="ContactInfoTextBox" Padding="5" Margin="0,0,0,10"/>
+                            <TextBlock Text="Kapcsolattartási információ:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <TextBox x:Name="ContactInfoTextBox" Padding="15,12" FontSize="16" Margin="0,0,0,20"/>
 
                             <!-- Kép feltöltés panel -->
-                            <StackPanel Margin="0,10,0,0">
-                                <TextBlock Text="Esemény képe:" FontWeight="SemiBold" Margin="0,0,0,5"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Image x:Name="EventImagePreview" Width="150" Height="100" Stretch="Uniform" 
-                                   Margin="0,0,10,0" Grid.Column="0"/>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <Button x:Name="SelectImageButton" Content="Kép kiválasztása" 
-                                        Click="SelectImageButton_Click" Margin="0,0,0,5"
-                                        Padding="10,5" Background="#2563EB" Foreground="White" BorderThickness="0">
-                                            <Button.Resources>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="CornerRadius" Value="4"/>
-                                                </Style>
-                                            </Button.Resources>
-                                        </Button>
-                                        <Button x:Name="ClearImageButton" Content="Kép törlése" 
-                                        Click="ClearImageButton_Click" Margin="0,0,0,5"
-                                        Padding="10,5" Background="#DC2626" Foreground="White" BorderThickness="0">
-                                            <Button.Resources>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="CornerRadius" Value="4"/>
-                                                </Style>
-                                            </Button.Resources>
-                                        </Button>
-                                        <Button x:Name="ViewImageButton" Content="Kép megtekintése" 
-                                        Click="ViewImageButton_Click" IsEnabled="False"
-                                        Padding="10,5" Background="#16A34A" Foreground="White" BorderThickness="0">
-                                            <Button.Resources>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="CornerRadius" Value="4"/>
-                                                </Style>
-                                            </Button.Resources>
-                                        </Button>
-                                    </StackPanel>
-                                </Grid>
-                            </StackPanel>
+                            <TextBlock Text="Esemény képe:" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
+                            <Grid Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Image x:Name="EventImagePreview" 
+                               Width="150" 
+                               Height="100" 
+                               Stretch="Uniform" 
+                               Margin="0,0,10,0" 
+                               Grid.Column="0"/>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <Button x:Name="SelectImageButton" 
+                                    Content="Kép kiválasztása" 
+                                    Click="SelectImageButton_Click" 
+                                    Margin="0,0,0,5"
+                                    Padding="15,12" 
+                                    Background="#2563EB" 
+                                    Foreground="White" 
+                                    BorderThickness="0"
+                                    FontSize="16">
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="8"/>
+                                            </Style>
+                                        </Button.Resources>
+                                    </Button>
+                                    <Button x:Name="ClearImageButton" 
+                                    Content="Kép törlése" 
+                                    Click="ClearImageButton_Click" 
+                                    Margin="0,5,0,5"
+                                    Padding="15,12" 
+                                    Background="#DC2626" 
+                                    Foreground="White" 
+                                    BorderThickness="0"
+                                    FontSize="16">
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="8"/>
+                                            </Style>
+                                        </Button.Resources>
+                                    </Button>
+                                    <Button x:Name="ViewImageButton" 
+                                    Content="Kép megtekintése" 
+                                    Click="ViewImageButton_Click" 
+                                    IsEnabled="False"
+                                    Padding="15,12" 
+                                    Background="#16A34A" 
+                                    Foreground="White" 
+                                    BorderThickness="0"
+                                    FontSize="16">
+                                        <Button.Resources>
+                                            <Style TargetType="Border">
+                                                <Setter Property="CornerRadius" Value="8"/>
+                                            </Style>
+                                        </Button.Resources>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
                                 <Button Content="Mégse" 
-                                Padding="15,8" 
+                                Padding="30,15" 
                                 Margin="0,0,10,0" 
                                 Background="#6B7280" 
                                 Foreground="White" 
                                 BorderThickness="0"
+                                FontSize="18"
                                 Click="CancelEventEditButton_Click">
                                     <Button.Resources>
                                         <Style TargetType="Border">
-                                            <Setter Property="CornerRadius" Value="6"/>
+                                            <Setter Property="CornerRadius" Value="8"/>
                                         </Style>
                                     </Button.Resources>
                                 </Button>
                                 <Button Content="Mentés" 
-                                Padding="15,8" 
+                                Padding="30,15" 
                                 Background="#16A34A" 
                                 Foreground="White" 
                                 BorderThickness="0"
+                                FontSize="18"
                                 Click="SaveEventButton_Click">
                                     <Button.Resources>
                                         <Style TargetType="Border">
-                                            <Setter Property="CornerRadius" Value="6"/>
+                                            <Setter Property="CornerRadius" Value="8"/>
                                         </Style>
                                     </Button.Resources>
                                 </Button>
