@@ -7,14 +7,6 @@ export const Foglalas = () => {
   const { room, checkInDate: initialCheckInDate, checkOutDate: initialCheckOutDate } = location.state || {};
   const { id } = useParams();
 
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      alert("Kérjük, jelentkezzen be a foglalás megkezdéséhez!");
-      navigate("/"); // Átirányítás a bejelentkezés oldalra
-    }
-  }, [navigate]);
-
   const [additionalGuests, setAdditionalGuests] = useState(0);
   const [savedGuests, setSavedGuests] = useState([]);
   const [mainGuest, setMainGuest] = useState(null);
@@ -27,6 +19,9 @@ export const Foglalas = () => {
   const [bookingError, setBookingError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showGuestModal, setShowGuestModal] = useState(false);
+  const [isRoomAvailable, setIsRoomAvailable] = useState(true);
+  const [availabilityMessage, setAvailabilityMessage] = useState("");
+  const [bookedDates, setBookedDates] = useState([]);
   const [guestData, setGuestData] = useState({
     firstName: '',
     lastName: '',
@@ -39,25 +34,82 @@ export const Foglalas = () => {
     gender: '',
   });
 
+  // Foglalt dátumok lekérése
+  useEffect(() => {
+    const fetchBookedDates = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(
+          `${process.env.REACT_APP_API_BASE_URL}/Bookings/GetBookedDates/${id}`,
+          { headers: { "Authorization": `Bearer ${token}` } }
+        );
+        
+        if (!response.ok) throw new Error("Hiba a foglalt dátumok lekérésekor");
+        const data = await response.json();
+        setBookedDates(data);
+      } catch (error) {
+        console.error("Hiba a foglalt dátumoknál:", error);
+        setBookedDates([]);
+      }
+    };
+    
+    fetchBookedDates();
+  }, [id]);
+
+  // Bejelentkezés ellenőrzése
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      alert("Kérjük, jelentkezzen be a foglalás megkezdéséhez!");
+      navigate("/");
+    }
+  }, [navigate]);
+
+  // Szoba elérhetőség ellenőrzése
+  const checkRoomAvailability = () => {
+    if (!checkInDate || !checkOutDate) return;
+
+    const newCheckIn = new Date(checkInDate);
+    const newCheckOut = new Date(checkOutDate);
+    
+    if (newCheckOut <= newCheckIn) {
+      setIsRoomAvailable(false);
+      setAvailabilityMessage("A kijelentkezés dátuma a bejelentkezés után kell legyen");
+      return;
+    }
+
+    const hasConflict = bookedDates.some(booking => {
+      const existingCheckIn = new Date(booking.checkInDate);
+      const existingCheckOut = new Date(booking.checkOutDate);
+      return newCheckIn < existingCheckOut && newCheckOut > existingCheckIn;
+    });
+
+    setIsRoomAvailable(!hasConflict);
+    setAvailabilityMessage(
+      !hasConflict 
+        ? "A szoba elérhető a megadott időpontban." 
+        : "Sajnos a szoba már foglalt erre az időpontra."
+    );
+  };
+
+  // Automatikus ellenőrzés dátumváltozásnál
+  useEffect(() => {
+    checkRoomAvailability();
+  }, [checkInDate, checkOutDate]);
+
+  // Foglalás elküldése
   const handleBooking = async () => {
     setIsSubmitting(true);
     setBookingError("");
 
     try {
-      if (!checkInDate || !checkOutDate) {
-        throw new Error("Kérjük töltsd ki mindkét dátum mezőt");
-      }
-
-      if (new Date(checkOutDate) <= new Date(checkInDate)) {
-        throw new Error("A kijelentkezés dátuma a bejelentkezés után kell legyen");
-      }
-
-      if (!paymentMethod) {
-        throw new Error("Válassz fizetési módot");
-      }
+      // Validációk
+      if (!checkInDate || !checkOutDate) throw new Error("Kérjük töltsd ki mindkét dátum mezőt");
+      if (new Date(checkOutDate) <= new Date(checkInDate)) throw new Error("A kijelentkezés dátuma a bejelentkezés után kell legyen");
+      if (!paymentMethod) throw new Error("Válassz fizetési módot");
+      if (!isRoomAvailable) throw new Error("A szoba már foglalt erre az időpontra");
 
       const totalGuests = additionalGuests + 1;
-
       const bookingData = {
         GuestId: mainGuest,
         CheckInDate: new Date(checkInDate),
@@ -67,7 +119,7 @@ export const Foglalas = () => {
       };
 
       const token = localStorage.getItem('authToken');
-      const response = await fetch(process.env.REACT_APP_API_BASE_URL+`/Bookings/New_Booking/${id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/Bookings/New_Booking/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -96,6 +148,7 @@ export const Foglalas = () => {
     }
   };
 
+  // További függvények és useEffect-ek...
   const getMinCheckoutDate = () => {
     if (!checkInDate) return "";
     const minDate = new Date(checkInDate);
@@ -110,14 +163,11 @@ export const Foglalas = () => {
 
       try {
         const response = await fetch(
-          process.env.REACT_APP_API_BASE_URL+`/Guests/GetGuestData/${username}`,
-          {
-            headers: { 'Authorization': `Bearer ${token}` },
-          }
+          `${process.env.REACT_APP_API_BASE_URL}/Guests/GetGuestData/${username}`,
+          { headers: { 'Authorization': `Bearer ${token}` } }
         );
 
         if (!response.ok) throw new Error('Nem sikerült lekérni a vendégeket');
-
         const data = await response.json();
         const guestsArray = Array.isArray(data) ? data : [data];
 
@@ -256,7 +306,7 @@ export const Foglalas = () => {
             <div className="w-full lg:w-2/3">
               <h2 className="text-3xl md:text-4xl font-bold text-blue-800 mb-4 md:mb-6 flex items-center gap-4">
                 <button
-                  onClick={() => navigate("/szobak")}  // Vagy "/szobak" ha van külön szobák oldal
+                  onClick={() => navigate("/szobak")}
                   className="p-2 rounded-full hover:bg-blue-100 transition-colors"
                   title="Vissza a szobákhoz"
                   aria-label="Vissza"
@@ -442,6 +492,11 @@ export const Foglalas = () => {
                       disabled={!checkInDate}
                     />
                   </div>
+                  {availabilityMessage && (
+                    <p className={`text-sm ${isRoomAvailable ? "text-green-600" : "text-red-600"}`}>
+                      {availabilityMessage}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -490,11 +545,12 @@ export const Foglalas = () => {
 
                 <button
                   onClick={handleBooking}
-                  disabled={isSubmitting}
-                  className={`w-full py-3 rounded-lg font-bold transition-colors ${isSubmitting
+                  disabled={isSubmitting || !isRoomAvailable}
+                  className={`w-full py-3 rounded-lg font-bold transition-colors ${
+                    isSubmitting || !isRoomAvailable
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-blue-600 hover:bg-blue-700 text-white"
-                    }`}
+                  }`}
                 >
                   {isSubmitting ? "Feldolgozás..." : "Foglalás megerősítése"}
                 </button>

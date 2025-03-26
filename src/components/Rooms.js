@@ -90,11 +90,10 @@ function RoomCard() {
     );
   };
 
-  const handlePriceChange = (e, index) => {
+  const handlePriceChange = (e) => {
     const value = e.target.value === '' ? '' : parseInt(e.target.value) || 0;
-    const newRange = [...priceRange];
-    newRange[index] = value === '' ? 0 : Math.min(Math.max(value, 0), 500000);
-    setPriceRange(newRange.sort((a, b) => a - b));
+    const newMax = value === '' ? 500000 : Math.min(Math.max(value, 0), 500000);
+    setPriceRange([0, newMax]);
   };
 
   const applyFilters = async () => {
@@ -144,9 +143,7 @@ function RoomCard() {
         );
       }
 
-      result = result.filter(room =>
-        room.pricePerNight >= priceRange[0] && room.pricePerNight <= priceRange[1]
-      );
+      result = result.filter(room => room.pricePerNight <= priceRange[1]);
 
       setFilteredRooms(result);
     } catch (error) {
@@ -255,7 +252,7 @@ function RoomCard() {
               Szűrők {showFilters ? 'bezárása' : 'megnyitása'}
             </button>
 
-            {(selectedRoomTypes.length > 0 || selectedAmenities.length > 0 || selectedFloors.length > 0 || priceRange[0] > 0 || priceRange[1] < 500000) && (
+            {(selectedRoomTypes.length > 0 || selectedAmenities.length > 0 || selectedFloors.length > 0 || priceRange[1] < 500000) && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>Aktív szűrők:</span>
                 <div className="flex flex-wrap gap-2">
@@ -269,11 +266,6 @@ function RoomCard() {
                       {floor}. emelet
                     </span>
                   ))}
-                  {priceRange[0] > 0 && (
-                    <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">
-                      Min {priceRange[0]} Ft
-                    </span>
-                  )}
                   {priceRange[1] < 500000 && (
                     <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">
                       Max {priceRange[1]} Ft
@@ -287,192 +279,124 @@ function RoomCard() {
 
         {showFilters && (
           <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-lg text-gray-800">Szobatípus</h3>
-                </div>
-                <div className="space-y-3 pl-11">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <h3 className="font-medium text-gray-800 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                  Szobatípus
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
                   {allRoomTypes.map(type => (
-                    <label key={type} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
+                    <label key={type} className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
                         checked={selectedRoomTypes.includes(type)}
                         onChange={() => handleRoomTypeChange(type)}
-                        className="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                        className="h-4 w-4 text-blue-600 rounded border-gray-300"
                       />
-                      <span className="text-gray-700">{type}</span>
+                      {type}
                     </label>
                   ))}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
-                    </div>
-                    <h3 className="font-semibold text-lg text-gray-800">Emelet</h3>
-                  </div>
-                  <div className="space-y-3 pl-11">
-                    <div className="grid grid-cols-4 gap-2">
-                      {allFloors.map(floor => (
-                        <div key={floor} className="flex">
-                          <input
-                            id={`floor-${floor}`}
-                            type="checkbox"
-                            checked={selectedFloors.includes(floor)}
-                            onChange={() => handleFloorChange(floor)}
-                            className="hidden peer"
-                          />
-                          <label
-                            htmlFor={`floor-${floor}`}
-                            className={`w-full py-2 px-3 text-center rounded-lg border transition-all cursor-pointer
-              ${selectedFloors.includes(floor)
-                                ? 'bg-blue-100 border-blue-300 text-blue-800 font-medium shadow-inner'
-                                : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'}`}
-                          >
-                            {floor}.
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                    {allFloors.length > 0 && (
-                      <p className="text-xs text-gray-500 mt-2">
-                        {selectedFloors.length > 0
-                          ? `${selectedFloors.length} emelet kiválasztva`
-                          : "Válasszon emeletet"}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                      </svg>
-                    </div>
-                    <h3 className="font-semibold text-lg text-gray-800">Kényelem</h3>
-                  </div>
-                  <div className="space-y-3 pl-11 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-                    {allAmenities.map(amenity => (
-                      <label key={amenity} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedAmenities.includes(amenity)}
-                          onChange={() => handleAmenityChange(amenity)}
-                          className="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                        />
-                        <span className="text-gray-700 text-sm">{amenity}</span>
-                      </label>
-                    ))}
-                  </div>
+              <div className="space-y-3">
+                <h3 className="font-medium text-gray-800 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  Emelet
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {allFloors.map(floor => (
+                    <button
+                      key={floor}
+                      onClick={() => handleFloorChange(floor)}
+                      className={`px-3 py-1 text-sm rounded-md ${
+                        selectedFloors.includes(floor)
+                          ? 'bg-blue-100 text-blue-800 font-medium'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {floor}.
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <h3 className="font-semibold text-lg text-gray-800">Ár tartomány (Ft/éj)</h3>
+              <div className="space-y-3">
+                <h3 className="font-medium text-gray-800 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                  Kényelem
+                </h3>
+                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-2">
+                  {allAmenities.map(amenity => (
+                    <label key={amenity} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={selectedAmenities.includes(amenity)}
+                        onChange={() => handleAmenityChange(amenity)}
+                        className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                      />
+                      <span className="truncate">{amenity}</span>
+                    </label>
+                  ))}
                 </div>
-                <div className="space-y-6 pl-11">
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1">
-                      <label className="block text-sm text-gray-500 mb-1">Maximum</label>
-                      <input
-                        type="number"
-                        value={priceRange[1] === 0 ? '' : priceRange[1]}
-                        onChange={(e) => handlePriceChange(e, 1)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                        min="0"
-                        max="500000"
-                        placeholder="500000"
-                      />
-                    </div>
-                  </div>
+              </div>
 
-                  <div className="px-2 pt-4">
-                    <div className="relative h-4">
-                      <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 rounded-full transform -translate-y-1/2"></div>
-                      <div
-                        className="absolute top-1/2 h-1 bg-blue-500 rounded-full transform -translate-y-1/2"
-                        style={{
-                          left: `0%`,
-                          right: `${100 - (priceRange[1] / 500000) * 100}%`
-                        }}
-                      ></div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="500000"
-                        step="1000"
-                        value={priceRange[1]}
-                        onChange={(e) => handlePriceChange(e, 1)}
-                        className="absolute top-1/2 left-0 w-full h-full opacity-0 cursor-pointer transform -translate-y-1/2 z-10"
-                      />
-                      <div
-                        className="absolute top-1/2 w-4 h-4 bg-white border-2 border-blue-500 rounded-full transform -translate-y-1/2 -translate-x-1/2 shadow cursor-pointer"
-                        style={{ left: `${(priceRange[1] / 500000) * 100}%` }}
-                      ></div>
-                    </div>
-                    <div className="flex justify-between text-xs text-gray-500 mt-2">
-                      <span>0 Ft</span>
-                      <span>500 000 Ft</span>
-                    </div>
+              <div className="space-y-3">
+                <h3 className="font-medium text-gray-800 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Ár (Ft/éj)
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      value={priceRange[1] === 500000 ? '' : priceRange[1]}
+                      onChange={handlePriceChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      placeholder="Maximum"
+                    />
                   </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="500000"
+                    step="1000"
+                    value={priceRange[1]}
+                    onChange={handlePriceChange}
+                    className="w-full"
+                  />
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8 pt-6 border-t border-gray-200">
+            <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6 pt-4 border-t border-gray-200">
               <button
                 onClick={resetFilters}
-                className="px-6 py-3 text-gray-700 hover:text-gray-900 font-medium flex items-center gap-2 hover:bg-gray-100 rounded-lg transition-colors w-full sm:w-auto justify-center"
+                className="px-4 py-2 text-sm text-gray-700 font-medium flex items-center gap-2 hover:bg-gray-100 rounded-md"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Összes szűrő törlése
+                Szűrők törlése
               </button>
-              <div className="flex gap-3 w-full sm:w-auto">
+              <div className="flex gap-2">
                 <button
                   onClick={() => setShowFilters(false)}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium w-full sm:w-auto"
+                  className="px-4 py-2 border border-gray-300 text-sm text-gray-700 rounded-md hover:bg-gray-50"
                 >
                   Mégse
                 </button>
                 <button
                   onClick={applyFilters}
-                  disabled={isLoading}
-                  className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition-colors font-medium flex items-center justify-center gap-2 shadow-md hover:shadow-lg w-full sm:w-auto"
+                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
                 >
-                  {isLoading ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Folyamatban...
-                    </>
-                  ) : (
-                    <>
-                      Szűrés alkalmazása
-                    </>
-                  )}
+                  Alkalmaz
                 </button>
               </div>
             </div>
