@@ -33,6 +33,7 @@ export const Foglalas = () => {
     dateOfBirth: '',
     gender: '',
   });
+  const [successMessage, setSuccessMessage] = useState(""); // Új állapot a sikerüzenethez
 
   // Foglalt dátumok lekérése
   useEffect(() => {
@@ -43,7 +44,7 @@ export const Foglalas = () => {
           `${process.env.REACT_APP_API_BASE_URL}/Bookings/GetBookedDates/${id}`,
           { headers: { "Authorization": `Bearer ${token}` } }
         );
-        
+
         if (!response.ok) throw new Error("Hiba a foglalt dátumok lekérésekor");
         const data = await response.json();
         setBookedDates(data);
@@ -52,7 +53,7 @@ export const Foglalas = () => {
         setBookedDates([]);
       }
     };
-    
+
     fetchBookedDates();
   }, [id]);
 
@@ -71,7 +72,7 @@ export const Foglalas = () => {
 
     const newCheckIn = new Date(checkInDate);
     const newCheckOut = new Date(checkOutDate);
-    
+
     if (newCheckOut <= newCheckIn) {
       setIsRoomAvailable(false);
       setAvailabilityMessage("A kijelentkezés dátuma a bejelentkezés után kell legyen");
@@ -86,8 +87,8 @@ export const Foglalas = () => {
 
     setIsRoomAvailable(!hasConflict);
     setAvailabilityMessage(
-      !hasConflict 
-        ? "A szoba elérhető a megadott időpontban." 
+      !hasConflict
+        ? "A szoba elérhető a megadott időpontban."
         : "Sajnos a szoba már foglalt erre az időpontra."
     );
   };
@@ -103,7 +104,6 @@ export const Foglalas = () => {
     setBookingError("");
 
     try {
-      // Validációk
       if (!checkInDate || !checkOutDate) throw new Error("Kérjük töltsd ki mindkét dátum mezőt");
       if (new Date(checkOutDate) <= new Date(checkInDate)) throw new Error("A kijelentkezés dátuma a bejelentkezés után kell legyen");
       if (!paymentMethod) throw new Error("Válassz fizetési módot");
@@ -148,7 +148,6 @@ export const Foglalas = () => {
     }
   };
 
-  // További függvények és useEffect-ek...
   const getMinCheckoutDate = () => {
     if (!checkInDate) return "";
     const minDate = new Date(checkInDate);
@@ -186,7 +185,7 @@ export const Foglalas = () => {
     const fetchAmenities = async () => {
       setLoading(true);
       try {
-        const response = await fetch(process.env.REACT_APP_API_BASE_URL+`/Amenities/GetAmenitiesForRoom/${id}`);
+        const response = await fetch(process.env.REACT_APP_API_BASE_URL + `/Amenities/GetAmenitiesForRoom/${id}`);
         if (!response.ok) throw new Error("Hiba a kényelmi szolgáltatások lekérdezése során.");
         setAmenities(await response.json());
       } catch (error) {
@@ -234,16 +233,33 @@ export const Foglalas = () => {
 
   const handleAddGuest = async (e) => {
     e.preventDefault();
+    setError(null);
+
     try {
       const token = localStorage.getItem('authToken');
+      const username = localStorage.getItem('username');
+      console.log('Token:', token);
+      console.log('Username:', username);
+
       if (!token) {
         throw new Error('Nincs token elmentve! Jelentkezz be újra.');
       }
+      if (!username) {
+        throw new Error('Nincs felhasználónév elmentve! Jelentkezz be újra.');
+      }
 
-      const username = localStorage.getItem('username');
-      const userResponse = await fetch(process.env.REACT_APP_API_BASE_URL+`/GetOneUserData/${username}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const userResponse = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/GetOneUserData/${username}`,
+        {
+          headers: { 'Authorization': `Bearer ${token}` },
+        }
+      );
+
+      if (!userResponse.ok) {
+        const errorText = await userResponse.text();
+        throw new Error(`Nem sikerült lekérni a felhasználói adatokat: ${errorText}`);
+      }
+
       const userData = await userResponse.json();
       const userId = userData.userId;
 
@@ -261,7 +277,9 @@ export const Foglalas = () => {
         dateOfBirth: guestData.dateOfBirth ? new Date(guestData.dateOfBirth).toISOString() : null,
       };
 
-      const response = await fetch(process.env.REACT_APP_API_BASE_URL+'/Guests/Addnewguest', {
+      console.log('Küldött payload:', payload);
+
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/Guests/Addnewguest`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -271,11 +289,34 @@ export const Foglalas = () => {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Hiba a vendég hozzáadása során: ${errorText}`);
+        const contentType = response.headers.get('Content-Type');
+        let errorData;
+
+        if (contentType && contentType.includes('application/json')) {
+          errorData = await response.json();
+          throw new Error(errorData.message || `Hiba a vendég hozzáadása során: ${response.status}`);
+        } else {
+          const errorText = await response.text();
+          throw new Error(errorText || `Hiba a vendég hozzáadása során: ${response.status}`);
+        }
       }
 
-      const newGuest = await response.json();
+      const text = await response.text();
+      let newGuest;
+
+      const contentType = response.headers.get('Content-Type');
+      if (contentType && contentType.includes('application/json') && text) {
+        newGuest = JSON.parse(text);
+      } else {
+        console.log('Szerver válasza (szöveg):', text);
+        newGuest = {
+          guestId: Date.now(),
+          ...guestData,
+        };
+      }
+
+      console.log('Feldolgozott newGuest:', newGuest);
+
       setSavedGuests([...savedGuests, newGuest]);
       setMainGuest(newGuest.guestId);
       setShowGuestModal(false);
@@ -291,7 +332,8 @@ export const Foglalas = () => {
         gender: '',
       });
       setError(null);
-      alert('Vendég sikeresen hozzáadva!');
+      setSuccessMessage('Vendég sikeresen hozzáadva!'); // Sikerüzenet beállítása
+      setTimeout(() => setSuccessMessage(''), 3000); // 3 másodperc után eltűnik
     } catch (err) {
       console.error('Hiba a vendég hozzáadása közben:', err.message);
       setError(err.message);
@@ -301,7 +343,13 @@ export const Foglalas = () => {
   return (
     <div id="webcrumbs">
       <div className="w-full max-w-[1200px] mx-auto bg-gradient-to-b from-blue-50 to-blue-100 font-sans">
-        <section className="py-6 md:py-10 px-4 md:px-8">
+        <section className="py-6 md:py-10 px-4 md:px-8 relative">
+          {/* Sikerüzenet megjelenítése */}
+          {successMessage && (
+            <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-fade-in">
+              {successMessage}
+            </div>
+          )}
           <div className="flex flex-col lg:flex-row gap-6">
             <div className="w-full lg:w-2/3">
               <h2 className="text-3xl md:text-4xl font-bold text-blue-800 mb-4 md:mb-6 flex items-center gap-4">
@@ -464,7 +512,6 @@ export const Foglalas = () => {
 
               <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg border-t-4 border-blue-600 mb-6">
                 <h3 className="text-2xl font-bold text-blue-700 mb-4">Időpontok</h3>
-
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -478,7 +525,6 @@ export const Foglalas = () => {
                       className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Kijelentkezés
@@ -520,7 +566,6 @@ export const Foglalas = () => {
                     {bookingError}
                   </div>
                 )}
-
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-700">Alapár/éj:</span>
@@ -542,15 +587,13 @@ export const Foglalas = () => {
                     </span>
                   </div>
                 </div>
-
                 <button
                   onClick={handleBooking}
                   disabled={isSubmitting || !isRoomAvailable}
-                  className={`w-full py-3 rounded-lg font-bold transition-colors ${
-                    isSubmitting || !isRoomAvailable
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-600 hover:bg-blue-700 text-white"
-                  }`}
+                  className={`w-full py-3 rounded-lg font-bold transition-colors ${isSubmitting || !isRoomAvailable
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                    }`}
                 >
                   {isSubmitting ? "Feldolgozás..." : "Foglalás megerősítése"}
                 </button>
@@ -562,33 +605,23 @@ export const Foglalas = () => {
                 </h3>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-blue-600">
-                      spa
-                    </span>
+                    <span className="material-symbols-outlined text-blue-600">spa</span>
                     <span>Wellness részleg használata</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-blue-600">
-                      fitness_center
-                    </span>
+                    <span className="material-symbols-outlined text-blue-600">fitness_center</span>
                     <span>Fitness terem</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-blue-600">
-                      restaurant
-                    </span>
+                    <span className="material-symbols-outlined text-blue-600">restaurant</span>
                     <span>Gourmet étterem</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-blue-600">
-                      directions_car
-                    </span>
+                    <span className="material-symbols-outlined text-blue-600">directions_car</span>
                     <span>Parkolás</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-blue-600">
-                      iron
-                    </span>
+                    <span className="material-symbols-outlined text-blue-600">iron</span>
                     <span>Mosodai szolgáltatás</span>
                   </li>
                 </ul>
@@ -700,7 +733,7 @@ export const Foglalas = () => {
               <div className="sm:col-span-2 flex gap-2 justify-end mt-4">
                 <button
                   type="submit"
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
                 >
                   Hozzáadás
                 </button>
@@ -720,7 +753,7 @@ export const Foglalas = () => {
                       gender: '',
                     });
                   }}
-                  className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                  className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
                 >
                   Mégse
                 </button>
