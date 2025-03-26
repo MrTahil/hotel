@@ -7,27 +7,22 @@ using System.Data;
 
 namespace HMZ_rt.Controllers
 {
-    [Route("Notifications")]
+    [Route("UserAccounts")]
     [ApiController]
     public class Notifiactions_controller : Controller
     {
         private readonly HmzRtContext _context;
 
-        public Notifiactions_controller(HmzRtContext context)
-        {
-            _context = context;
-        }
 
-        /// Creates a new notification message in the system.
-        /// <param name="notidto">The notification details to create.</param>
-        /// <returns>The created notification or error if creation fails.</returns>
+
+
+
+        public Notifiactions_controller(HmzRtContext context) { _context = context; }
         [Authorize(Roles = "System,Admin,Recept")]
         [HttpPost("Sent Messages")]
         public async Task<ActionResult<Notification>> NewMessage(CreateNotifiactionDto notidto)
         {
-            // Create new notification object
-            var isis = new Notification
-            {
+            var isis = new Notification {
                 Message = notidto.Message,
                 Status = notidto.Status,
                 Type = notidto.Type,
@@ -38,7 +33,6 @@ namespace HMZ_rt.Controllers
                 DateSent = DateTime.MinValue,
                 DateRead = DateTime.MinValue,
             };
-
             if (isis != null)
             {
                 await _context.Notifications.AddAsync(isis);
@@ -48,13 +42,11 @@ namespace HMZ_rt.Controllers
             return BadRequest();
         }
 
-        /// Updates the sent timestamp of a notification.
-        /// <param name="NotiId">The ID of the notification to update.</param>
-        /// <returns>The updated notification or error if update fails.</returns>
+
         [HttpPut("UpdateSentTime/{NotiId}")]
         public async Task<ActionResult<Notification>> UpdateOnSent(int NotiId)
         {
-            var oke = await _context.Notifications.FirstOrDefaultAsync(x => x.NotificationId == NotiId);
+            var oke=await _context.Notifications.FirstOrDefaultAsync(x => x.NotificationId == NotiId);
             if (oke != null)
             {
                 oke.DateSent = DateTime.Now;
@@ -62,12 +54,9 @@ namespace HMZ_rt.Controllers
                 await _context.SaveChangesAsync();
                 return Ok(oke);
             }
-            return NotFound(new { message = "No data with this ID exists in the database." });
+            return NotFound(new { message = "Nincs ilyen id-val rendelkező adat az adatbázisban." });
         }
-
-        /// Updates the read timestamp of a notification when it's opened.
-        /// <param name="NotiId">The ID of the notification to update.</param>
-        /// <returns>The updated notification or error if update fails.</returns>
+        
         [HttpPut("UpdateOpenedTime/{NotiId}")]
         public async Task<ActionResult<Notification>> UpdateOnOpened(int NotiId)
         {
@@ -79,12 +68,9 @@ namespace HMZ_rt.Controllers
                 await _context.SaveChangesAsync();
                 return Ok(oke);
             }
-            return NotFound(new { message = "No data with this ID exists in the database." });
+            return NotFound(new { message = "Nincs ilyen id-val rendelkező adat az adatbázisban." });
         }
 
-        /// Deletes a notification by ID.
-        /// <param name="id">The ID of the notification to delete.</param>
-        /// <returns>Success message or error if deletion fails.</returns>
         [Authorize(Roles = "Admin,System,Recept")]
         [HttpDelete("DeleteNoti/{id}")]
         public async Task<ActionResult<Notification>> DeleteNoti(int id)
@@ -96,20 +82,17 @@ namespace HMZ_rt.Controllers
                 {
                     _context.Notifications.Remove(adat);
                     await _context.SaveChangesAsync();
-                    return StatusCode(200, "Successfully deleted");
-                }
-                return StatusCode(404, "No data with this ID in the database");
+                    return StatusCode(200, "Sikeres törlés");
+                } return StatusCode(404, "Nincs ilyen id-val adat az adatbázisban");
             }
             catch (Exception ex)
             {
+
                 return StatusCode(500, ex);
             }
+            
         }
 
-        /// Updates the status of a notification.
-        /// <param name="id">The ID of the notification to update.</param>
-        /// <param name="udto">The updated status information.</param>
-        /// <returns>Success message or error if update fails.</returns>
         [Authorize(Roles = "Admin,System,Recept,Base")]
         [HttpPut("UpdateStatusofNoti/{id}")]
         public async Task<ActionResult<Notification>> UpdateNotificationStatus(int id, UpdateNotiStatus udto)
@@ -122,12 +105,13 @@ namespace HMZ_rt.Controllers
                     adat.Status = udto.Status;
                     _context.Notifications.Update(adat);
                     await _context.SaveChangesAsync();
-                    return StatusCode(201, "Successfully changed");
+                    return StatusCode(201, "Sikeres változtatás");
                 }
-                return StatusCode(404, "Not found");
+                return StatusCode(404, "Nem található");
             }
             catch (Exception ex)
             {
+
                 return StatusCode(500, ex);
             }
         }
