@@ -56,7 +56,7 @@ function RoomCard() {
         const types = [...new Set(roomsData.map(room => room.roomType))];
         const amenities = [...new Set(roomsData.flatMap(room => room.amenities || []))];
         const floors = [...new Set(roomsData.map(room => room.floorNumber))].sort((a, b) => a - b);
-        
+
         setAllRoomTypes(types);
         setAllAmenities(amenities);
         setAllFloors(floors);
@@ -67,13 +67,13 @@ function RoomCard() {
         setIsLoading(false);
       }
     };
-    
+
     fetchRoomsAndBookings();
   }, []);
 
   const hasDateConflict = (roomId, checkIn, checkOut) => {
     if (!checkIn || !checkOut) return false;
-    
+
     const bookings = bookedDatesByRoom[roomId] || [];
     const newStart = new Date(checkIn);
     const newEnd = new Date(checkOut);
@@ -137,7 +137,7 @@ function RoomCard() {
 
       // Apply date filter first if enabled
       if (applyDateFilter && checkInDate && checkOutDate) {
-        filtered = filtered.filter(room => 
+        filtered = filtered.filter(room =>
           !hasDateConflict(room.roomId, checkInDate, checkOutDate)
         );
       }
@@ -285,7 +285,7 @@ function RoomCard() {
                 </button>
               </div>
             </div>
-            
+
             <div className="mt-3 flex items-center">
               <input
                 type="checkbox"
@@ -343,107 +343,151 @@ function RoomCard() {
         </div>
 
         {showFilters && (
-          <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <h3 className="font-medium text-gray-800 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-200 fixed md:relative inset-0 md:inset-auto z-50 md:z-auto overflow-y-auto">
+            {/* Mobile Header */}
+            <div className="md:hidden sticky top-0 bg-white pb-4 border-b border-gray-200">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-gray-800">Szűrők</h2>
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="p-2 text-gray-500 hover:text-gray-700"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
-                  Szobatípus
-                </h3>
-                <div className="grid grid-cols-2 gap-2">
-                  {allRoomTypes.map(type => (
-                    <label key={type} className="flex items-center gap-2 text-sm">
+                </button>
+              </div>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="max-h-[80vh] md:max-h-none overflow-y-auto touch-pan-y">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 md:pt-0">
+                <div className="space-y-3">
+                  <h3 className="font-medium text-gray-800 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    Szobatípus
+                  </h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    {allRoomTypes.map(type => (
+                      <label key={type} className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={selectedRoomTypes.includes(type)}
+                          onChange={() => handleRoomTypeChange(type)}
+                          className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                        />
+                        {type}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="font-medium text-gray-800 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    Emelet
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {allFloors.map(floor => (
+                      <button
+                        key={floor}
+                        onClick={() => handleFloorChange(floor)}
+                        className={`px-3 py-1 text-sm rounded-md ${selectedFloors.includes(floor)
+                            ? 'bg-blue-100 text-blue-800 font-medium'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                      >
+                        {floor}.
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="font-medium text-gray-800 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                    Kényelem
+                  </h3>
+                  <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-2">
+                    {allAmenities.map(amenity => (
+                      <label key={amenity} className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={selectedAmenities.includes(amenity)}
+                          onChange={() => handleAmenityChange(amenity)}
+                          className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                        />
+                        <span className="truncate">{amenity}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="font-medium text-gray-800 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Ár (Ft/éj)
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
                       <input
-                        type="checkbox"
-                        checked={selectedRoomTypes.includes(type)}
-                        onChange={() => handleRoomTypeChange(type)}
-                        className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                        type="number"
+                        value={priceRange[1] === 500000 ? '' : priceRange[1]}
+                        onChange={handlePriceChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        placeholder="Maximum"
                       />
-                      {type}
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <h3 className="font-medium text-gray-800 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  Emelet
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {allFloors.map(floor => (
-                    <button
-                      key={floor}
-                      onClick={() => handleFloorChange(floor)}
-                      className={`px-3 py-1 text-sm rounded-md ${
-                        selectedFloors.includes(floor)
-                          ? 'bg-blue-100 text-blue-800 font-medium'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {floor}.
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <h3 className="font-medium text-gray-800 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                  </svg>
-                  Kényelem
-                </h3>
-                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-2">
-                  {allAmenities.map(amenity => (
-                    <label key={amenity} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={selectedAmenities.includes(amenity)}
-                        onChange={() => handleAmenityChange(amenity)}
-                        className="h-4 w-4 text-blue-600 rounded border-gray-300"
-                      />
-                      <span className="truncate">{amenity}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <h3 className="font-medium text-gray-800 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Ár (Ft/éj)
-                </h3>
-                <div className="space-y-2">
-                  <div className="flex gap-2">
+                    </div>
                     <input
-                      type="number"
-                      value={priceRange[1] === 500000 ? '' : priceRange[1]}
+                      type="range"
+                      min="0"
+                      max="500000"
+                      step="1000"
+                      value={priceRange[1]}
                       onChange={handlePriceChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                      placeholder="Maximum"
+                      className="w-full"
                     />
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="500000"
-                    step="1000"
-                    value={priceRange[1]}
-                    onChange={handlePriceChange}
-                    className="w-full"
-                  />
+                </div>
+              </div>
+
+              {/* Mobile Footer */}
+              <div className="md:hidden sticky bottom-0 bg-white pt-4 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row justify-between gap-3">
+                  <button
+                    onClick={resetFilters}
+                    className="px-4 py-2 text-sm text-gray-700 font-medium flex items-center gap-2 hover:bg-gray-100 rounded-md"
+                  >
+                    Szűrők törlése
+                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setShowFilters(false)}
+                      className="px-4 py-2 border border-gray-300 text-sm text-gray-700 rounded-md hover:bg-gray-50 flex-1"
+                    >
+                      Mégse
+                    </button>
+                    <button
+                      onClick={applyFilters}
+                      className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 flex-1"
+                    >
+                      Alkalmaz
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6 pt-4 border-t border-gray-200">
+            {/* Desktop Footer */}
+            <div className="hidden md:flex flex-col sm:flex-row justify-between gap-3 mt-6 pt-4 border-t border-gray-200">
               <button
                 onClick={resetFilters}
                 className="px-4 py-2 text-sm text-gray-700 font-medium flex items-center gap-2 hover:bg-gray-100 rounded-md"
@@ -492,8 +536,8 @@ function RoomCard() {
                   key={room.roomId}
                   room={room}
                   onBookingClick={handleBookingClick}
-                  isAvailable={!applyDateFilter || !checkInDate || !checkOutDate || 
-                               !hasDateConflict(room.roomId, checkInDate, checkOutDate)}
+                  isAvailable={!applyDateFilter || !checkInDate || !checkOutDate ||
+                    !hasDateConflict(room.roomId, checkInDate, checkOutDate)}
                   checkInDate={checkInDate}
                   checkOutDate={checkOutDate}
                 />
@@ -524,9 +568,8 @@ function RoomCard() {
 
 function RoomItem({ room, onBookingClick, isAvailable, checkInDate, checkOutDate }) {
   return (
-    <div className={`group bg-white rounded-xl shadow-md hover:shadow-lg overflow-hidden transform transition-all duration-300 ease-out hover:-translate-y-1 flex flex-col h-full ${
-      !isAvailable ? 'opacity-70' : ''
-    }`}>
+    <div className={`group bg-white rounded-xl shadow-md hover:shadow-lg overflow-hidden transform transition-all duration-300 ease-out hover:-translate-y-1 flex flex-col h-full ${!isAvailable ? 'opacity-70' : ''
+      }`}>
       <div className="relative h-56 bg-gray-200 overflow-hidden flex-shrink-0">
         <img
           src={room.images || process.env.REACT_APP_DEFAULT_ROOM_IMAGE}
@@ -553,11 +596,10 @@ function RoomItem({ room, onBookingClick, isAvailable, checkInDate, checkOutDate
 
         <div className="mt-auto pt-4">
           <button
-            className={`w-full px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 group/button shadow-md ${
-              isAvailable 
-                ? 'bg-blue-600 text-white hover:bg-blue-700' 
+            className={`w-full px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 group/button shadow-md ${isAvailable
+                ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-gray-400 text-gray-700 cursor-not-allowed'
-            }`}
+              }`}
             onClick={() => isAvailable && onBookingClick(room.roomId, room)}
             disabled={!isAvailable}
           >
