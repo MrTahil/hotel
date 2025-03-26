@@ -19,7 +19,8 @@ function RegisterModal({ onClose, switchToLogin }) {
 
   // Jelszó validáció
   const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[\W_]).{6,}$/;
+    // Legalább 6 karakter, legalább egy nagybetű, és legalább egy speciális karakter (bármilyen billentyűzeten lévő)
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`]).{6,}$/;
     return passwordRegex.test(password);
   };
 
@@ -50,7 +51,7 @@ function RegisterModal({ onClose, switchToLogin }) {
     }
 
     if (!validatePassword(password)) {
-      setErrorMessage('A jelszónak legalább 6 karakter hosszúnak kell lennie, tartalmaznia kell legalább egy nagybetűt és egy speciális karaktert!');
+      setErrorMessage('A jelszónak legalább 6 karakter hosszúnak kell lennie, tartalmaznia kell legalább egy nagybetűt és egy speciális karaktert (pl. !@#$%^&*()_+-=[]{}|;:,.<>?/~)!');
       return;
     }
 

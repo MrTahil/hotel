@@ -151,7 +151,7 @@ const ProfilePage = () => {
     try {
       const token = localStorage.getItem('authToken');
       const username = localStorage.getItem('username');
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*?])[A-Za-z\d!@#$%^&*?]{8,}$/;
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`])[A-Za-z\d!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`]{8,}$/;
 
       if (!token || !username) {
         throw new Error('Hiányzó autentikációs adatok');
@@ -276,7 +276,7 @@ const ProfilePage = () => {
 
     try {
       const passwordRegex =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*?])[A-Za-z\d!@#$%^&*?]{8,}$/;
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`])[A-Za-z\d!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`]{8,}$/;
 
       if (newPasswordData.newPassword !== newPasswordData.confirmPassword) {
         setPasswordErrors((prev) => ({
