@@ -107,7 +107,7 @@ function About() {
                                 A HMZ Hotel nem csupán egy hely - ez egy érzés. Amint belépsz, tudod,
                                 hogy valami különleges vár rád.
                             </blockquote>
-                            <p className="text-right text-blue-600 font-medium">- Marino Leonardo Antonio, Vendégünk</p>
+                            <p className="text-right text-blue-600 font-medium">- Jánosi Marcell, Vendégünk</p>
                         </div>
                     </div>
                 </div>
