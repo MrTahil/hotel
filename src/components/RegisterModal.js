@@ -11,59 +11,81 @@ function RegisterModal({ onClose, switchToLogin }) {
   const [successMessage, setSuccessMessage] = useState('');
   const [showVerification, setShowVerification] = useState(false);
 
+  // Email validáció
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
+  // Jelszó validáció
   const validatePassword = (password) => {
     const passwordRegex = /^(?=.*[A-Z])(?=.*[\W_]).{6,}$/;
     return passwordRegex.test(password);
   };
 
+  // Felhasználónév validáció
+  const validateUsername = (username) => {
+    const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+    return usernameRegex.test(username);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
+    setSuccessMessage('');
 
-    if (!username) {
+    if (!username.trim()) {
       setErrorMessage('A felhasználónév nem lehet üres!');
       return;
     }
 
+    if (!validateUsername(username)) {
+      setErrorMessage('A felhasználónév csak betűket, számokat és aláhúzást tartalmazhat, és 3-20 karakter hosszú kell legyen!');
+      return;
+    }
+
     if (!validateEmail(email)) {
-      setErrorMessage('Érvénytelen e-mail cím!');
+      setErrorMessage('Érvénytelen e-mail cím formátum!');
       return;
     }
 
     if (!validatePassword(password)) {
-      setErrorMessage('A jelszónak legalább 6 karakterből kell állnia, tartalmaznia kell egy nagybetűt és egy speciális karaktert!');
+      setErrorMessage('A jelszónak legalább 6 karakter hosszúnak kell lennie, tartalmaznia kell legalább egy nagybetűt és egy speciális karaktert!');
       return;
     }
 
     if (password !== confirmPassword) {
-      setErrorMessage('A jelszavak nem egyeznek!');
+      setErrorMessage('A megadott jelszavak nem egyeznek!');
       return;
     }
 
     try {
-      const response = await fetch(process.env.REACT_APP_API_BASE_URL+'/UserAccounts/Register', {
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/UserAccounts/Register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ UserName: username, email, password }),
       });
 
       const data = await response.json();
+      console.log('Szerver válasz:', data);
 
       if (response.ok) {
         setSuccessMessage('Sikeres regisztráció! Kérlek ellenőrizd az emailed és add meg a kódot!');
         localStorage.setItem('username', username);
-        localStorage.setItem('email', email); // Az email mentése
+        localStorage.setItem('email', email);
         setTimeout(() => setShowVerification(true), 2000);
       } else {
-        setErrorMessage(data.message || 'Hiba történt a regisztráció során!');
+        let errorMsg = 'Ismeretlen hiba történt a regisztráció során!';
+        if (data.errors && data.errors.UserName) {
+          errorMsg = data.errors.UserName[0];
+        } else if (data.message) {
+          errorMsg = data.message;
+        }
+        setErrorMessage(errorMsg);
       }
     } catch (error) {
-      setErrorMessage('Hálózati hiba történt. Próbáld újra később!');
+      setErrorMessage('Hálózati hiba történt. Kérjük próbáld újra később!');
+      console.error('Hiba részletei:', error);
     }
   };
 
