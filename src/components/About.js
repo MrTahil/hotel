@@ -15,7 +15,7 @@ function About() {
         <section className="relative py-16 bg-gradient-to-b from-blue-50 to-white">
             {/* Dekoratív fejléc sáv */}
             <div className="absolute top-0 left-0 w-full h-16 bg-gradient-to-r from-blue-500 to-indigo-600 shadow-md"></div>
-            
+
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Cím rész */}
                 <div className="text-center mb-16 pt-8">
@@ -28,36 +28,36 @@ function About() {
                         <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-3/4 h-2 bg-gradient-to-r from-blue-200 to-indigo-200 rounded-full"></div>
                     </div>
                     <p className="text-xl text-gray-600 max-w-3xl mx-auto mt-6 leading-relaxed">
-                        A HMZ Hotel nem csupán egy szállás, hanem egy életre szóló élmény. 
-                        A város központjában fekvő luxusszállodánkban minden pillanat a kikapcsolódásról 
+                        A HMZ Hotel nem csupán egy szállás, hanem egy életre szóló élmény.
+                        A város központjában fekvő luxusszállodánkban minden pillanat a kikapcsolódásról
                         és a fényűzésről szól.
                     </p>
                 </div>
 
                 {/* Szolgáltatások */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-                    <FeatureCard 
+                    <FeatureCard
                         emoji="🏨"
                         title="Prémium szállás"
                         description="Kényelmes, modern felszereltségű szobáinkban pihenhet meg a város zajától távol."
                         bgColor="bg-blue-50"
                         borderColor="border-blue-300"
                     />
-                    <FeatureCard 
+                    <FeatureCard
                         emoji="🍽️"
                         title="Gourmet élmények"
                         description="Kiváló séfjeink napi 3 étkezésben kínálják remekműveiket."
                         bgColor="bg-indigo-50"
                         borderColor="border-indigo-300"
                     />
-                    <FeatureCard 
+                    <FeatureCard
                         emoji="💆‍♂️"
                         title="Wellness kínálat"
                         description="Spa-központunkban teljes mértékben feltöltődhetsz."
                         bgColor="bg-purple-50"
                         borderColor="border-purple-300"
                     />
-                    <FeatureCard 
+                    <FeatureCard
                         emoji="🛎️"
                         title="Prémium szolgáltatások"
                         description="Személyre szabott konciergszolgáltatás minden vendégünk számára."
@@ -74,7 +74,7 @@ function About() {
                                 <h3 className="text-2xl font-bold mb-1">Megtalálás</h3>
                                 <p className="text-blue-100">{hotelLocation.address}</p>
                             </div>
-                            <button 
+                            <button
                                 onClick={openGoogleMaps}
                                 className="px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
                             >
@@ -104,10 +104,24 @@ function About() {
                         <div className="text-4xl mr-4 text-blue-400">"</div>
                         <div>
                             <blockquote className="text-2xl italic text-gray-700 mb-4">
-                                A HMZ Hotel nem csupán egy hely - ez egy érzés. Amint belépsz, tudod, 
+                                A HMZ Hotel nem csupán egy hely - ez egy érzés. Amint belépsz, tudod,
                                 hogy valami különleges vár rád.
                             </blockquote>
                             <p className="text-right text-blue-600 font-medium">- Marino Leonardo Antonio, Vendégünk</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-12 bg-white p-8 rounded-2xl shadow-lg max-w-4xl mx-auto border-l-4 border-blue-500 transform transition-all duration-300 hover:-translate-y-1">
+                    <div className="flex items-start">
+                        <div className="text-4xl mr-4 text-blue-400">"</div>
+                        <div>
+                            <blockquote className="text-2xl italic text-gray-700 mb-4">
+                                Álmaim kéklő egén,
+                                Gyümölcsfáim tetején,
+                                Pálinka, szerelmem, légy az enyém!
+                            </blockquote>
+                            <p className="text-right text-blue-600 font-medium">- Magma Cum Laude, Vendégünk</p>
                         </div>
                     </div>
                 </div>

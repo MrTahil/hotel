@@ -15,7 +15,7 @@ function Programs() {
                     id: event.eventId,
                     name: event.eventName,
                     description: event.description,
-                    images: event.images || '../img/lo.png', // Alapértelmezett kép, ha nincs megadva
+                    images: event.images || '../img/default_imgage.png', // Alapértelmezett kép, ha nincs megadva
                     schedule: event.eventDate,
                     organizerName: event.organizerName,
                     contactInfo: event.contactInfo,
