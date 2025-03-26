@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace hmz_rt.Models.Dtos
 {
-    public class Event
-    {
+    public class Event {
         public int EventId { get; set; }
         public string EventName { get; set; }
         public int? Capacity { get; set; }
@@ -19,10 +18,10 @@ namespace hmz_rt.Models.Dtos
         public string ContactInfo { get; set; }
         public DateTime? DateAdded { get; set; }
         public decimal? Price { get; set; }
-
-        public string Images { get; set; }
+        public string Images { get; set; } // ImageUrl helyett Images
         public List<EventBooking> Eventbookings { get; set; }
     }
+
 
     public class EventBooking
     {
