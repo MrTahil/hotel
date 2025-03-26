@@ -287,15 +287,142 @@ const ProfilePage = () => {
   };
 
   const handleDeleteAccount = async () => {
-    // ... (unchanged)
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Nincs token elmentve! Jelentkezz be újra.');
+      }
+
+      const username = localStorage.getItem('username');
+      if (!username) {
+        throw new Error('Nincs felhasználónév elmentve!');
+      }
+
+      const response = await fetch(process.env.REACT_APP_API_BASE_URL + `/UserAccounts/DeleteUserByUsername/${username}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ Password: deletePassword }),
+      });
+
+      if (response.status === 401) {
+        throw new Error('Token érvénytelen vagy lejárt!');
+      }
+
+      if (response.status === 404) {
+        throw new Error('Felhasználó nem található!');
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP hiba! Státusz: ${response.status}`);
+      }
+
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('username');
+      navigate('/');
+    } catch (error) {
+      console.error('Hiba történt a fiók törlése közben:', error.message);
+      setError(error.message);
+    }
   };
 
   const handleAddGuest = async (e) => {
-    // ... (unchanged)
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Nincs token elmentve! Jelentkezz be újra.');
+      }
+
+      if (!user?.userId) {
+        throw new Error('Felhasználói azonosító nem található!');
+      }
+
+      if (!guestData.firstName || !guestData.lastName || !guestData.dateOfBirth) {
+        throw new Error('A vezetéknév, keresztnév és születési dátum megadása kötelező!');
+      }
+
+      const payload = {
+        ...guestData,
+        userId: user.userId,
+        dateOfBirth: guestData.dateOfBirth ? new Date(guestData.dateOfBirth).toISOString() : null,
+      };
+
+      const response = await fetch(process.env.REACT_APP_API_BASE_URL + '/Guests/Addnewguest', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      // Ellenőrizzük a Content-Type-ot
+      const contentType = response.headers.get('Content-Type');
+      let data;
+
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json(); // Ha JSON, akkor parse-oljuk
+      } else {
+        data = await response.text(); // Ha nem JSON, akkor szövegként kezeljük
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || data || `Hiba a vendég hozzáadása során: ${response.status}`);
+      }
+
+      await fetchGuests();
+      setShowGuestModal(false);
+      setGuestData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phoneNumber: '',
+        address: '',
+        city: '',
+        country: '',
+        dateOfBirth: '',
+        gender: '',
+      });
+      setError(null);
+      setMessage({ type: 'success', text: typeof data === 'string' ? data : data.message || 'Vendég sikeresen hozzáadva!' });
+    } catch (err) {
+      console.error('Hiba a vendég hozzáadása közben:', err.message);
+      setError(err.message);
+      setMessage({ type: 'error', text: err.message });
+    }
   };
 
   const handleDeleteGuest = async (guestId) => {
-    // ... (unchanged)
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Nincs token elmentve! Jelentkezz be újra.');
+      }
+
+      const response = await fetch(process.env.REACT_APP_API_BASE_URL + `/Guests/DeleteGuest/${guestId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Hiba a vendég törlése során: ${errorText}`);
+      }
+
+      await fetchGuests();
+      setMessage({ type: 'success', text: 'Vendég sikeresen törölve!' });
+    } catch (err) {
+      console.error('Hiba a vendég törlése közben:', err.message);
+      setError(err.message);
+      setMessage({ type: 'error', text: err.message });
+    }
   };
 
   const handleEditGuest = (guest) => {
