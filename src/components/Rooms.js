@@ -21,23 +21,42 @@ function RoomCard() {
   const [showFilters, setShowFilters] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [bookedDatesByRoom, setBookedDatesByRoom] = useState({});
+  const [applyDateFilter, setApplyDateFilter] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchRooms = async () => {
+    const fetchRoomsAndBookings = async () => {
       setIsLoading(true);
-      setError(null);
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_API_ROOMS_URL}`);
-        if (!response.ok) throw new Error(process.env.REACT_APP_ERROR_NETWORK);
-        const data = await response.json();
-        setRooms(data);
-        setFilteredRooms(data);
+        // Fetch rooms
+        const roomsResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_API_ROOMS_URL}`);
+        if (!roomsResponse.ok) throw new Error(process.env.REACT_APP_ERROR_NETWORK);
+        const roomsData = await roomsResponse.json();
 
-        const types = [...new Set(data.map(room => room.roomType))];
-        const amenities = [...new Set(data.flatMap(room => room.amenities || []))];
-        const floors = [...new Set(data.map(room => room.floorNumber))].sort((a, b) => a - b);
+        // Fetch bookings for each room
+        const bookingsPromises = roomsData.map(async room => {
+          const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/Bookings/GetBookedDates/${room.roomId}`);
+          if (!response.ok) return [];
+          return response.json();
+        });
+
+        const bookingsData = await Promise.all(bookingsPromises);
+        const bookedDatesMap = bookingsData.reduce((acc, dates, index) => {
+          acc[roomsData[index].roomId] = dates;
+          return acc;
+        }, {});
+
+        setBookedDatesByRoom(bookedDatesMap);
+        setRooms(roomsData);
+        setFilteredRooms(roomsData);
+
+        // Extract filter options
+        const types = [...new Set(roomsData.map(room => room.roomType))];
+        const amenities = [...new Set(roomsData.flatMap(room => room.amenities || []))];
+        const floors = [...new Set(roomsData.map(room => room.floorNumber))].sort((a, b) => a - b);
+        
         setAllRoomTypes(types);
         setAllAmenities(amenities);
         setAllFloors(floors);
@@ -48,8 +67,23 @@ function RoomCard() {
         setIsLoading(false);
       }
     };
-    fetchRooms();
+    
+    fetchRoomsAndBookings();
   }, []);
+
+  const hasDateConflict = (roomId, checkIn, checkOut) => {
+    if (!checkIn || !checkOut) return false;
+    
+    const bookings = bookedDatesByRoom[roomId] || [];
+    const newStart = new Date(checkIn);
+    const newEnd = new Date(checkOut);
+
+    return bookings.some(booking => {
+      const existingStart = new Date(booking.checkInDate);
+      const existingEnd = new Date(booking.checkOutDate);
+      return newStart < existingEnd && newEnd > existingStart;
+    });
+  };
 
   const getTodayDate = () => new Date().toISOString().split('T')[0];
 
@@ -96,63 +130,61 @@ function RoomCard() {
     setPriceRange([0, newMax]);
   };
 
-  const applyFilters = async () => {
+  const applyFilters = () => {
     setIsLoading(true);
-    setError(null);
-
     try {
-      let result = [...rooms];
+      let filtered = [...rooms];
 
-      if (checkInDate && checkOutDate) {
-        try {
-          const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_API_SEARCH_ROOMS}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              CheckInDate: checkInDate,
-              CheckOutDate: checkOutDate,
-              GuestNumber: guestCount === 'Bármennyi' ? 0 : parseInt(guestCount),
-            }),
-          });
-
-          if (!response.ok) throw new Error('Error in date-based filtering');
-          result = await response.json();
-        } catch (err) {
-          console.warn('API filtering failed, applying local filters', err);
-        }
-      }
-
-      if (guestCount !== 'Bármennyi') {
-        const numGuests = parseInt(guestCount);
-        result = result.filter(room => room.capacity >= numGuests);
-      }
-
-      if (selectedRoomTypes.length > 0) {
-        result = result.filter(room => selectedRoomTypes.includes(room.roomType));
-      }
-
-      if (selectedFloors.length > 0) {
-        result = result.filter(room => selectedFloors.includes(room.floorNumber));
-      }
-
-      if (selectedAmenities.length > 0) {
-        result = result.filter(room =>
-          selectedAmenities.every(amenity => room.amenities?.includes(amenity))
+      // Apply date filter first if enabled
+      if (applyDateFilter && checkInDate && checkOutDate) {
+        filtered = filtered.filter(room => 
+          !hasDateConflict(room.roomId, checkInDate, checkOutDate)
         );
       }
 
-      result = result.filter(room => room.pricePerNight <= priceRange[1]);
+      // Then apply all other filters
+      filtered = applyNonDateFilters(filtered);
 
-      setFilteredRooms(result);
+      setFilteredRooms(filtered);
     } catch (error) {
       console.error('Filtering error:', error);
-      setError(process.env.REACT_APP_ERROR_NETWORK);
+      setError('Hiba történt a szűrés során');
     } finally {
       setIsLoading(false);
       setShowFilters(false);
     }
+  };
+
+  const applyNonDateFilters = (roomsToFilter) => {
+    let filtered = [...roomsToFilter];
+
+    // Guest count filtering - only if not 'Bármennyi'
+    if (guestCount !== 'Bármennyi') {
+      const numGuests = parseInt(guestCount);
+      filtered = filtered.filter(room => room.capacity >= numGuests);
+    }
+
+    // Room type filtering
+    if (selectedRoomTypes.length > 0) {
+      filtered = filtered.filter(room => selectedRoomTypes.includes(room.roomType));
+    }
+
+    // Floor filtering
+    if (selectedFloors.length > 0) {
+      filtered = filtered.filter(room => selectedFloors.includes(room.floorNumber));
+    }
+
+    // Amenity filtering
+    if (selectedAmenities.length > 0) {
+      filtered = filtered.filter(room =>
+        selectedAmenities.every(amenity => room.amenities?.includes(amenity))
+      );
+    }
+
+    // Price filtering
+    filtered = filtered.filter(room => room.pricePerNight <= priceRange[1]);
+
+    return filtered;
   };
 
   const handleBookingClick = (roomId, room) => {
@@ -175,6 +207,9 @@ function RoomCard() {
     setSelectedFloors([]);
     setPriceRange([0, 500000]);
     setGuestCount('Bármennyi');
+    setCheckInDate('');
+    setCheckOutDate('');
+    setApplyDateFilter(false);
     setFilteredRooms(rooms);
   };
 
@@ -203,9 +238,9 @@ function RoomCard() {
           </div>
 
           <div className="w-full bg-white rounded-xl shadow-md p-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{process.env.REACT_APP_DATE_LABEL} Érkezés</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Érkezés</label>
                 <input
                   type="date"
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -215,7 +250,7 @@ function RoomCard() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{process.env.REACT_APP_DATE_LABEL} Távozás</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Távozás</label>
                 <input
                   type="date"
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -238,6 +273,31 @@ function RoomCard() {
                   ))}
                 </select>
               </div>
+              <div className="flex items-end gap-2">
+                <button
+                  onClick={applyFilters}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Keresés
+                </button>
+              </div>
+            </div>
+            
+            <div className="mt-3 flex items-center">
+              <input
+                type="checkbox"
+                id="applyDateFilter"
+                checked={applyDateFilter}
+                onChange={() => setApplyDateFilter(!applyDateFilter)}
+                className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                disabled={!checkInDate || !checkOutDate}
+              />
+              <label htmlFor="applyDateFilter" className="ml-2 text-sm text-gray-700">
+                Szűrés a kiválasztott dátumokra
+              </label>
             </div>
           </div>
 
@@ -252,7 +312,7 @@ function RoomCard() {
               Szűrők {showFilters ? 'bezárása' : 'megnyitása'}
             </button>
 
-            {(selectedRoomTypes.length > 0 || selectedAmenities.length > 0 || selectedFloors.length > 0 || priceRange[1] < 500000) && (
+            {(selectedRoomTypes.length > 0 || selectedAmenities.length > 0 || selectedFloors.length > 0 || priceRange[1] < 500000 || applyDateFilter) && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>Aktív szűrők:</span>
                 <div className="flex flex-wrap gap-2">
@@ -269,6 +329,11 @@ function RoomCard() {
                   {priceRange[1] < 500000 && (
                     <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">
                       Max {priceRange[1]} Ft
+                    </span>
+                  )}
+                  {applyDateFilter && checkInDate && checkOutDate && (
+                    <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs">
+                      {new Date(checkInDate).toLocaleDateString('hu-HU')} - {new Date(checkOutDate).toLocaleDateString('hu-HU')}
                     </span>
                   )}
                 </div>
@@ -427,6 +492,10 @@ function RoomCard() {
                   key={room.roomId}
                   room={room}
                   onBookingClick={handleBookingClick}
+                  isAvailable={!applyDateFilter || !checkInDate || !checkOutDate || 
+                               !hasDateConflict(room.roomId, checkInDate, checkOutDate)}
+                  checkInDate={checkInDate}
+                  checkOutDate={checkOutDate}
                 />
               ))
             ) : (
@@ -453,9 +522,11 @@ function RoomCard() {
   );
 }
 
-function RoomItem({ room, onBookingClick }) {
+function RoomItem({ room, onBookingClick, isAvailable, checkInDate, checkOutDate }) {
   return (
-    <div className="group bg-white rounded-xl shadow-md hover:shadow-lg overflow-hidden transform transition-all duration-300 ease-out hover:-translate-y-1 flex flex-col h-full">
+    <div className={`group bg-white rounded-xl shadow-md hover:shadow-lg overflow-hidden transform transition-all duration-300 ease-out hover:-translate-y-1 flex flex-col h-full ${
+      !isAvailable ? 'opacity-70' : ''
+    }`}>
       <div className="relative h-56 bg-gray-200 overflow-hidden flex-shrink-0">
         <img
           src={room.images || process.env.REACT_APP_DEFAULT_ROOM_IMAGE}
@@ -465,25 +536,41 @@ function RoomItem({ room, onBookingClick }) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
         <span className="absolute top-4 right-4 bg-blue-800 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg backdrop-blur-sm bg-opacity-90">
-          {room.pricePerNight ? `${room.pricePerNight.toLocaleString('hu-HU')} ${process.env.REACT_APP_PRICE_FORMAT}` : 'Ár igénylés'}
+          {room.pricePerNight ? `${room.pricePerNight.toLocaleString('hu-HU')} Ft/éj` : 'Ár igénylés'}
         </span>
+        {!isAvailable && checkInDate && checkOutDate && (
+          <div className="absolute bottom-0 left-0 right-0 bg-red-600 text-white text-center py-1 text-sm font-medium">
+            Foglalt: {new Date(checkInDate).toLocaleDateString('hu-HU')} - {new Date(checkOutDate).toLocaleDateString('hu-HU')}
+          </div>
+        )}
       </div>
 
       <div className="p-5 flex flex-col flex-grow">
-        <h3 className="text-xl font-extrabold text-gray-900 mb-2">{room.roomType || process.env.REACT_APP_DEFAULT_ROOM_NAME}</h3>
-        <p className="text-gray-600 line-clamp-2 mb-4">{room.description || process.env.REACT_APP_NO_DESCRIPTION_TEXT}</p>
+        <h3 className="text-xl font-extrabold text-gray-900 mb-2">{room.roomType || 'Deluxe szoba'}</h3>
+        <p className="text-gray-600 line-clamp-2 mb-4">{room.description || 'Nincs elérhető leírás'}</p>
 
         <RoomDetails room={room} />
 
         <div className="mt-auto pt-4">
           <button
-            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 group/button shadow-md hover:bg-blue-700"
-            onClick={() => onBookingClick(room.roomId, room)}
+            className={`w-full px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 group/button shadow-md ${
+              isAvailable 
+                ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                : 'bg-gray-400 text-gray-700 cursor-not-allowed'
+            }`}
+            onClick={() => isAvailable && onBookingClick(room.roomId, room)}
+            disabled={!isAvailable}
           >
-            Foglalás
-            <svg className="w-4 h-4 transition-transform group-hover/button:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
+            {isAvailable ? (
+              <>
+                Foglalás
+                <svg className="w-4 h-4 transition-transform group-hover/button:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </>
+            ) : (
+              'Foglalt'
+            )}
           </button>
         </div>
       </div>
