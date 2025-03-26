@@ -63,6 +63,10 @@ namespace RoomListApp
         private string selectedImagePath = string.Empty;
         private byte[] imageData = null;
 
+        private RoomManager _roomManager;
+
+        private EventImageManager _eventManager;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -86,6 +90,9 @@ namespace RoomListApp
             timer.Start();
 
             UpdateTimeDisplay();
+            _roomManager = new RoomManager();
+            _eventManager = new EventImageManager();
+
         }
 
         private void Timer_Tick(object sender, EventArgs e)
@@ -208,16 +215,10 @@ namespace RoomListApp
             {
                 try
                 {
-                    var imageUrl = $"https://api.hmzrt.eu{selectedRoom.Images}";
-                    var imageResponse = await _httpClient.GetAsync(imageUrl);
-                    if (imageResponse.IsSuccessStatusCode)
+                    var imageUrl = $"https://localhost:7047{selectedRoom.Images}";
+                    var bitmap = await _roomManager.LoadRoomImage(imageUrl);
+                    if (bitmap != null)
                     {
-                        roomImageData = await imageResponse.Content.ReadAsByteArrayAsync();
-                        var bitmap = new BitmapImage();
-                        bitmap.BeginInit();
-                        bitmap.StreamSource = new MemoryStream(roomImageData);
-                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                        bitmap.EndInit();
                         RoomImagePreview.Source = bitmap;
                         ViewRoomImageButton.IsEnabled = true;
                     }
@@ -226,6 +227,10 @@ namespace RoomListApp
                 {
                     MessageBox.Show($"Nem sikerült betölteni a szobához tartozó képet: {ex.Message}", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
+            }
+            else
+            {
+                MessageBox.Show("A szobához nincs társítva kép.", "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
             }
 
             roomEditPanel.Visibility = Visibility.Visible;
@@ -560,7 +565,7 @@ namespace RoomListApp
                     return;
                 }
 
-                var imageUrl = $"https://api.hmzrt.eu{roomWithImage.Images}";
+                var imageUrl = $"https://localhost:7047{roomWithImage.Images}";
                 var imageResponse = await _httpClient.GetAsync(imageUrl);
                 if (!imageResponse.IsSuccessStatusCode)
                 {
@@ -3764,16 +3769,10 @@ namespace RoomListApp
             {
                 try
                 {
-                    var imageUrl = $"https://api.hmzrt.eu{selectedEvent.Images}";
-                    var imageResponse = await _httpClient.GetAsync(imageUrl);
-                    if (imageResponse.IsSuccessStatusCode)
+                    var imageUrl = $"https://localhost:7047{selectedEvent.Images}";
+                    var bitmap = await _eventManager.LoadEventImage(imageUrl);
+                    if (bitmap != null)
                     {
-                        imageData = await imageResponse.Content.ReadAsByteArrayAsync();
-                        var bitmap = new BitmapImage();
-                        bitmap.BeginInit();
-                        bitmap.StreamSource = new MemoryStream(imageData);
-                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                        bitmap.EndInit();
                         EventImagePreview.Source = bitmap;
                         ViewImageButton.IsEnabled = true;
                     }
@@ -3782,6 +3781,10 @@ namespace RoomListApp
                 {
                     MessageBox.Show($"Nem sikerült betölteni az eseményhez tartozó képet: {ex.Message}", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
+            }
+            else
+            {
+                MessageBox.Show("Az eseményhez nincs társítva kép.", "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
             }
 
             eventEditPanel.Visibility = Visibility.Visible;
@@ -4121,15 +4124,41 @@ namespace RoomListApp
             }
         }
 
-        private async void ViewEventImage_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button && button.Tag != null)
-            {
-                int eventId = (int)button.Tag;
-                await LoadAndShowEventImage(eventId);
+        private async void ViewEventImage_Click(object sender, RoutedEventArgs e) {
+            var button = sender as Button;
+            if (button?.Tag == null) return;
+
+            int eventId = Convert.ToInt32(button.Tag);
+            var selectedEvent = eventsListView.Items.Cast<Event>().FirstOrDefault(ev => ev.EventId == eventId);
+
+            if (selectedEvent != null && !string.IsNullOrEmpty(selectedEvent.Images)) { // ImageUrl helyett Images
+                try {
+                    var imageUrl = $"https://localhost:7047{selectedEvent.Images}"; // ImageUrl helyett Images
+                    var bitmap = await _eventManager.LoadEventImage(imageUrl);
+
+                    if (bitmap != null) {
+                        var imageWindow = new Window {
+                            Title = $"{selectedEvent.EventName} képe",
+                            SizeToContent = SizeToContent.WidthAndHeight,
+                            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                            Content = new System.Windows.Controls.Image {
+                                Source = bitmap,
+                                Stretch = System.Windows.Media.Stretch.Uniform,
+                                MaxWidth = 800,
+                                MaxHeight = 600
+                            }
+                        };
+                        imageWindow.ShowDialog();
+                    }
+                }
+                catch (Exception ex) {
+                    MessageBox.Show($"Nem sikerült betölteni az eseményhez tartozó képet: {ex.Message}", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            else {
+                MessageBox.Show("Az eseményhez nincs társítva kép.", "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
-
         private async Task LoadAndShowEventImage(int eventId)
         {
             try
@@ -4151,7 +4180,7 @@ namespace RoomListApp
                     return;
                 }
 
-                var imageUrl = $"https://api.hmzrt.eu{eventWithImage.Images}";
+                var imageUrl = $"https://localhost:7047{eventWithImage.Images}";
                 var imageResponse = await _httpClient.GetAsync(imageUrl);
                 if (!imageResponse.IsSuccessStatusCode)
                 {
