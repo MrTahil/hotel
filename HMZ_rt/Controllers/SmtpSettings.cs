@@ -4,6 +4,7 @@ using MimeKit;
 using MimeKit.Text;
 using System.Net.Mail;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
+using Microsoft.Extensions.Options;
 
 namespace HMZ_rt.Controllers
 {
@@ -25,9 +26,9 @@ namespace HMZ_rt.Controllers
     {
         private readonly SmtpSettings _smtpSettings;
 
-        public EmailService(SmtpSettings smtpSettings)
+        public EmailService(IOptions<SmtpSettings> smtpSettingsOptions)
         {
-            _smtpSettings = smtpSettings;
+            _smtpSettings = smtpSettingsOptions.Value;
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string body)

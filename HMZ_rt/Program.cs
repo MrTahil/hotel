@@ -25,7 +25,7 @@ namespace HMZ_rt
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowHmztr",
-                    policy => policy.WithOrigins(["http://localhost:3000", "https://hmzrt.eu","https://api.hmzrt.eu"])
+                    policy => policy.WithOrigins(["http://localhost:3000", "https://hmzrt.eu", "https://api.hmzrt.eu", "https://web.hmzrt.hu"])
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials());
@@ -40,7 +40,7 @@ namespace HMZ_rt
             {
                 var connection = builder.Configuration.GetConnectionString("MySql");
                 o.UseMySQL(connection);
-            }); 
+            });
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -48,16 +48,16 @@ namespace HMZ_rt
             })
             .AddJwtBearer(options =>
             {
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-                ValidAudience = builder.Configuration["JwtSettings:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]))
-                    };
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+                    ValidAudience = builder.Configuration["JwtSettings:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]))
+                };
                 options.Events = new JwtBearerEvents
                 {
                     OnChallenge = async context =>
@@ -128,13 +128,13 @@ namespace HMZ_rt
 
 
 
-            
+
 
             var app = builder.Build();
             app.MapGet("/", () => "HMZ_rt API v1.0");
             // Configure the HTTP request pipeline.
-                app.UseSwagger();
-                app.UseSwaggerUI();
+            app.UseSwagger();
+            app.UseSwaggerUI();
             //app.UseHttpsRedirection();
             app.UseCors("AllowHmztr");
             app.UseAuthorization();

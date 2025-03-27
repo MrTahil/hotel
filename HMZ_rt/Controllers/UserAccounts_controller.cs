@@ -313,7 +313,7 @@ namespace HMZ_rt.Controllers
 
                 if (user == null)
                     return NotFound(new { message = "Felhasználó nem található" });
-                if (ddto != null) {
+                if (ddto == null) {
                     return StatusCode(404, "Nem lehet üres a jelszó");
                 }
                 if (PasswordHasher.VerifyPassword(ddto.Password, user.Password))
