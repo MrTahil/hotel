@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 
 function Services() {
     const [hoveredCard, setHoveredCard] = useState(null);
     const [activeFilter, setActiveFilter] = useState('all');
+    const [selectedService, setSelectedService] = useState(null);
 
     const services = [
         {
             id: 1,
             name: 'Wellness és Spa',
-            description: 'Kényeztető masszázsok, szaunák és wellness szolgáltatások várják a vendégeket, hogy feltöltődjenek és ellazuljanak.',
+            description: 'Kényeztető masszázsok, szaunák és wellness szolgáltatások várják a vendégeket.',
+            detailedDescription: 'Tapasztalja meg a teljes testi-lelki megújulást professzionális terapeutáink kezei alatt. Választható szolgáltatásaink között szerepel svéd masszázs, aromaterápiás kezelés, finn szauna és infraszauna használata, valamint relaxációs medence.',
             category: 'wellness',
             features: ['Masszázs', 'Szauna', 'Meditáció', 'Gyógyfürdő'],
             priceRange: '15,000 - 50,000 Ft',
@@ -18,7 +19,8 @@ function Services() {
         {
             id: 2,
             name: 'Éttermek',
-            description: 'Prémium minőségű ételek és italok különleges atmoszférában. Séfjeink kreatív fogásai garantálják a felejthetetlen élményt.',
+            description: 'Prémium minőségű ételek és italok különleges atmoszférában.',
+            detailedDescription: 'Három különböző éttermünk várja Önt: a Panorama étterem lélegzetelállító kilátással, a Bistro modern magyar fogásokkal, és a Fine Dining exkluzív gourmet élményekkel. Minden étteremben elérhető gyermekmenü és borlapunk 50+ válogatott tételt kínál.',
             category: 'dining',
             features: ['Helyi specialitások', 'Nemzetközi konyha', 'Vegán opciók', 'Sommelier'],
             priceRange: '5,000 - 30,000 Ft',
@@ -27,7 +29,8 @@ function Services() {
         {
             id: 3,
             name: 'Szobaszerviz',
-            description: 'Non-stop szobaszerviz a kényelmed érdekében. Bármikor rendelhetsz friss ételeket, italokat vagy egyéb szolgáltatásokat.',
+            description: 'Non-stop szobaszerviz a kényelmed érdekében.',
+            detailedDescription: 'Éjjel-nappal elérhető szolgáltatásunk biztosítja, hogy szobájában is élvezhesse éttermeink kínálatát. Speciális kéréseket is teljesítünk, mint például gluténmentes vagy vegetáriánus ételek, valamint extra párnák vagy takarók igényelhetők.',
             category: 'room',
             features: ['24/7 elérhetőség', 'Gyors kiszolgálás', 'Speciális kérések', 'Prémium minőség'],
             priceRange: 'Ingyenes',
@@ -36,7 +39,8 @@ function Services() {
         {
             id: 4,
             name: 'Konferencia termek',
-            description: 'Modern felszereltségű konferencia termek, amelyek ideálisak üzleti találkozókra, tréningekre és eseményekre.',
+            description: 'Modern felszereltségű konferencia termek üzleti eseményekre.',
+            detailedDescription: 'Három különböző méretű terem áll rendelkezésre (20-150 fő), mindegyik felszerelve 4K projektorral, professzionális hangrendszerrel és gyors Wi-Fi-vel. Catering szolgáltatás és technikai support is kérhető.',
             category: 'business',
             features: ['HD projektor', 'Hangosítás', 'Kávészünet', 'Flipchart'],
             priceRange: '50,000 - 200,000 Ft',
@@ -45,21 +49,42 @@ function Services() {
         {
             id: 5,
             name: 'Gyermekprogramok',
-            description: 'Szórakoztató és oktató programok a legkisebb vendégeinknek. Képzett animátoraink felügyelete mellett.',
+            description: 'Szórakoztató és oktató programok gyerekeknek.',
+            detailedDescription: 'Napi programjaink között szerepel kézműves foglalkozás, kincskereső túra a kertben, interaktív mesedélután és esti mozi vetítés. 3-12 éves korú gyermekek számára, szakképzett animátorokkal.',
             category: 'family',
             features: ['Kreatív műhely', 'Túrák', 'Játékterem', 'Filmvetítés'],
             priceRange: 'Ingyenes - 10,000 Ft',
-            duration: '1-4 óra',
-            link: '/programok' // ide kerül a link
+            duration: '1-4 óra'
         },
         {
             id: 6,
             name: 'Privát strand',
-            description: 'Exkluzív privát strand medencével és napozóágyakkal, ahol teljes magánéletet élvezhet.',
+            description: 'Exkluzív privát strand medencével és napozóágyakkal.',
+            detailedDescription: 'Saját partszakaszunk kristálytiszta vízzel, fűtött infinity medencével és prémium napozóágyakkal várja vendégeinket. Koktélbár és privát masszázs szolgáltatás is elérhető a teljes kikapcsolódásért.',
             category: 'wellness',
             features: ['Privát tér', 'Lombik', 'Bárpult', 'Masszázs'],
             priceRange: '5,000 - 20,000 Ft',
             duration: '2-6 óra'
+        },
+        {
+            id: 7,
+            name: 'Fitnesz és Sport',
+            description: 'Modern edzőterem és szabadtéri sportlehetőségek.',
+            detailedDescription: 'Teljesen felszerelt konditerem kardió és erőgépekkel, valamint szabadtéri teniszpálya és futóösvény. Személyi edző és csoportos jóga órák is foglalhatók.',
+            category: 'wellness',
+            features: ['Edzőterem', 'Tenisz', 'Jóga', 'Személyi edző'],
+            priceRange: 'Ingyenes - 15,000 Ft',
+            duration: '1-2 óra'
+        },
+        {
+            id: 8,
+            name: 'Borkóstoló',
+            description: 'Vezetett borkóstoló helyi borászatok termékeivel.',
+            detailedDescription: 'Fedezze fel a régió legjobb borait sommelier vezetésével. A 2 órás program során 6 különböző bort kóstolhat meg, párosítva helyi sajtokkal és falatkákkal.',
+            category: 'dining',
+            features: ['Helyi borok', 'Sommelier', 'Sajttál', 'Vezetett túra'],
+            priceRange: '12,000 - 25,000 Ft',
+            duration: '2 óra'
         }
     ];
 
@@ -79,9 +104,9 @@ function Services() {
     return (
         <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
-                {/* Fejléc rész */}
+                {/* Header */}
                 <div className="text-center mb-16">
-                    <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
+                    <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl lg:text-6xl">
                         Szolgáltatásaink
                     </h1>
                     <p className="mt-5 max-w-xl mx-auto text-xl text-gray-500">
@@ -89,7 +114,7 @@ function Services() {
                     </p>
                 </div>
 
-                {/* Szűrők */}
+                {/* Filters */}
                 <div className="flex flex-wrap justify-center gap-3 mb-12">
                     {categories.map((category) => (
                         <button
@@ -102,7 +127,7 @@ function Services() {
                     ))}
                 </div>
 
-                {/* Szolgáltatás kártyák */}
+                {/* Service Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {filteredServices.map((service) => (
                         <div
@@ -111,20 +136,10 @@ function Services() {
                             onMouseEnter={() => setHoveredCard(service.id)}
                             onMouseLeave={() => setHoveredCard(null)}
                         >
-                            {/* Kép rész (kép nincs, de egy színes háttér) */}
                             <div className="h-48 bg-gradient-to-br from-blue-600 via-blue-400 to-blue-300 text-white flex justify-center items-center">
-    <span className="font-bold text-2xl">{service.name}</span>
-</div>
+                                <span className="font-bold text-2xl">{service.name}</span>
+                            </div>
 
-
-
-
-
-
-
-
-
-                            {/* Tartalom */}
                             <div className="bg-white p-6">
                                 <div className="flex justify-between items-start">
                                     <h3 className="text-xl font-bold text-gray-900">{service.name}</h3>
@@ -135,7 +150,6 @@ function Services() {
 
                                 <p className="mt-3 text-gray-600">{service.description}</p>
 
-                                {/* Jellemzők */}
                                 <div className="mt-4">
                                     <h4 className="text-sm font-semibold text-gray-900 mb-2">Jellemzők:</h4>
                                     <div className="flex flex-wrap gap-2">
@@ -150,49 +164,33 @@ function Services() {
                                     </div>
                                 </div>
 
-                                {/* Időtartam és gomb */}
                                 <div className="mt-6 flex items-center justify-between">
                                     <span className="text-sm text-gray-500">
-                                        <svg
-                                            className="w-4 h-4 inline mr-1"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                            />
+                                        <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         {service.duration}
                                     </span>
 
-                                    <Link
-                                        to={`/programok`}
+                                    <button
+                                        onClick={() => setSelectedService(selectedService === service.id ? null : service.id)}
                                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300"
                                     >
-                                        Részletek
-                                        <svg
-                                            className="ml-2 -mr-1 w-4 h-4"
-                                            fill="currentColor"
-                                            viewBox="0 0 20 20"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                            <path
-                                                fillRule="evenodd"
-                                                d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                                                clipRule="evenodd"
-                                            />
+                                        {selectedService === service.id ? 'Kevesebb' : 'Részletek'}
+                                        <svg className="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                                         </svg>
-                                    </Link>
-
+                                    </button>
                                 </div>
+
+                                {/* Detailed Description */}
+                                {selectedService === service.id && (
+                                    <div className="mt-4 p-4 bg-blue-50 rounded-lg transition-all duration-300">
+                                        <p className="text-gray-700">{service.detailedDescription}</p>
+                                    </div>
+                                )}
                             </div>
 
-                            {/* Hover effekt */}
                             {hoveredCard === service.id && (
                                 <div className="absolute inset-0 border-2 border-blue-400 rounded-2xl pointer-events-none" />
                             )}
@@ -200,27 +198,17 @@ function Services() {
                     ))}
                 </div>
 
-                {/* Extra információ */}
+                {/* Extra Info */}
                 <div className="mt-20 bg-blue-600 rounded-2xl p-8 text-white">
                     <div className="max-w-3xl mx-auto text-center">
                         <h2 className="text-3xl font-bold mb-4">Egyedi igények, kivételes szolgáltatások</h2>
                         <p className="text-blue-100 mb-6">
                             Ha speciális igénye van, vagy csoportos foglalást tervez, kérjük keressen minket bizalommal.
-                            Mindent megteszünk, hogy maradandó élményt nyújtsunk Önnek és családjának.
                         </p>
                         <button className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 transition-colors duration-300">
                             Kapcsolatfelvétel
-                            <svg
-                                className="ml-3 -mr-1 w-5 h-5"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                                    clipRule="evenodd"
-                                />
+                            <svg className="ml-3 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                             </svg>
                         </button>
                     </div>
