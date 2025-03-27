@@ -85,6 +85,46 @@ function Services() {
             features: ['Helyi borok', 'Sommelier', 'Sajttál', 'Vezetett túra'],
             priceRange: '12,000 - 25,000 Ft',
             duration: '2 óra'
+        },
+        {
+            id: 9,
+            name: 'Csillagvizsgáló Est',
+            description: 'Csillagnézés és ismeretterjesztés szakértő vezetésével.',
+            detailedDescription: 'Professzionális teleszkópokkal felszerelt csillagvizsgálónkban megismerheti az éjszakai égbolt csodáit. A program tartalmaz egy rövid előadást a csillagászatról, majd vezetett megfigyelést a szabad ég alatt.',
+            category: 'family',
+            features: ['Teleszkóp', 'Előadás', 'Csillagképek', 'Gyerekbarát'],
+            priceRange: '8,000 - 15,000 Ft',
+            duration: '2-3 óra'
+        },
+        {
+            id: 10,
+            name: 'Kerékpártúra',
+            description: 'Vezetett túrák a környék legszebb útvonalain.',
+            detailedDescription: 'Különböző nehézségi szintű túrák közül választhat, kezdőtől a haladóig. Kerékpárokat és védőfelszerelést biztosítunk, a túrák során pedig helyi idegenvezető mutatja be a környék nevezetességeit.',
+            category: 'wellness',
+            features: ['Kerékpár bérlés', 'Idegenvezetés', 'Panoráma', 'Csoportos'],
+            priceRange: '10,000 - 20,000 Ft',
+            duration: '3-5 óra'
+        },
+        {
+            id: 11,
+            name: 'Privát Mozi',
+            description: 'Személyre szabott filmvetítés exkluzív környezetben.',
+            detailedDescription: 'Válassza ki kedvenc filmjét, és nézze meg egy privát, 10 fős moziteremben. Pattogatott kukorica, üdítők és kényelmes fotelek biztosítják a tökéletes moziélményt.',
+            category: 'room',
+            features: ['Privát terem', 'Filmválasztás', 'Snack', 'Hangrendszer'],
+            priceRange: '20,000 - 40,000 Ft',
+            duration: '2-3 óra'
+        },
+        {
+            id: 12,
+            name: 'Workshopok',
+            description: 'Kreatív és üzleti workshopok szakértők vezetésével.',
+            detailedDescription: 'Választható témák: fotózás, főzés, prezentációs készségek vagy csapatépítés. Minden workshop gyakorlati oktatást kínál, kis létszámú csoportokban, hogy mindenki aktívan részt vehessen.',
+            category: 'business',
+            features: ['Szakértő oktató', 'Gyakorlat', 'Eszközök', 'Csoportos'],
+            priceRange: '15,000 - 35,000 Ft',
+            duration: '2-4 óra'
         }
     ];
 
