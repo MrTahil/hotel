@@ -150,7 +150,7 @@
     <Compile Include="Models\Dtos\Guest.cs" />
     <Compile Include="Models\Dtos\Promotion.cs" />
     <Compile Include="Models\Dtos\Rooms.cs" />
-    <Compile Include="Models\Converters\EventImageManager.cs" />
+    <Compile Include="Models\Converters\EventManager.cs" />
     <Compile Include="Models\Converters\RoomImage.cs" />
     <Compile Include="ErrorWindow.xaml.cs">
       <DependentUpon>ErrorWindow.xaml</DependentUpon>
