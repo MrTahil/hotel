@@ -393,3 +393,15 @@ public class DeleteAccount
     [Required(ErrorMessage ="A jelszó megadása törléshez szükséges")]
     public string Password { get; set; }
 }
+
+
+public class NewRevi
+{
+    [Required(ErrorMessage = "Nem lehet üres a GuestId")]
+    public int GuestId { get; set; }
+    [Required(ErrorMessage = "Nem lehet üres az értékelés!")]
+    [Range(1, 10, ErrorMessage = "1 és 10 között kell lennie az értékelésnek!")]
+    public decimal? Rating { get; set; }
+    public string? Comment {get;set;}
+
+}
