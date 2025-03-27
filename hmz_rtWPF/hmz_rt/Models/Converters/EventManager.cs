@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,19 +10,22 @@ using System.Windows;
 
 namespace hmz_rt.Models.Converters
 {
-    public class EventImageManager // Átnevezve az ütközés elkerülésére
+    public class EventImageManager 
     {
         private readonly HttpClient _httpClient;
         private readonly string _cacheFolder;
 
-        public EventImageManager() {
+        public EventImageManager()
+        {
             _httpClient = new HttpClient();
             _cacheFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "YourAppName", "EventImageCache");
             Directory.CreateDirectory(_cacheFolder);
         }
 
-        public async Task<BitmapImage> LoadEventImage(string imageUrl) {
-            try {
+        public async Task<BitmapImage> LoadEventImage(string imageUrl)
+        {
+            try
+            {
                 string fileName = Path.GetFileName(new Uri(imageUrl).LocalPath);
                 string localPath = Path.Combine(_cacheFolder, fileName);
 
@@ -37,7 +40,7 @@ namespace hmz_rt.Models.Converters
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.UriSource = new Uri(localPath);
                 bitmap.EndInit();
-                bitmap.Freeze(); // Ez javítja a teljesítményt és megakadályozza a szálak közötti hozzáférési problémákat
+                bitmap.Freeze(); 
 
                 return bitmap;
             }
@@ -48,14 +51,12 @@ namespace hmz_rt.Models.Converters
             }
         }
 
-        // Opcionális: Kép törlése a gyorsítótárból
         public void ClearImageCache(string imageUrl)
         {
             try
             {
                 string fileName = Path.GetFileName(new Uri(imageUrl).LocalPath);
                 string localPath = Path.Combine(_cacheFolder, fileName);
-
                 if (File.Exists(localPath))
                 {
                     File.Delete(localPath);
@@ -67,7 +68,6 @@ namespace hmz_rt.Models.Converters
             }
         }
 
-        // Opcionális: Teljes gyorsítótár törlése
         public void ClearAllCache()
         {
             try
