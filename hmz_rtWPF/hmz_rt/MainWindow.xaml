@@ -1728,19 +1728,25 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn Header="Státusz" Width="120">
+                            <GridViewColumn Header="Státusz" Width="Auto">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Button x:Name="StatusButton" 
-                                Content="{Binding Status, Converter={StaticResource StatusToButtonTextConverter}}"
-                                Tag="{Binding BookingId}"
-                                Click="StatusButton_Click"
-                                Width="100"
-                                Height="30"
-                                BorderThickness="0">
+                                                Content="{Binding Status, Converter={StaticResource StatusToButtonTextConverter}}"
+                                                Tag="{Binding BookingId}"
+                                                Click="StatusButton_Click"
+                                                Width="110"
+                                                Height="36"
+                                                BorderThickness="1"
+                                                Margin="5,2">
                                             <Button.Resources>
                                                 <Style TargetType="Border">
                                                     <Setter Property="CornerRadius" Value="8"/>
+                                                    <Setter Property="Effect">
+                                                        <Setter.Value>
+                                                            <DropShadowEffect ShadowDepth="2" BlurRadius="4" Opacity="0.3" />
+                                                        </Setter.Value>
+                                                    </Setter>
                                                 </Style>
                                             </Button.Resources>
                                             <Button.Style>
@@ -1750,27 +1756,35 @@
                                                             <Setter Property="Content" Value="Check In"/>
                                                             <Setter Property="Background" Value="#DCFCE7"/>
                                                             <Setter Property="Foreground" Value="#065F46"/>
+                                                            <Setter Property="BorderBrush" Value="#10B981"/>
+                                                            <Setter Property="FontWeight" Value="SemiBold"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Status}" Value="Függőben">
                                                             <Setter Property="Content" Value="Check In"/>
                                                             <Setter Property="Background" Value="#FEF3C7"/>
                                                             <Setter Property="Foreground" Value="#92400E"/>
+                                                            <Setter Property="BorderBrush" Value="#F59E0B"/>
+                                                            <Setter Property="FontWeight" Value="SemiBold"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Status}" Value="Checked In">
                                                             <Setter Property="Content" Value="Check Out"/>
                                                             <Setter Property="Background" Value="#EFF6FF"/>
                                                             <Setter Property="Foreground" Value="#1E40AF"/>
+                                                            <Setter Property="BorderBrush" Value="#3B82F6"/>
+                                                            <Setter Property="FontWeight" Value="SemiBold"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Status}" Value="Finished">
                                                             <Setter Property="Content" Value="Lezárva"/>
                                                             <Setter Property="Background" Value="#D1D5DB"/>
                                                             <Setter Property="Foreground" Value="#374151"/>
+                                                            <Setter Property="BorderBrush" Value="#9CA3AF"/>
                                                             <Setter Property="IsEnabled" Value="False"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding Status}" Value="Lemondva">
                                                             <Setter Property="Content" Value="Lemondva"/>
                                                             <Setter Property="Background" Value="#FEE2E2"/>
                                                             <Setter Property="Foreground" Value="#991B1B"/>
+                                                            <Setter Property="BorderBrush" Value="#EF4444"/>
                                                             <Setter Property="IsEnabled" Value="False"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -2499,5 +2513,594 @@
                 </Border>
             </Grid>
         </Grid>
+
+        <!-- Foglalás típus választó panel -->
+        <Grid x:Name="bookingTypeSelectionContainer" Grid.Row="1" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Fejléc -->
+            <Grid Grid.Row="0" Background="#1E293B" Margin="0,0,0,25">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Vissza gomb -->
+                <Button Grid.Column="0" 
+                Content="⬅ Vissza" 
+                HorizontalAlignment="Left" 
+                Margin="30,20" 
+                Padding="25,15" 
+                Background="#3B82F6" 
+                Foreground="White" 
+                BorderThickness="0"
+                FontSize="18"
+                Click="BookingTypeBackButton_Click">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <!-- Cím -->
+                <TextBlock Grid.Column="1" 
+                   Text="Válasszon foglalás típust" 
+                   VerticalAlignment="Center" 
+                   HorizontalAlignment="Center" 
+                   FontSize="32" 
+                   FontWeight="SemiBold" 
+                   Foreground="White"/>
+            </Grid>
+
+            <!-- Választási lehetőségek -->
+            <UniformGrid Grid.Row="1" Columns="2" Margin="100,50">
+                <!-- Szobafoglalások kezelése -->
+                <Border Style="{StaticResource DashboardCard}" Background="#F0FDF4" Margin="20" MouseLeftButtonDown="RoomBookingsCard_MouseLeftButtonDown">
+                    <Border.RenderTransform>
+                        <ScaleTransform/>
+                    </Border.RenderTransform>
+                    <StackPanel>
+                        <TextBlock Text="&#xE8F4;" Style="{StaticResource DashboardIcon}" Foreground="#16A34A"/>
+                        <TextBlock Text="Szobafoglalások kezelése" Style="{StaticResource DashboardTitle}" Foreground="#14532D"/>
+                        <TextBlock Text="Szállodai szobák foglalásainak kezelése, check-in, check-out folyamatok" 
+                           FontSize="14" TextWrapping="Wrap" Margin="0,10,0,0" Foreground="#166534"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Eseményfoglalások kezelése -->
+                <Border Style="{StaticResource DashboardCard}" Background="#F0FDFA" Margin="20" MouseLeftButtonDown="EventBookingsCard_MouseLeftButtonDown">
+                    <Border.RenderTransform>
+                        <ScaleTransform/>
+                    </Border.RenderTransform>
+                    <StackPanel>
+                        <TextBlock Text="&#xE787;" Style="{StaticResource DashboardIcon}" Foreground="#0D9488"/>
+                        <TextBlock Text="Eseményfoglalások kezelése" Style="{StaticResource DashboardTitle}" Foreground="#134E4A"/>
+                        <TextBlock Text="Programok, rendezvények foglalásainak kezelése, résztvevők nyilvántartása" 
+                           FontSize="14" TextWrapping="Wrap" Margin="0,10,0,0" Foreground="#0F766E"/>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+        </Grid>
+
+        <!-- Eseményfoglalások kezelése konténer -->
+        <Grid x:Name="eventBookingsContainer" Grid.Row="1" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Fejléc -->
+            <Grid Grid.Row="0" Background="#1E293B">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Vissza gomb -->
+                <Button Grid.Column="0" 
+                x:Name="EventBookingsBackButton"
+                Content="⬅ Vissza" 
+                HorizontalAlignment="Left" 
+                Margin="30,20" 
+                Padding="25,15" 
+                Background="#3B82F6" 
+                Foreground="White" 
+                BorderThickness="0"
+                FontSize="18"
+                Click="EventBookingsBackButton_Click">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <!-- Cím -->
+                <TextBlock Grid.Column="1" 
+                   Text="Eseményfoglalások kezelése" 
+                   VerticalAlignment="Center" 
+                   HorizontalAlignment="Center" 
+                   FontSize="32" 
+                   FontWeight="SemiBold" 
+                   Foreground="White"/>
+
+                <!-- Új foglalás gomb -->
+                <Button Grid.Column="2" 
+                x:Name="NewEventBookingButton"
+                Content="+ Új eseményfoglalás" 
+                HorizontalAlignment="Right" 
+                Margin="30,20" 
+                Padding="25,15" 
+                Background="#10B981" 
+                Foreground="White" 
+                BorderThickness="0"
+                FontSize="18"
+                Click="NewEventBookingButton_Click">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+            </Grid>
+
+            <!-- Tartalom -->
+            <Grid Grid.Row="1" Margin="30">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Keresés és szűrés -->
+                <Grid Grid.Row="0" Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Keresés -->
+                    <Border Grid.Column="0" 
+                    Background="White" 
+                    BorderBrush="#E2E8F0" 
+                    BorderThickness="1" 
+                    CornerRadius="8" 
+                    Padding="15" 
+                    Margin="0,0,10,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" 
+                               Text="🔍" 
+                               FontSize="18" 
+                               VerticalAlignment="Center" 
+                               Margin="0,0,10,0"/>
+                            <TextBox Grid.Column="1" 
+         x:Name="EventBookingSearchTextBox"
+         BorderThickness="0" 
+         FontSize="16" 
+         VerticalAlignment="Center" 
+         Background="Transparent"
+         TextChanged="EventBookingSearchTextBox_TextChanged">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="TextBox">
+                                                    <Grid>
+                                                        <TextBlock Text="Keresés név, esemény vagy státusz alapján..." 
+                                       Foreground="Gray" 
+                                       Visibility="{Binding Text.IsEmpty, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                        <ScrollViewer x:Name="PART_ContentHost"/>
+                                                    </Grid>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                        </Grid>
+                    </Border>
+
+                    <!-- Frissítés gomb -->
+                    <Button Grid.Column="1" 
+                    x:Name="RefreshEventBookingsButton"
+                    Content="🔄 Frissítés" 
+                    Padding="20,15" 
+                    Background="#3B82F6" 
+                    Foreground="White" 
+                    BorderThickness="0"
+                    FontSize="16"
+                    Click="RefreshEventBookingsButton_Click">
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="8"/>
+                            </Style>
+                        </Button.Resources>
+                    </Button>
+                </Grid>
+
+                <!-- Foglalások listája -->
+                <Border Grid.Row="1" 
+                Background="White" 
+                BorderBrush="#E2E8F0" 
+                BorderThickness="1" 
+                CornerRadius="12" 
+                Padding="0">
+                    <ListView x:Name="eventBookingsListView" 
+                      BorderThickness="0" 
+                      Background="Transparent"
+                      SelectionMode="Single">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Foglalás ID" Width="100">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding EventBookingId}" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Esemény" Width="200">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding EventName}" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Vendég" Width="200">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding GuestName}" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Jegyek száma" Width="120">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding NumberOfTickets}" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Összeg" Width="120">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding TotalPrice, StringFormat='{}{0:N0} Ft'}" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Foglalás dátuma" Width="150">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding BookingDate, StringFormat='{}{0:yyyy.MM.dd}'}" VerticalAlignment="Center"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Státusz" Width="150">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button x:Name="EventStatusButton" 
+                                            Content="{Binding Status}"
+                                            Tag="{Binding EventBookingId}"
+                                            Click="EventStatusButton_Click"
+                                            Width="130"
+                                            Height="36"
+                                            BorderThickness="1"
+                                            Margin="5,2">
+                                                <Button.Resources>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="CornerRadius" Value="8"/>
+                                                        <Setter Property="Effect">
+                                                            <Setter.Value>
+                                                                <DropShadowEffect ShadowDepth="2" BlurRadius="4" Opacity="0.3" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </Button.Resources>
+                                                <Button.Style>
+                                                    <Style TargetType="Button">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Jóváhagyva">
+                                                                <Setter Property="Background" Value="#DCFCE7"/>
+                                                                <Setter Property="Foreground" Value="#065F46"/>
+                                                                <Setter Property="BorderBrush" Value="#10B981"/>
+                                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Függőben">
+                                                                <Setter Property="Background" Value="#FEF3C7"/>
+                                                                <Setter Property="Foreground" Value="#92400E"/>
+                                                                <Setter Property="BorderBrush" Value="#F59E0B"/>
+                                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Checked In">
+                                                                <Setter Property="Background" Value="#EFF6FF"/>
+                                                                <Setter Property="Foreground" Value="#1E40AF"/>
+                                                                <Setter Property="BorderBrush" Value="#3B82F6"/>
+                                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Finished">
+                                                                <Setter Property="Background" Value="#D1D5DB"/>
+                                                                <Setter Property="Foreground" Value="#374151"/>
+                                                                <Setter Property="BorderBrush" Value="#9CA3AF"/>
+                                                                <Setter Property="IsEnabled" Value="False"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="Lemondva">
+                                                                <Setter Property="Background" Value="#FEE2E2"/>
+                                                                <Setter Property="Foreground" Value="#991B1B"/>
+                                                                <Setter Property="BorderBrush" Value="#EF4444"/>
+                                                                <Setter Property="IsEnabled" Value="False"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Fizetési státusz" Width="150">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding PaymentStatus}" VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding PaymentStatus}" Value="Fizetve">
+                                                                <Setter Property="Foreground" Value="#059669"/>
+                                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding PaymentStatus}" Value="Függőben">
+                                                                <Setter Property="Foreground" Value="#D97706"/>
+                                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Műveletek" Width="200">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Content="Részletek" 
+                                                Tag="{Binding EventBookingId}"
+                                                Click="EventBookingDetailsButton_Click"
+                                                Background="#3B82F6" 
+                                                Foreground="White"
+                                                Padding="10,5"
+                                                Margin="0,0,5,0">
+                                                    <Button.Resources>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="CornerRadius" Value="4"/>
+                                                        </Style>
+                                                    </Button.Resources>
+                                                </Button>
+                                                <Button Content="Törlés" 
+                                                Tag="{Binding EventBookingId}"
+                                                Click="DeleteEventBookingButton_Click"
+                                                Background="#EF4444" 
+                                                Foreground="White"
+                                                Padding="10,5">
+                                                    <Button.Resources>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="CornerRadius" Value="4"/>
+                                                        </Style>
+                                                    </Button.Resources>
+                                                </Button>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- Új eseményfoglalás panel -->
+        <Grid x:Name="newEventBookingPanel" Grid.Row="1" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Fejléc -->
+            <Grid Grid.Row="0" Background="#1E293B">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Vissza gomb -->
+                <Button Grid.Column="0" 
+                Content="⬅ Vissza" 
+                HorizontalAlignment="Left" 
+                Margin="30,20" 
+                Padding="25,15" 
+                Background="#3B82F6" 
+                Foreground="White" 
+                BorderThickness="0"
+                FontSize="18"
+                Click="NewEventBookingBackButton_Click">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="8"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <!-- Cím -->
+                <TextBlock Grid.Column="1" 
+                   Text="Új eseményfoglalás létrehozása" 
+                   VerticalAlignment="Center" 
+                   HorizontalAlignment="Center" 
+                   FontSize="32" 
+                   FontWeight="SemiBold" 
+                   Foreground="White"/>
+            </Grid>
+
+            <!-- Űrlap -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <Border Background="White" 
+                BorderBrush="#E2E8F0" 
+                BorderThickness="1" 
+                CornerRadius="12" 
+                Margin="30"
+                Padding="30">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Esemény kiválasztása -->
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,20">
+                            <TextBlock Text="Esemény kiválasztása" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <ComboBox x:Name="EventComboBox" 
+                              DisplayMemberPath="EventName"
+                              SelectedValuePath="EventId"
+                              FontSize="16"
+                              Padding="10"
+                              SelectionChanged="EventComboBox_SelectionChanged"/>
+                        </StackPanel>
+
+                        <!-- Vendég kiválasztása -->
+                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,0,20">
+                            <TextBlock Text="Vendég kiválasztása" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <ComboBox x:Name="EventGuestComboBox" 
+                              DisplayMemberPath="FullName"
+                              SelectedValuePath="GuestId"
+                              FontSize="16"
+                              Padding="10"/>
+                        </StackPanel>
+
+                        <!-- Jegyek száma -->
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,20">
+                            <TextBlock Text="Jegyek száma" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <TextBox x:Name="TicketsTextBox" 
+                             FontSize="16"
+                             Padding="10"
+                             TextChanged="TicketsTextBox_TextChanged"/>
+                        </StackPanel>
+
+                        <!-- Összeg -->
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,0,20">
+                            <TextBlock Text="Összeg" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <TextBox x:Name="EventTotalPriceTextBox" 
+                             FontSize="16"
+                             Padding="10"
+                             IsReadOnly="True"/>
+                        </StackPanel>
+
+                        <!-- Státusz -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,10,20">
+                            <TextBlock Text="Státusz" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <ComboBox x:Name="EventBookingStatusComboBox" 
+                              FontSize="16"
+                              Padding="10">
+                                <ComboBoxItem Content="Jóváhagyva"/>
+                                <ComboBoxItem Content="Függőben"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Fizetési státusz -->
+                        <StackPanel Grid.Row="2" Grid.Column="1" Margin="10,0,0,20">
+                            <TextBlock Text="Fizetési státusz" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <ComboBox x:Name="PaymentStatusComboBox" 
+                              FontSize="16"
+                              Padding="10">
+                                <ComboBoxItem Content="Fizetve"/>
+                                <ComboBoxItem Content="Függőben"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- Jegyzetek -->
+                        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,20">
+                            <TextBlock Text="Jegyzetek" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+                            <TextBox x:Name="EventNotesTextBox" 
+                             FontSize="16"
+                             Padding="10"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             Height="100"/>
+                        </StackPanel>
+
+                        <!-- Esemény információk -->
+                        <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" 
+                        Background="#F8FAFC" 
+                        BorderBrush="#E2E8F0" 
+                        BorderThickness="1" 
+                        CornerRadius="8" 
+                        Padding="20"
+                        Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock Text="Esemény információk" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,15"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Esemény neve:" FontWeight="SemiBold" Margin="0,0,10,5"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" x:Name="EventNameInfoTextBlock" Text="-" Margin="0,0,0,5"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Időpont:" FontWeight="SemiBold" Margin="0,0,10,5"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" x:Name="EventDateInfoTextBlock" Text="-" Margin="0,0,0,5"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Helyszín:" FontWeight="SemiBold" Margin="0,0,10,5"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" x:Name="EventLocationInfoTextBlock" Text="-" Margin="0,0,0,5"/>
+
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Jegy ára:" FontWeight="SemiBold" Margin="0,0,10,5"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" x:Name="EventPriceInfoTextBlock" Text="-" Margin="0,0,0,5"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Mentés gomb -->
+                        <Button Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
+                        Content="Foglalás mentése" 
+                        HorizontalAlignment="Center" 
+                        Margin="0,20,0,0" 
+                        Padding="30,15" 
+                        Background="#10B981" 
+                        Foreground="White" 
+                        BorderThickness="0"
+                        FontSize="18"
+                        Click="SaveEventBookingButton_Click">
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="8"/>
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+                    </Grid>
+                </Border>
+            </ScrollViewer>
+        </Grid>
+
+
+
     </Grid>
 </Window>
