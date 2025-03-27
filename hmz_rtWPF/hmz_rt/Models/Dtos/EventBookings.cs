@@ -21,8 +21,8 @@ namespace hmz_rt.Models.Dtos
         private string _paymentStatus;
         private DateTime _dateAdded;
         private string _notes;
-        private string _guestName; // Kiegészítő mező a vendég nevének megjelenítéséhez
-        private string _eventName; // Kiegészítő mező az esemény nevének megjelenítéséhez
+        private string _guestName; 
+        private string _eventName; 
 
         public int EventBookingId
         {
