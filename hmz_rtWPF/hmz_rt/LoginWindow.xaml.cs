@@ -33,7 +33,7 @@ namespace RoomListApp
                 ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
             };
 
-            _httpClient = new HttpClient(handler) { BaseAddress = new Uri("https://localhost:7047/UserAccounts/") };
+            _httpClient = new HttpClient(handler) { BaseAddress = new Uri("https://api.hmzrt.eu/UserAccounts/") };
 
             LoadSavedCredentials();
             Loaded += LoginWindow_Loaded;
