@@ -194,7 +194,7 @@ namespace HMZ_rt.Controllers
                 {
 
 
-                    var data = await _context.Guests.FirstOrDefaultAsync(x => x.UserId == userid.UserId);
+                    var data = await _context.Guests.Where(x => x.UserId == userid.UserId).ToListAsync();
                     if (data != null)
                     {
                         return StatusCode(200, data);
