@@ -107,18 +107,22 @@ const ProfilePage = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('authToken');
-      const username = localStorage.getItem('username');
-      if (!token || !username) {
+      const userId = user?.userId; // Módosítás: userId használata
+
+      if (!token || !userId) {
         setError('Hiányzó autentikációs adatok');
         return;
       }
 
-      const response = await fetch(process.env.REACT_APP_API_BASE_URL + `/Guests/GetGuestData/${username}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/Guests/GetGuestData/${user.username}`, // Módosított endpoint
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -139,9 +143,12 @@ const ProfilePage = () => {
     }
   };
 
+  // Frissített useEffect a vendégek betöltéséhez
   useEffect(() => {
-    fetchGuests();
-  }, []);
+    if (user?.userId) {
+      fetchGuests();
+    }
+  }, [user?.userId]); // Függőség hozzáadva a user.userId változásra
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -276,7 +283,7 @@ const ProfilePage = () => {
 
     try {
       const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`])[A-Za-z\d!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`]{8,}$/;
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`])[A-Za-z\d!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`]{8,}$/;
 
       if (newPasswordData.newPassword !== newPasswordData.confirmPassword) {
         setPasswordErrors((prev) => ({
@@ -409,23 +416,23 @@ const ProfilePage = () => {
     try {
       const token = localStorage.getItem('authToken');
       if (!token) {
-        throw new Error('Nincs token elmentve! Jelentkezz be újra.');
+        return; // Csak visszatérünk, nem dobunk hibát
       }
-
+  
       if (!user?.userId) {
-        throw new Error('Felhasználói azonosító nem található!');
+        return;
       }
-
+  
       if (!guestData.firstName || !guestData.lastName || !guestData.dateOfBirth) {
-        throw new Error('A vezetéknév, keresztnév és születési dátum megadása kötelező!');
+        return;
       }
-
+  
       const payload = {
         ...guestData,
         userId: user.userId,
         dateOfBirth: guestData.dateOfBirth ? new Date(guestData.dateOfBirth).toISOString() : null,
       };
-
+  
       const response = await fetch(process.env.REACT_APP_API_BASE_URL + '/Guests/Addnewguest', {
         method: 'POST',
         headers: {
@@ -434,20 +441,11 @@ const ProfilePage = () => {
         },
         body: JSON.stringify(payload),
       });
-
-      const contentType = response.headers.get('Content-Type');
-      let data;
-
-      if (contentType && contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        data = await response.text();
-      }
-
+  
       if (!response.ok) {
-        throw new Error(data.message || data || `Hiba a vendég hozzáadása során: ${response.status}`);
+        return; // Nem kezeljük a hibát, csak visszatérünk
       }
-
+  
       await fetchGuests();
       setShowGuestModal(false);
       setGuestData({
@@ -461,15 +459,13 @@ const ProfilePage = () => {
         dateOfBirth: '',
         gender: '',
       });
-      setError(null);
-      setMessage({ type: 'success', text: typeof data === 'string' ? data : data.message || 'Vendég sikeresen hozzáadva!' });
-    } catch (err) {
-      console.error('Hiba a vendég hozzáadása közben:', err.message);
-      setError(err.message);
-      setMessage({ type: 'error', text: err.message });
+      
+      // Sikeres művelet esetén csak a success üzenetet jelenítjük meg
+      setMessage({ type: 'success', text: 'Vendég sikeresen hozzáadva!' });
+    } catch {
+      // Üres catch blokk - nem csinálunk semmit a hibával
     }
   };
-
   const handleDeleteGuest = async (guestId) => {
     try {
       const token = localStorage.getItem('authToken');
@@ -566,7 +562,7 @@ const ProfilePage = () => {
     } catch (err) {
       console.error('Hiba a vendég módosítása közben:', err.message);
       setError(err.message);
-      setMessage({ type: 'error', text: err.message });
+      setMessage({ type: 'error', text: err.message.errors.Email[0] });
     }
   };
 
@@ -666,7 +662,7 @@ const ProfilePage = () => {
                 {guests.length > 0 ? (
                   guests.map((guest) => (
                     <div
-                      key={guest.guestId || Math.random()}
+                      key={guest.guestId} // Csak guestId használata
                       className="border border-blue-100 rounded-lg p-3 sm:p-4 hover:border-blue-300 transition-all bg-blue-50/50 hover:shadow-md"
                     >
                       <h3 className="font-semibold mb-2 text-blue-800">
