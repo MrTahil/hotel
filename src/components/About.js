@@ -14,7 +14,6 @@ function About() {
     return (
         <section className="relative py-16 bg-gradient-to-b from-blue-50 to-white">
             {/* Dekoratív fejléc sáv */}
-            <div className="absolute top-0 left-0 w-full h-16 bg-gradient-to-r from-blue-500 to-indigo-600 shadow-md"></div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Cím rész */}

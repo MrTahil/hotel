@@ -1,49 +1,57 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import DetailItem from "./DetailItem";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [deletePassword, setDeletePassword] = useState('');
+  const [deletePassword, setDeletePassword] = useState("");
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [guests, setGuests] = useState([]);
   const [guestData, setGuestData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phoneNumber: '',
-    address: '',
-    city: '',
-    country: '',
-    dateOfBirth: '',
-    gender: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    address: "",
+    city: "",
+    country: "",
+    dateOfBirth: "",
+    gender: "",
   });
   const [editGuestId, setEditGuestId] = useState(null);
   const [message, setMessage] = useState(null);
+  const [bookings, setBookings] = useState([]);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showCommentModal, setShowCommentModal] = useState(false);
+  const [commentData, setCommentData] = useState({
+    rating: 5,
+    comment: "",
+  });
 
   // Password change states
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
   const [passwordErrors, setPasswordErrors] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Forgot password states
-  const [forgotEmail, setForgotEmail] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
   const [newPasswordData, setNewPasswordData] = useState({
-    newPassword: '',
-    confirmPassword: ''
+    newPassword: "",
+    confirmPassword: "",
   });
   const [forgotStep, setForgotStep] = useState(1);
   const [showNewPasswordForgot, setShowNewPasswordForgot] = useState(false);
@@ -59,41 +67,144 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem("authToken");
         if (!token) {
-          throw new Error('Nincs token elmentve! Jelentkezz be újra.');
+          throw new Error("Nincs token elmentve! Jelentkezz be újra.");
         }
 
-        const response = await fetch(process.env.REACT_APP_API_BASE_URL + `/UserAccounts/GetOneUserData/${localStorage.getItem('username')}`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        const response = await fetch(
+          `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/GetOneUserData/${localStorage.getItem("username")}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (response.status === 401) {
-          throw new Error('Token érvénytelen vagy lejárt!');
+          throw new Error("Token érvénytelen vagy lejárt!");
         }
 
         if (!response.ok) {
           throw new Error(`HTTP hiba! Státusz: ${response.status}`);
         }
+        const fetchBookingDetails = async (bookingId) => {
+          try {
+            const token = localStorage.getItem("authToken");
+            const response = await fetch(
+              `${process.env.REACT_APP_API_BASE_URL}/Bookings/GetBookingDetails/${bookingId}`,
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+            if (!response.ok) {
+              throw new Error("Nem sikerült lekérni a foglalás részleteit");
+            }
+            const data = await response.json();
+            return data.roomId || data.room?.id;
+          } catch (err) {
+            console.error("Hiba a foglalás részleteinek lekérésekor:", err.message);
+            return null;
+          }
+        };
+        
+        const handleOpenDetails = (booking) => {
+          console.log("Booking adatok:", booking);
+          const roomId = booking.roomId || booking.room?.id || booking.RoomId || booking.room?.RoomId;
+          if (!roomId) {
+            console.error("Hiba: Nem található RoomId a booking objektumban", booking);
+          }
+          setSelectedBooking({
+            ...booking,
+            BookingId: booking.id || booking.bookingId,
+            RoomId: roomId || booking.id || booking.bookingId, // Ha RoomId nincs, használjuk a BookingId-t
+          });
+        };
+        
+        const handleSubmitComment = async (e) => {
+          e.preventDefault();
+          try {
+            const token = localStorage.getItem("authToken");
+            if (!token) {
+              throw new Error("Nincs token elmentve! Jelentkezz be újra.");
+            }
+        
+            if (guests.length === 0) {
+              throw new Error(
+                "Nincs vendég hozzáadva! Kérjük, adjon hozzá egy vendéget először."
+              );
+            }
+        
+            // Ha RoomId nincs, BookingId-t használunk
+            const roomId = selectedBooking.RoomId || selectedBooking.BookingId;
+            if (!roomId) {
+              console.error("Hiba: Sem RoomId, sem BookingId nem található", selectedBooking);
+              throw new Error("A szoba vagy foglalás azonosítója hiányzik az adatokból!");
+            }
+        
+            console.log("Küldött adatok:", {
+              RoomId: roomId,
+              GuestId: guests[0].guestId,
+              Rating: commentData.rating,
+              Comment: commentData.comment,
+            });
+        
+            const response = await fetch(
+              `${process.env.REACT_APP_API_BASE_URL}/Reviews/NemComment/${roomId}`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  GuestId: guests[0].guestId,
+                  Rating: commentData.rating,
+                  Comment: commentData.comment,
+                }),
+              }
+            );
+        
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(
+                errorData.message || "Hiba történt az értékelés küldése közben"
+              );
+            }
+        
+            setMessage({ type: "success", text: "Értékelés sikeresen elküldve!" });
+            setShowCommentModal(false);
+            setCommentData({
+              rating: 5,
+              comment: "",
+            });
+          } catch (err) {
+            console.error("Hiba az értékelés küldése közben:", err.message);
+            setMessage({ type: "error", text: err.message });
+          }
+        };
 
         const data = await response.json();
         setUser({
           username: data.username,
           email: data.email,
-          profileImage: data.profileImage || 'https://randomuser.me/api/portraits/men/42.jpg',
+          profileImage:
+            data.profileImage || "https://randomuser.me/api/portraits/men/42.jpg",
           userId: data.userId,
           role: data.role,
-          dateCreated: new Date(data.dateCreated).toLocaleDateString('hu-HU'),
+          dateCreated: new Date(data.dateCreated).toLocaleDateString("hu-HU"),
         });
       } catch (error) {
-        console.error('Hiba történt:', error.message);
+        console.error("Hiba történt:", error.message);
         setError(error.message);
-        if (error.message.includes('token') || error.message.includes('401')) {
-          navigate('/login');
+        if (error.message.includes("token") || error.message.includes("401")) {
+          navigate("/login");
         }
       } finally {
         setLoading(false);
@@ -103,23 +214,114 @@ const ProfilePage = () => {
     fetchUserData();
   }, [navigate]);
 
+  const fetchBookings = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token || !user?.userId) {
+        setError("Hiányzó autentikációs adatok vagy felhasználó ID");
+        return;
+      }
+  
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/Bookings/BookingsByUser/${user.userId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      if (!response.ok) {
+        if (response.status === 400) {
+          setBookings([]);
+          return;
+        }
+        throw new Error(`Nem sikerült lekérni a foglalásokat: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log("Backend foglalások adatai:", data); // Ellenőrizzük a struktúrát
+      setBookings(data);
+    } catch (err) {
+      console.error("Hiba a foglalások lekérésekor:", err.message);
+      setError(err.message);
+      setBookings([]);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.userId) {
+      fetchBookings();
+    }
+  }, [user?.userId]);
+
+  const handleOpenDetails = (booking) => {
+    console.log("Booking adatok:", booking);
+    const roomId = booking.roomId || booking.room?.id || booking.RoomId || booking.room?.RoomId;
+    if (!roomId) {
+      console.error("Hiba: Nem található RoomId a booking objektumban", booking);
+    }
+    setSelectedBooking({
+      ...booking,
+      BookingId: booking.id || booking.bookingId,
+      RoomId: roomId,
+    });
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedBooking(null);
+  };
+
+  const handleDeleteBooking = async (bookingId) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("Nincs token elmentve! Jelentkezz be újra.");
+      }
+
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/Bookings/DeleteBooking/${bookingId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Hiba a foglalás törlése során: ${response.status}`);
+      }
+
+      setMessage({ type: "success", text: "Foglalás sikeresen törölve!" });
+      fetchBookings();
+    } catch (err) {
+      console.error("Hiba a foglalás törlése közben:", err.message);
+      setMessage({ type: "error", text: err.message });
+    }
+  };
+  
+
   const fetchGuests = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('authToken');
-      const userId = user?.userId; // Módosítás: userId használata
+      const token = localStorage.getItem("authToken");
+      const userId = user?.userId;
 
       if (!token || !userId) {
-        setError('Hiányzó autentikációs adatok');
+        setError("Hiányzó autentikációs adatok");
         return;
       }
 
       const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL}/Guests/GetGuestData/${user.username}`, // Módosított endpoint
+        `${process.env.REACT_APP_API_BASE_URL}/Guests/GetGuestData/${user.username}`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         }
       );
@@ -135,7 +337,7 @@ const ProfilePage = () => {
       const data = await response.json();
       setGuests(Array.isArray(data) ? data : [data]);
     } catch (err) {
-      console.error('Hiba a vendéglista lekérésekor:', err.message);
+      console.error("Hiba a vendéglista lekérésekor:", err.message);
       setError(err.message);
       setGuests([]);
     } finally {
@@ -143,67 +345,79 @@ const ProfilePage = () => {
     }
   };
 
-  // Frissített useEffect a vendégek betöltéséhez
   useEffect(() => {
     if (user?.userId) {
       fetchGuests();
     }
-  }, [user?.userId]); // Függőség hozzáadva a user.userId változásra
+  }, [user?.userId]);
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    setPasswordErrors({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setPasswordErrors({ currentPassword: "", newPassword: "", confirmPassword: "" });
     setMessage(null);
 
     try {
-      const token = localStorage.getItem('authToken');
-      const username = localStorage.getItem('username');
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`])[A-Za-z\d!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`]{8,}$/;
+      const token = localStorage.getItem("authToken");
+      const username = localStorage.getItem("username");
+      const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`])[A-Za-z\d!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`]{8,}$/;
 
       if (!token || !username) {
-        throw new Error('Hiányzó autentikációs adatok');
+        throw new Error("Hiányzó autentikációs adatok");
       }
 
-      // Validation checks...
       if (passwordData.newPassword !== passwordData.confirmPassword) {
-        setPasswordErrors(prev => ({ ...prev, confirmPassword: 'Az új jelszavak nem egyeznek!' }));
+        setPasswordErrors((prev) => ({
+          ...prev,
+          confirmPassword: "Az új jelszavak nem egyeznek!",
+        }));
         return;
       }
 
       if (!passwordRegex.test(passwordData.newPassword)) {
-        setPasswordErrors(prev => ({
+        setPasswordErrors((prev) => ({
           ...prev,
-          newPassword: 'Az új jelszónak legalább 8 karakterből kell állnia, és tartalmaznia kell kisbetűt, nagybetűt, számot és speciális karaktert (!@#$%^&*?)!'
+          newPassword:
+            "Az új jelszónak legalább 8 karakterből kell állnia, és tartalmaznia kell kisbetűt, nagybetűt, számot és speciális karaktert (!@#$%^&*?)!",
         }));
         return;
       }
 
       const { response, data } = await handleApiCall(
         `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/Newpasswithknownpass/${username}`,
-        'PUT',
+        "PUT",
         {
           OldPassword: passwordData.currentPassword,
-          Password: passwordData.newPassword
+          Password: passwordData.newPassword,
         }
       );
 
       if (!response.ok) {
-        if (data.message && (data.message.includes('jelenlegi jelszó') || data.message.includes('Incorrect password'))) {
-          setPasswordErrors(prev => ({ ...prev, currentPassword: 'Helytelen jelenlegi jelszó!' }));
+        if (
+          data.message &&
+          (data.message.includes("jelenlegi jelszó") ||
+            data.message.includes("Incorrect password"))
+        ) {
+          setPasswordErrors((prev) => ({
+            ...prev,
+            currentPassword: "Helytelen jelenlegi jelszó!",
+          }));
         } else {
-          throw new Error(data.message || `Hiba a jelszó változtatásakor: ${response.status}`);
+          throw new Error(
+            data.message || `Hiba a jelszó változtatásakor: ${response.status}`
+          );
         }
         return;
       }
 
-      setMessage({ type: 'success', text: 'Jelszó sikeresen megváltoztatva!' });
+      setMessage({ type: "success", text: "Jelszó sikeresen megváltoztatva!" });
       setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
       });
     } catch (err) {
-      setMessage({ type: 'error', text: err.message });
+      setMessage({ type: "error", text: err.message });
     }
   };
 
@@ -319,12 +533,16 @@ const ProfilePage = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Hiba történt az új jelszó beállításakor!");
+        throw new Error(
+          data.message || "Hiba történt az új jelszó beállításakor!"
+        );
       }
 
       setMessage({
         type: "success",
-        text: data.message || "Jelszó sikeresen visszaállítva! Jelentkezzen be az új jelszóval.",
+        text:
+          data.message ||
+          "Jelszó sikeresen visszaállítva! Jelentkezzen be az új jelszóval.",
       });
       setForgotEmail("");
       setVerificationCode("");
@@ -338,57 +556,63 @@ const ProfilePage = () => {
 
   const handleDeleteAccount = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("authToken");
       if (!token) {
-        throw new Error('Nincs token elmentve! Jelentkezz be újra.');
+        throw new Error("Nincs token elmentve! Jelentkezz be újra.");
       }
 
-      const username = localStorage.getItem('username');
+      const username = localStorage.getItem("username");
       if (!username) {
-        throw new Error('Nincs felhasználónév elmentve!');
+        throw new Error("Nincs felhasználónév elmentve!");
       }
 
-      const response = await fetch(process.env.REACT_APP_API_BASE_URL + `/UserAccounts/DeleteUserByUsername/${username}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ Password: deletePassword }),
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/DeleteUserByUsername/${username}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ Password: deletePassword }),
+        }
+      );
 
       if (response.status === 401) {
-        throw new Error('Token érvénytelen vagy lejárt!');
+        throw new Error("Token érvénytelen vagy lejárt!");
       }
 
       if (response.status === 404) {
-        throw new Error('Felhasználó nem található!');
+        throw new Error("Felhasználó nem található!");
       }
 
       if (!response.ok) {
         const errorData = await response.text();
-        throw new Error(errorData || `HTTP hiba! Státusz: ${response.status}`);
+        throw new Error(
+          errorData || `HTTP hiba! Státusz: ${response.status}`
+        );
       }
 
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('username');
-      navigate('/');
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("username");
+      navigate("/");
     } catch (error) {
-      console.error('Hiba történt a fiók törlése közben:', error.message);
+      console.error("Hiba történt a fiók törlése közben:", error.message);
       setError(error.message);
     }
   };
+
   const handleApiCall = async (url, method, body, requiresAuth = true) => {
     const headers = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     };
 
     if (requiresAuth) {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("authToken");
       if (!token) {
-        throw new Error('Authentication token missing');
+        throw new Error("Authentication token missing");
       }
-      headers['Authorization'] = `Bearer ${token}`;
+      headers["Authorization"] = `Bearer ${token}`;
     }
 
     const response = await fetch(url, {
@@ -397,15 +621,12 @@ const ProfilePage = () => {
       body: body ? JSON.stringify(body) : undefined,
     });
 
-    // Clone the response to read it as both text and JSON if needed
     const responseClone = response.clone();
 
     try {
-      // First try to parse as JSON
       const data = await response.json();
       return { response, data };
     } catch (error) {
-      // If JSON parsing fails, read as text
       const text = await responseClone.text();
       return { response, data: { message: text } };
     }
@@ -414,72 +635,85 @@ const ProfilePage = () => {
   const handleAddGuest = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("authToken");
       if (!token) {
-        return; // Csak visszatérünk, nem dobunk hibát
+        setMessage({ type: "error", text: "Nincs token elmentve!" });
+        return;
       }
-  
+
       if (!user?.userId) {
+        setMessage({ type: "error", text: "Felhasználó ID hiányzik!" });
         return;
       }
-  
+
       if (!guestData.firstName || !guestData.lastName || !guestData.dateOfBirth) {
+        setMessage({ type: "error", text: "Kötelező mezők hiányoznak!" });
         return;
       }
-  
+
       const payload = {
         ...guestData,
         userId: user.userId,
-        dateOfBirth: guestData.dateOfBirth ? new Date(guestData.dateOfBirth).toISOString() : null,
+        dateOfBirth: guestData.dateOfBirth
+          ? new Date(guestData.dateOfBirth).toISOString()
+          : null,
       };
-  
-      const response = await fetch(process.env.REACT_APP_API_BASE_URL + '/Guests/Addnewguest', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-  
+
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/Guests/Addnewguest`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
       if (!response.ok) {
-        return; // Nem kezeljük a hibát, csak visszatérünk
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Hiba a vendég hozzáadása során!");
       }
-  
+
       await fetchGuests();
       setShowGuestModal(false);
       setGuestData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phoneNumber: '',
-        address: '',
-        city: '',
-        country: '',
-        dateOfBirth: '',
-        gender: '',
+        firstName: "",
+        lastName: "",
+        email: "",
+        phoneNumber: "",
+        address: "",
+        city: "",
+        country: "",
+        dateOfBirth: "",
+        gender: "",
       });
-      
-      // Sikeres művelet esetén csak a success üzenetet jelenítjük meg
-      setMessage({ type: 'success', text: 'Vendég sikeresen hozzáadva!' });
-    } catch {
-      // Üres catch blokk - nem csinálunk semmit a hibával
+
+      setMessage({ type: "success", text: "Vendég sikeresen hozzáadva!" });
+    } catch (err) {
+      console.error("Hiba a vendég hozzáadása közben:", err.message);
+      setMessage({ type: "error", text: err.message });
     }
   };
+
   const handleDeleteGuest = async (guestId) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("authToken");
       if (!token) {
-        throw new Error('Nincs token elmentve! Jelentkezz be újra.');
+        throw new Error("Nincs token elmentve! Jelentkezz be újra.");
       }
 
-      const response = await fetch(process.env.REACT_APP_API_BASE_URL + `/Guests/DeleteGuest/${guestId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/Guests/DeleteGuest/${guestId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -487,11 +721,11 @@ const ProfilePage = () => {
       }
 
       await fetchGuests();
-      setMessage({ type: 'success', text: 'Vendég sikeresen törölve!' });
+      setMessage({ type: "success", text: "Vendég sikeresen törölve!" });
     } catch (err) {
-      console.error('Hiba a vendég törlése közben:', err.message);
+      console.error("Hiba a vendég törlése közben:", err.message);
       setError(err.message);
-      setMessage({ type: 'error', text: err.message });
+      setMessage({ type: "error", text: err.message });
     }
   };
 
@@ -499,13 +733,15 @@ const ProfilePage = () => {
     setGuestData({
       firstName: guest.firstName,
       lastName: guest.lastName,
-      email: guest.email || '',
-      phoneNumber: guest.phoneNumber || '',
-      address: guest.address || '',
-      city: guest.city || '',
-      country: guest.country || '',
-      dateOfBirth: guest.dateOfBirth ? new Date(guest.dateOfBirth).toISOString().split('T')[0] : '',
-      gender: guest.gender || '',
+      email: guest.email || "",
+      phoneNumber: guest.phoneNumber || "",
+      address: guest.address || "",
+      city: guest.city || "",
+      country: guest.country || "",
+      dateOfBirth: guest.dateOfBirth
+        ? new Date(guest.dateOfBirth).toISOString().split("T")[0]
+        : "",
+      gender: guest.gender || "",
     });
     setEditGuestId(guest.guestId);
     setShowGuestModal(true);
@@ -514,63 +750,115 @@ const ProfilePage = () => {
   const handleUpdateGuest = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("authToken");
       if (!token) {
-        throw new Error('Nincs token elmentve! Jelentkezz be újra.');
+        throw new Error("Nincs token elmentve! Jelentkezz be újra.");
       }
 
       if (!editGuestId) {
-        throw new Error('Nincs kiválasztott vendég a szerkesztéshez!');
+        throw new Error("Nincs kiválasztott vendég a szerkesztéshez!");
       }
 
       const payload = {
         ...guestData,
-        dateOfBirth: guestData.dateOfBirth ? new Date(guestData.dateOfBirth).toISOString() : null,
+        dateOfBirth: guestData.dateOfBirth
+          ? new Date(guestData.dateOfBirth).toISOString()
+          : null,
       };
 
-      const response = await fetch(process.env.REACT_APP_API_BASE_URL + `/Guests/UpdateGuest/${editGuestId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/Guests/UpdateGuest/${editGuestId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const responseData = await response.json();
 
       if (!response.ok) {
-        throw new Error(responseData.message || `Hiba a vendég módosítása során: ${response.status}`);
+        throw new Error(
+          responseData.message || `Hiba a vendég módosítása során: ${response.status}`
+        );
       }
 
       await fetchGuests();
       setShowGuestModal(false);
       setGuestData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phoneNumber: '',
-        address: '',
-        city: '',
-        country: '',
-        dateOfBirth: '',
-        gender: '',
+        firstName: "",
+        lastName: "",
+        email: "",
+        phoneNumber: "",
+        address: "",
+        city: "",
+        country: "",
+        dateOfBirth: "",
+        gender: "",
       });
       setEditGuestId(null);
       setError(null);
-      setMessage({ type: 'success', text: responseData.message || 'Vendég sikeresen módosítva!' });
+      setMessage({
+        type: "success",
+        text: responseData.message || "Vendég sikeresen módosítva!",
+      });
     } catch (err) {
-      console.error('Hiba a vendég módosítása közben:', err.message);
+      console.error("Hiba a vendég módosítása közben:", err.message);
       setError(err.message);
-      setMessage({ type: 'error', text: err.message.errors.Email[0] });
+      setMessage({ type: "error", text: err.message });
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('username');
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("username");
     setUser(null);
-    navigate('/');
+    navigate("/");
+  };
+
+  const handleSubmitComment = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("Nincs token elmentve! Jelentkezz be újra.");
+      }
+      if (guests.length === 0) {
+        throw new Error("Nincs vendég hozzáadva! Kérjük, adjon hozzá egy vendéget először.");
+      }
+      const roomId = selectedBooking.RoomId || selectedBooking.BookingId; // Használjuk a BookingId-t, ha RoomId nincs
+      if (!roomId) {
+        throw new Error("A szoba vagy foglalás azonosítója hiányzik!");
+      }
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/Reviews/NemComment/${roomId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            GuestId: guests[0].guestId,
+            Rating: commentData.rating,
+            Comment: commentData.comment,
+          }),
+        }
+      );
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Hiba történt az értékelés küldése közben");
+      }
+      setMessage({ type: "success", text: "Értékelés sikeresen elküldve!" });
+      setShowCommentModal(false);
+      setCommentData({ rating: 5, comment: "" });
+    } catch (err) {
+      console.error("Hiba az értékelés küldése közben:", err.message);
+      setMessage({ type: "error", text: err.message });
+    }
   };
 
   if (loading) {
@@ -581,7 +869,8 @@ const ProfilePage = () => {
     <div className="bg-blue-50 min-h-screen p-6 sm:p-8 relative">
       {message && (
         <div
-          className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white ${message.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}
+          className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white ${message.type === "success" ? "bg-green-500" : "bg-red-500"
+            }`}
         >
           {message.text}
         </div>
@@ -596,7 +885,9 @@ const ProfilePage = () => {
             <span className="material-symbols-outlined mr-2">arrow_back</span>
             Vissza a főoldalra
           </button>
-          <h1 className="text-2xl sm:text-3xl font-bold text-blue-800">Profil kezelése</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-blue-800">
+            Profil kezelése
+          </h1>
           <button
             onClick={handleLogout}
             className="flex items-center bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
@@ -615,26 +906,40 @@ const ProfilePage = () => {
                 <span className="material-symbols-outlined text-3xl sm:text-4xl mr-3 sm:mr-4 bg-blue-100 p-2 sm:p-3 rounded-full text-blue-600">
                   person
                 </span>
-                <h2 className="text-xl sm:text-2xl font-semibold text-blue-800">Profilom</h2>
+                <h2 className="text-xl sm:text-2xl font-semibold text-blue-800">
+                  Profilom
+                </h2>
               </div>
               <div className="flex flex-col items-center mb-6">
                 <div className="relative group mb-4">
                   <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-blue-100 group-hover:border-blue-300 transition-all duration-300">
-                    <img src={user.profileImage} alt="Profilkép" className="w-full h-full object-cover" />
+                    <img
+                      src={user.profileImage}
+                      alt="Profilkép"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-blue-800 mb-1">{user.username}</h3>
-                <p className="text-xs sm:text-sm text-blue-600 mb-4">Regisztrált: {user.dateCreated}</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-blue-800 mb-1">
+                  {user.username}
+                </h3>
+                <p className="text-xs sm:text-sm text-blue-600 mb-4">
+                  Regisztrált: {user.dateCreated}
+                </p>
               </div>
               <div className="space-y-4">
                 <div className="border-t border-blue-100 pt-4">
-                  <label className="block text-sm font-medium mb-1 text-blue-800">Felhasználónév</label>
+                  <label className="block text-sm font-medium mb-1 text-blue-800">
+                    Felhasználónév
+                  </label>
                   <div className="px-3 sm:px-4 py-2 bg-blue-50 rounded-lg text-blue-700 text-sm sm:text-base">
                     {user.username}
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-blue-800">Email cím</label>
+                  <label className="block text-sm font-medium mb-1 text-blue-800">
+                    Email cím
+                  </label>
                   <div className="px-3 sm:px-4 py-2 bg-blue-50 rounded-lg text-blue-700 text-sm sm:text-base break-all">
                     {user.email}
                   </div>
@@ -648,45 +953,54 @@ const ProfilePage = () => {
                   <span className="material-symbols-outlined text-3xl sm:text-4xl mr-3 sm:mr-4 bg-cyan-100 p-2 sm:p-3 rounded-full text-cyan-600">
                     bookmark
                   </span>
-                  <h2 className="text-xl sm:text-2xl font-semibold text-blue-800">Elmentett vendég adatok</h2>
+                  <h2 className="text-xl sm:text-2xl font-semibold text-blue-800">
+                    Elmentett vendég adatok
+                  </h2>
                 </div>
                 <button
                   onClick={() => setShowGuestModal(true)}
                   className="flex items-center justify-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transform hover:scale-105 transition-all duration-200 w-full md:w-auto"
                 >
-                  <span className="material-symbols-outlined mr-2">person_add</span>
+                  <span className="material-symbols-outlined mr-2">
+                    person_add
+                  </span>
                   Vendég hozzáadása
                 </button>
               </div>
+
               <div className="space-y-4">
                 {guests.length > 0 ? (
                   guests.map((guest) => (
                     <div
-                      key={guest.guestId} // Csak guestId használata
+                      key={guest.guestId}
                       className="border border-blue-100 rounded-lg p-3 sm:p-4 hover:border-blue-300 transition-all bg-blue-50/50 hover:shadow-md"
                     >
                       <h3 className="font-semibold mb-2 text-blue-800">
                         {guest.firstName} {guest.lastName}
                       </h3>
                       <p className="text-xs sm:text-sm text-blue-700 mb-1">
-                        Email: {guest.email || 'Nincs megadva'}
+                        Email: {guest.email || "Nincs megadva"}
                       </p>
                       <p className="text-xs sm:text-sm text-blue-700 mb-3">
-                        Telefon: {guest.phoneNumber || 'Nincs megadva'}
+                        Telefon: {guest.phoneNumber || "Nincs megadva"}
                       </p>
                       <div className="flex flex-wrap gap-2">
                         <button
                           onClick={() => handleEditGuest(guest)}
                           className="px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors flex items-center text-sm"
                         >
-                          <span className="material-symbols-outlined text-sm mr-1">edit</span>
+                          <span className="material-symbols-outlined text-sm mr-1">
+                            edit
+                          </span>
                           Szerkesztés
                         </button>
                         <button
                           onClick={() => handleDeleteGuest(guest.guestId)}
                           className="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors flex items-center text-sm"
                         >
-                          <span className="material-symbols-outlined text-sm mr-1">delete</span>
+                          <span className="material-symbols-outlined text-sm mr-1">
+                            delete
+                          </span>
                           Törlés
                         </button>
                       </div>
@@ -701,18 +1015,295 @@ const ProfilePage = () => {
         )}
 
         {user && (
+          <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg mb-6 sm:mb-8 hover:shadow-2xl transition-all duration-300 border border-blue-200 transform hover:-translate-y-1">
+            <div className="flex items-center mb-6">
+              <span className="material-symbols-outlined text-4xl sm:text-5xl mr-4 bg-teal-100 p-3 rounded-full text-teal-600 animate-pulse">
+                event
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-blue-800 bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
+                Foglalásaim
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {bookings.length > 0 ? (
+                bookings.map((booking, index) => {
+                  const roomNumber =
+                    booking.room?.number || booking.roomNumber || "N/A";
+                  const checkInDate =
+                    booking.startDate ||
+                    booking.checkInDate ||
+                    booking.dateFrom ||
+                    "N/A";
+                  const checkOutDate =
+                    booking.endDate ||
+                    booking.checkOutDate ||
+                    booking.dateTo ||
+                    "N/A";
+                  const firstName =
+                    booking.guest?.firstName || booking.firstName || "N/A";
+                  const lastName =
+                    booking.guest?.lastName || booking.lastName || "N/A";
+                  const floorNumber =
+                    booking.room?.floor || booking.floorNumber || "N/A";
+                  const roomType =
+                    booking.room?.type || booking.roomType || "N/A";
+                  const numberOfGuests =
+                    booking.guestCount || booking.numberOfGuests || "N/A";
+                  const totalPrice = booking.price || booking.totalPrice || "N/A";
+                  const paymentStatus =
+                    booking.status || booking.paymentStatus || "N/A";
+
+                  return (
+                    <div
+                      key={booking.id || booking.bookingId || `booking-${index}`}
+                      className="border border-blue-200 rounded-xl p-4 bg-gradient-to-br from-blue-50 to-teal-50 hover:border-teal-400 transition-all duration-300 shadow-md hover:shadow-xl"
+                    >
+                      <div className="flex justify-between items-center mb-3">
+                        <div>
+                          <p className="text-sm font-medium text-blue-700">
+                            Szobaszám:{" "}
+                            <span className="font-bold text-teal-600">
+                              {roomNumber}
+                            </span>
+                          </p>
+                          <p className="text-sm font-medium text-blue-700">
+                            Időpont:{" "}
+                            <span className="font-bold text-teal-600">
+                              {checkInDate !== "N/A" && checkOutDate !== "N/A"
+                                ? `${new Date(
+                                  checkInDate
+                                ).toLocaleDateString("hu-HU")} - ${new Date(
+                                  checkOutDate
+                                ).toLocaleDateString("hu-HU")}`
+                                : "N/A"}
+                            </span>
+                          </p>
+                        </div>
+                        <button
+                          onClick={() =>
+                            handleOpenDetails({
+                              ...booking,
+                              RoomNumber: roomNumber,
+                              CheckInDate: checkInDate,
+                              CheckOutDate: checkOutDate,
+                              FirstName: firstName,
+                              LastName: lastName,
+                              FloorNumber: floorNumber,
+                              RoomType: roomType,
+                              NumberOfGuests: numberOfGuests,
+                              TotalPrice: totalPrice,
+                              PaymentStatus: paymentStatus,
+                            })
+                          }
+                          className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-blue-600 transform hover:scale-105 transition-all duration-200 shadow-md"
+                        >
+                          Részletek
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-blue-700 col-span-full">
+                  Nincsenek foglalásaid.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {selectedBooking && (
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all duration-300 ease-out">
+              <div className="bg-gradient-to-r from-teal-500 to-blue-600 p-6 text-white">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-2xl font-bold">Foglalás részletei</h3>
+                    <p className="text-teal-100 mt-1">
+                      #{selectedBooking.BookingId}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleCloseDetails}
+                    className="text-white hover:text-teal-200 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-3xl">
+                      close
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-3">
+                    <DetailItem
+                      label="Szobaszám"
+                      value={selectedBooking.RoomNumber || "N/A"}
+                      icon="meeting_room"
+                    />
+                    <DetailItem
+                      label="Időpont"
+                      value={
+                        selectedBooking.CheckInDate &&
+                          selectedBooking.CheckOutDate
+                          ? `${new Date(
+                            selectedBooking.CheckInDate
+                          ).toLocaleDateString("hu-HU")} - ${new Date(
+                            selectedBooking.CheckOutDate
+                          ).toLocaleDateString("hu-HU")}`
+                          : "N/A"
+                      }
+                      icon="date_range"
+                    />
+                    <DetailItem
+                      label="Vendégek száma"
+                      value={`${selectedBooking.NumberOfGuests || "N/A"} fő`}
+                      icon="group"
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <DetailItem
+                      label="Név"
+                      value={
+                        selectedBooking.FirstName && selectedBooking.LastName
+                          ? `${selectedBooking.FirstName} ${selectedBooking.LastName}`
+                          : "N/A"
+                      }
+                      icon="person"
+                    />
+                    <DetailItem
+                      label="Fizetési státusz"
+                      value={selectedBooking.PaymentStatus || "N/A"}
+                      icon="payments"
+                      highlight={selectedBooking.PaymentStatus === "Fizetve"}
+                    />
+                    <DetailItem
+                      label="Összeg"
+                      value={`${selectedBooking.TotalPrice?.toLocaleString(
+                        "hu-HU"
+                      ) || "N/A"} HUF`}
+                      icon="attach_money"
+                    />
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-200 pt-4">
+                  <DetailItem
+                    label="Szobatípus"
+                    value={selectedBooking.RoomType || "N/A"}
+                    icon="king_bed"
+                  />
+                  <DetailItem
+                    label="Emelet"
+                    value={selectedBooking.FloorNumber || "N/A"}
+                    icon="floor"
+                  />
+                </div>
+
+                <div className="border-t border-gray-200 pt-4">
+                  <details className="group">
+                    <summary className="flex items-center justify-between cursor-pointer list-none">
+                      <div className="flex items-center text-blue-600 group-hover:text-blue-800 transition-colors">
+                        <span className="material-symbols-outlined mr-2">
+                          person
+                        </span>
+                        <span className="font-medium">
+                          Saját adatok megtekintése
+                        </span>
+                      </div>
+                      <span className="material-symbols-outlined text-gray-500 group-open:rotate-180 transition-transform">
+                        expand_more
+                      </span>
+                    </summary>
+                    <div className="mt-3 p-4 bg-blue-50 rounded-lg space-y-2 animate-[fadeIn_0.2s_ease-in-out]">
+                      <DetailItem
+                        label="Felhasználónév"
+                        value={user.username}
+                        small
+                      />
+                      <DetailItem label="Email" value={user.email} small />
+                      <DetailItem
+                        label="Regisztráció dátuma"
+                        value={user.dateCreated}
+                        small
+                      />
+                    </div>
+                  </details>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row justify-end gap-3">
+                <button
+                  onClick={() => handleDeleteBooking(selectedBooking.BookingId)}
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors"
+                >
+                  <span className="material-symbols-outlined">delete</span>
+                  Foglalás törlése
+                </button>
+                <button
+                  onClick={() => setShowCommentModal(true)}
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  <span className="material-symbols-outlined">rate_review</span>
+                  Értékelés
+                </button>
+                <button
+                  onClick={() => {
+                    if (selectedBooking.RoomId) {
+                      navigate(`/Foglalas/${selectedBooking.RoomId}`, {
+                        state: {
+                          room: {
+                            roomId: selectedBooking.RoomId,
+                            roomNumber: selectedBooking.RoomNumber,
+                            roomType: selectedBooking.RoomType,
+                            floorNumber: selectedBooking.FloorNumber,
+                            pricePerNight: selectedBooking.TotalPrice,
+                            capacity: selectedBooking.NumberOfGuests,
+                          },
+                          checkInDate: selectedBooking.CheckInDate,
+                          checkOutDate: selectedBooking.CheckOutDate,
+                        },
+                      });
+                    } else {
+                      navigate("/Foglalas/id", {
+                        state: {
+                          searchParams: {
+                            roomNumber: selectedBooking.RoomNumber,
+                            floor: selectedBooking.FloorNumber,
+                            type: selectedBooking.RoomType,
+                          },
+                        },
+                      });
+                    }
+                  }}
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  <span className="material-symbols-outlined">visibility</span>
+                  Szoba részletei
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {user && (
           <>
             <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md mb-6 sm:mb-8 hover:shadow-xl transition-shadow duration-300 border border-blue-100">
               <div className="flex items-center mb-4">
                 <span className="material-symbols-outlined text-3xl sm:text-4xl mr-3 sm:mr-4 bg-indigo-100 p-2 sm:p-3 rounded-full text-indigo-600">
                   lock
                 </span>
-                <h2 className="text-xl sm:text-2xl font-semibold text-blue-800">Jelszó kezelése</h2>
+                <h2 className="text-xl sm:text-2xl font-semibold text-blue-800">
+                  Jelszó kezelése
+                </h2>
               </div>
 
               <details className="mb-4 sm:mb-6 group">
                 <summary className="list-none flex items-center justify-between cursor-pointer p-3 sm:p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                  <span className="font-medium text-blue-800">Jelszó megváltoztatása</span>
+                  <span className="font-medium text-blue-800">
+                    Jelszó megváltoztatása
+                  </span>
                   <span className="material-symbols-outlined transition-transform group-open:rotate-180 text-blue-600">
                     expand_more
                   </span>
@@ -721,45 +1312,67 @@ const ProfilePage = () => {
                   <form className="space-y-4" onSubmit={handleChangePassword}>
                     <div>
                       {passwordErrors.currentPassword && (
-                        <p className="text-red-600 text-xs mb-1">{passwordErrors.currentPassword}</p>
+                        <p className="text-red-600 text-xs mb-1">
+                          {passwordErrors.currentPassword}
+                        </p>
                       )}
-                      <label className="block text-sm font-medium mb-1 text-blue-800" htmlFor="current-password">
+                      <label
+                        className="block text-sm font-medium mb-1 text-blue-800"
+                        htmlFor="current-password"
+                      >
                         Jelenlegi jelszó
                       </label>
                       <div className="relative">
                         <input
-                          type={showCurrentPassword ? 'text' : 'password'}
+                          type={showCurrentPassword ? "text" : "password"}
                           id="current-password"
                           className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                           placeholder="Jelenlegi jelszó"
                           value={passwordData.currentPassword}
-                          onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                          onChange={(e) =>
+                            setPasswordData({
+                              ...passwordData,
+                              currentPassword: e.target.value,
+                            })
+                          }
                           required
                         />
                         <button
                           type="button"
-                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                          onClick={() =>
+                            setShowCurrentPassword(!showCurrentPassword)
+                          }
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600"
                         >
-                          {showCurrentPassword ? 'Elrejtés' : 'Megjelenítés'}
+                          {showCurrentPassword ? "Elrejtés" : "Megjelenítés"}
                         </button>
                       </div>
                     </div>
                     <div>
                       {passwordErrors.newPassword && (
-                        <p className="text-red-600 text-xs mb-1">{passwordErrors.newPassword}</p>
+                        <p className="text-red-600 text-xs mb-1">
+                          {passwordErrors.newPassword}
+                        </p>
                       )}
-                      <label className="block text-sm font-medium mb-1 text-blue-800" htmlFor="new-password">
+                      <label
+                        className="block text-sm font-medium mb-1 text-blue-800"
+                        htmlFor="new-password"
+                      >
                         Új jelszó
                       </label>
                       <div className="relative">
                         <input
-                          type={showNewPassword ? 'text' : 'password'}
+                          type={showNewPassword ? "text" : "password"}
                           id="new-password"
                           className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                           placeholder="Új jelszó"
                           value={passwordData.newPassword}
-                          onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                          onChange={(e) =>
+                            setPasswordData({
+                              ...passwordData,
+                              newPassword: e.target.value,
+                            })
+                          }
                           required
                         />
                         <button
@@ -767,40 +1380,56 @@ const ProfilePage = () => {
                           onClick={() => setShowNewPassword(!showNewPassword)}
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600"
                         >
-                          {showNewPassword ? 'Elrejtés' : 'Megjelenítés'}
+                          {showNewPassword ? "Elrejtés" : "Megjelenítés"}
                         </button>
                       </div>
                     </div>
                     <div>
                       {passwordErrors.confirmPassword && (
-                        <p className="text-red-600 text-xs mb-1">{passwordErrors.confirmPassword}</p>
+                        <p className="text-red-600 text-xs mb-1">
+                          {passwordErrors.confirmPassword}
+                        </p>
                       )}
-                      <label className="block text-sm font-medium mb-1 text-blue-800" htmlFor="confirm-password">
+                      <label
+                        className="block text-sm font-medium mb-1 text-blue-800"
+                        htmlFor="confirm-password"
+                      >
                         Új jelszó megerősítése
                       </label>
                       <div className="relative">
                         <input
-                          type={showConfirmPassword ? 'text' : 'password'}
+                          type={showConfirmPassword ? "text" : "password"}
                           id="confirm-password"
                           className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                           placeholder="Új jelszó megerősítése"
                           value={passwordData.confirmPassword}
-                          onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                          onChange={(e) =>
+                            setPasswordData({
+                              ...passwordData,
+                              confirmPassword: e.target.value,
+                            })
+                          }
                           required
                         />
                         <button
                           type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600"
                         >
-                          {showConfirmPassword ? 'Elrejtés' : 'Megjelenítés'}
+                          {showConfirmPassword ? "Elrejtés" : "Megjelenítés"}
                         </button>
                       </div>
                     </div>
 
-                    {/* Message display above the button */}
                     {message && (
-                      <div className={`p-3 rounded-lg ${message.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      <div
+                        className={`p-3 rounded-lg ${message.type === "success"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                          }`}
+                      >
                         {message.text}
                       </div>
                     )}
@@ -817,21 +1446,28 @@ const ProfilePage = () => {
 
               <details className="group">
                 <summary className="list-none flex items-center justify-between cursor-pointer p-3 sm:p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                  <span className="font-medium text-blue-800">Elfelejtett jelszó</span>
+                  <span className="font-medium text-blue-800">
+                    Elfelejtett jelszó
+                  </span>
                   <span className="material-symbols-outlined transition-transform group-open:rotate-180 text-blue-600">
                     expand_more
                   </span>
                 </summary>
                 <div className="p-3 sm:p-4 border-t border-blue-100 animate-[fadeIn_0.2s_ease-in-out]">
                   <p className="mb-4 text-xs sm:text-sm text-blue-700">
-                    {forgotStep === 1 && 'Adja meg az email címét a jelszó visszaállításához.'}
-                    {forgotStep === 2 && 'Adja meg az emailben kapott 6 számjegyű kódot.'}
-                    {forgotStep === 3 && 'Adja meg az új jelszót.'}
+                    {forgotStep === 1 &&
+                      "Adja meg az email címét a jelszó visszaállításához."}
+                    {forgotStep === 2 &&
+                      "Adja meg az emailben kapott 6 számjegyű kódot."}
+                    {forgotStep === 3 && "Adja meg az új jelszót."}
                   </p>
                   {forgotStep === 1 && (
                     <form className="space-y-4" onSubmit={handleForgotPasswordStep1}>
                       <div>
-                        <label className="block text-sm font-medium mb-1 text-blue-800" htmlFor="reset-email">
+                        <label
+                          className="block text-sm font-medium mb-1 text-blue-800"
+                          htmlFor="reset-email"
+                        >
                           Email cím
                         </label>
                         <input
@@ -876,7 +1512,9 @@ const ProfilePage = () => {
                       </div>
                       {message && (
                         <div
-                          className={`p-3 rounded-lg ${message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                          className={`p-3 rounded-lg ${message.type === "success"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
                             }`}
                         >
                           {message.text}
@@ -895,53 +1533,83 @@ const ProfilePage = () => {
                     <form className="space-y-4" onSubmit={handleForgotPasswordStep3}>
                       <div>
                         {passwordErrors.newPassword && (
-                          <p className="text-red-600 text-xs mb-1">{passwordErrors.newPassword}</p>
+                          <p className="text-red-600 text-xs mb-1">
+                            {passwordErrors.newPassword}
+                          </p>
                         )}
-                        <label className="block text-sm font-medium mb-1 text-blue-800" htmlFor="new-password-forgot">
+                        <label
+                          className="block text-sm font-medium mb-1 text-blue-800"
+                          htmlFor="new-password-forgot"
+                        >
                           Új jelszó
                         </label>
                         <div className="relative">
                           <input
-                            type={showNewPasswordForgot ? 'text' : 'password'}
+                            type={showNewPasswordForgot ? "text" : "password"}
                             id="new-password-forgot"
                             className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                             placeholder="Új jelszó"
                             value={newPasswordData.newPassword}
-                            onChange={(e) => setNewPasswordData({ ...newPasswordData, newPassword: e.target.value })}
+                            onChange={(e) =>
+                              setNewPasswordData({
+                                ...newPasswordData,
+                                newPassword: e.target.value,
+                              })
+                            }
                             required
                           />
                           <button
                             type="button"
-                            onClick={() => setShowNewPasswordForgot(!showNewPasswordForgot)}
+                            onClick={() =>
+                              setShowNewPasswordForgot(!showNewPasswordForgot)
+                            }
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600"
                           >
-                            {showNewPasswordForgot ? 'Elrejtés' : 'Megjelenítés'}
+                            {showNewPasswordForgot ? "Elrejtés" : "Megjelenítés"}
                           </button>
                         </div>
                       </div>
                       <div>
                         {passwordErrors.confirmPassword && (
-                          <p className="text-red-600 text-xs mb-1">{passwordErrors.confirmPassword}</p>
+                          <p className="text-red-600 text-xs mb-1">
+                            {passwordErrors.confirmPassword}
+                          </p>
                         )}
-                        <label className="block text-sm font-medium mb-1 text-blue-800" htmlFor="confirm-password-forgot">
+                        <label
+                          className="block text-sm font-medium mb-1 text-blue-800"
+                          htmlFor="confirm-password-forgot"
+                        >
                           Új jelszó megerősítése
                         </label>
                         <div className="relative">
                           <input
-                            type={showConfirmPasswordForgot ? 'text' : 'password'}
+                            type={
+                              showConfirmPasswordForgot ? "text" : "password"
+                            }
                             id="confirm-password-forgot"
                             className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                             placeholder="Új jelszó megerősítése"
                             value={newPasswordData.confirmPassword}
-                            onChange={(e) => setNewPasswordData({ ...newPasswordData, confirmPassword: e.target.value })}
+                            onChange={(e) =>
+                              setNewPasswordData({
+                                ...newPasswordData,
+                                confirmPassword: e.target.value,
+                              })
+                            }
                             required
                           />
                           <button
                             type="button"
-                            onClick={() => setShowConfirmPasswordForgot(!showConfirmPasswordForgot)}
+                            onClick={() =>
+                              setShowConfirmPasswordForgot(
+                                !showConfirmPasswordForgot
+                              )
+                            }
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600"
                           >
-                            {showConfirmPasswordForgot ? 'Elrejtés' : 'Megjelenítés'}
+                            {showConfirmPasswordForgot
+                              ? "Elrejtés"
+                              : "Megjelenítés"}
                           </button>
                         </div>
                       </div>
@@ -964,19 +1632,27 @@ const ProfilePage = () => {
                   Fiók törlése
                 </h2>
                 <p className="text-xs sm:text-sm text-blue-700 mb-4">
-                  A fiók törlése végleges művelet, és nem vonható vissza. Az összes adat, beleértve a mentett vendég adatokat is, véglegesen törlődni fog.
+                  A fiók törlése végleges művelet, és nem vonható vissza. Az összes
+                  adat, beleértve a mentett vendég adatokat is, véglegesen
+                  törlődni fog.
                 </p>
                 <details className="group">
                   <summary className="list-none cursor-pointer flex items-center">
-                    <span className="material-symbols-outlined mr-2">delete_forever</span>
+                    <span className="material-symbols-outlined mr-2">
+                      delete_forever
+                    </span>
                     <span>Fiók törlése</span>
                   </summary>
                   <div className="mt-4 p-3 sm:p-4 bg-white border border-red-200 rounded-lg animate-[fadeIn_0.2s_ease-in-out]">
                     <p className="font-medium text-red-600 mb-4 text-sm sm:text-base">
-                      Biztosan törölni szeretné a fiókját? Ez a művelet nem visszavonható.
+                      Biztosan törölni szeretné a fiókját? Ez a művelet nem
+                      visszavonható.
                     </p>
                     <div className="mb-4">
-                      <label className="block text-sm font-medium mb-1 text-blue-800" htmlFor="confirm-delete">
+                      <label
+                        className="block text-sm font-medium mb-1 text-blue-800"
+                        htmlFor="confirm-delete"
+                      >
                         Írja be a jelszavát a megerősítéshez:
                       </label>
                       <input
@@ -1006,54 +1682,87 @@ const ProfilePage = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl">
               <h3 className="text-xl font-semibold text-blue-800 mb-4">
-                {editGuestId ? 'Vendég szerkesztése' : 'Új vendég hozzáadása'}
+                {editGuestId ? "Vendég szerkesztése" : "Új vendég hozzáadása"}
               </h3>
-              <form onSubmit={editGuestId ? handleUpdateGuest : handleAddGuest} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <form
+                onSubmit={editGuestId ? handleUpdateGuest : handleAddGuest}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+              >
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-blue-800">Vezetéknév</label>
+                    <label className="block text-sm font-medium text-blue-800">
+                      Vezetéknév
+                    </label>
                     <input
+                      placeholder="Petőfi"
                       type="text"
                       value={guestData.lastName}
-                      onChange={(e) => setGuestData({ ...guestData, lastName: e.target.value })}
+                      onChange={(e) =>
+                        setGuestData({ ...guestData, lastName: e.target.value })
+                      }
                       className="w-full p-2 border border-blue-200 rounded-lg"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-blue-800">Keresztnév</label>
+                    <label className="block text-sm font-medium text-blue-800">
+                      Keresztnév
+                    </label>
                     <input
+                      placeholder="Sándor"
                       type="text"
                       value={guestData.firstName}
-                      onChange={(e) => setGuestData({ ...guestData, firstName: e.target.value })}
+                      onChange={(e) =>
+                        setGuestData({ ...guestData, firstName: e.target.value })
+                      }
                       className="w-full p-2 border border-blue-200 rounded-lg"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-blue-800">Email</label>
+                    <label className="block text-sm font-medium text-blue-800">
+                      Email
+                    </label>
                     <input
+                      placeholder="example@gmail.com"
                       type="email"
                       value={guestData.email}
-                      onChange={(e) => setGuestData({ ...guestData, email: e.target.value })}
+                      onChange={(e) =>
+                        setGuestData({ ...guestData, email: e.target.value })
+                      }
                       className="w-full p-2 border border-blue-200 rounded-lg"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-blue-800">Telefonszám</label>
+                    <label className="block text-sm font-medium text-blue-800">
+                      Telefonszám
+                    </label>
                     <input
+                      placeholder="36 70 123 456"
                       type="text"
                       value={guestData.phoneNumber}
-                      onChange={(e) => setGuestData({ ...guestData, phoneNumber: e.target.value })}
+                      onChange={(e) =>
+                        setGuestData({
+                          ...guestData,
+                          phoneNumber: e.target.value,
+                        })
+                      }
                       className="w-full p-2 border border-blue-200 rounded-lg"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-blue-800">Születési dátum</label>
+                    <label className="block text-sm font-medium text-blue-800">
+                      Születési dátum
+                    </label>
                     <input
                       type="date"
                       value={guestData.dateOfBirth}
-                      onChange={(e) => setGuestData({ ...guestData, dateOfBirth: e.target.value })}
+                      onChange={(e) =>
+                        setGuestData({
+                          ...guestData,
+                          dateOfBirth: e.target.value,
+                        })
+                      }
                       className="w-full p-2 border border-blue-200 rounded-lg"
                       required
                     />
@@ -1061,37 +1770,56 @@ const ProfilePage = () => {
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-blue-800">Cím</label>
+                    <label className="block text-sm font-medium text-blue-800">
+                      Cím
+                    </label>
                     <input
+                      placeholder="Palóczy László u. 3"
                       type="text"
                       value={guestData.address}
-                      onChange={(e) => setGuestData({ ...guestData, address: e.target.value })}
+                      onChange={(e) =>
+                        setGuestData({ ...guestData, address: e.target.value })
+                      }
                       className="w-full p-2 border border-blue-200 rounded-lg"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-blue-800">Város</label>
+                    <label className="block text-sm font-medium text-blue-800">
+                      Település
+                    </label>
                     <input
+                      placeholder="Budapest"
                       type="text"
                       value={guestData.city}
-                      onChange={(e) => setGuestData({ ...guestData, city: e.target.value })}
+                      onChange={(e) =>
+                        setGuestData({ ...guestData, city: e.target.value })
+                      }
                       className="w-full p-2 border border-blue-200 rounded-lg"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-blue-800">Ország</label>
+                    <label className="block text-sm font-medium text-blue-800">
+                      Ország
+                    </label>
                     <input
+                      placeholder="Magyarország"
                       type="text"
                       value={guestData.country}
-                      onChange={(e) => setGuestData({ ...guestData, country: e.target.value })}
+                      onChange={(e) =>
+                        setGuestData({ ...guestData, country: e.target.value })
+                      }
                       className="w-full p-2 border border-blue-200 rounded-lg"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-blue-800">Nem</label>
+                    <label className="block text-sm font-medium text-blue-800">
+                      Nem
+                    </label>
                     <select
                       value={guestData.gender}
-                      onChange={(e) => setGuestData({ ...guestData, gender: e.target.value })}
+                      onChange={(e) =>
+                        setGuestData({ ...guestData, gender: e.target.value })
+                      }
                       className="w-full p-2 border border-blue-200 rounded-lg"
                     >
                       <option value="">Válasszon</option>
@@ -1106,7 +1834,7 @@ const ProfilePage = () => {
                     type="submit"
                     className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
                   >
-                    {editGuestId ? 'Mentés' : 'Hozzáadás'}
+                    {editGuestId ? "Mentés" : "Hozzáadás"}
                   </button>
                   <button
                     type="button"
@@ -1114,20 +1842,83 @@ const ProfilePage = () => {
                       setShowGuestModal(false);
                       setEditGuestId(null);
                       setGuestData({
-                        firstName: '',
-                        lastName: '',
-                        email: '',
-                        phoneNumber: '',
-                        address: '',
-                        city: '',
-                        country: '',
-                        dateOfBirth: '',
-                        gender: '',
+                        firstName: "",
+                        lastName: "",
+                        email: "",
+                        phoneNumber: "",
+                        address: "",
+                        city: "",
+                        country: "",
+                        dateOfBirth: "",
+                        gender: "",
                       });
                     }}
                     className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
                   >
                     Mégse
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {showCommentModal && selectedBooking && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+              <h3 className="text-xl font-semibold text-blue-800 mb-4">
+                Értékelés hozzáadása
+              </h3>
+              <form onSubmit={handleSubmitComment}>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-blue-800 mb-2">
+                    Értékelés (1-5 csillag)
+                  </label>
+                  <div className="flex items-center">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() =>
+                          setCommentData({ ...commentData, rating: star })
+                        }
+                        className={`text-2xl ${star <= commentData.rating
+                          ? "text-yellow-500"
+                          : "text-gray-300"
+                          }`}
+                      >
+                        ★
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-blue-800 mb-2">
+                    Megjegyzés
+                  </label>
+                  <textarea
+                    value={commentData.comment}
+                    onChange={(e) =>
+                      setCommentData({ ...commentData, comment: e.target.value })
+                    }
+                    className="w-full p-2 border border-blue-200 rounded-lg"
+                    rows={4}
+                    required
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowCommentModal(false)}
+                    className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+                  >
+                    Mégse
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                  >
+                    Küldés
                   </button>
                 </div>
               </form>

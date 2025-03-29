@@ -33,7 +33,7 @@ export const Foglalas = () => {
     dateOfBirth: '',
     gender: '',
   });
-  const [successMessage, setSuccessMessage] = useState(""); // Új állapot a sikerüzenethez
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Foglalt dátumok lekérése
   useEffect(() => {
@@ -66,6 +66,34 @@ export const Foglalas = () => {
     }
   }, [navigate]);
 
+  // Vendégek lekérése
+  const fetchGuests = async () => {
+    const username = localStorage.getItem('username');
+    const token = localStorage.getItem('authToken');
+
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/Guests/GetGuestData/${username}`,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+
+      if (!response.ok) throw new Error('Nem sikerült lekérni a vendégeket');
+      const data = await response.json();
+      const guestsArray = Array.isArray(data) ? data : [data];
+
+      setSavedGuests(guestsArray);
+      if (guestsArray.length > 0 && !mainGuest) setMainGuest(guestsArray[0].guestId);
+    } catch (error) {
+      console.error('Hiba a vendégek lekérésekor:', error);
+      setSavedGuests([]);
+    }
+  };
+
+  // Oldal betöltésekor vendégek lekérése
+  useEffect(() => {
+    fetchGuests();
+  }, []);
+
   // Szoba elérhetőség ellenőrzése
   const checkRoomAvailability = () => {
     if (!checkInDate || !checkOutDate) return;
@@ -93,7 +121,6 @@ export const Foglalas = () => {
     );
   };
 
-  // Automatikus ellenőrzés dátumváltozásnál
   useEffect(() => {
     checkRoomAvailability();
   }, [checkInDate, checkOutDate]);
@@ -104,10 +131,21 @@ export const Foglalas = () => {
     setBookingError("");
 
     try {
-      if (!checkInDate || !checkOutDate) throw new Error("Kérjük töltsd ki mindkét dátum mezőt");
-      if (new Date(checkOutDate) <= new Date(checkInDate)) throw new Error("A kijelentkezés dátuma a bejelentkezés után kell legyen");
-      if (!paymentMethod) throw new Error("Válassz fizetési módot");
-      if (!isRoomAvailable) throw new Error("A szoba már foglalt erre az időpontra");
+      if (!mainGuest) {
+        throw new Error("Kérjük, válasszon ki egy fő foglalót, vagy adjon hozzá egy új vendéget a folytatáshoz.");
+      }
+      if (!checkInDate || !checkOutDate) {
+        throw new Error("Kérjük, töltsd ki mindkét dátum mezőt!");
+      }
+      if (new Date(checkOutDate) <= new Date(checkInDate)) {
+        throw new Error("A kijelentkezés dátuma a bejelentkezés után kell legyen!");
+      }
+      if (!paymentMethod) {
+        throw new Error("Kérjük, válassz fizetési módot!");
+      }
+      if (!isRoomAvailable) {
+        throw new Error("A szoba már foglalt erre az időpontra!");
+      }
 
       const totalGuests = additionalGuests + 1;
       const bookingData = {
@@ -115,31 +153,30 @@ export const Foglalas = () => {
         CheckInDate: new Date(checkInDate),
         CheckOutDate: new Date(checkOutDate),
         NumberOfGuests: totalGuests,
-        PaymentMethod: paymentMethod
+        PaymentMethod: paymentMethod,
       };
 
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("authToken");
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/Bookings/New_Booking/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
         },
-        body: JSON.stringify(bookingData)
+        body: JSON.stringify(bookingData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Hiba a foglalás során");
+        throw new Error(errorData.message || "Hiba történt a foglalás során.");
       }
 
       navigate("/", {
         state: {
           success: true,
-          message: "Foglalásodat rögzítettük! Hamarosan emailt kapsz visszaigazolással."
-        }
+          message: "Foglalásodat rögzítettük! Hamarosan emailt kapsz visszaigazolással.",
+        },
       });
-
     } catch (error) {
       console.error("Foglalási hiba:", error);
       setBookingError(error.message);
@@ -155,37 +192,12 @@ export const Foglalas = () => {
     return minDate.toISOString().split("T")[0];
   };
 
-  useEffect(() => {
-    const fetchGuests = async () => {
-      const username = localStorage.getItem('username');
-      const token = localStorage.getItem('authToken');
-
-      try {
-        const response = await fetch(
-          `${process.env.REACT_APP_API_BASE_URL}/Guests/GetGuestData/${username}`,
-          { headers: { 'Authorization': `Bearer ${token}` } }
-        );
-
-        if (!response.ok) throw new Error('Nem sikerült lekérni a vendégeket');
-        const data = await response.json();
-        const guestsArray = Array.isArray(data) ? data : [data];
-
-        setSavedGuests(guestsArray);
-        if (guestsArray.length > 0 && !mainGuest) setMainGuest(guestsArray[0].guestId);
-      } catch (error) {
-        console.error('Hiba a vendégek lekérésekor:', error);
-        setSavedGuests([]);
-      }
-    };
-
-    fetchGuests();
-  }, [mainGuest]);
-
+  // Kényelmi szolgáltatások lekérése
   useEffect(() => {
     const fetchAmenities = async () => {
       setLoading(true);
       try {
-        const response = await fetch(process.env.REACT_APP_API_BASE_URL + `/Amenities/GetAmenitiesForRoom/${id}`);
+        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/Amenities/GetAmenitiesForRoom/${id}`);
         if (!response.ok) throw new Error("Hiba a kényelmi szolgáltatások lekérdezése során.");
         setAmenities(await response.json());
       } catch (error) {
@@ -238,8 +250,6 @@ export const Foglalas = () => {
     try {
       const token = localStorage.getItem('authToken');
       const username = localStorage.getItem('username');
-      console.log('Token:', token);
-      console.log('Username:', username);
 
       if (!token) {
         throw new Error('Nincs token elmentve! Jelentkezz be újra.');
@@ -277,8 +287,6 @@ export const Foglalas = () => {
         dateOfBirth: guestData.dateOfBirth ? new Date(guestData.dateOfBirth).toISOString() : null,
       };
 
-      console.log('Küldött payload:', payload);
-
       const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/Guests/Addnewguest`, {
         method: 'POST',
         headers: {
@@ -310,14 +318,13 @@ export const Foglalas = () => {
       } else {
         console.log('Szerver válasza (szöveg):', text);
         newGuest = {
-          guestId: Date.now(),
+          guestId: Date.now(), // Ideiglenes azonosító
           ...guestData,
         };
       }
 
-      console.log('Feldolgozott newGuest:', newGuest);
-
-      setSavedGuests([...savedGuests, newGuest]);
+      const updatedGuests = [...savedGuests, newGuest];
+      setSavedGuests(updatedGuests);
       setMainGuest(newGuest.guestId);
       setShowGuestModal(false);
       setGuestData({
@@ -332,8 +339,9 @@ export const Foglalas = () => {
         gender: '',
       });
       setError(null);
-      setSuccessMessage('Vendég sikeresen hozzáadva!'); // Sikerüzenet beállítása
-      setTimeout(() => setSuccessMessage(''), 3000); // 3 másodperc után eltűnik
+      await fetchGuests();
+      setSuccessMessage('Vendég sikeresen hozzáadva!');
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
       console.error('Hiba a vendég hozzáadása közben:', err.message);
       setError(err.message);
@@ -344,7 +352,6 @@ export const Foglalas = () => {
     <div id="webcrumbs">
       <div className="w-full max-w-[1200px] mx-auto bg-gradient-to-b from-blue-50 to-blue-100 font-sans">
         <section className="py-6 md:py-10 px-4 md:px-8 relative">
-          {/* Sikerüzenet megjelenítése */}
           {successMessage && (
             <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-fade-in">
               {successMessage}
@@ -429,6 +436,46 @@ export const Foglalas = () => {
                       </div>
                     ))}
                 </div>
+              </div>
+
+              {/* Komment szekció áthelyezve ide */}
+              <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg mb-6 border-t-4 border-teal-500">
+                <h3 className="text-2xl font-bold text-teal-700 mb-4 flex items-center">
+                  <span className="material-symbols-outlined mr-2">comment</span>
+                  Vendégvélemények
+                </h3>
+                {room?.reviews && room.reviews.length > 0 ? (
+                  <div className="space-y-6">
+                    {room.reviews.map((review) => (
+                      <div key={review.id} className="border-b border-gray-200 pb-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="text-yellow-400 flex">
+                            {[...Array(5)].map((_, i) => (
+                              <span
+                                key={i}
+                                className={i < review.rating ? "text-yellow-400" : "text-gray-300"}
+                              >
+                                ★
+                              </span>
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            {new Date(review.reviewDate).toLocaleDateString('hu-HU')}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 mb-2">{review.comment}</p>
+                        {review.response && (
+                          <div className="bg-teal-50 p-3 rounded-lg mt-2">
+                            <p className="text-sm font-medium text-teal-800">Válasz a szállásadótól:</p>
+                            <p className="text-gray-700">{review.response}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-700 italic">Még nincsenek vélemények ehhez a szobához.</p>
+                )}
               </div>
             </div>
 
@@ -568,7 +615,7 @@ export const Foglalas = () => {
                 )}
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-700">Alapár/éj:</span>
+                    <span className="text-gray-700">Alapár / Éjszaka:</span>
                     <span className="font-semibold">{room?.pricePerNight} Ft</span>
                   </div>
                   <div className="flex justify-between">

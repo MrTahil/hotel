@@ -12,7 +12,7 @@ function Hero() {
 
     useEffect(() => {
         // Szobák lekérése
-        fetch(process.env.REACT_APP_API_BASE_URL+'/Rooms/GetRoomWith')
+        fetch(process.env.REACT_APP_API_BASE_URL + '/Rooms/GetRoomWith')
             .then(response => response.json())
             .then(data => {
                 const availableRooms = data
@@ -29,7 +29,7 @@ function Hero() {
             .catch(error => console.error('Error fetching rooms:', error));
 
         // Események lekérése
-        fetch(process.env.REACT_APP_API_BASE_URL+`/Events/Geteents`)
+        fetch(process.env.REACT_APP_API_BASE_URL + `/Events/Geteents`)
             .then(response => response.json())
             .then(data => {
                 const formattedPrograms = data.map(event => ({
@@ -62,6 +62,19 @@ function Hero() {
         } else {
             navigate('/login');
         }
+    };
+
+    // Dinamikus elmozdulás kiszámítása a képernyőméret alapján
+    const getSlideOffset = () => {
+        const width = window.innerWidth;
+        if (width < 640) {
+            // Mobil nézet: teljes szélesség (100%) + középre igazítás
+            const containerWidth = sliderRef.current ? sliderRef.current.offsetWidth : width;
+            const cardWidth = containerWidth * 0.8; // w-4/5 = 80%
+            return (containerWidth - cardWidth) / 2 - (currentIndex * cardWidth);
+        }
+        if (width < 768) return currentIndex * 50;  // sm nézet: 50%
+        return currentIndex * 33.33;                // md+ nézet: 33.33%
     };
 
     // Körkörös navigáció balra
@@ -121,7 +134,7 @@ function Hero() {
                         <div className="text-center mb-8 md:mb-16">
                             <h1 className="text-3xl md:text-5xl font-bold text-blue-900 mb-4 md:mb-6">Luxus Szálloda</h1>
                             <p className="text-lg md:text-xl text-blue-700 max-w-3xl mx-auto">
-                                Fedezze fel a kényelem és elegancia új dimenzióját
+                                Fedezze fel a kényelem és elegancia új dimenzióját szállodánkban!
                             </p>
                         </div>
                         
@@ -137,10 +150,18 @@ function Hero() {
                                 <div 
                                     ref={sliderRef}
                                     className={`flex ${transitionEnabled ? 'transition-transform duration-500' : ''} gap-6`}
-                                    style={{ transform: `translateX(-${currentIndex * (100 / 3)}%)` }}
+                                    style={{ 
+                                        transform: window.innerWidth < 640 
+                                            ? `translateX(${getSlideOffset()}px)` 
+                                            : `translateX(-${getSlideOffset()}%)`
+                                    }}
                                 >
                                     {duplicatedRooms.map((room, index) => (
-                                        <div key={`${room.id}-${index}`} className="flex-shrink-0 w-full sm:w-1/2 md:w-1/3">
+                                        <div 
+                                            key={`${room.id}-${index}`} 
+                                            className="flex-shrink-0 w-4/5 sm:w-1/2 md:w-1/3 mx-auto"
+                                            onClick={() => handleRoomClick(room.id)}
+                                        >
                                             <div className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer transform hover:scale-105 transition-all duration-300">
                                                 <div
                                                     className="h-48 bg-cover bg-center"

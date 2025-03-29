@@ -125,6 +125,7 @@ function RegisterModal({ onClose, switchToLogin }) {
                   Felhasználónév
                 </label>
                 <input
+              placeholder='PetőfiSanyi'
                   required
                   type="text"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -138,6 +139,7 @@ function RegisterModal({ onClose, switchToLogin }) {
                   Email
                 </label>
                 <input
+                  placeholder='example@gmail.com'
                   required
                   type="email"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -151,6 +153,7 @@ function RegisterModal({ onClose, switchToLogin }) {
                   Jelszó
                 </label>
                 <input
+                placeholder='Ezt jól jegyezd meg!'
                   required
                   type="password"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -164,6 +167,7 @@ function RegisterModal({ onClose, switchToLogin }) {
                   Jelszó megerősítése
                 </label>
                 <input
+                placeholder='És ne felejtsd el...'
                   required
                   type="password"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

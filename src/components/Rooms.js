@@ -35,11 +35,25 @@ function RoomCard() {
         if (!roomsResponse.ok) throw new Error(process.env.REACT_APP_ERROR_NETWORK);
         const roomsData = await roomsResponse.json();
 
-        // Fetch bookings for each room
+        // Fetch bookings for each room with authentication
+        const token = localStorage.getItem('authToken');
         const bookingsPromises = roomsData.map(async room => {
-          const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/Bookings/GetBookedDates/${room.roomId}`);
-          if (!response.ok) return [];
-          return response.json();
+          try {
+            const response = await fetch(
+              `${process.env.REACT_APP_API_BASE_URL}/Bookings/GetBookedDates/${room.roomId}`,
+              {
+                headers: token ? { "Authorization": `Bearer ${token}` } : {},
+              }
+            );
+            if (!response.ok) {
+              // Ha 401 vagy más hiba van, üres tömböt adunk vissza
+              return [];
+            }
+            return await response.json();
+          } catch (err) {
+            console.warn(`Failed to fetch booked dates for room ${room.roomId}:`, err.message);
+            return []; // Hiba esetén üres tömb, így nem szakad meg a folyamat
+          }
         });
 
         const bookingsData = await Promise.all(bookingsPromises);
@@ -188,7 +202,7 @@ function RoomCard() {
   };
 
   const handleBookingClick = (roomId, room) => {
-    if (!localStorage.getItem(process.env.REACT_APP_AUTH_TOKEN_KEY)) {
+    if (!localStorage.getItem('authToken')) {
       setShowLoginModal(true);
     } else {
       navigate(`/Foglalas/${roomId}`, {
@@ -579,7 +593,7 @@ function RoomItem({ room, onBookingClick, isAvailable, checkInDate, checkOutDate
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
         <span className="absolute top-4 right-4 bg-blue-800 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg backdrop-blur-sm bg-opacity-90">
-          {room.pricePerNight ? `${room.pricePerNight.toLocaleString('hu-HU')} Ft/éj` : 'Ár igénylés'}
+          {room.pricePerNight ? `${room.pricePerNight.toLocaleString('hu-HU')} Ft / Éjszaka` : 'Ár igénylés'}
         </span>
         {!isAvailable && checkInDate && checkOutDate && (
           <div className="absolute bottom-0 left-0 right-0 bg-red-600 text-white text-center py-1 text-sm font-medium">
