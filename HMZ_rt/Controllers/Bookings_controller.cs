@@ -422,13 +422,32 @@ namespace HMZ_rt.Controllers
 
 
         [Authorize(Roles ="Base,Admin,System,Recept")]
-        [HttpGet("BookingsByUserId")]
-        public async Task<ActionResult<Booking>> GetUserBookings(int UserIdd)
+        [HttpGet("BookingsByUser/{id}")]
+        public async Task<ActionResult<Booking>> GetUserBookings(int id)
         {
-            var data =await  _context.Guests.FirstOrDefaultAsync(x => x.UserId == UserIdd);
-            var reservation =  _context.Bookings.Where(x => x.GuestId == data.GuestId).Include(x => x.Payments);
+            var data =await  _context.Guests.Where(x => x.UserId == id).ToListAsync();
+            var reservations = new List<Booking>();
+            foreach (var item in data)
+            {
+                    
+                if (_context.Bookings.Where(x => x.GuestId == item.GuestId) != null)
+                {
+                    reservations.Add((Booking)_context.Bookings.Where(x => x.GuestId == item.GuestId));
+                }
+            }
+              
             if (data != null) {
-                return StatusCode(201, reservation);
+                return StatusCode(201, reservations.Select(x => new{ 
+                    x.Guest.FirstName,
+                    x.Guest.LastName,
+                    x.NumberOfGuests ,
+                    x.BookingDate,
+                    x.CheckInDate,
+                    x.CheckOutDate,
+                    x.PaymentStatus,
+                    x.TotalPrice, 
+                    x.Room.RoomType, 
+                    x.Room.FloorNumber}));
             }
             return BadRequest();
 
