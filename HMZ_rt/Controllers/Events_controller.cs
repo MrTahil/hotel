@@ -23,7 +23,7 @@ namespace HMZ_rt.Controllers
             {
                 var events = await _context.Events.Include(x => x.Eventbookings).ToListAsync();
                 if (events != null) {
-                    return StatusCode(201, events);
+                    return StatusCode(200, events);
 
                 }
                 return StatusCode(404, "üres");
@@ -149,7 +149,7 @@ namespace HMZ_rt.Controllers
 
 
             var dat = await _context.Events.Include(x => x.Eventbookings).Where(x=> x.EventDate > DateTime.Now.AddDays(-1) ).ToListAsync();
-                return StatusCode(201, dat);
+                return StatusCode(200, dat);
             }
             catch (Exception ex)
             {

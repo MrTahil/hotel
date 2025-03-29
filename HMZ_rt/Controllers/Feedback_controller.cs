@@ -66,7 +66,7 @@ namespace HMZ_rt.Controllers
                     {
                         _context.Feedbacks.Add(feed);
                        await _context.SaveChangesAsync();
-                        return StatusCode(200, "Sikeres mentés");
+                        return StatusCode(201, "Sikeres mentés");
                     }
 
                 } return StatusCode(418, "Ha ide jutsz nagy baj van");

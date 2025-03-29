@@ -421,37 +421,44 @@ namespace HMZ_rt.Controllers
 
 
 
-        [Authorize(Roles ="Base,Admin,System,Recept")]
+        [Authorize(Roles = "Base,Admin,System,Recept")]
         [HttpGet("BookingsByUser/{id}")]
-        public async Task<ActionResult<Booking>> GetUserBookings(int id)
+        public async Task<ActionResult<IEnumerable<object>>> GetUserBookings(int id)
         {
-            var data =await  _context.Guests.Where(x => x.UserId == id).ToListAsync();
+            var guests = await _context.Guests
+                .Where(x => x.UserId == id)
+                .ToListAsync();
+
             var reservations = new List<Booking>();
-            foreach (var item in data)
+
+            foreach (var guest in guests)
             {
-                    
-                if (_context.Bookings.Where(x => x.GuestId == item.GuestId) != null)
-                {
-                    reservations.Add((Booking)_context.Bookings.Where(x => x.GuestId == item.GuestId));
-                }
+                var bookings = await _context.Bookings
+                    .Where(x => x.GuestId == guest.GuestId)
+                    .ToListAsync(); 
+
+
+                reservations.AddRange(bookings); 
             }
-              
-            if (data != null) {
-                return StatusCode(201, reservations.Select(x => new{ 
-                    x.Guest.FirstName,
-                    x.Guest.LastName,
-                    x.NumberOfGuests ,
+
+            if (reservations.Any())
+            {
+                return StatusCode(200, reservations.Select(x => new
+                {
+                    FirstName = x.Guest != null ? x.Guest.FirstName : "N/A",
+                    LastName = x.Guest != null ? x.Guest.LastName : "N/A",
+                    x.NumberOfGuests,
                     x.BookingDate,
                     x.CheckInDate,
                     x.CheckOutDate,
                     x.PaymentStatus,
-                    x.TotalPrice, 
-                    x.Room.RoomType, 
-                    x.Room.FloorNumber}));
+                    x.TotalPrice,
+                    FloorNumber = x.Room != null ? x.Room.FloorNumber : -1,
+                    
+                }));
             }
+
             return BadRequest();
-
-
         }
         [Authorize(Roles = "Base,Admin,System,Recept")]
         [HttpDelete("DeleteBooking/{id}")]

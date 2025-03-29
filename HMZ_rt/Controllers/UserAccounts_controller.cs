@@ -454,7 +454,7 @@ namespace HMZ_rt.Controllers
                     await Send2FACode(user.Username, email, code);
                     _context.Useraccounts.Update(user);
                     await _context.SaveChangesAsync();
-                    return StatusCode(200);
+                    return StatusCode(201);
                 }
                 return StatusCode(418);
             }

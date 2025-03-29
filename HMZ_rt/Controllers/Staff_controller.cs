@@ -64,7 +64,7 @@ namespace HMZ_rt.Controllers
             {
 
             
-            return StatusCode(201, await _context.Staff.ToListAsync());
+            return StatusCode(200, await _context.Staff.ToListAsync());
             }
             catch (Exception ex)
             {

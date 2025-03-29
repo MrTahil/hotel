@@ -22,7 +22,7 @@ namespace HMZ_rt.Controllers
             try
             {
                 var promotions = await _context.Promotions.ToListAsync();
-                return StatusCode(201, promotions);
+                return StatusCode(200, promotions);
             }
             catch (Exception ex)
             {

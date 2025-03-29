@@ -24,7 +24,7 @@ namespace HMZ_rt.Controllers
             {
 
 
-                return StatusCode(201, await _context.Roommaintenances.ToListAsync());
+                return StatusCode(200, await _context.Roommaintenances.ToListAsync());
             }
             catch (Exception ex)
             {

@@ -94,7 +94,7 @@ namespace HMZ_rt.Controllers
             var data =await _context.Guests.Include(x => x.Bookings).Include(a => a.Feedbacks).Include(z => z.Reviews).ToListAsync();
                 if (data != null)
                 {
-                    return StatusCode(201, data);
+                    return StatusCode(200, data);
                 } return StatusCode(404, "Üres tábla");
             
             }
@@ -145,7 +145,7 @@ namespace HMZ_rt.Controllers
                 
                 if (ppl != null)
                 {
-                    return StatusCode(201, ppl);
+                    return StatusCode(200, ppl);
                 }
                 return StatusCode(400, "Én se tudom mi a baja engedd el");
 
