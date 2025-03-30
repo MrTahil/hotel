@@ -32,13 +32,19 @@ namespace HMZ_rt.Controllers
                 return StatusCode(500, ex);
             }
         }
-        [Authorize(Roles ="Admin,Recept,Base,System")]
-        [HttpPost("NemComment/{roomid}")]
+        [Authorize(Roles = "System,Admin,Recept,Base")]
+        [HttpPost("NewComment/{roomid}")]
         public async Task<ActionResult<Review>> NewRevi(int roomid, NewRevi crtdto)
         {
             try
             {
-                var data = _context.Rooms.FirstOrDefaultAsync(x => x.RoomId == roomid);
+                var bookcheck = await _context.Bookings.FirstOrDefaultAsync(x => x.BookingId == crtdto.BookingId);
+                if (bookcheck==null)
+                {
+                    return StatusCode(404, "foglalási szám nem található");
+                }
+                    
+                var data = await _context.Rooms.FirstOrDefaultAsync(x => x.RoomId == roomid);
                 if (data!= null)
                 {
                     var newdata = new Review
@@ -51,7 +57,9 @@ namespace HMZ_rt.Controllers
                         Status = "OK",
                         Response = "",
                         ResponseDate = DateTime.MinValue,
-                        DateAdded = DateTime.Now
+                        DateAdded = DateTime.Now,
+                        BookingId = crtdto.BookingId
+                        
                     };
                     if (newdata != null)
                     {
@@ -68,5 +76,7 @@ namespace HMZ_rt.Controllers
                 return StatusCode(500, ex);
             }
         }
+
+
     }
 }

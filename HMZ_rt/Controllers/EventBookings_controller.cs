@@ -74,7 +74,8 @@ namespace HMZ_rt.Controllers
         {
             try
             {
-                var eventdata = _context.Events.FirstOrDefault(x => x.EventId == eventid && x.EventDate > DateTime.Now.AddDays(-1));
+                
+                var eventdata =  _context.Events.FirstOrDefault(x => x.EventId == eventid && x.EventDate > DateTime.Now.AddDays(-1));
                 if (eventdata == null) {
                     return StatusCode(404, "Ez az esemény nem létezik vagy már véget ért.");
                 }
@@ -97,7 +98,7 @@ namespace HMZ_rt.Controllers
                 };
                 if (data !=null)
                 {
-                    _context.Eventbookings.Add(data);
+                     _context.Eventbookings.Add(data);
                     await _context.SaveChangesAsync();
                     return StatusCode(201, "Sikeres Foglalás");
                 } return StatusCode(404, "Something went wrong");

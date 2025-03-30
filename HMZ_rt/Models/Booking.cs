@@ -31,6 +31,8 @@ public partial class Booking
     public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+    public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
     [JsonIgnore]
     public virtual Room Room { get; set; } = null!;
 }

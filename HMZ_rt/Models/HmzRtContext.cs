@@ -47,14 +47,12 @@ public partial class HmzRtContext : DbContext
 
     public virtual DbSet<Roommaintenance> Roommaintenances { get; set; }
 
-
     public virtual DbSet<Service> Services { get; set; }
 
     public virtual DbSet<Staff> Staff { get; set; }
 
-
-
     public virtual DbSet<Useraccount> Useraccounts { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -182,10 +180,6 @@ public partial class HmzRtContext : DbContext
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("int(11)")
                 .HasColumnName("capacity");
-            entity.Property(e => e.Price)
-                .HasDefaultValueSql("'NULL'")
-                .HasPrecision(10)
-                .HasColumnName("price");
             entity.Property(e => e.ContactInfo)
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")
@@ -215,6 +209,9 @@ public partial class HmzRtContext : DbContext
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnName("organizer_name");
+            entity.Property(e => e.Price)
+                .HasPrecision(10)
+                .HasColumnName("price");
             entity.Property(e => e.Status)
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")
@@ -385,7 +382,7 @@ public partial class HmzRtContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.Guests)
                 .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.SetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("fk_guests_useraccounts");
         });
 
@@ -699,6 +696,8 @@ public partial class HmzRtContext : DbContext
 
             entity.ToTable("reviews");
 
+            entity.HasIndex(e => e.BookingId, "Booking_id");
+
             entity.HasIndex(e => e.GuestId, "Reviews_fk2");
 
             entity.HasIndex(e => e.RoomId, "Reviews_fk3");
@@ -706,6 +705,9 @@ public partial class HmzRtContext : DbContext
             entity.Property(e => e.ReviewId)
                 .HasColumnType("int(11)")
                 .HasColumnName("review_id");
+            entity.Property(e => e.BookingId)
+                .HasColumnType("int(11)")
+                .HasColumnName("booking_id");
             entity.Property(e => e.Comment)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("text")
@@ -740,6 +742,10 @@ public partial class HmzRtContext : DbContext
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnName("status");
+
+            entity.HasOne(d => d.Booking).WithMany(p => p.Reviews)
+                .HasForeignKey(d => d.BookingId)
+                .HasConstraintName("reviews_ibfk_1");
 
             entity.HasOne(d => d.Guest).WithMany(p => p.Reviews)
                 .HasForeignKey(d => d.GuestId)
@@ -912,7 +918,6 @@ public partial class HmzRtContext : DbContext
                 .HasConstraintName("RoomMaintenance_fk5");
         });
 
-
         modelBuilder.Entity<Service>(entity =>
         {
             entity.HasKey(e => e.ServiceId).HasName("PRIMARY");
@@ -1006,8 +1011,6 @@ public partial class HmzRtContext : DbContext
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnName("status");
         });
-
-        
 
         modelBuilder.Entity<Useraccount>(entity =>
         {

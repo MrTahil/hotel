@@ -25,6 +25,10 @@ public partial class Review
     public DateTime? ResponseDate { get; set; }
 
     public DateTime? DateAdded { get; set; }
+
+    public int BookingId { get; set; }
+    [JsonIgnore]
+    public virtual Booking Booking { get; set; } = null!;
     [JsonIgnore]
     public virtual Guest Guest { get; set; } = null!;
     [JsonIgnore]

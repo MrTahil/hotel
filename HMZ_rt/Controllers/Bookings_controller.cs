@@ -435,10 +435,11 @@ namespace HMZ_rt.Controllers
             {
                 var bookings = await _context.Bookings
                     .Where(x => x.GuestId == guest.GuestId)
-                    .ToListAsync(); 
+                    .Include(x => x.Guest) 
+                    .Include(x => x.Room)  
+                    .ToListAsync();
 
-
-                reservations.AddRange(bookings); 
+                reservations.AddRange(bookings);
             }
 
             if (reservations.Any())
@@ -453,13 +454,16 @@ namespace HMZ_rt.Controllers
                     x.CheckOutDate,
                     x.PaymentStatus,
                     x.TotalPrice,
-                    FloorNumber = x.Room != null ? x.Room.FloorNumber : -1,
-                    
+                    FloorNumber = x.Room != null ? x.Room.FloorNumber : -1,  
+                    RoomNumber = x.Room != null ? x.Room.RoomNumber : "N/A"  ,
+                    RoomType = x.Room != null? x.Room.RoomType : "alap",
+                    x.BookingId
                 }));
             }
 
             return BadRequest();
         }
+
         [Authorize(Roles = "Base,Admin,System,Recept")]
         [HttpDelete("DeleteBooking/{id}")]
         public async Task<ActionResult<Booking>> DeleteBooking(int id)

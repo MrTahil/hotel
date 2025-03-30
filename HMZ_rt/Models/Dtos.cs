@@ -403,5 +403,6 @@ public class NewRevi
     [Range(1, 10, ErrorMessage = "1 és 10 között kell lennie az értékelésnek!")]
     public decimal? Rating { get; set; }
     public string? Comment {get;set;}
-
+    [Required(ErrorMessage = "Nem lehet üres a foglalási szám")]
+    public int BookingId { get; set; }
 }

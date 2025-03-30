@@ -27,5 +27,4 @@ public partial class Payment
     public DateTime? DateAdded { get; set; }
     [JsonIgnore]
     public virtual Booking Booking { get; set; } = null!;
-
 }
