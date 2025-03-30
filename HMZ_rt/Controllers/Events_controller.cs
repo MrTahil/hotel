@@ -79,7 +79,7 @@ namespace HMZ_rt.Controllers
                         OrganizerName = crtdto.OrganizerName,
                         ContactInfo = crtdto.ContactInfo,
                         DateAdded = DateTime.Now,
-                        Price = crtdto.Price,
+                        Price = (decimal)crtdto.Price,
                         Images = imagePath
                     };
 
@@ -117,7 +117,7 @@ namespace HMZ_rt.Controllers
                     data.Description = udto.Description;
                     data.OrganizerName = udto.OrganizerName;
                     data.ContactInfo = udto.ContactInfo;
-                    data.Price = udto.Price;
+                    data.Price = (decimal)udto.Price;
                     if (data.Price < 0)
                     {
                         return BadRequest("Nem lehet kevesebb mint 0 az ár");
