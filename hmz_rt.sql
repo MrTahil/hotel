@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 28, 2025 at 01:44 PM
+-- Generation Time: Mar 30, 2025 at 07:45 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -166,7 +166,11 @@ INSERT INTO `bookings` (`room_id`, `booking_id`, `guest_id`, `check_in_date`, `c
 (18, 7, 3, '2025-03-25', '2025-03-29', 4, 800000, '2025-03-23', 'Finished', 'Fizetve'),
 (3, 8, 4, '2025-03-28', '2025-03-31', 2, 70000, '2025-03-24', 'Jóváhagyva', 'Fizetésre vár'),
 (5, 11, 4, '2025-03-25', '2025-03-28', 1, 15000, '2025-03-24', 'Jóváhagyva', 'Fizetésre vár'),
-(4, 12, 35, '2025-04-06', '2025-05-11', 2, 200000, '2025-03-28', 'Jóváhagyva', 'Fizetésre vár');
+(4, 12, 35, '2025-04-06', '2025-05-11', 2, 200000, '2025-03-28', 'Jóváhagyva', 'Fizetésre vár'),
+(3, 16, 40, '2025-03-06', '2025-03-11', 1, 35000, '2025-03-29', 'Jóváhagyva', 'Fizetésre vár'),
+(21, 17, 40, '2025-03-12', '2025-03-14', 4, 400000, '2025-03-29', 'Jóváhagyva', 'Fizetésre vár'),
+(18, 18, 40, '2025-03-14', '2025-04-13', 5, 1000000, '2025-03-29', 'Jóváhagyva', 'Fizetésre vár'),
+(4, 19, 41, '2025-03-29', '2025-03-31', 4, 400000, '2025-03-29', 'Jóváhagyva', 'Fizetésre vár');
 
 -- --------------------------------------------------------
 
@@ -283,8 +287,9 @@ CREATE TABLE `guests` (
 INSERT INTO `guests` (`first_name`, `guest_id`, `last_name`, `email`, `phone_number`, `address`, `city`, `country`, `date_of_birth`, `gender`, `user_id`) VALUES
 ('Róbert', 3, 'Monostori', 'monostorir@kkszki.hu', '06707026565', 'Nagyi', 'Miskolc', 'Magyarország', '2025-02-24', 'Férfi', 5),
 ('Tamás', 4, 'Hilóczki', 'hiloczkit@kkszki.hu', '065254587', 'Nagy Lajos utca 12', 'Szeged', 'Magyarország', '2005-03-06', 'Férfi', 3),
-('Omni', 34, 'Man', 'zelenakz@kkszki.hu', '+36703237436', 'Pozsonyi utca', 'Miskolc', 'Magyarország', '1999-12-30', 'Férfi', 19),
-('rzrz', 35, 'rrzrzr', 'rzr@erere.hu', '050567657657', 'rzrz', 'rzrzrz', 'rzrzzr', '2003-04-05', 'Férfi', 21);
+('rzrz', 35, 'rrzrzr', 'rzr@erere.hu', '050567657657', 'rzrz', 'rzrzrz', 'rzrzzr', '2003-04-05', 'Férfi', 21),
+('Omni', 40, 'Man', 'omniman@gmail.com', '+84757678475', 'Viltrum', 'Viltrum', 'Viltrum', '1999-01-10', 'Férfi', 22),
+('Omni', 41, 'Man', 'omniman@gmail.com', '+36703237436', 'adasdasd', 'asdadsad', 'dasdasdadaad', '1999-01-10', 'Férfi', 22);
 
 -- --------------------------------------------------------
 
@@ -391,7 +396,11 @@ INSERT INTO `payments` (`payment_id`, `booking_id`, `payment_date`, `amount`, `p
 (6, 7, '0001-01-01', 800000, 'Készpénz', '0', 'Fizetve', 'Huf', '', '2025-03-23'),
 (7, 8, '0001-01-01', 70000, 'Bankkártya', '0', 'Fizetésre vár', 'Huf', '', '2025-03-24'),
 (10, 11, '0001-01-01', 15000, 'Fizetés érkezéskor', '0', 'Fizetésre vár', 'Huf', '', '2025-03-24'),
-(11, 12, '0001-01-01', 200000, 'Fizetés érkezéskor', '0', 'Fizetésre vár', 'Huf', '', '2025-03-28');
+(11, 12, '0001-01-01', 200000, 'Fizetés érkezéskor', '0', 'Fizetésre vár', 'Huf', '', '2025-03-28'),
+(15, 16, '0001-01-01', 35000, 'Bankkártya', '0', 'Fizetésre vár', 'Huf', '', '2025-03-29'),
+(16, 17, '0001-01-01', 400000, 'Fizetés érkezéskor', '0', 'Fizetésre vár', 'Huf', '', '2025-03-29'),
+(17, 18, '0001-01-01', 1000000, 'Átutalás', '0', 'Fizetésre vár', 'Huf', '', '2025-03-29'),
+(18, 19, '0001-01-01', 400000, 'Bankkártya', '0', 'Fizetésre vár', 'Huf', '', '2025-03-29');
 
 -- --------------------------------------------------------
 
@@ -440,7 +449,8 @@ CREATE TABLE `reviews` (
   `status` varchar(255) DEFAULT NULL,
   `response` text DEFAULT NULL,
   `response_date` date DEFAULT NULL,
-  `date_added` date DEFAULT NULL
+  `date_added` date DEFAULT NULL,
+  `booking_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_hungarian_ci;
 
 -- --------------------------------------------------------
@@ -607,13 +617,12 @@ CREATE TABLE `useraccounts` (
 --
 
 INSERT INTO `useraccounts` (`username`, `user_id`, `password`, `email`, `role`, `RefreshToken`, `RefreshTokenExpiryTime`, `status`, `date_created`, `last_login`, `date_updated`, `notes`, `authenticationcode`, `authenticationexpire`) VALUES
-('Tahil', 3, 'hte+RnleAunUji+Bx3f7EPd8Nd2nOw82PS50E6kPBYOBYQ+8JUKlArMigzjZ1CM3', 'hiloczkit@kkszki.hu', 'System', '++5btnoXnmF6lWNrI1t2oGaUsGY9gSOG3Qy33cspSlI=', '2025-04-04', 'string', '2025-01-16', '2025-01-16', '2025-01-16', 'string', '111111', '2025-02-13'),
-('asdasdasd', 4, '3S4JbEmjI0P69HENXf0Wp+u8teCyLgUPrKSYOMLRv91+ixql4MlfM4TWgeaJLIU/', 'hiloczkit12@kkszki.hu', 'Base', 'qiNaBxchix/fw5p2I6Bq0odyQmSo0CmQawB6MiPqVFc=', '2025-01-23', 'string', '2025-01-16', '2025-01-16', '2025-01-16', 'string', '111111', '2025-02-13'),
-('a_Beto', 5, 'u04oCPhO+K7Y9IBD+zsk/QP/jWnVhlEdpOyaWFAzwQjPvc0kubpehqBt15MLXuVv', 'monostorir@kkszki.hu', 'System', 'KQ53vJVCwV625ChcTvmukeVmN/4TvgQvWTzPS9cuTWY=', '2025-04-04', 'string', '2025-02-14', '2025-02-14', '2025-02-14', 'string', 'activated', '2025-02-20'),
+('Tahil', 3, 'hte+RnleAunUji+Bx3f7EPd8Nd2nOw82PS50E6kPBYOBYQ+8JUKlArMigzjZ1CM3', 'hiloczkit@kkszki.hu', 'System', 'kdX42iIZYsgXATmhXpxe245ye/jqeavDYOrLdgcYMiw=', '2025-04-05', 'string', '2025-01-16', '2025-01-16', '2025-01-16', 'string', '111111', '2025-02-13'),
+('a_Beto', 5, 'u04oCPhO+K7Y9IBD+zsk/QP/jWnVhlEdpOyaWFAzwQjPvc0kubpehqBt15MLXuVv', 'monostorir@kkszki.hu', 'System', 'KDAi8zSO2PNRxeDxhq/YQYhjetVSXMeRuBDyCO6dluY=', '2025-04-05', 'string', '2025-02-14', '2025-02-14', '2025-02-14', 'string', 'activated', '2025-02-20'),
 ('Bozsgai', 6, 'qcFvcMo+qVpNxTezQhvnNO1acWKoZ1LEuvTFPrpsF48g/IL7vNu9jxt9epGzeLWA', 'monostorir@kkszki.hu', 'Base', 'gAuQy6/FuHKA0O1HEhZ4/d4iecZg8P88EprvucvItbA=', '2025-03-31', NULL, '2025-02-21', '2025-02-21', '2025-02-21', NULL, '000000', '2025-03-20'),
-('LoriAttila', 19, 'Vfc5k4Hhfh9g6fkBRrImBSi5/sDtEGfThpMVysBdNY2+JeOtPH4p4AUD9GDHTJQC', 'nokivagyok69420@gmail.com', 'Base', 'twBo3Lw894CmZYgfgsGMnCaDFwzx2DupFc9V3oJmYEE=', '2025-04-04', NULL, '2025-03-24', '2025-03-24', '2025-03-24', NULL, 'activated', '2025-03-29'),
-('string', 20, 'nJN79OWpKcob2YMQux5HJ9IypYNebJLL4j/AyEnGJlAjKon/mb4eVm1uvDkxhvgZ', 'user@example.com', 'unactivated', NULL, NULL, 'string', '2025-03-27', '2025-03-27', '2025-03-27', 'string', '198319', '2025-03-28'),
-('kaszalr', 21, '1Pjb/b8G8Lsj8+h7bC1t/Wym7s/CSc0YmFr4iajmayb19WzdjMcKkFmnPb0KSPCc', 'kaszalr@kkszki.hu', 'Base', 'DXv9vcV4tBSU3xMP5g0GRfzv3hcJ6oHW2g0Jkepjoeo=', '2025-04-04', NULL, '2025-03-28', '2025-03-28', '2025-03-28', NULL, 'activated', NULL);
+('LoriAttila', 19, 'Vfc5k4Hhfh9g6fkBRrImBSi5/sDtEGfThpMVysBdNY2+JeOtPH4p4AUD9GDHTJQC', 'nokivagyok69420@gmail.com', 'Base', 'kguIvptwE+2GUX7EKFabz4vayimnIapPRnQ/JJ+T8Es=', '2025-04-05', NULL, '2025-03-24', '2025-03-24', '2025-03-24', NULL, 'activated', '2025-03-29'),
+('kaszalr', 21, '1Pjb/b8G8Lsj8+h7bC1t/Wym7s/CSc0YmFr4iajmayb19WzdjMcKkFmnPb0KSPCc', 'kaszalr@kkszki.hu', 'Base', 'DXv9vcV4tBSU3xMP5g0GRfzv3hcJ6oHW2g0Jkepjoeo=', '2025-04-04', NULL, '2025-03-28', '2025-03-28', '2025-03-28', NULL, 'activated', NULL),
+('ZuZuu', 22, 'L2FGPfANZJWC27IMMahtkimizz8eRTEKCt7qVStIioAr2M8haZ2FSiQ7h2V0M9Su', 'zelenakz@kkszki.hu', 'System', 'xAcAKfr6HhjJ0+34n5ksQ6QQYPGYKMQ4gmxVgLo1RKw=', '2025-04-05', NULL, '2025-03-29', '2025-03-29', '2025-03-29', NULL, 'activated', NULL);
 
 --
 -- Indexes for dumped tables
@@ -708,7 +717,8 @@ ALTER TABLE `promotions`
 ALTER TABLE `reviews`
   ADD PRIMARY KEY (`review_id`),
   ADD KEY `Reviews_fk2` (`guest_id`),
-  ADD KEY `Reviews_fk3` (`room_id`);
+  ADD KEY `Reviews_fk3` (`room_id`),
+  ADD KEY `Booking_id` (`booking_id`);
 
 --
 -- Indexes for table `roominventory`
@@ -763,7 +773,7 @@ ALTER TABLE `amenities`
 -- AUTO_INCREMENT for table `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `eventbookings`
@@ -787,7 +797,7 @@ ALTER TABLE `feedback`
 -- AUTO_INCREMENT for table `guests`
 --
 ALTER TABLE `guests`
-  MODIFY `guest_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `guest_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `invoices`
@@ -817,7 +827,7 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT for table `payments`
 --
 ALTER TABLE `payments`
-  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `promotions`
@@ -829,7 +839,7 @@ ALTER TABLE `promotions`
 -- AUTO_INCREMENT for table `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `roominventory`
@@ -865,7 +875,7 @@ ALTER TABLE `staff`
 -- AUTO_INCREMENT for table `useraccounts`
 --
 ALTER TABLE `useraccounts`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- Constraints for dumped tables
@@ -932,7 +942,8 @@ ALTER TABLE `promotions`
 --
 ALTER TABLE `reviews`
   ADD CONSTRAINT `Reviews_fk2` FOREIGN KEY (`guest_id`) REFERENCES `guests` (`guest_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `Reviews_fk3` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+  ADD CONSTRAINT `Reviews_fk3` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`booking_id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `roominventory`
