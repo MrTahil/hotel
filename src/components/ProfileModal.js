@@ -1110,180 +1110,188 @@ const ProfilePage = () => {
           </div>
         )}
 
-        {selectedBooking && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all duration-300 ease-out">
-              <div className="bg-gradient-to-r from-teal-500 to-blue-600 p-6 text-white">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-2xl font-bold">Foglalás részletei</h3>
-                    <p className="text-teal-100 mt-1">
-                      #{selectedBooking.BookingId}
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleCloseDetails}
-                    className="text-white hover:text-teal-200 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-3xl">
-                      close
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="p-6 space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="space-y-3">
-                    <DetailItem
-                      label="Szobaszám"
-                      value={selectedBooking.RoomNumber || "N/A"}
-                      icon="meeting_room"
-                    />
-                    <DetailItem
-                      label="Időpont"
-                      value={
-                        selectedBooking.CheckInDate &&
-                        selectedBooking.CheckOutDate
-                          ? `${new Date(
-                              selectedBooking.CheckInDate
-                            ).toLocaleDateString("hu-HU")} - ${new Date(
-                              selectedBooking.CheckOutDate
-                            ).toLocaleDateString("hu-HU")}`
-                          : "N/A"
-                      }
-                      icon="date_range"
-                    />
-                    <DetailItem
-                      label="Vendégek száma"
-                      value={`${selectedBooking.NumberOfGuests || "N/A"} fő`}
-                      icon="group"
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <DetailItem
-                      label="Név"
-                      value={
-                        selectedBooking.FirstName && selectedBooking.LastName
-                          ? `${selectedBooking.FirstName} ${selectedBooking.LastName}`
-                          : "N/A"
-                      }
-                      icon="person"
-                    />
-                    <DetailItem
-                      label="Fizetési státusz"
-                      value={selectedBooking.PaymentStatus || "N/A"}
-                      icon="payments"
-                      highlight={selectedBooking.PaymentStatus === "Fizetve"}
-                    />
-                    <DetailItem
-                      label="Összeg"
-                      value={`${selectedBooking.TotalPrice?.toLocaleString(
-                        "hu-HU"
-                      ) || "N/A"} HUF`}
-                      icon="attach_money"
-                    />
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-200 pt-4">
-                  <DetailItem
-                    label="Szobatípus"
-                    value={selectedBooking.RoomType || "N/A"}
-                    icon="king_bed"
-                  />
-                  <DetailItem
-                    label="Emelet"
-                    value={selectedBooking.FloorNumber || "N/A"}
-                    icon="floor"
-                  />
-                </div>
-
-                <div className="border-t border-gray-200 pt-4">
-                  <details className="group">
-                    <summary className="flex items-center justify-between cursor-pointer list-none">
-                      <div className="flex items-center text-blue-600 group-hover:text-blue-800 transition-colors">
-                        <span className="material-symbols-outlined mr-2">
-                          person
-                        </span>
-                        <span className="font-medium">
-                          Saját adatok megtekintése
-                        </span>
-                      </div>
-                      <span className="material-symbols-outlined text-gray-500 group-open:rotate-180 transition-transform">
-                        expand_more
-                      </span>
-                    </summary>
-                    <div className="mt-3 p-4 bg-blue-50 rounded-lg space-y-2 animate-[fadeIn_0.2s_ease-in-out]">
-                      <DetailItem
-                        label="Felhasználónév"
-                        value={user.username}
-                        small
-                      />
-                      <DetailItem label="Email" value={user.email} small />
-                      <DetailItem
-                        label="Regisztráció dátuma"
-                        value={user.dateCreated}
-                        small
-                      />
-                    </div>
-                  </details>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row justify-end gap-3">
-                <button
-                  onClick={() => handleDeleteBooking(selectedBooking.BookingId)}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors"
-                >
-                  <span className="material-symbols-outlined">delete</span>
-                  Foglalás törlése
-                </button>
-                <button
-                  onClick={() => setShowCommentModal(true)}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
-                >
-                  <span className="material-symbols-outlined">rate_review</span>
-                  Értékelés
-                </button>
-                <button
-                  onClick={() => {
-                    if (selectedBooking.RoomId) {
-                      navigate(`/Foglalas/${selectedBooking.RoomId}`, {
-                        state: {
-                          room: {
-                            roomId: selectedBooking.RoomId,
-                            roomNumber: selectedBooking.RoomNumber,
-                            roomType: selectedBooking.RoomType,
-                            floorNumber: selectedBooking.FloorNumber,
-                            pricePerNight: selectedBooking.TotalPrice,
-                            capacity: selectedBooking.NumberOfGuests,
-                          },
-                          checkInDate: selectedBooking.CheckInDate,
-                          checkOutDate: selectedBooking.CheckOutDate,
-                        },
-                      });
-                    } else {
-                      navigate("/Foglalas/id", {
-                        state: {
-                          searchParams: {
-                            roomNumber: selectedBooking.RoomNumber,
-                            floor: selectedBooking.FloorNumber,
-                            type: selectedBooking.RoomType,
-                          },
-                        },
-                      });
-                    }
-                  }}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-                >
-                  <span className="material-symbols-outlined">visibility</span>
-                  Szoba részletei
-                </button>
-              </div>
-            </div>
+{selectedBooking && (
+  <div 
+    className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+    onClick={() => setSelectedBooking(null)}
+  >
+    <div 
+      className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all duration-300 ease-out"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="bg-gradient-to-r from-teal-500 to-blue-600 p-6 text-white">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-2xl font-bold">Foglalás részletei</h3>
+            <p className="text-teal-100 mt-1">
+              #{selectedBooking.BookingId}
+            </p>
           </div>
-        )}
+          <button
+            onClick={() => setSelectedBooking(null)}
+            className="text-white hover:text-teal-200 transition-colors"
+            aria-label="Bezárás"
+          >
+            <span className="material-symbols-outlined text-3xl">
+              close
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div className="p-6 space-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="space-y-3">
+            <DetailItem
+              label="Szobaszám"
+              value={selectedBooking.RoomNumber || "N/A"}
+              icon="meeting_room"
+            />
+            <DetailItem
+              label="Időpont"
+              value={
+                selectedBooking.CheckInDate && selectedBooking.CheckOutDate
+                  ? `${new Date(selectedBooking.CheckInDate).toLocaleDateString("hu-HU")} - ${new Date(selectedBooking.CheckOutDate).toLocaleDateString("hu-HU")}`
+                  : "N/A"
+              }
+              icon="date_range"
+            />
+            <DetailItem
+              label="Vendégek száma"
+              value={`${selectedBooking.NumberOfGuests || "N/A"} fő`}
+              icon="group"
+            />
+          </div>
+          
+          <div className="space-y-3">
+            <DetailItem
+              label="Név"
+              value={
+                selectedBooking.FirstName && selectedBooking.LastName
+                  ? `${selectedBooking.FirstName} ${selectedBooking.LastName}`
+                  : "N/A"
+              }
+              icon="person"
+            />
+            <DetailItem
+              label="Fizetési státusz"
+              value={selectedBooking.PaymentStatus || "N/A"}
+              icon="payments"
+              highlight={selectedBooking.PaymentStatus === "Fizetve"}
+            />
+            <DetailItem
+              label="Összeg"
+              value={`${selectedBooking.TotalPrice?.toLocaleString("hu-HU") || "N/A"} HUF`}
+              icon="attach_money"
+            />
+          </div>
+        </div>
+
+        <div className="border-t border-gray-200 pt-4">
+          <DetailItem
+            label="Szobatípus"
+            value={selectedBooking.RoomType || "N/A"}
+            icon="king_bed"
+          />
+          <DetailItem
+            label="Emelet"
+            value={selectedBooking.FloorNumber || "N/A"}
+            icon="floor"
+          />
+        </div>
+
+        <div className="border-t border-gray-200 pt-4">
+          <details className="group">
+            <summary className="flex items-center justify-between cursor-pointer list-none">
+              <div className="flex items-center text-blue-600 group-hover:text-blue-800 transition-colors">
+                <span className="material-symbols-outlined mr-2">
+                  person
+                </span>
+                <span className="font-medium">
+                  Saját adatok megtekintése
+                </span>
+              </div>
+              <span className="material-symbols-outlined text-gray-500 group-open:rotate-180 transition-transform">
+                expand_more
+              </span>
+            </summary>
+            <div className="mt-3 p-4 bg-blue-50 rounded-lg space-y-2 animate-[fadeIn_0.2s_ease-in-out]">
+              <DetailItem
+                label="Felhasználónév"
+                value={user.username}
+                small
+              />
+              <DetailItem label="Email" value={user.email} small />
+              <DetailItem
+                label="Regisztráció dátuma"
+                value={user.dateCreated}
+                small
+              />
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div className="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row justify-end gap-3">
+        <button
+          onClick={() => setSelectedBooking(null)}
+          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors"
+        >
+          <span className="material-symbols-outlined">close</span>
+          Bezárás
+        </button>
+        <button
+          onClick={() => handleDeleteBooking(selectedBooking.BookingId)}
+          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors"
+        >
+          <span className="material-symbols-outlined">delete</span>
+          Foglalás törlése
+        </button>
+        <button
+          onClick={() => setShowCommentModal(true)}
+          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+        >
+          <span className="material-symbols-outlined">rate_review</span>
+          Értékelés
+        </button>
+        <button
+          onClick={() => {
+            if (selectedBooking.RoomId) {
+              navigate(`/Foglalas/${selectedBooking.RoomId}`, {
+                state: {
+                  room: {
+                    roomId: selectedBooking.RoomId,
+                    roomNumber: selectedBooking.RoomNumber,
+                    roomType: selectedBooking.RoomType,
+                    floorNumber: selectedBooking.FloorNumber,
+                    pricePerNight: selectedBooking.TotalPrice,
+                    capacity: selectedBooking.NumberOfGuests,
+                  },
+                  checkInDate: selectedBooking.CheckInDate,
+                  checkOutDate: selectedBooking.CheckOutDate,
+                },
+              });
+            } else {
+              navigate("/Foglalas/id", {
+                state: {
+                  searchParams: {
+                    roomNumber: selectedBooking.RoomNumber,
+                    floor: selectedBooking.FloorNumber,
+                    type: selectedBooking.RoomType,
+                  },
+                },
+              });
+            }
+          }}
+          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+        >
+          <span className="material-symbols-outlined">visibility</span>
+          Szoba részletei
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
         {user && (
           <>

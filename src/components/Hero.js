@@ -8,6 +8,7 @@ function Hero() {
     const [transitionEnabled, setTransitionEnabled] = useState(true);
     const [programs, setPrograms] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedFeature, setSelectedFeature] = useState(null); // Kiválasztott feature állapota
     const navigate = useNavigate();
     const sliderRef = useRef(null);
     const containerRef = useRef(null);
@@ -136,6 +137,65 @@ function Hero() {
 
     const duplicatedRooms = rooms.length > 0 ? [...rooms, ...rooms, ...rooms] : [];
 
+    const features = [
+        {
+            icon: 'spa',
+            title: 'Wellness & Spa',
+            shortDesc: 'Pihenjen modern spa részlegünkben.',
+            detailedDesc: {
+                description: 'Fedezze fel a tökéletes kikapcsolódást modern wellness és spa részlegünkben, ahol a legújabb technológiák és hagyományos relaxációs módszerek találkoznak. Élvezze a tágas szaunák, gőzkabinok és jakuzzik kényelmét, miközben a professzionális masszőrök által kínált exkluzív kezelések széles választékából válogathat.',
+                facilities: ['Finn szauna', 'Infraszauna', 'Gőzkabin', 'Jakuzzi', 'Aromaterápiás szoba', 'Relaxációs zóna'],
+                openingHours: 'Hétfőtől vasárnapig: 8:00 - 20:00',
+                pricing: 'Alapszolgáltatások ingyenesek a vendégek számára, masszázsok 5000 Ft/30 perctől',
+                additionalInfo: 'Kérjük, előre foglaljon időpontot a masszázsokra. Fürdőruhát és papucsot biztosítunk.',
+            },
+        },
+        {
+            icon: 'restaurant',
+            title: 'Gourmet Étterem',
+            shortDesc: 'Élvezze díjnyertes fogásainkat.',
+            detailedDesc: {
+                description: 'Lépjen be gasztronómiai csodák világába gourmet éttermünkben, ahol a legfinomabb alapanyagokból készült, díjnyertes fogások várják Önt. Séfjeink a helyi és nemzetközi konyha legjavát ötvözik, hogy minden egyes étel egyedi élményt nyújtson.',
+                menuHighlights: ['Szezonális degusztációs menü', 'Frissen fogott tengeri halak', 'Házi készítésű desszertek', 'Vegán és gluténmentes opciók'],
+                openingHours: 'Hétfőtől vasárnapig: 7:00 - 22:00',
+                pricing: 'Főételek 3500 Ft-tól, borok poháronként 1200 Ft-tól',
+                additionalInfo: 'Asztalfoglalás ajánlott, különösen hétvégeken.',
+            },
+        },
+        {
+            icon: 'pool',
+            title: 'Medence',
+            shortDesc: 'Frissüljön fel stílusos medencénkben.',
+            detailedDesc: {
+                description: 'Merüljön el a luxusban stílusos medencénkben, amely a szálloda egyik ékköve. A kristálytiszta vizű, fűtött beltéri és kültéri medencék egész évben elérhetőek, így bármikor élvezheti a víz nyugtató hatását.',
+                facilities: ['Beltéri fűtött medence', 'Kültéri infinity medence', 'Gyermekmedence', 'Medence melletti bár'],
+                openingHours: 'Hétfőtől vasárnapig: 6:00 - 22:00',
+                pricing: 'Ingyenes a vendégek számára',
+                additionalInfo: 'Törölközőt biztosítunk, a medence melletti bár 10:00-tól üzemel.',
+            },
+        },
+        {
+            icon: 'wifi',
+            title: 'Ingyenes Wi-Fi',
+            shortDesc: 'Gyors kapcsolat mindenhol.',
+            detailedDesc: {
+                description: 'Maradjon mindig kapcsolatban ingyenes, nagy sebességű Wi-Fi hálózatunkkal, amely a szálloda minden szegletében elérhető. Legyen szó munkáról, videóhívásokról vagy egyszerű böngészésről, nálunk a stabil és gyors internetkapcsolat alapfelszereltség.',
+                facilities: ['100 Mbps sebesség', 'Több eszköz támogatása', '24/7 technikai segítség'],
+                openingHours: 'Folyamatosan elérhető',
+                pricing: 'Ingyenes minden vendég számára',
+                additionalInfo: 'Jelszó a recepción kérhető.',
+            },
+        },
+    ];
+
+    const openDetails = (feature) => {
+        setSelectedFeature(feature);
+    };
+
+    const closeDetails = () => {
+        setSelectedFeature(null);
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-screen bg-blue-50">
@@ -229,21 +289,99 @@ function Hero() {
                             Kivételes szolgáltatások és modern dizájn minden vendégünk számára.
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                            {[
-                                { icon: 'spa', title: 'Wellness & Spa', desc: 'Pihenjen modern spa részlegünkben.' },
-                                { icon: 'restaurant', title: 'Gourmet Étterem', desc: 'Élvezze díjnyertes fogásainkat.' },
-                                { icon: 'pool', title: 'Medence', desc: 'Frissüljön fel stílusos medencénkben.' },
-                                { icon: 'wifi', title: 'Ingyenes Wi-Fi', desc: 'Gyors kapcsolat mindenhol.' }
-                            ].map((feature, idx) => (
-                                <div key={idx} className="bg-white p-6 rounded-lg shadow-md">
-                                    <span className="material-symbols-outlined text-4xl text-blue-600 mb-4">{feature.icon}</span>
+                            {features.map((feature, idx) => (
+                                <div
+                                    key={idx}
+                                    className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col items-center"
+                                >
+                                    <span className="material-symbols-outlined text-4xl text-blue-600 mb-4">
+                                        {feature.icon}
+                                    </span>
                                     <h3 className="text-xl font-semibold text-blue-900 mb-2">{feature.title}</h3>
-                                    <p className="text-blue-700">{feature.desc}</p>
+                                    <p className="text-blue-700 mb-4">{feature.shortDesc}</p>
+                                    <button
+                                        onClick={() => openDetails(feature)}
+                                        className="mt-auto bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm"
+                                    >
+                                        Részletek
+                                    </button>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </section>
+
+                {/* Részletek Modal */}
+{selectedFeature && (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-2xl font-bold text-blue-900">{selectedFeature.title}</h3>
+          <button
+            onClick={closeDetails}
+            className="text-gray-600 hover:text-gray-800"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+        <p className="text-gray-700 mb-4">{selectedFeature.detailedDesc.description}</p>
+        <div className="space-y-4">
+          {selectedFeature.detailedDesc.facilities || selectedFeature.detailedDesc.menuHighlights ? (
+            <div>
+              <h4 className="text-lg font-semibold text-blue-800">
+                {selectedFeature.title === 'Gourmet Étterem' ? 'Menü kiemelések' : 'Szolgáltatások'}
+              </h4>
+              <ul className="list-disc pl-5 text-gray-600">
+                {(selectedFeature.detailedDesc.facilities || selectedFeature.detailedDesc.menuHighlights).map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+  
+          {selectedFeature.detailedDesc.openingHours && (
+            <div>
+              <h4 className="text-lg font-semibold text-blue-800">Nyitvatartás</h4>
+              <p className="text-gray-600">{selectedFeature.detailedDesc.openingHours}</p>
+            </div>
+          )}
+  
+          {selectedFeature.detailedDesc.pricing && (
+            <div>
+              <h4 className="text-lg font-semibold text-blue-800">Árak</h4>
+              <p className="text-gray-600">{selectedFeature.detailedDesc.pricing}</p>
+            </div>
+          )}
+  
+          {selectedFeature.detailedDesc.additionalInfo && (
+            <div>
+              <h4 className="text-lg font-semibold text-blue-800">További információ</h4>
+              <p className="text-gray-600">{selectedFeature.detailedDesc.additionalInfo}</p>
+            </div>
+          )}
+        </div>
+        <button
+          onClick={closeDetails}
+          className="mt-6 w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+        >
+          Bezárás
+        </button>
+      </div>
+    </div>
+  )}
 
                 <section className="py-16 bg-white">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
