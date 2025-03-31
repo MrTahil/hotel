@@ -7,8 +7,7 @@ function RoomCard() {
   const [rooms, setRooms] = useState([]);
   const [filteredRooms, setFilteredRooms] = useState([]);
   const [guestCount, setGuestCount] = useState('Bármennyi');
-  const [checkInDate, setCheckInDate] = useState('');
-  const [checkOutDate, setCheckOutDate] = useState('');
+  const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
   const [selectedRoomTypes, setSelectedRoomTypes] = useState([]);
   const [selectedAmenities, setSelectedAmenities] = useState([]);
   const [selectedFloors, setSelectedFloors] = useState([]);
@@ -30,29 +29,21 @@ function RoomCard() {
     const fetchRoomsAndBookings = async () => {
       setIsLoading(true);
       try {
-        // Fetch rooms
         const roomsResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_API_ROOMS_URL}`);
         if (!roomsResponse.ok) throw new Error(process.env.REACT_APP_ERROR_NETWORK);
         const roomsData = await roomsResponse.json();
 
-        // Fetch bookings for each room with authentication
         const token = localStorage.getItem('authToken');
         const bookingsPromises = roomsData.map(async room => {
           try {
             const response = await fetch(
               `${process.env.REACT_APP_API_BASE_URL}/Bookings/GetBookedDates/${room.roomId}`,
-              {
-                headers: token ? { "Authorization": `Bearer ${token}` } : {},
-              }
+              { headers: token ? { "Authorization": `Bearer ${token}` } : {} }
             );
-            if (!response.ok) {
-              // Ha 401 vagy más hiba van, üres tömböt adunk vissza
-              return [];
-            }
-            return await response.json();
+            return response.ok ? await response.json() : [];
           } catch (err) {
             console.warn(`Failed to fetch booked dates for room ${room.roomId}:`, err.message);
-            return []; // Hiba esetén üres tömb, így nem szakad meg a folyamat
+            return [];
           }
         });
 
@@ -66,7 +57,6 @@ function RoomCard() {
         setRooms(roomsData);
         setFilteredRooms(roomsData);
 
-        // Extract filter options
         const types = [...new Set(roomsData.map(room => room.roomType))];
         const amenities = [...new Set(roomsData.flatMap(room => room.amenities || []))];
         const floors = [...new Set(roomsData.map(room => room.floorNumber))].sort((a, b) => a - b);
@@ -85,12 +75,12 @@ function RoomCard() {
     fetchRoomsAndBookings();
   }, []);
 
-  const hasDateConflict = (roomId, checkIn, checkOut) => {
-    if (!checkIn || !checkOut) return false;
+  const hasDateConflict = (roomId, startDate, endDate) => {
+    if (!startDate || !endDate) return false;
 
     const bookings = bookedDatesByRoom[roomId] || [];
-    const newStart = new Date(checkIn);
-    const newEnd = new Date(checkOut);
+    const newStart = new Date(startDate);
+    const newEnd = new Date(endDate);
 
     return bookings.some(booking => {
       const existingStart = new Date(booking.checkInDate);
@@ -101,23 +91,26 @@ function RoomCard() {
 
   const getTodayDate = () => new Date().toISOString().split('T')[0];
 
-  const getMinCheckOutDate = () => {
-    if (!checkInDate) return getTodayDate();
-    const checkIn = new Date(checkInDate);
-    checkIn.setDate(checkIn.getDate() + 1);
-    return checkIn.toISOString().split('T')[0];
+  const getMinEndDate = (start) => {
+    if (!start) return getTodayDate();
+    const minDate = new Date(start);
+    minDate.setDate(minDate.getDate() + 1);
+    return minDate.toISOString().split('T')[0];
   };
 
-  const handleCheckInChange = (e) => {
-    const newDate = e.target.value;
-    setCheckInDate(newDate);
-    if (checkOutDate && newDate > checkOutDate) {
-      setCheckOutDate('');
-    }
-  };
+  const handleDateChange = (e) => {
+    const { name, value } = e.target;
+    setDateRange(prev => {
+      const newRange = { ...prev, [name]: value };
 
-  const handleCheckOutChange = (e) => {
-    setCheckOutDate(e.target.value);
+      if (name === 'startDate' && value && prev.endDate && value >= prev.endDate) {
+        const minEnd = new Date(value);
+        minEnd.setDate(minEnd.getDate() + 1);
+        newRange.endDate = minEnd.toISOString().split('T')[0];
+      }
+
+      return newRange;
+    });
   };
 
   const handleRoomTypeChange = (type) => {
@@ -149,16 +142,13 @@ function RoomCard() {
     try {
       let filtered = [...rooms];
 
-      // Apply date filter first if enabled
-      if (applyDateFilter && checkInDate && checkOutDate) {
+      if (applyDateFilter && dateRange.startDate && dateRange.endDate) {
         filtered = filtered.filter(room =>
-          !hasDateConflict(room.roomId, checkInDate, checkOutDate)
+          !hasDateConflict(room.roomId, dateRange.startDate, dateRange.endDate)
         );
       }
 
-      // Then apply all other filters
       filtered = applyNonDateFilters(filtered);
-
       setFilteredRooms(filtered);
     } catch (error) {
       console.error('Filtering error:', error);
@@ -172,30 +162,25 @@ function RoomCard() {
   const applyNonDateFilters = (roomsToFilter) => {
     let filtered = [...roomsToFilter];
 
-    // Guest count filtering - only if not 'Bármennyi'
     if (guestCount !== 'Bármennyi') {
       const numGuests = parseInt(guestCount);
       filtered = filtered.filter(room => room.capacity >= numGuests);
     }
 
-    // Room type filtering
     if (selectedRoomTypes.length > 0) {
       filtered = filtered.filter(room => selectedRoomTypes.includes(room.roomType));
     }
 
-    // Floor filtering
     if (selectedFloors.length > 0) {
       filtered = filtered.filter(room => selectedFloors.includes(room.floorNumber));
     }
 
-    // Amenity filtering
     if (selectedAmenities.length > 0) {
       filtered = filtered.filter(room =>
         selectedAmenities.every(amenity => room.amenities?.includes(amenity))
       );
     }
 
-    // Price filtering
     filtered = filtered.filter(room => room.pricePerNight <= priceRange[1]);
 
     return filtered;
@@ -208,8 +193,8 @@ function RoomCard() {
       navigate(`/Foglalas/${roomId}`, {
         state: {
           room,
-          checkInDate: checkInDate || '',
-          checkOutDate: checkOutDate || ''
+          checkInDate: dateRange.startDate || '',
+          checkOutDate: dateRange.endDate || ''
         }
       });
     }
@@ -221,8 +206,7 @@ function RoomCard() {
     setSelectedFloors([]);
     setPriceRange([0, 500000]);
     setGuestCount('Bármennyi');
-    setCheckInDate('');
-    setCheckOutDate('');
+    setDateRange({ startDate: '', endDate: '' });
     setApplyDateFilter(false);
     setFilteredRooms(rooms);
   };
@@ -257,9 +241,10 @@ function RoomCard() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Érkezés</label>
                 <input
                   type="date"
+                  name="startDate"
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  value={checkInDate}
-                  onChange={handleCheckInChange}
+                  value={dateRange.startDate}
+                  onChange={handleDateChange}
                   min={getTodayDate()}
                 />
               </div>
@@ -267,11 +252,12 @@ function RoomCard() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Távozás</label>
                 <input
                   type="date"
+                  name="endDate"
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  value={checkOutDate}
-                  onChange={handleCheckOutChange}
-                  min={getMinCheckOutDate()}
-                  disabled={!checkInDate}
+                  value={dateRange.endDate}
+                  onChange={handleDateChange}
+                  min={getMinEndDate(dateRange.startDate)}
+                  disabled={!dateRange.startDate}
                 />
               </div>
               <div>
@@ -307,7 +293,7 @@ function RoomCard() {
                 checked={applyDateFilter}
                 onChange={() => setApplyDateFilter(!applyDateFilter)}
                 className="h-4 w-4 text-blue-600 rounded border-gray-300"
-                disabled={!checkInDate || !checkOutDate}
+                disabled={!dateRange.startDate || !dateRange.endDate}
               />
               <label htmlFor="applyDateFilter" className="ml-2 text-sm text-gray-700">
                 Szűrés a kiválasztott dátumokra
@@ -345,9 +331,9 @@ function RoomCard() {
                       Max {priceRange[1]} Ft
                     </span>
                   )}
-                  {applyDateFilter && checkInDate && checkOutDate && (
+                  {applyDateFilter && dateRange.startDate && dateRange.endDate && (
                     <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs">
-                      {new Date(checkInDate).toLocaleDateString('hu-HU')} - {new Date(checkOutDate).toLocaleDateString('hu-HU')}
+                      {new Date(dateRange.startDate).toLocaleDateString('hu-HU')} - {new Date(dateRange.endDate).toLocaleDateString('hu-HU')}
                     </span>
                   )}
                 </div>
@@ -358,7 +344,6 @@ function RoomCard() {
 
         {showFilters && (
           <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-200 fixed md:relative inset-0 md:inset-auto z-50 md:z-auto overflow-y-auto">
-            {/* Mobile Header */}
             <div className="md:hidden sticky top-0 bg-white pb-4 border-b border-gray-200">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold text-gray-800">Szűrők</h2>
@@ -373,7 +358,6 @@ function RoomCard() {
               </div>
             </div>
 
-            {/* Scrollable Content */}
             <div className="max-h-[80vh] md:max-h-none overflow-y-auto touch-pan-y">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 md:pt-0">
                 <div className="space-y-3">
@@ -473,7 +457,6 @@ function RoomCard() {
                 </div>
               </div>
 
-              {/* Mobile Footer */}
               <div className="md:hidden sticky bottom-0 bg-white pt-4 border-t border-gray-200">
                 <div className="flex flex-col sm:flex-row justify-between gap-3">
                   <button
@@ -500,7 +483,6 @@ function RoomCard() {
               </div>
             </div>
 
-            {/* Desktop Footer */}
             <div className="hidden md:flex flex-col sm:flex-row justify-between gap-3 mt-6 pt-4 border-t border-gray-200">
               <button
                 onClick={resetFilters}
@@ -550,10 +532,10 @@ function RoomCard() {
                   key={room.roomId}
                   room={room}
                   onBookingClick={handleBookingClick}
-                  isAvailable={!applyDateFilter || !checkInDate || !checkOutDate ||
-                    !hasDateConflict(room.roomId, checkInDate, checkOutDate)}
-                  checkInDate={checkInDate}
-                  checkOutDate={checkOutDate}
+                  isAvailable={!applyDateFilter || !dateRange.startDate || !dateRange.endDate ||
+                    !hasDateConflict(room.roomId, dateRange.startDate, dateRange.endDate)}
+                  checkInDate={dateRange.startDate}
+                  checkOutDate={dateRange.endDate}
                 />
               ))
             ) : (
