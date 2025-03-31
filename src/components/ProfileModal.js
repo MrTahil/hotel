@@ -57,6 +57,57 @@ const ProfilePage = () => {
   const [showNewPasswordForgot, setShowNewPasswordForgot] = useState(false);
   const [showConfirmPasswordForgot, setShowConfirmPasswordForgot] = useState(false);
 
+  // Moved fetchRoomIdByNumber to component scope
+  const fetchRoomIdByNumber = async (roomNumber) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/Rooms/GetRoomWith`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Nem sikerült lekérni a szobák adatait: ${response.status}`);
+      }
+      const rooms = await response.json();
+      const room = rooms.find((r) => r.roomNumber === roomNumber);
+      return room?.roomId || null;
+    } catch (err) {
+      console.error("Hiba a szoba azonosító lekérdezésekor:", err.message);
+      return null;
+    }
+  };
+
+  // Moved fetchBookingDetails to component scope
+  const fetchBookingDetails = async (bookingId) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/Bookings/GetBookingDetails/${bookingId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Nem sikerült lekérni a foglalás részleteit");
+      }
+      const data = await response.json();
+      return data.roomId || data.room?.id;
+    } catch (err) {
+      console.error("Hiba a foglalás részleteinek lekérésekor:", err.message);
+      return null;
+    }
+  };
+
   useEffect(() => {
     if (message) {
       const timer = setTimeout(() => setMessage(null), 3000);
@@ -90,105 +141,6 @@ const ProfilePage = () => {
         if (!response.ok) {
           throw new Error(`HTTP hiba! Státusz: ${response.status}`);
         }
-        const fetchBookingDetails = async (bookingId) => {
-          try {
-            const token = localStorage.getItem("authToken");
-            const response = await fetch(
-              `${process.env.REACT_APP_API_BASE_URL}/Bookings/GetBookingDetails/${bookingId}`,
-              {
-                method: "GET",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-            if (!response.ok) {
-              throw new Error("Nem sikerült lekérni a foglalás részleteit");
-            }
-            const data = await response.json();
-            return data.roomId || data.room?.id;
-          } catch (err) {
-            console.error("Hiba a foglalás részleteinek lekérésekor:", err.message);
-            return null;
-          }
-        };
-        
-        const handleOpenDetails = (booking) => {
-          console.log("Booking adatok:", booking);
-          const roomId = booking.roomId || booking.room?.id || booking.RoomId || booking.room?.RoomId;
-          if (!roomId) {
-            console.error("Hiba: Nem található RoomId a booking objektumban", booking);
-          }
-          setSelectedBooking({
-            ...booking,
-            BookingId: booking.id || booking.bookingId,
-            RoomId: roomId || booking.id || booking.bookingId, // Ha RoomId nincs, használjuk a BookingId-t
-          });
-        };
-        
-        const handleSubmitComment = async (e) => {
-          e.preventDefault();
-          try {
-            const token = localStorage.getItem("authToken");
-            if (!token) {
-              throw new Error("Nincs token elmentve! Jelentkezz be újra.");
-            }
-        
-            if (guests.length === 0) {
-              throw new Error(
-                "Nincs vendég hozzáadva! Kérjük, adjon hozzá egy vendéget először."
-              );
-            }
-        
-            // Ha RoomId nincs, BookingId-t használunk
-            const roomId = selectedBooking.RoomId || selectedBooking.BookingId;
-            if (!roomId) {
-              console.error("Hiba: Sem RoomId, sem BookingId nem található", selectedBooking);
-              throw new Error("A szoba vagy foglalás azonosítója hiányzik az adatokból!");
-            }
-        
-            console.log("Küldött adatok:", {
-              RoomId: roomId,
-              GuestId: guests[0].guestId,
-              Rating: commentData.rating,
-              Comment: commentData.comment,
-            });
-        
-            const response = await fetch(
-              `${process.env.REACT_APP_API_BASE_URL}/Reviews/NemComment/${roomId}`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  GuestId: guests[0].guestId,
-                  Rating: commentData.rating,
-                  Comment: commentData.comment,
-                }),
-              }
-            );
-        
-            if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(
-                errorData.message || "Hiba történt az értékelés küldése közben"
-              );
-            }
-        
-            setMessage({ type: "success", text: "Értékelés sikeresen elküldve!" });
-            setShowCommentModal(false);
-            setCommentData({
-              rating: 5,
-              comment: "",
-            });
-          } catch (err) {
-            console.error("Hiba az értékelés küldése közben:", err.message);
-            setMessage({ type: "error", text: err.message });
-          }
-        };
 
         const data = await response.json();
         setUser({
@@ -221,7 +173,7 @@ const ProfilePage = () => {
         setError("Hiányzó autentikációs adatok vagy felhasználó ID");
         return;
       }
-  
+
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/Bookings/BookingsByUser/${user.userId}`,
         {
@@ -232,7 +184,7 @@ const ProfilePage = () => {
           },
         }
       );
-  
+
       if (!response.ok) {
         if (response.status === 400) {
           setBookings([]);
@@ -240,9 +192,9 @@ const ProfilePage = () => {
         }
         throw new Error(`Nem sikerült lekérni a foglalásokat: ${response.status}`);
       }
-  
+
       const data = await response.json();
-      console.log("Backend foglalások adatai:", data); // Ellenőrizzük a struktúrát
+      console.log("Backend foglalások adatai:", JSON.stringify(data, null, 2));
       setBookings(data);
     } catch (err) {
       console.error("Hiba a foglalások lekérésekor:", err.message);
@@ -257,16 +209,39 @@ const ProfilePage = () => {
     }
   }, [user?.userId]);
 
-  const handleOpenDetails = (booking) => {
+  const handleOpenDetails = async (booking) => {
     console.log("Booking adatok:", booking);
-    const roomId = booking.roomId || booking.room?.id || booking.RoomId || booking.room?.RoomId;
+
+    let roomId = booking.room?.id || booking.roomId || booking.RoomId || booking.room?.RoomId;
+
+    if (!roomId && booking.roomNumber) {
+      roomId = await fetchRoomIdByNumber(booking.roomNumber);
+    }
+
+    if (!roomId && (booking.id || booking.bookingId)) {
+      roomId = await fetchBookingDetails(booking.id || booking.bookingId);
+    }
+
     if (!roomId) {
       console.error("Hiba: Nem található RoomId a booking objektumban", booking);
+      setMessage({ type: "error", text: "Nem található szoba azonosító a foglalásban!" });
+      return;
     }
+
     setSelectedBooking({
       ...booking,
       BookingId: booking.id || booking.bookingId,
       RoomId: roomId,
+      RoomNumber: booking.room?.number || booking.roomNumber || "N/A",
+      CheckInDate: booking.startDate || booking.checkInDate || booking.dateFrom || "N/A",
+      CheckOutDate: booking.endDate || booking.checkOutDate || booking.dateTo || "N/A",
+      FirstName: booking.guest?.firstName || booking.firstName || "N/A",
+      LastName: booking.guest?.lastName || booking.lastName || "N/A",
+      FloorNumber: booking.room?.floor || booking.floorNumber || "N/A",
+      RoomType: booking.room?.type || booking.roomType || "N/A",
+      NumberOfGuests: booking.guestCount || booking.numberOfGuests || "N/A",
+      TotalPrice: booking.price || booking.totalPrice || "N/A",
+      PaymentStatus: booking.status || booking.paymentStatus || "N/A",
     });
   };
 
@@ -303,7 +278,6 @@ const ProfilePage = () => {
       setMessage({ type: "error", text: err.message });
     }
   };
-  
 
   const fetchGuests = async () => {
     try {
@@ -826,15 +800,31 @@ const ProfilePage = () => {
       if (!token) {
         throw new Error("Nincs token elmentve! Jelentkezz be újra.");
       }
+
       if (guests.length === 0) {
         throw new Error("Nincs vendég hozzáadva! Kérjük, adjon hozzá egy vendéget először.");
       }
-      const roomId = selectedBooking.RoomId || selectedBooking.BookingId; // Használjuk a BookingId-t, ha RoomId nincs
+
+      const roomId = selectedBooking.RoomId;
+      const bookingId = selectedBooking.BookingId;
+
       if (!roomId) {
-        throw new Error("A szoba vagy foglalás azonosítója hiányzik!");
+        throw new Error("A szoba azonosítója (RoomId) hiányzik az adatokból!");
       }
+      if (!bookingId) {
+        throw new Error("A foglalás azonosítója (BookingId) hiányzik az adatokból!");
+      }
+
+      console.log("Küldött adatok:", {
+        RoomId: roomId,
+        BookingId: bookingId,
+        GuestId: guests[0].guestId,
+        Rating: commentData.rating,
+        Comment: commentData.comment,
+      });
+
       const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL}/Reviews/NemComment/${roomId}`,
+        `${process.env.REACT_APP_API_BASE_URL}/Reviews/NewComment/${roomId}`,
         {
           method: "POST",
           headers: {
@@ -842,16 +832,25 @@ const ProfilePage = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            BookingId: bookingId,
             GuestId: guests[0].guestId,
             Rating: commentData.rating,
             Comment: commentData.comment,
           }),
         }
       );
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Hiba történt az értékelés küldése közben");
+        let errorMessage = "Hiba történt az értékelés küldése közben";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (jsonError) {
+          console.error("JSON parsing error:", jsonError);
+        }
+        throw new Error(`${errorMessage} (Státusz: ${response.status})`);
       }
+
       setMessage({ type: "success", text: "Értékelés sikeresen elküldve!" });
       setShowCommentModal(false);
       setCommentData({ rating: 5, comment: "" });
@@ -869,8 +868,7 @@ const ProfilePage = () => {
     <div className="bg-blue-50 min-h-screen p-6 sm:p-8 relative">
       {message && (
         <div
-          className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white ${message.type === "success" ? "bg-green-500" : "bg-red-500"
-            }`}
+          className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white ${message.type === "success" ? "bg-green-500" : "bg-red-500"}`}
         >
           {message.text}
         </div>
@@ -1146,12 +1144,12 @@ const ProfilePage = () => {
                       label="Időpont"
                       value={
                         selectedBooking.CheckInDate &&
-                          selectedBooking.CheckOutDate
+                        selectedBooking.CheckOutDate
                           ? `${new Date(
-                            selectedBooking.CheckInDate
-                          ).toLocaleDateString("hu-HU")} - ${new Date(
-                            selectedBooking.CheckOutDate
-                          ).toLocaleDateString("hu-HU")}`
+                              selectedBooking.CheckInDate
+                            ).toLocaleDateString("hu-HU")} - ${new Date(
+                              selectedBooking.CheckOutDate
+                            ).toLocaleDateString("hu-HU")}`
                           : "N/A"
                       }
                       icon="date_range"
@@ -1885,7 +1883,7 @@ const ProfilePage = () => {
                         className={`text-2xl ${star <= commentData.rating
                           ? "text-yellow-500"
                           : "text-gray-300"
-                          }`}
+                        }`}
                       >
                         ★
                       </button>
@@ -1930,4 +1928,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;
+export default ProfilePage; 
