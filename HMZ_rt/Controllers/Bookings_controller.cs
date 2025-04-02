@@ -64,12 +64,12 @@ namespace HMZ_rt.Controllers
                                              .Replace("{PaymentStatus}", booking.PaymentStatus)
                                              .Replace("{SupportEmail}", "hmzrtkando@gmail.com")
                                              .Replace("{SupportPhone}", "+36 (70) 123-4567")
-                                             .Replace("{ManageBookingUrl}", $"https://yourcompany.com/bookings/{Convert.ToString(booking.BookingId)}")
+                                             .Replace("{ManageBookingUrl}", $"https://hmzrt.eu/booking/{Convert.ToString(booking.BookingId)}")
                                              .Replace("{CurrentYear}", DateTime.Now.Year.ToString())
                                              .Replace("{CompanyName}", "HMZ RT")
                                              .Replace("{CompanyAddress}", "Palóczy László utca 3, Miskolc, BAZ, 3531")
-                                             .Replace("{PrivacyPolicyUrl}", "https://yourcompany.com/privacy")
-                                             .Replace("{TermsUrl}", "https://yourcompany.com/terms");
+                                             .Replace("{PrivacyPolicyUrl}", "https://hmzrt.eu/rolunk")
+                                             .Replace("{TermsUrl}", "https://hmzrt.eu/rolunk");
                 // Handle additional items if any
                 //string additionalItemsHtml = "";
                 //foreach (var item in booking.AdditionalItems)
@@ -598,6 +598,72 @@ namespace HMZ_rt.Controllers
        
             }
             catch ( Exception ex)
+            {
+
+                return StatusCode(500, ex);
+            }
+        }
+
+
+
+        [Authorize(Roles = "Admin,Base,Recept,System")]
+        [HttpPost("GetEmailBooking/{BookingId}")]
+        public async Task<ActionResult<Booking>> GetBookingDataEmail(int BookingId, EmailBooking datadto)
+        {
+            try
+            {
+                var bookdata = await _context.Bookings.FirstOrDefaultAsync(x => x.BookingId == BookingId);
+                if (bookdata == null)
+                {
+                    return StatusCode(404, "Nem található ezzel az id-val foglalás");
+                }
+                var guestdata = await _context.Guests.FirstOrDefaultAsync(x => x.GuestId == bookdata.GuestId);
+                if (guestdata == null)
+                {
+                    return StatusCode(404, "Nem található ezzel a guest id-val guest");
+                }
+                var userdata = await _context.Useraccounts.FirstOrDefaultAsync(x => x.UserId == datadto.UserId);
+                if (userdata == null)
+                {
+                    return StatusCode(404, "Nem található felhasználó");
+                }
+
+
+                
+
+                
+                    var booking = await _context.Bookings
+                        .Where(x => x.GuestId == guestdata.GuestId)
+                        .Include(x => x.Guest)
+                        .Include(x => x.Room)
+                        .ToListAsync();
+
+                    
+                
+
+                
+                    return StatusCode(200, booking.Select(x => new
+                    {
+                        FirstName = x.Guest != null ? x.Guest.FirstName : "N/A",
+                        LastName = x.Guest != null ? x.Guest.LastName : "N/A",
+                        x.NumberOfGuests,
+                        x.BookingDate,
+                        x.CheckInDate,
+                        x.CheckOutDate,
+                        x.PaymentStatus,
+                        x.TotalPrice,
+                        FloorNumber = x.Room != null ? x.Room.FloorNumber : -1,
+                        RoomNumber = x.Room != null ? x.Room.RoomNumber : "N/A",
+                        RoomType = x.Room != null ? x.Room.RoomType : "alap",
+                        x.BookingId,
+                        x.RoomId
+                    }));
+                
+
+                
+
+            }
+            catch (Exception ex)
             {
 
                 return StatusCode(500, ex);

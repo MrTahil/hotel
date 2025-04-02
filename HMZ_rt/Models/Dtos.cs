@@ -406,3 +406,11 @@ public class NewRevi
     [Required(ErrorMessage = "Nem lehet üres a foglalási szám")]
     public int BookingId { get; set; }
 }
+
+
+public class EmailBooking
+{
+    [Required(ErrorMessage ="A user id megadása kötelező!")]
+    public int UserId { get; set; }
+
+}
