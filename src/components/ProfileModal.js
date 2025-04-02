@@ -1151,34 +1151,37 @@ const ProfilePage = () => {
         )}
         {selectedBooking && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+            className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-2 sm:p-4 backdrop-blur-sm"
             onClick={() => setSelectedBooking(null)}
           >
             <div
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all duration-300 ease-out"
+              className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-out"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="bg-gradient-to-r from-teal-500 to-blue-600 p-6 text-white">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-teal-500 to-blue-600 p-4 sm:p-6 text-white sticky top-0 z-10">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-2xl font-bold">Foglalás részletei</h3>
-                    <p className="text-teal-100 mt-1">
+                    <h3 className="text-xl sm:text-2xl font-bold">Foglalás részletei</h3>
+                    <p className="text-teal-100 mt-1 text-sm sm:text-base">
                       #{selectedBooking.BookingId}
                     </p>
                   </div>
                   <button
                     onClick={() => setSelectedBooking(null)}
-                    className="text-white hover:text-teal-200 transition-colors"
+                    className="text-white hover:text-teal-200 transition-colors p-1"
                     aria-label="Bezárás"
                   >
-                    <span className="material-symbols-outlined text-3xl">
+                    <span className="material-symbols-outlined text-2xl sm:text-3xl">
                       close
                     </span>
                   </button>
                 </div>
               </div>
-              <div className="p-6 space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+              {/* Content */}
+              <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                   <div className="space-y-3">
                     <DetailItem
                       label="Szobaszám"
@@ -1223,7 +1226,8 @@ const ProfilePage = () => {
                     />
                   </div>
                 </div>
-                <div className="border-t border-gray-200 pt-4">
+
+                <div className="border-t border-gray-200 pt-3 sm:pt-4">
                   <DetailItem
                     label="Szobatípus"
                     value={selectedBooking.RoomType || "N/A"}
@@ -1235,22 +1239,23 @@ const ProfilePage = () => {
                     icon="floor"
                   />
                 </div>
-                <div className="border-t border-gray-200 pt-4">
+
+                <div className="border-t border-gray-200 pt-3 sm:pt-4">
                   <details className="group">
                     <summary className="flex items-center justify-between cursor-pointer list-none">
                       <div className="flex items-center text-blue-600 group-hover:text-blue-800 transition-colors">
-                        <span className="material-symbols-outlined mr-2">
+                        <span className="material-symbols-outlined mr-2 text-lg sm:text-xl">
                           person
                         </span>
-                        <span className="font-medium">
+                        <span className="font-medium text-sm sm:text-base">
                           Saját adatok megtekintése
                         </span>
                       </div>
-                      <span className="material-symbols-outlined text-gray-500 group-open:rotate-180 transition-transform">
+                      <span className="material-symbols-outlined text-gray-500 text-lg sm:text-xl group-open:rotate-180 transition-transform">
                         expand_more
                       </span>
                     </summary>
-                    <div className="mt-3 p-4 bg-blue-50 rounded-lg space-y-2 animate-[fadeIn_0.2s_ease-in-out]">
+                    <div className="mt-3 p-3 sm:p-4 bg-blue-50 rounded-lg space-y-2 animate-[fadeIn_0.2s_ease-in-out]">
                       <DetailItem
                         label="Felhasználónév"
                         value={user.username}
@@ -1266,26 +1271,28 @@ const ProfilePage = () => {
                   </details>
                 </div>
               </div>
-              <div className="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row justify-end gap-3">
+
+              {/* Footer Buttons */}
+              <div className="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap justify-end gap-2 sm:gap-3 sticky bottom-0">
                 <button
                   onClick={() => setSelectedBooking(null)}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors"
+                  className="flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors text-sm sm:text-base"
                 >
-                  <span className="material-symbols-outlined">close</span>
+                  <span className="material-symbols-outlined text-lg sm:text-xl">close</span>
                   Bezárás
                 </button>
                 <button
                   onClick={() => handleDeleteBooking(selectedBooking.BookingId)}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors"
+                  className="flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors text-sm sm:text-base"
                 >
-                  <span className="material-symbols-outlined">delete</span>
-                  Foglalás törlése
+                  <span className="material-symbols-outlined text-lg sm:text-xl">delete</span>
+                  Törlés
                 </button>
                 <button
                   onClick={() => setShowCommentModal(true)}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                  className="flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base"
                 >
-                  <span className="material-symbols-outlined">rate_review</span>
+                  <span className="material-symbols-outlined text-lg sm:text-xl">rate_review</span>
                   Értékelés
                 </button>
                 <button
@@ -1317,10 +1324,10 @@ const ProfilePage = () => {
                       });
                     }
                   }}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                  className="flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-5 py-1.5 sm:py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base"
                 >
-                  <span className="material-symbols-outlined">visibility</span>
-                  Szoba részletei
+                  <span className="material-symbols-outlined text-lg sm:text-xl">visibility</span>
+                  Részletek
                 </button>
               </div>
             </div>
