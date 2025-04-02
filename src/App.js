@@ -12,6 +12,7 @@ import Services from './components/Services';
 import Foglalas from './components/Foglalas';
 import ProfilePage from './components/ProfileModal';
 import LoginModal from './components/LoginModal';
+import ManageBookingEmail from './components/ManageBookingEmail';
 
 function App() {
   return (
@@ -30,6 +31,9 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/Foglalas/:id" element={<Foglalas />} />
             <Route path="*" element={<h1>404 - Az oldal nem található</h1>} />
+            <Route path="/booking/:bookingId" element={<ManageBookingEmail />} />
+
+
           </Routes>
         </div>
         <Footer />
