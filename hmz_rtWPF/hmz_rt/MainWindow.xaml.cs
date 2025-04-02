@@ -33,8 +33,8 @@ namespace RoomListApp
         // Változók a szoba szerkesztési módhoz
         private bool isEditRoom = false;
         private int currentRoomId = 0;
-        private string selectedRoomImagePath = string.Empty;
-        private byte[] roomImageData = null;
+        //private string selectedRoomImagePath = string.Empty;
+        //private byte[] roomImageData = null;
 
         // Változók a szerkesztési módhoz
         private bool isEditMode = false;
@@ -63,12 +63,13 @@ namespace RoomListApp
         private int currentEditEventBookingId = 0;
 
         // Változók a kép feltöltéshez
+        /*
         private string selectedImagePath = string.Empty;
-        private byte[] imageData = null;
+        private byte[] imageData = null; */
 
-        private RoomManager _roomManager;
+       // private RoomManager _roomManager;
 
-        private EventImageManager _eventManager;
+        //private EventImageManager _eventManager;
 
         private EventBookingsService _eventBookingsService;
         private TokenService _tokenService;
@@ -101,8 +102,8 @@ namespace RoomListApp
             timer.Start();
 
             UpdateTimeDisplay();
-            _roomManager = new RoomManager();
-            _eventManager = new EventImageManager();
+            //_roomManager = new RoomManager();
+            //_eventManager = new EventImageManager();
 
             _tokenService = new TokenService();
             _eventBookingsService = new EventBookingsService(_tokenService);
@@ -196,7 +197,6 @@ namespace RoomListApp
             isEditRoom = true;
             currentRoomId = selectedRoom.RoomId;
             roomEditTitle.Text = "Szoba szerkesztése";
-
             RoomNumberTextBox.Text = selectedRoom.RoomNumber;
             CapacityTextBox.Text = selectedRoom.Capacity?.ToString();
             PricePerNightTextBox.Text = selectedRoom.PricePerNight?.ToString();
@@ -222,35 +222,11 @@ namespace RoomListApp
                 }
             }
 
-            roomImageData = null;
-            selectedRoomImagePath = string.Empty;
-            RoomImagePreview.Source = null;
-            ViewRoomImageButton.IsEnabled = false;
-
-            if (!string.IsNullOrEmpty(selectedRoom.Images))
-            {
-                try
-                {
-                    var imageUrl = $"https://api.hmzrt.eu/{selectedRoom.Images}";
-                    var bitmap = await _roomManager.LoadRoomImage(imageUrl);
-                    if (bitmap != null)
-                    {
-                        RoomImagePreview.Source = bitmap;
-                        ViewRoomImageButton.IsEnabled = true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Nem sikerült betölteni a szobához tartozó képet: {ex.Message}", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            }
-            else
-            {
-                MessageBox.Show("A szobához nincs társítva kép.", "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
+            // A képkezeléssel kapcsolatos kód eltávolítva
 
             roomEditPanel.Visibility = Visibility.Visible;
         }
+
 
         private async void DeleteRoomButton_Click(object sender, RoutedEventArgs e)
         {
@@ -284,7 +260,8 @@ namespace RoomListApp
                     RoomStatusComboBox.SelectedItem == null ||
                     string.IsNullOrWhiteSpace(FloorNumberTextBox.Text))
                 {
-                    MessageBox.Show("Kérjük, töltse ki az összes kötelező mezőt!", "Hiányzó adatok", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Kérjük, töltse ki az összes kötelező mezőt!",
+                        "Hiányzó adatok", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -311,95 +288,35 @@ namespace RoomListApp
 
                 if (isEditRoom)
                 {
-                    if (roomImageData != null && roomImageData.Length > 0)
+                    var updateDto = new UpdateRoom
                     {
-                        var multipartContent = new MultipartFormDataContent();
-                        multipartContent.Add(new StringContent(RoomNumberTextBox.Text), "RoomNumber");
-                        multipartContent.Add(new StringContent(selectedRoomType), "RoomType");
-                        multipartContent.Add(new StringContent(CapacityTextBox.Text), "Capacity");
-                        multipartContent.Add(new StringContent(PricePerNightTextBox.Text), "PricePerNight");
-                        multipartContent.Add(new StringContent(selectedStatus), "Status");
-                        multipartContent.Add(new StringContent(FloorNumberTextBox.Text), "FloorNumber");
-                        multipartContent.Add(new StringContent(RoomDescriptionTextBox.Text ?? ""), "Description");
-                        multipartContent.Add(new StringContent(AmenitiesTextBox.Text ?? ""), "Amenities");
-                        var fileName = Path.GetFileName(selectedRoomImagePath);
-                        multipartContent.Add(new ByteArrayContent(roomImageData), "ImageFile", fileName);
-
-                        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
-                        var response = await _httpClient.PutAsync($"Rooms/UpdateRoom/{currentRoomId}", multipartContent);
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            string errorResponse = await response.Content.ReadAsStringAsync();
-                            MessageBox.Show($"Hiba a szoba frissítésekor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-
-                        MessageBox.Show("A szoba sikeresen frissítve!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
-                        await LoadRoomsToListView();
-                    }
-                    else
-                    {
-                        var updateDto = new UpdateRoom
-                        {
-                            RoomNumber = RoomNumberTextBox.Text,
-                            RoomType = selectedRoomType,
-                            Capacity = capacity,
-                            PricePerNight = pricePerNight,
-                            Status = selectedStatus,
-                            FloorNumber = floorNumber,
-                            Description = RoomDescriptionTextBox.Text,
-                            Amenities = AmenitiesTextBox.Text
-                        };
-                        await UpdateRoom(currentRoomId, updateDto);
-                    }
+                        RoomNumber = RoomNumberTextBox.Text,
+                        RoomType = selectedRoomType,
+                        Capacity = int.Parse(CapacityTextBox.Text),
+                        PricePerNight = decimal.Parse(PricePerNightTextBox.Text),
+                        Status = selectedStatus,
+                        FloorNumber = int.Parse(FloorNumberTextBox.Text),
+                        Description = RoomDescriptionTextBox.Text,
+                        Amenities = AmenitiesTextBox.Text
+                    };
+                    await UpdateRoom(currentRoomId, updateDto);
                 }
                 else
                 {
-                    if (roomImageData != null && roomImageData.Length > 0)
+                    var createDto = new CreateRoom
                     {
-                        var multipartContent = new MultipartFormDataContent();
-                        multipartContent.Add(new StringContent(RoomNumberTextBox.Text), "RoomNumber");
-                        multipartContent.Add(new StringContent(selectedRoomType), "RoomType");
-                        multipartContent.Add(new StringContent(CapacityTextBox.Text), "Capacity");
-                        multipartContent.Add(new StringContent(PricePerNightTextBox.Text), "PricePerNight");
-                        multipartContent.Add(new StringContent(selectedStatus), "Status");
-                        multipartContent.Add(new StringContent(FloorNumberTextBox.Text), "FloorNumber");
-                        multipartContent.Add(new StringContent(RoomDescriptionTextBox.Text ?? ""), "Description");
-                        multipartContent.Add(new StringContent(AmenitiesTextBox.Text ?? ""), "Amenities");
-                        var fileName = Path.GetFileName(selectedRoomImagePath);
-                        multipartContent.Add(new ByteArrayContent(roomImageData), "ImageFile", fileName);
-
-                        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
-                        var response = await _httpClient.PostAsync("Rooms/CreateRoom", multipartContent);
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            string errorResponse = await response.Content.ReadAsStringAsync();
-                            MessageBox.Show($"Hiba a szoba létrehozásakor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-
-                        MessageBox.Show("Az új szoba sikeresen létrehozva!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
-                        await LoadRoomsToListView();
-                    }
-                    else
-                    {
-                        var createDto = new CreateRoom
-                        {
-                            RoomNumber = RoomNumberTextBox.Text,
-                            RoomType = selectedRoomType,
-                            Capacity = capacity,
-                            PricePerNight = pricePerNight,
-                            Status = selectedStatus,
-                            FloorNumber = floorNumber,
-                            Description = RoomDescriptionTextBox.Text,
-                            Amenities = AmenitiesTextBox.Text
-                        };
-                        await CreateRoom(createDto);
-                    }
+                        RoomNumber = RoomNumberTextBox.Text,
+                        RoomType = selectedRoomType,
+                        Capacity = int.Parse(CapacityTextBox.Text),
+                        PricePerNight = decimal.Parse(PricePerNightTextBox.Text),
+                        Status = selectedStatus,
+                        FloorNumber = int.Parse(FloorNumberTextBox.Text),
+                        Description = RoomDescriptionTextBox.Text,
+                        Amenities = AmenitiesTextBox.Text
+                    };
+                    await CreateRoom(createDto);
                 }
 
-                selectedRoomImagePath = string.Empty;
-                roomImageData = null;
                 roomEditPanel.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
@@ -500,16 +417,16 @@ namespace RoomListApp
             }
         }
 
-        private async void ViewRoomImage_Click(object sender, RoutedEventArgs e)
+        /*private async void ViewRoomImage_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag != null)
             {
                 int roomId = (int)button.Tag;
                 await LoadAndShowRoomImage(roomId);
             }
-        }
+        }*/
 
-        private void SelectRoomImageButton_Click(object sender, RoutedEventArgs e)
+        /*private void SelectRoomImageButton_Click(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
@@ -552,6 +469,7 @@ namespace RoomListApp
                 ShowImageInLargeView(RoomImagePreview.Source as BitmapImage, "Szoba kép előnézete");
             }
         }
+        */
 
         private void CancelRoomEditButton_Click(object sender, RoutedEventArgs e)
         {
@@ -560,49 +478,49 @@ namespace RoomListApp
             currentRoomId = 0;
         }
 
-        private async Task LoadAndShowRoomImage(int roomId)
-        {
-            try
-            {
-                var rooms = await _httpClient.GetAsync($"Rooms/GetRoomWith");
-                if (!rooms.IsSuccessStatusCode)
-                {
-                    MessageBox.Show("Nem sikerült lekérni a szoba adatait.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
+        /* private async Task LoadAndShowRoomImage(int roomId)
+         {
+             try
+             {
+                 var rooms = await _httpClient.GetAsync($"Rooms/GetRoomWith");
+                 if (!rooms.IsSuccessStatusCode)
+                 {
+                     MessageBox.Show("Nem sikerült lekérni a szoba adatait.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                     return;
+                 }
 
-                var roomsString = await rooms.Content.ReadAsStringAsync();
-                var allRooms = JsonSerializer.Deserialize<List<Room>>(roomsString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                var roomWithImage = allRooms.FirstOrDefault(r => r.RoomId == roomId);
+                 var roomsString = await rooms.Content.ReadAsStringAsync();
+                 var allRooms = JsonSerializer.Deserialize<List<Room>>(roomsString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                 var roomWithImage = allRooms.FirstOrDefault(r => r.RoomId == roomId);
 
-                if (roomWithImage == null || string.IsNullOrEmpty(roomWithImage.Images))
-                {
-                    MessageBox.Show("A szobához nincs társítva kép.", "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
-                    return;
-                }
+                 if (roomWithImage == null || string.IsNullOrEmpty(roomWithImage.Images))
+                 {
+                     MessageBox.Show("A szobához nincs társítva kép.", "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
+                     return;
+                 }
 
-                var imageUrl = $"https://api.hmzrt.eu/{roomWithImage.Images}";
-                var imageResponse = await _httpClient.GetAsync(imageUrl);
-                if (!imageResponse.IsSuccessStatusCode)
-                {
-                    MessageBox.Show("Nem sikerült letölteni a képet.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
+                 var imageUrl = $"https://api.hmzrt.eu/{roomWithImage.Images}";
+                 var imageResponse = await _httpClient.GetAsync(imageUrl);
+                 if (!imageResponse.IsSuccessStatusCode)
+                 {
+                     MessageBox.Show("Nem sikerült letölteni a képet.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                     return;
+                 }
 
-                var imageBytes = await imageResponse.Content.ReadAsByteArrayAsync();
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.StreamSource = new MemoryStream(imageBytes);
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.EndInit();
+                 var imageBytes = await imageResponse.Content.ReadAsByteArrayAsync();
+                 var bitmap = new BitmapImage();
+                 bitmap.BeginInit();
+                 bitmap.StreamSource = new MemoryStream(imageBytes);
+                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                 bitmap.EndInit();
 
-                ShowImageInLargeView(bitmap, $"{roomWithImage.RoomNumber} szoba képe");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
+                 ShowImageInLargeView(bitmap, $"{roomWithImage.RoomNumber} szoba képe");
+             }
+             catch (Exception ex)
+             {
+                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+             }
+         }*/
 
         private void ClearRoomFormFields()
         {
@@ -614,10 +532,6 @@ namespace RoomListApp
             FloorNumberTextBox.Text = string.Empty;
             RoomDescriptionTextBox.Text = string.Empty;
             AmenitiesTextBox.Text = string.Empty;
-            RoomImagePreview.Source = null;
-            selectedRoomImagePath = string.Empty;
-            roomImageData = null;
-            ViewRoomImageButton.IsEnabled = false;
         }
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
@@ -3736,6 +3650,7 @@ namespace RoomListApp
             eventEditTitle.Text = "Esemény szerkesztése";
             EventNameTextBox.Text = selectedEvent.EventName;
             EventCapacityTextBox.Text = selectedEvent.Capacity?.ToString();
+
             foreach (ComboBoxItem item in EventStatusComboBox.Items)
             {
                 if (item.Content.ToString() == selectedEvent.Status)
@@ -3744,6 +3659,7 @@ namespace RoomListApp
                     break;
                 }
             }
+
             EventDatePicker.SelectedDate = selectedEvent.EventDate;
             LocationTextBox.Text = selectedEvent.Location;
             PriceTextBox.Text = selectedEvent.Price?.ToString();
@@ -3751,38 +3667,6 @@ namespace RoomListApp
             OrganizerNameTextBox.Text = selectedEvent.OrganizerName;
             ContactInfoTextBox.Text = selectedEvent.ContactInfo;
 
-            selectedImagePath = string.Empty;
-            imageData = null;
-            EventImagePreview.Source = null;
-            ViewImageButton.IsEnabled = false;
-
-            if (!string.IsNullOrEmpty(selectedEvent.Images))
-            {
-                try
-                {
-                    var imageUrl = $"https://api.hmzrt.eu/{selectedEvent.Images}";
-                    Console.WriteLine($"Kép betöltése szerkesztéshez: {imageUrl}"); // Debugging célokra
-                    var bitmap = await _eventManager.LoadEventImage(imageUrl);
-
-                    if (bitmap != null)
-                    {
-                        EventImagePreview.Source = bitmap;
-                        ViewImageButton.IsEnabled = true;
-                    }
-                    else
-                    {
-                        MessageBox.Show($"A kép nem tölthető be: {imageUrl}", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Részletes hiba: {ex.ToString()}", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            }
-            else
-            {
-                MessageBox.Show("Az eseményhez nincs társítva kép.", "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
 
             eventEditPanel.Visibility = Visibility.Visible;
         }
@@ -3858,99 +3742,37 @@ namespace RoomListApp
 
                 if (isEditEvent)
                 {
-                    if (imageData != null && imageData.Length > 0)
+                    var updateDto = new UpdateEvent
                     {
-                        var multipartContent = new MultipartFormDataContent();
-                        multipartContent.Add(new StringContent(EventNameTextBox.Text), "EventName");
-                        multipartContent.Add(new StringContent(EventCapacityTextBox.Text), "Capacity");
-                        multipartContent.Add(new StringContent((EventStatusComboBox.SelectedItem as ComboBoxItem)?.Content.ToString()), "Status");
-                        multipartContent.Add(new StringContent(EventDatePicker.SelectedDate.Value.ToString("yyyy-MM-dd")), "EventDate");
-                        multipartContent.Add(new StringContent(LocationTextBox.Text), "Location");
-                        multipartContent.Add(new StringContent(EventDescriptionTextBox.Text ?? ""), "Description");
-                        multipartContent.Add(new StringContent(OrganizerNameTextBox.Text ?? ""), "OrganizerName");
-                        multipartContent.Add(new StringContent(ContactInfoTextBox.Text ?? ""), "ContactInfo");
-                        multipartContent.Add(new StringContent(PriceTextBox.Text), "Price");
-                        var fileName = Path.GetFileName(selectedImagePath);
-                        multipartContent.Add(new ByteArrayContent(imageData), "ImageFile", fileName);
-
-                        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
-                        var response = await _httpClient.PutAsync($"Events/UpdateEvent/{currentEventId}", multipartContent);
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            string errorResponse = await response.Content.ReadAsStringAsync();
-                            MessageBox.Show($"Hiba az esemény frissítésekor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-
-                        MessageBox.Show("Az esemény sikeresen frissítve!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
-                        await LoadEventsToListView();
-                    }
-                    else
-                    {
-                        var updateDto = new UpdateEvent
-                        {
-                            EventName = EventNameTextBox.Text,
-                            Capacity = int.Parse(EventCapacityTextBox.Text),
-                            Status = (EventStatusComboBox.SelectedItem as ComboBoxItem)?.Content.ToString(),
-                            EventDate = EventDatePicker.SelectedDate,
-                            Location = LocationTextBox.Text,
-                            Description = EventDescriptionTextBox.Text,
-                            OrganizerName = OrganizerNameTextBox.Text,
-                            ContactInfo = ContactInfoTextBox.Text,
-                            Price = decimal.Parse(PriceTextBox.Text)
-                        };
-                        await UpdateEvent(currentEventId, updateDto);
-                    }
+                        EventName = EventNameTextBox.Text,
+                        Capacity = int.Parse(EventCapacityTextBox.Text),
+                        Status = (EventStatusComboBox.SelectedItem as ComboBoxItem)?.Content.ToString(),
+                        EventDate = EventDatePicker.SelectedDate,
+                        Location = LocationTextBox.Text,
+                        Description = EventDescriptionTextBox.Text,
+                        OrganizerName = OrganizerNameTextBox.Text,
+                        ContactInfo = ContactInfoTextBox.Text,
+                        Price = decimal.Parse(PriceTextBox.Text)
+                    };
+                    await UpdateEvent(currentEventId, updateDto);
                 }
                 else
                 {
-                    if (imageData != null && imageData.Length > 0)
+                    var createDto = new CreateEvent
                     {
-                        var multipartContent = new MultipartFormDataContent();
-                        multipartContent.Add(new StringContent(EventNameTextBox.Text), "EventName");
-                        multipartContent.Add(new StringContent(EventCapacityTextBox.Text), "Capacity");
-                        multipartContent.Add(new StringContent((EventStatusComboBox.SelectedItem as ComboBoxItem)?.Content.ToString()), "Status");
-                        multipartContent.Add(new StringContent(EventDatePicker.SelectedDate.Value.ToString("yyyy-MM-dd")), "EventDate");
-                        multipartContent.Add(new StringContent(LocationTextBox.Text), "Location");
-                        multipartContent.Add(new StringContent(EventDescriptionTextBox.Text ?? ""), "Description");
-                        multipartContent.Add(new StringContent(OrganizerNameTextBox.Text ?? ""), "OrganizerName");
-                        multipartContent.Add(new StringContent(ContactInfoTextBox.Text ?? ""), "ContactInfo");
-                        multipartContent.Add(new StringContent(PriceTextBox.Text), "Price");
-                        var fileName = Path.GetFileName(selectedImagePath);
-                        multipartContent.Add(new ByteArrayContent(imageData), "ImageFile", fileName);
-
-                        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
-                        var response = await _httpClient.PostAsync("Events/CreateEvent", multipartContent);
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            string errorResponse = await response.Content.ReadAsStringAsync();
-                            MessageBox.Show($"Hiba az esemény létrehozásakor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-
-                        MessageBox.Show("Az új esemény sikeresen létrehozva!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
-                        await LoadEventsToListView();
-                    }
-                    else
-                    {
-                        var createDto = new CreateEvent
-                        {
-                            EventName = EventNameTextBox.Text,
-                            Capacity = int.Parse(EventCapacityTextBox.Text),
-                            Status = (EventStatusComboBox.SelectedItem as ComboBoxItem)?.Content.ToString(),
-                            EventDate = EventDatePicker.SelectedDate,
-                            Location = LocationTextBox.Text,
-                            Description = EventDescriptionTextBox.Text,
-                            OrganizerName = OrganizerNameTextBox.Text,
-                            ContactInfo = ContactInfoTextBox.Text,
-                            Price = decimal.Parse(PriceTextBox.Text)
-                        };
-                        await CreateEvent(createDto);
-                    }
+                        EventName = EventNameTextBox.Text,
+                        Capacity = int.Parse(EventCapacityTextBox.Text),
+                        Status = (EventStatusComboBox.SelectedItem as ComboBoxItem)?.Content.ToString(),
+                        EventDate = EventDatePicker.SelectedDate,
+                        Location = LocationTextBox.Text,
+                        Description = EventDescriptionTextBox.Text,
+                        OrganizerName = OrganizerNameTextBox.Text,
+                        ContactInfo = ContactInfoTextBox.Text,
+                        Price = decimal.Parse(PriceTextBox.Text)
+                    };
+                    await CreateEvent(createDto);
                 }
 
-                selectedImagePath = string.Empty;
-                imageData = null;
                 eventEditPanel.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
@@ -4077,7 +3899,7 @@ namespace RoomListApp
             ContactInfoTextBox.Text = string.Empty;
         }
 
-        private void SelectImageButton_Click(object sender, RoutedEventArgs e)
+        /*private void SelectImageButton_Click(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
@@ -4262,6 +4084,7 @@ namespace RoomListApp
             imageWindow.Content = grid;
             imageWindow.ShowDialog();
         }
+        */
 
 
         private void BookingTypeBackButton_Click(object sender, RoutedEventArgs e)
@@ -4269,8 +4092,6 @@ namespace RoomListApp
             bookingTypeSelectionContainer.Visibility = Visibility.Collapsed;
             dashboardGrid.Visibility = Visibility.Visible;
         }
-
-        // Szobafoglalások kezelése gomb
 
         private async void LoadBookings()
         {
@@ -4290,7 +4111,6 @@ namespace RoomListApp
             LoadBookings();
         }
 
-        // Eseményfoglalások kezelése gomb
         private void EventBookingsCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             bookingTypeSelectionContainer.Visibility = Visibility.Collapsed;
@@ -4303,15 +4123,10 @@ namespace RoomListApp
         {
             try
             {
-                // Betöltés jelző megjelenítése (ha van)
-                // loadingIndicator.Visibility = Visibility.Visible;
-
                 var eventBookings = await _eventBookingsService.GetAllEventBookings();
 
-                // Kiegészítő adatok betöltése (vendégnevek, eseménynevek)
                 foreach (var booking in eventBookings)
                 {
-                    // Vendég nevének betöltése
                     if (booking.GuestId > 0)
                     {
                         var guest = await _guestService.GetGuestById(booking.GuestId);
@@ -4321,7 +4136,6 @@ namespace RoomListApp
                         }
                     }
 
-                    // Esemény nevének betöltése
                     if (booking.EventId > 0)
                     {
                         var eventItem = await _eventService.GetEventById(booking.EventId);
@@ -4338,14 +4152,8 @@ namespace RoomListApp
             {
                 MessageBox.Show($"Hiba történt az eseményfoglalások betöltésekor: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            finally
-            {
-                // Betöltés jelző elrejtése (ha van)
-                // loadingIndicator.Visibility = Visibility.Collapsed;
-            }
         }
 
-        // Vissza gomb az eseményfoglalások kezeléséből
         private void EventBookingsBackButton_Click(object sender, RoutedEventArgs e)
         {
             eventBookingsContainer.Visibility = Visibility.Collapsed;
@@ -4357,13 +4165,11 @@ namespace RoomListApp
             bookingTypeSelectionContainer.Visibility = Visibility.Visible;
         }
 
-        // Frissítés gomb
         private void RefreshEventBookingsButton_Click(object sender, RoutedEventArgs e)
         {
             LoadEventBookings();
         }
 
-        // Keresés
         private void EventBookingSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             string searchText = EventBookingSearchTextBox.Text.ToLower();
@@ -4389,16 +4195,13 @@ namespace RoomListApp
         }
 
 
-        // Új eseményfoglalás gomb
         private async void NewEventBookingButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                // Események betöltése a ComboBox-ba
                 var events = await _eventService.GetAllEvents();
                 EventComboBox.ItemsSource = events;
 
-                // Vendégek betöltése a ComboBox-ba
                 var guests = await _guestService.GetAllGuests();
                 if (guests != null && guests.Count > 0)
                 {
@@ -4410,12 +4213,10 @@ namespace RoomListApp
                 }
                 EventGuestComboBox.ItemsSource = guests;
 
-                // Alapértelmezett értékek beállítása
                 StatusComboBox.SelectedIndex = 0;
                 PaymentStatusComboBox.SelectedIndex = 0;
                 TicketsTextBox.Text = "1";
 
-                // Panel megjelenítése
                 eventBookingsContainer.Visibility = Visibility.Collapsed;
                 newEventBookingPanel.Visibility = Visibility.Visible;
             }
@@ -4425,36 +4226,30 @@ namespace RoomListApp
             }
         }
 
-        // Vissza gomb az új foglalás panelről
         private void NewEventBookingBackButton_Click(object sender, RoutedEventArgs e)
         {
             newEventBookingPanel.Visibility = Visibility.Collapsed;
             eventBookingsContainer.Visibility = Visibility.Visible;
         }
 
-        // Esemény kiválasztása
         private void EventComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (EventComboBox.SelectedItem is Event selectedEvent)
             {
-                // Esemény adatainak megjelenítése
                 EventNameInfoTextBlock.Text = selectedEvent.EventName;
                 EventDateInfoTextBlock.Text = selectedEvent.EventDate?.ToString("yyyy.MM.dd. HH:mm");
                 EventLocationInfoTextBlock.Text = selectedEvent.Location;
                 EventPriceInfoTextBlock.Text = $"{selectedEvent.Price:N0} Ft";
 
-                // Összeg számítása
                 CalculateTotalPrice();
             }
         }
 
-        // Jegyek számának változása
         private void TicketsTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             CalculateTotalPrice();
         }
 
-        // Összeg számítása
         private void CalculateTotalPrice()
         {
             if (EventComboBox.SelectedItem is Event selectedEvent &&
@@ -4469,12 +4264,10 @@ namespace RoomListApp
             }
         }
 
-        // Foglalás mentése
         private async void SaveEventBookingButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                // Adatok validálása
                 if (EventComboBox.SelectedItem == null)
                 {
                     MessageBox.Show("Kérjük, válasszon eseményt!", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -4493,13 +4286,11 @@ namespace RoomListApp
                     return;
                 }
 
-                // Adatok összegyűjtése
                 var selectedEvent = (Event)EventComboBox.SelectedItem;
                 var selectedGuest = (Guest)EventGuestComboBox.SelectedItem;
                 var selectedStatus = ((ComboBoxItem)StatusComboBox.SelectedItem).Content.ToString();
                 var selectedPaymentStatus = ((ComboBoxItem)PaymentStatusComboBox.SelectedItem).Content.ToString();
 
-                // Foglalás létrehozása
                 var newBooking = new CreateEventBooking
                 {
                     GuestId = selectedGuest.GuestId,
@@ -4509,18 +4300,15 @@ namespace RoomListApp
                     Notes = NotesTextBox.Text
                 };
 
-                // Foglalás mentése
                 bool success = await _eventBookingsService.CreateEventBooking(newBooking, selectedEvent.EventId);
 
                 if (success)
                 {
                     MessageBox.Show("Az eseményfoglalás sikeresen létrehozva!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    // Visszatérés a foglalások listájához
                     newEventBookingPanel.Visibility = Visibility.Collapsed;
                     eventBookingsContainer.Visibility = Visibility.Visible;
 
-                    // Lista frissítése
                     LoadEventBookings();
                 }
             }
@@ -4530,7 +4318,6 @@ namespace RoomListApp
             }
         }
 
-        // Foglalás törlése
         private async void DeleteEventBookingButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -4559,7 +4346,6 @@ namespace RoomListApp
             }
         }
 
-        // Foglalás részletek
         private void EventBookingDetailsButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -4596,7 +4382,6 @@ namespace RoomListApp
             }
         }
 
-        // Státusz gomb kezelése
         private async void EventStatusButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -4611,7 +4396,6 @@ namespace RoomListApp
                 {
                     string newStatus = string.Empty;
 
-                    // Státusz váltás logika
                     switch (selectedBooking.Status)
                     {
                         case "Jóváhagyva":
@@ -4633,7 +4417,6 @@ namespace RoomListApp
 
                     MessageBox.Show($"A foglalás státusza sikeresen módosítva: {newStatus}", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    // Frissítjük a listát
                     LoadEventBookings();
                 }
             }
