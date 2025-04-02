@@ -401,7 +401,7 @@
                             <GridViewColumn Header="Kép" Width="80">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Button Content="Megtekintés" 
+                                        <!-- <Button Content="Megtekintés" 
                                         Click="ViewRoomImage_Click" 
                                         Tag="{Binding RoomId}"
                                         Visibility="Visible"
@@ -411,7 +411,7 @@
                                                     <Setter Property="CornerRadius" Value="4"/>
                                                 </Style>
                                             </Button.Resources>
-                                        </Button>
+                                        </Button> -->
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -520,7 +520,7 @@
                                Margin="0,0,10,0" 
                                Grid.Column="0"/>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <Button x:Name="SelectRoomImageButton" 
+                                    <!--<Button x:Name="SelectRoomImageButton" 
                                     Content="Kép kiválasztása" 
                                     Click="SelectRoomImageButton_Click" 
                                     Margin="0,0,0,5"
@@ -534,8 +534,8 @@
                                                 <Setter Property="CornerRadius" Value="8"/>
                                             </Style>
                                         </Button.Resources>
-                                    </Button>
-                                    <Button x:Name="ClearRoomImageButton" 
+                                    </Button>-->
+                                    <!--<Button x:Name="ClearRoomImageButton" 
                                     Content="Kép törlése" 
                                     Click="ClearRoomImageButton_Click" 
                                     Margin="0,5,0,5"
@@ -549,8 +549,8 @@
                                                 <Setter Property="CornerRadius" Value="8"/>
                                             </Style>
                                         </Button.Resources>
-                                    </Button>
-                                    <Button x:Name="ViewRoomImageButton" 
+                                    </Button>-->
+                                    <!--<Button x:Name="ViewRoomImageButton" 
                                     Content="Kép megtekintése" 
                                     Click="ViewRoomImageButton_Click" 
                                     IsEnabled="False"
@@ -564,7 +564,7 @@
                                                 <Setter Property="CornerRadius" Value="8"/>
                                             </Style>
                                         </Button.Resources>
-                                    </Button>
+                                    </Button>-->
                                 </StackPanel>
                             </Grid>
 
@@ -2340,7 +2340,7 @@
                             <GridViewColumn Header="Kép" Width="80">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Button Content="Megtekintés" 
+                                        <!--<Button Content="Megtekintés" 
                                         Click="ViewEventImage_Click" 
                                         Tag="{Binding EventId}"
                                         Visibility="Visible"
@@ -2350,7 +2350,7 @@
                                                     <Setter Property="CornerRadius" Value="4"/>
                                                 </Style>
                                             </Button.Resources>
-                                        </Button>
+                                        </Button>-->
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -2431,7 +2431,7 @@
                                Margin="0,0,10,0" 
                                Grid.Column="0"/>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <Button x:Name="SelectImageButton" 
+                                    <!--<Button x:Name="SelectImageButton" 
                                     Content="Kép kiválasztása" 
                                     Click="SelectImageButton_Click" 
                                     Margin="0,0,0,5"
@@ -2475,7 +2475,7 @@
                                                 <Setter Property="CornerRadius" Value="8"/>
                                             </Style>
                                         </Button.Resources>
-                                    </Button>
+                                    </Button>-->
                                 </StackPanel>
                             </Grid>
 
