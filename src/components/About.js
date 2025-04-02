@@ -19,7 +19,7 @@ function About() {
                 {/* Cím rész */}
                 <div className="text-center mb-16 pt-8">
                     <div className="inline-block relative">
-                        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+                        <h2 className="animate-bounce text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
                             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
                                 Fedezd fel a HMZ Hotel világát
                             </span>

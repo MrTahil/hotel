@@ -227,7 +227,7 @@ function RoomCard() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
           <div className="relative inline-block mb-4">
-            <h2 className="text-3xl font-bold text-gray-800 relative z-10">
+            <h2 className=" animate-bounce text-3xl font-bold text-gray-800 relative z-10">
               <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 Szobák
               </span>
@@ -313,26 +313,31 @@ function RoomCard() {
             </button>
 
             {(selectedRoomTypes.length > 0 || selectedAmenities.length > 0 || selectedFloors.length > 0 || priceRange[1] < 500000 || applyDateFilter) && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <span>Aktív szűrők:</span>
-                <div className="flex flex-wrap gap-2">
+              <div className="mt-3 md:mt-0">
+                <div className="text-sm text-gray-600 mb-1">Aktív szűrők:</div>
+                <div className="flex flex-wrap gap-2 overflow-x-auto py-1 -mx-2 px-2">
                   {selectedRoomTypes.map(type => (
-                    <span key={type} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                    <span key={type} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs whitespace-nowrap">
                       {type}
                     </span>
                   ))}
                   {selectedFloors.map(floor => (
-                    <span key={floor} className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+                    <span key={floor} className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs whitespace-nowrap">
                       {floor}. emelet
                     </span>
                   ))}
+                  {selectedAmenities.map(amenity => (
+                    <span key={amenity} className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs whitespace-nowrap">
+                      {amenity}
+                    </span>
+                  ))}
                   {priceRange[1] < 500000 && (
-                    <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">
-                      Max {priceRange[1]} Ft
+                    <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs whitespace-nowrap">
+                      Max {priceRange[1].toLocaleString('hu-HU')} Ft
                     </span>
                   )}
                   {applyDateFilter && dateRange.startDate && dateRange.endDate && (
-                    <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs">
+                    <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs whitespace-nowrap">
                       {new Date(dateRange.startDate).toLocaleDateString('hu-HU')} - {new Date(dateRange.endDate).toLocaleDateString('hu-HU')}
                     </span>
                   )}
@@ -395,8 +400,8 @@ function RoomCard() {
                         key={floor}
                         onClick={() => handleFloorChange(floor)}
                         className={`px-3 py-1 text-sm rounded-md ${selectedFloors.includes(floor)
-                            ? 'bg-blue-100 text-blue-800 font-medium'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-blue-100 text-blue-800 font-medium'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                       >
                         {floor}.
@@ -593,8 +598,8 @@ function RoomItem({ room, onBookingClick, isAvailable, checkInDate, checkOutDate
         <div className="mt-auto pt-4">
           <button
             className={`w-full px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 group/button shadow-md ${isAvailable
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-gray-400 text-gray-700 cursor-not-allowed'
+              ? 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'bg-gray-400 text-gray-700 cursor-not-allowed'
               }`}
             onClick={() => isAvailable && onBookingClick(room.roomId, room)}
             disabled={!isAvailable}

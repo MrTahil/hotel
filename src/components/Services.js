@@ -146,7 +146,7 @@ function Services() {
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-16">
-                    <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl lg:text-6xl">
+                    <h1 className=" animate-bounce text-4xl font-extrabold text-gray-900 sm:text-5xl lg:text-6xl">
                         Szolgáltatásaink
                     </h1>
                     <p className="mt-5 max-w-xl mx-auto text-xl text-gray-500">

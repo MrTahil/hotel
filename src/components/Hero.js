@@ -158,7 +158,7 @@ function Hero() {
                 description: 'Lépjen be gasztronómiai csodák világába gourmet éttermünkben, ahol a legfinomabb alapanyagokból készült, díjnyertes fogások várják Önt. Séfjeink a helyi és nemzetközi konyha legjavát ötvözik, hogy minden egyes étel egyedi élményt nyújtson.',
                 menuHighlights: ['Szezonális degusztációs menü', 'Frissen fogott tengeri halak', 'Házi készítésű desszertek', 'Vegán és gluténmentes opciók'],
                 openingHours: 'Hétfőtől vasárnapig: 7:00 - 22:00',
-                pricing: 'Főételek 3500 Ft-tól, borok poháronként 1200 Ft-tól',
+                pricing: 'Főételek 5000 Ft-tól 30.000 Ft-ig, borok poháronként 1200 Ft-tól',
                 additionalInfo: 'Asztalfoglalás ajánlott, különösen hétvégeken.',
             },
         },
@@ -216,7 +216,7 @@ function Hero() {
                 />
                 <div className="absolute inset-0 bg-blue-900 z-10"></div>
                 <div className="relative z-20 text-center px-4">
-                    <h1 className="text-4xl md:text-6xl font-bold mb-6">Üdvözöljük a Luxus Szállodában</h1>
+                    <h1 className=" animate-bounce text-4xl md:text-6xl font-bold mb-6">Üdvözöljük a Luxus Szállodában</h1>
                     <p className="text-lg md:text-2xl max-w-3xl mx-auto mb-8 text-blue-100">
                         Modern kényelem és elegancia várja Önt exkluzív szobáinkban.
                     </p>

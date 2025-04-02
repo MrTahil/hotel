@@ -24,14 +24,13 @@ const ProfilePage = () => {
   const [editGuestId, setEditGuestId] = useState(null);
   const [message, setMessage] = useState(null);
   const [bookings, setBookings] = useState([]);
+  const [eventBookings, setEventBookings] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [commentData, setCommentData] = useState({
     rating: 5,
     comment: "",
   });
-
-  // Password change states
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -45,8 +44,6 @@ const ProfilePage = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // Forgot password states
   const [forgotEmail, setForgotEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [newPasswordData, setNewPasswordData] = useState({
@@ -57,7 +54,6 @@ const ProfilePage = () => {
   const [showNewPasswordForgot, setShowNewPasswordForgot] = useState(false);
   const [showConfirmPasswordForgot, setShowConfirmPasswordForgot] = useState(false);
 
-  // Moved fetchRoomIdByNumber to component scope
   const fetchRoomIdByNumber = async (roomNumber) => {
     try {
       const token = localStorage.getItem("authToken");
@@ -83,7 +79,6 @@ const ProfilePage = () => {
     }
   };
 
-  // Moved fetchBookingDetails to component scope
   const fetchBookingDetails = async (bookingId) => {
     try {
       const token = localStorage.getItem("authToken");
@@ -122,7 +117,6 @@ const ProfilePage = () => {
         if (!token) {
           throw new Error("Nincs token elmentve! Jelentkezz be újra.");
         }
-
         const response = await fetch(
           `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/GetOneUserData/${localStorage.getItem("username")}`,
           {
@@ -133,15 +127,12 @@ const ProfilePage = () => {
             },
           }
         );
-
         if (response.status === 401) {
           throw new Error("Token érvénytelen vagy lejárt!");
         }
-
         if (!response.ok) {
           throw new Error(`HTTP hiba! Státusz: ${response.status}`);
         }
-
         const data = await response.json();
         setUser({
           username: data.username,
@@ -162,7 +153,6 @@ const ProfilePage = () => {
         setLoading(false);
       }
     };
-
     fetchUserData();
   }, [navigate]);
 
@@ -173,7 +163,6 @@ const ProfilePage = () => {
         setError("Hiányzó autentikációs adatok vagy felhasználó ID");
         return;
       }
-
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/Bookings/BookingsByUser/${user.userId}`,
         {
@@ -184,7 +173,6 @@ const ProfilePage = () => {
           },
         }
       );
-
       if (!response.ok) {
         if (response.status === 400) {
           setBookings([]);
@@ -192,9 +180,7 @@ const ProfilePage = () => {
         }
         throw new Error(`Nem sikerült lekérni a foglalásokat: ${response.status}`);
       }
-
       const data = await response.json();
-      console.log("Backend foglalások adatai:", JSON.stringify(data, null, 2));
       setBookings(data);
     } catch (err) {
       console.error("Hiba a foglalások lekérésekor:", err.message);
@@ -203,31 +189,54 @@ const ProfilePage = () => {
     }
   };
 
+  const fetchEventBookings = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("Nincs token elmentve! Jelentkezz be újra.");
+      }
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/Feedback/GetEventBookings`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Nem sikerült lekérni a program foglalásokat: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Event Bookings Response:", data); // Logold ki az adatokat
+      setEventBookings(data);
+    } catch (err) {
+      console.error("Hiba a program foglalások lekérésekor:", err.message);
+      setError(err.message);
+      setEventBookings([]);
+    }
+  };
+
   useEffect(() => {
     if (user?.userId) {
       fetchBookings();
+      fetchEventBookings();
     }
   }, [user?.userId]);
 
   const handleOpenDetails = async (booking) => {
-    console.log("Booking adatok:", booking);
-
     let roomId = booking.room?.id || booking.roomId || booking.RoomId || booking.room?.RoomId;
-
     if (!roomId && booking.roomNumber) {
       roomId = await fetchRoomIdByNumber(booking.roomNumber);
     }
-
     if (!roomId && (booking.id || booking.bookingId)) {
       roomId = await fetchBookingDetails(booking.id || booking.bookingId);
     }
-
     if (!roomId) {
-      console.error("Hiba: Nem található RoomId a booking objektumban", booking);
       setMessage({ type: "error", text: "Nem található szoba azonosító a foglalásban!" });
       return;
     }
-
     setSelectedBooking({
       ...booking,
       BookingId: booking.id || booking.bookingId,
@@ -255,7 +264,6 @@ const ProfilePage = () => {
       if (!token) {
         throw new Error("Nincs token elmentve! Jelentkezz be újra.");
       }
-
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/Bookings/DeleteBooking/${bookingId}`,
         {
@@ -266,15 +274,40 @@ const ProfilePage = () => {
           },
         }
       );
-
       if (!response.ok) {
         throw new Error(`Hiba a foglalás törlése során: ${response.status}`);
       }
-
       setMessage({ type: "success", text: "Foglalás sikeresen törölve!" });
       fetchBookings();
     } catch (err) {
       console.error("Hiba a foglalás törlése közben:", err.message);
+      setMessage({ type: "error", text: err.message });
+    }
+  };
+
+  const handleDeleteEventBooking = async (id) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("Nincs token elmentve! Jelentkezz be újra.");
+      }
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/Feedback/DeleteBookingById/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Hiba a program foglalás törlése során: ${response.status}`);
+      }
+      setMessage({ type: "success", text: "Program foglalás sikeresen törölve!" });
+      fetchEventBookings();
+    } catch (err) {
+      console.error("Hiba a program foglalás törlése közben:", err.message);
       setMessage({ type: "error", text: err.message });
     }
   };
@@ -284,12 +317,10 @@ const ProfilePage = () => {
       setLoading(true);
       const token = localStorage.getItem("authToken");
       const userId = user?.userId;
-
       if (!token || !userId) {
         setError("Hiányzó autentikációs adatok");
         return;
       }
-
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/Guests/GetGuestData/${user.username}`,
         {
@@ -299,7 +330,6 @@ const ProfilePage = () => {
           },
         }
       );
-
       if (!response.ok) {
         if (response.status === 404) {
           setGuests([]);
@@ -307,7 +337,6 @@ const ProfilePage = () => {
         }
         throw new Error(`Nem sikerült lekérni a vendégeket: ${response.status}`);
       }
-
       const data = await response.json();
       setGuests(Array.isArray(data) ? data : [data]);
     } catch (err) {
@@ -329,17 +358,14 @@ const ProfilePage = () => {
     e.preventDefault();
     setPasswordErrors({ currentPassword: "", newPassword: "", confirmPassword: "" });
     setMessage(null);
-
     try {
       const token = localStorage.getItem("authToken");
       const username = localStorage.getItem("username");
       const passwordRegex =
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`])[A-Za-z\d!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`]{8,}$/;
-
       if (!token || !username) {
         throw new Error("Hiányzó autentikációs adatok");
       }
-
       if (passwordData.newPassword !== passwordData.confirmPassword) {
         setPasswordErrors((prev) => ({
           ...prev,
@@ -347,7 +373,6 @@ const ProfilePage = () => {
         }));
         return;
       }
-
       if (!passwordRegex.test(passwordData.newPassword)) {
         setPasswordErrors((prev) => ({
           ...prev,
@@ -356,7 +381,6 @@ const ProfilePage = () => {
         }));
         return;
       }
-
       const { response, data } = await handleApiCall(
         `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/Newpasswithknownpass/${username}`,
         "PUT",
@@ -365,7 +389,6 @@ const ProfilePage = () => {
           Password: passwordData.newPassword,
         }
       );
-
       if (!response.ok) {
         if (
           data.message &&
@@ -383,7 +406,6 @@ const ProfilePage = () => {
         }
         return;
       }
-
       setMessage({ type: "success", text: "Jelszó sikeresen megváltoztatva!" });
       setPasswordData({
         currentPassword: "",
@@ -398,7 +420,6 @@ const ProfilePage = () => {
   const handleForgotPasswordStep1 = async (e) => {
     e.preventDefault();
     setMessage(null);
-
     try {
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/ForgotPasswordsendemail/${forgotEmail}`,
@@ -409,15 +430,12 @@ const ProfilePage = () => {
           },
         }
       );
-
       if (response.status === 418) {
         throw new Error("Ez az email cím nem szerepel az adatbázisban!");
       }
-
       if (!response.ok) {
         throw new Error("Hiba történt a jelszó-visszaállítási kérelem során!");
       }
-
       setMessage({
         type: "success",
         text: "Ellenőrizze email fiókját a 6 számjegyű kódért!",
@@ -432,7 +450,6 @@ const ProfilePage = () => {
   const handleForgotPasswordStep2 = async (e) => {
     e.preventDefault();
     setMessage(null);
-
     try {
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/VerifyTheforgotpass`,
@@ -447,15 +464,12 @@ const ProfilePage = () => {
           }),
         }
       );
-
       if (response.status === 202) {
         throw new Error("Hibás kód vagy email!");
       }
-
       if (!response.ok) {
         throw new Error(`Hiba az ellenőrzés során: ${response.status}`);
       }
-
       setMessage({ type: "success", text: "Kód elfogadva!" });
       setForgotStep(3);
     } catch (err) {
@@ -468,11 +482,9 @@ const ProfilePage = () => {
     e.preventDefault();
     setPasswordErrors({ newPassword: "", confirmPassword: "" });
     setMessage(null);
-
     try {
       const passwordRegex =
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`])[A-Za-z\d!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`]{8,}$/;
-
       if (newPasswordData.newPassword !== newPasswordData.confirmPassword) {
         setPasswordErrors((prev) => ({
           ...prev,
@@ -480,7 +492,6 @@ const ProfilePage = () => {
         }));
         return;
       }
-
       if (!passwordRegex.test(newPasswordData.newPassword)) {
         setPasswordErrors((prev) => ({
           ...prev,
@@ -489,7 +500,6 @@ const ProfilePage = () => {
         }));
         return;
       }
-
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/SetNewPassword`,
         {
@@ -503,15 +513,12 @@ const ProfilePage = () => {
           }),
         }
       );
-
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(
           data.message || "Hiba történt az új jelszó beállításakor!"
         );
       }
-
       setMessage({
         type: "success",
         text:
@@ -534,12 +541,10 @@ const ProfilePage = () => {
       if (!token) {
         throw new Error("Nincs token elmentve! Jelentkezz be újra.");
       }
-
       const username = localStorage.getItem("username");
       if (!username) {
         throw new Error("Nincs felhasználónév elmentve!");
       }
-
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/DeleteUserByUsername/${username}`,
         {
@@ -551,22 +556,18 @@ const ProfilePage = () => {
           body: JSON.stringify({ Password: deletePassword }),
         }
       );
-
       if (response.status === 401) {
         throw new Error("Token érvénytelen vagy lejárt!");
       }
-
       if (response.status === 404) {
         throw new Error("Felhasználó nem található!");
       }
-
       if (!response.ok) {
         const errorData = await response.text();
         throw new Error(
           errorData || `HTTP hiba! Státusz: ${response.status}`
         );
       }
-
       localStorage.removeItem("authToken");
       localStorage.removeItem("username");
       navigate("/");
@@ -580,7 +581,6 @@ const ProfilePage = () => {
     const headers = {
       "Content-Type": "application/json",
     };
-
     if (requiresAuth) {
       const token = localStorage.getItem("authToken");
       if (!token) {
@@ -588,15 +588,12 @@ const ProfilePage = () => {
       }
       headers["Authorization"] = `Bearer ${token}`;
     }
-
     const response = await fetch(url, {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
     });
-
     const responseClone = response.clone();
-
     try {
       const data = await response.json();
       return { response, data };
@@ -614,17 +611,14 @@ const ProfilePage = () => {
         setMessage({ type: "error", text: "Nincs token elmentve!" });
         return;
       }
-
       if (!user?.userId) {
         setMessage({ type: "error", text: "Felhasználó ID hiányzik!" });
         return;
       }
-
       if (!guestData.firstName || !guestData.lastName || !guestData.dateOfBirth) {
         setMessage({ type: "error", text: "Kötelező mezők hiányoznak!" });
         return;
       }
-
       const payload = {
         ...guestData,
         userId: user.userId,
@@ -632,7 +626,6 @@ const ProfilePage = () => {
           ? new Date(guestData.dateOfBirth).toISOString()
           : null,
       };
-
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/Guests/Addnewguest`,
         {
@@ -644,27 +637,29 @@ const ProfilePage = () => {
           body: JSON.stringify(payload),
         }
       );
-
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Hiba a vendég hozzáadása során!");
+        const errorText = await response.text();
+        throw new Error(`Hiba a vendég hozzáadása során: ${errorText}`);
       }
-
-      await fetchGuests();
-      setShowGuestModal(false);
-      setGuestData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phoneNumber: "",
-        address: "",
-        city: "",
-        country: "",
-        dateOfBirth: "",
-        gender: "",
-      });
-
-      setMessage({ type: "success", text: "Vendég sikeresen hozzáadva!" });
+      const responseText = await response.text();
+      if (responseText.includes("Sikeres")) {
+        await fetchGuests();
+        setShowGuestModal(false);
+        setGuestData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phoneNumber: "",
+          address: "",
+          city: "",
+          country: "",
+          dateOfBirth: "",
+          gender: "",
+        });
+        setMessage({ type: "success", text: "Vendég sikeresen hozzáadva!" });
+      } else {
+        throw new Error(`Váratlan válasz a szervertől: ${responseText}`);
+      }
     } catch (err) {
       console.error("Hiba a vendég hozzáadása közben:", err.message);
       setMessage({ type: "error", text: err.message });
@@ -673,11 +668,13 @@ const ProfilePage = () => {
 
   const handleDeleteGuest = async (guestId) => {
     try {
+      if (!guestId) {
+        throw new Error("A vendég azonosítója (guestId) hiányzik!");
+      }
       const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("Nincs token elmentve! Jelentkezz be újra.");
       }
-
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/Guests/DeleteGuest/${guestId}`,
         {
@@ -688,12 +685,15 @@ const ProfilePage = () => {
           },
         }
       );
-
       if (!response.ok) {
-        const errorText = await response.text();
+        let errorText;
+        try {
+          errorText = await response.text();
+        } catch (e) {
+          errorText = `Hiba a válasz olvasása közben: ${response.status}`;
+        }
         throw new Error(`Hiba a vendég törlése során: ${errorText}`);
       }
-
       await fetchGuests();
       setMessage({ type: "success", text: "Vendég sikeresen törölve!" });
     } catch (err) {
@@ -728,18 +728,15 @@ const ProfilePage = () => {
       if (!token) {
         throw new Error("Nincs token elmentve! Jelentkezz be újra.");
       }
-
       if (!editGuestId) {
         throw new Error("Nincs kiválasztott vendég a szerkesztéshez!");
       }
-
       const payload = {
         ...guestData,
         dateOfBirth: guestData.dateOfBirth
           ? new Date(guestData.dateOfBirth).toISOString()
           : null,
       };
-
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/Guests/UpdateGuest/${editGuestId}`,
         {
@@ -751,37 +748,32 @@ const ProfilePage = () => {
           body: JSON.stringify(payload),
         }
       );
-
-      const responseData = await response.json();
-
       if (!response.ok) {
-        throw new Error(
-          responseData.message || `Hiba a vendég módosítása során: ${response.status}`
-        );
+        const errorText = await response.text();
+        throw new Error(`Hiba a vendég módosítása során: ${errorText}`);
       }
-
-      await fetchGuests();
-      setShowGuestModal(false);
-      setGuestData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phoneNumber: "",
-        address: "",
-        city: "",
-        country: "",
-        dateOfBirth: "",
-        gender: "",
-      });
-      setEditGuestId(null);
-      setError(null);
-      setMessage({
-        type: "success",
-        text: responseData.message || "Vendég sikeresen módosítva!",
-      });
+      const responseText = await response.text();
+      if (responseText.includes("Sikeres frissítés")) {
+        await fetchGuests();
+        setShowGuestModal(false);
+        setGuestData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phoneNumber: "",
+          address: "",
+          city: "",
+          country: "",
+          dateOfBirth: "",
+          gender: "",
+        });
+        setEditGuestId(null);
+        setMessage({ type: "success", text: "Vendég sikeresen módosítva!" });
+      } else {
+        throw new Error(`Váratlan válasz a szervertől: ${responseText}`);
+      }
     } catch (err) {
       console.error("Hiba a vendég módosítása közben:", err.message);
-      setError(err.message);
       setMessage({ type: "error", text: err.message });
     }
   };
@@ -800,29 +792,17 @@ const ProfilePage = () => {
       if (!token) {
         throw new Error("Nincs token elmentve! Jelentkezz be újra.");
       }
-
       if (guests.length === 0) {
         throw new Error("Nincs vendég hozzáadva! Kérjük, adjon hozzá egy vendéget először.");
       }
-
       const roomId = selectedBooking.RoomId;
       const bookingId = selectedBooking.BookingId;
-
       if (!roomId) {
         throw new Error("A szoba azonosítója (RoomId) hiányzik az adatokból!");
       }
       if (!bookingId) {
         throw new Error("A foglalás azonosítója (BookingId) hiányzik az adatokból!");
       }
-
-      console.log("Küldött adatok:", {
-        RoomId: roomId,
-        BookingId: bookingId,
-        GuestId: guests[0].guestId,
-        Rating: commentData.rating,
-        Comment: commentData.comment,
-      });
-
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/Reviews/NewComment/${roomId}`,
         {
@@ -839,7 +819,6 @@ const ProfilePage = () => {
           }),
         }
       );
-
       if (!response.ok) {
         let errorMessage = "Hiba történt az értékelés küldése közben";
         try {
@@ -850,7 +829,6 @@ const ProfilePage = () => {
         }
         throw new Error(`${errorMessage} (Státusz: ${response.status})`);
       }
-
       setMessage({ type: "success", text: "Értékelés sikeresen elküldve!" });
       setShowCommentModal(false);
       setCommentData({ rating: 5, comment: "" });
@@ -873,7 +851,6 @@ const ProfilePage = () => {
           {message.text}
         </div>
       )}
-
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center mb-6 gap-4">
           <button
@@ -894,9 +871,7 @@ const ProfilePage = () => {
             Kijelentkezés
           </button>
         </div>
-
         {error && <p className="text-red-600 mb-4">{error}</p>}
-
         {user && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 md:gap-8 mb-8">
             <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 border border-blue-100">
@@ -944,7 +919,6 @@ const ProfilePage = () => {
                 </div>
               </div>
             </div>
-
             <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 border border-blue-100">
               <div className="flex flex-col gap-3 mb-4">
                 <div className="flex items-center">
@@ -965,7 +939,6 @@ const ProfilePage = () => {
                   Vendég hozzáadása
                 </button>
               </div>
-
               <div className="space-y-4">
                 {guests.length > 0 ? (
                   guests.map((guest) => (
@@ -1011,7 +984,6 @@ const ProfilePage = () => {
             </div>
           </div>
         )}
-
         {user && (
           <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg mb-6 sm:mb-8 hover:shadow-2xl transition-all duration-300 border border-blue-200 transform hover:-translate-y-1">
             <div className="flex items-center mb-6">
@@ -1050,11 +1022,10 @@ const ProfilePage = () => {
                   const totalPrice = booking.price || booking.totalPrice || "N/A";
                   const paymentStatus =
                     booking.status || booking.paymentStatus || "N/A";
-
                   return (
                     <div
                       key={booking.id || booking.bookingId || `booking-${index}`}
-                      className="border border-blue-200 rounded-xl p-4 bg-gradient-to-br from-blue-50 to-teal-50 hover:border-teal-400 transition-all duration-300 shadow-md hover:shadow-xl"
+                      className="border border-blue-2 rounded-xl p-4 bg-gradient-to-br from-blue-50 to-teal-50 hover:border-teal-400 transition-all duration-300 shadow-md hover:shadow-xl"
                     >
                       <div className="flex justify-between items-center mb-3">
                         <div>
@@ -1109,190 +1080,252 @@ const ProfilePage = () => {
             </div>
           </div>
         )}
-
-{selectedBooking && (
-  <div 
-    className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
-    onClick={() => setSelectedBooking(null)}
-  >
-    <div 
-      className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all duration-300 ease-out"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="bg-gradient-to-r from-teal-500 to-blue-600 p-6 text-white">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-2xl font-bold">Foglalás részletei</h3>
-            <p className="text-teal-100 mt-1">
-              #{selectedBooking.BookingId}
-            </p>
-          </div>
-          <button
-            onClick={() => setSelectedBooking(null)}
-            className="text-white hover:text-teal-200 transition-colors"
-            aria-label="Bezárás"
-          >
-            <span className="material-symbols-outlined text-3xl">
-              close
-            </span>
-          </button>
-        </div>
-      </div>
-
-      <div className="p-6 space-y-5">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="space-y-3">
-            <DetailItem
-              label="Szobaszám"
-              value={selectedBooking.RoomNumber || "N/A"}
-              icon="meeting_room"
-            />
-            <DetailItem
-              label="Időpont"
-              value={
-                selectedBooking.CheckInDate && selectedBooking.CheckOutDate
-                  ? `${new Date(selectedBooking.CheckInDate).toLocaleDateString("hu-HU")} - ${new Date(selectedBooking.CheckOutDate).toLocaleDateString("hu-HU")}`
-                  : "N/A"
-              }
-              icon="date_range"
-            />
-            <DetailItem
-              label="Vendégek száma"
-              value={`${selectedBooking.NumberOfGuests || "N/A"} fő`}
-              icon="group"
-            />
-          </div>
-          
-          <div className="space-y-3">
-            <DetailItem
-              label="Név"
-              value={
-                selectedBooking.FirstName && selectedBooking.LastName
-                  ? `${selectedBooking.FirstName} ${selectedBooking.LastName}`
-                  : "N/A"
-              }
-              icon="person"
-            />
-            <DetailItem
-              label="Fizetési státusz"
-              value={selectedBooking.PaymentStatus || "N/A"}
-              icon="payments"
-              highlight={selectedBooking.PaymentStatus === "Fizetve"}
-            />
-            <DetailItem
-              label="Összeg"
-              value={`${selectedBooking.TotalPrice?.toLocaleString("hu-HU") || "N/A"} HUF`}
-              icon="attach_money"
-            />
-          </div>
-        </div>
-
-        <div className="border-t border-gray-200 pt-4">
-          <DetailItem
-            label="Szobatípus"
-            value={selectedBooking.RoomType || "N/A"}
-            icon="king_bed"
-          />
-          <DetailItem
-            label="Emelet"
-            value={selectedBooking.FloorNumber || "N/A"}
-            icon="floor"
-          />
-        </div>
-
-        <div className="border-t border-gray-200 pt-4">
-          <details className="group">
-            <summary className="flex items-center justify-between cursor-pointer list-none">
-              <div className="flex items-center text-blue-600 group-hover:text-blue-800 transition-colors">
-                <span className="material-symbols-outlined mr-2">
-                  person
-                </span>
-                <span className="font-medium">
-                  Saját adatok megtekintése
-                </span>
-              </div>
-              <span className="material-symbols-outlined text-gray-500 group-open:rotate-180 transition-transform">
-                expand_more
+        {user && (
+          <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg mb-6 sm:mb-8 hover:shadow-2xl transition-all duration-300 border border-blue-200 transform hover:-translate-y-1">
+            <div className="flex items-center mb-6">
+              <span className="material-symbols-outlined text-4xl sm:text-5xl mr-4 bg-purple-100 p-3 rounded-full text-purple-600 animate-pulse">
+                celebration
               </span>
-            </summary>
-            <div className="mt-3 p-4 bg-blue-50 rounded-lg space-y-2 animate-[fadeIn_0.2s_ease-in-out]">
-              <DetailItem
-                label="Felhasználónév"
-                value={user.username}
-                small
-              />
-              <DetailItem label="Email" value={user.email} small />
-              <DetailItem
-                label="Regisztráció dátuma"
-                value={user.dateCreated}
-                small
-              />
+              <h2 className="text-2xl sm:text-3xl font-bold text-blue-800 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                Program foglalásaim
+              </h2>
             </div>
-          </details>
-        </div>
-      </div>
-
-      <div className="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row justify-end gap-3">
-        <button
-          onClick={() => setSelectedBooking(null)}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors"
-        >
-          <span className="material-symbols-outlined">close</span>
-          Bezárás
-        </button>
-        <button
-          onClick={() => handleDeleteBooking(selectedBooking.BookingId)}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors"
-        >
-          <span className="material-symbols-outlined">delete</span>
-          Foglalás törlése
-        </button>
-        <button
-          onClick={() => setShowCommentModal(true)}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
-        >
-          <span className="material-symbols-outlined">rate_review</span>
-          Értékelés
-        </button>
-        <button
-          onClick={() => {
-            if (selectedBooking.RoomId) {
-              navigate(`/Foglalas/${selectedBooking.RoomId}`, {
-                state: {
-                  room: {
-                    roomId: selectedBooking.RoomId,
-                    roomNumber: selectedBooking.RoomNumber,
-                    roomType: selectedBooking.RoomType,
-                    floorNumber: selectedBooking.FloorNumber,
-                    pricePerNight: selectedBooking.TotalPrice,
-                    capacity: selectedBooking.NumberOfGuests,
-                  },
-                  checkInDate: selectedBooking.CheckInDate,
-                  checkOutDate: selectedBooking.CheckOutDate,
-                },
-              });
-            } else {
-              navigate("/Foglalas/id", {
-                state: {
-                  searchParams: {
-                    roomNumber: selectedBooking.RoomNumber,
-                    floor: selectedBooking.FloorNumber,
-                    type: selectedBooking.RoomType,
-                  },
-                },
-              });
-            }
-          }}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-        >
-          <span className="material-symbols-outlined">visibility</span>
-          Szoba részletei
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {eventBookings.length > 0 ? (
+                eventBookings.map((booking) => (
+                  <div
+                    key={booking.eventBookingId}
+                    className="border border-blue-200 rounded-xl p-4 bg-gradient-to-br from-purple-50 to-blue-50 hover:border-purple-400 transition-all duration-300 shadow-md hover:shadow-xl"
+                  >
+                    <div className="flex justify-between items-center mb-3">
+                      <div>
+                        <p className="text-sm font-medium text-blue-700">
+                          Program neve:{" "}
+                          <span className="font-bold text-purple-600">
+                            {booking.event?.name || "N/A"}
+                          </span>
+                        </p>
+                        <p className="text-sm font-medium text-blue-700">
+                          Dátum:{" "}
+                          <span className="font-bold text-purple-600">
+                            {booking.event?.date
+                              ? new Date(booking.event.date).toLocaleDateString("hu-HU")
+                              : "N/A"}
+                          </span>
+                        </p>
+                        <p className="text-sm font-medium text-blue-700">
+                          Helyszín:{" "}
+                          <span className="font-bold text-purple-600">
+                            {booking.event?.location || "N/A"}
+                          </span>
+                        </p>
+                        <p className="text-sm font-medium text-blue-700">
+                          Státusz:{" "}
+                          <span className="font-bold text-purple-600">
+                            {booking.status || "N/A"}
+                          </span>
+                        </p>
+                        <p className="text-sm font-medium text-blue-700">
+                          Jegyek száma:{" "}
+                          <span className="font-bold text-purple-600">
+                            {booking.numberOfTickets || "N/A"}
+                          </span>
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteEventBooking(booking.eventBookingId)}
+                        className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-md"
+                      >
+                        Törlés
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-blue-700 col-span-full">
+                  Nincsenek program foglalásaid.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+        {selectedBooking && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+            onClick={() => setSelectedBooking(null)}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all duration-300 ease-out"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="bg-gradient-to-r from-teal-500 to-blue-600 p-6 text-white">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-2xl font-bold">Foglalás részletei</h3>
+                    <p className="text-teal-100 mt-1">
+                      #{selectedBooking.BookingId}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setSelectedBooking(null)}
+                    className="text-white hover:text-teal-200 transition-colors"
+                    aria-label="Bezárás"
+                  >
+                    <span className="material-symbols-outlined text-3xl">
+                      close
+                    </span>
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-3">
+                    <DetailItem
+                      label="Szobaszám"
+                      value={selectedBooking.RoomNumber || "N/A"}
+                      icon="meeting_room"
+                    />
+                    <DetailItem
+                      label="Időpont"
+                      value={
+                        selectedBooking.CheckInDate && selectedBooking.CheckOutDate
+                          ? `${new Date(selectedBooking.CheckInDate).toLocaleDateString("hu-HU")} - ${new Date(selectedBooking.CheckOutDate).toLocaleDateString("hu-HU")}`
+                          : "N/A"
+                      }
+                      icon="date_range"
+                    />
+                    <DetailItem
+                      label="Vendégek száma"
+                      value={`${selectedBooking.NumberOfGuests || "N/A"} fő`}
+                      icon="group"
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <DetailItem
+                      label="Név"
+                      value={
+                        selectedBooking.FirstName && selectedBooking.LastName
+                          ? `${selectedBooking.FirstName} ${selectedBooking.LastName}`
+                          : "N/A"
+                      }
+                      icon="person"
+                    />
+                    <DetailItem
+                      label="Fizetési státusz"
+                      value={selectedBooking.PaymentStatus || "N/A"}
+                      icon="payments"
+                      highlight={selectedBooking.PaymentStatus === "Fizetve"}
+                    />
+                    <DetailItem
+                      label="Összeg"
+                      value={`${selectedBooking.TotalPrice?.toLocaleString("hu-HU") || "N/A"} HUF`}
+                      icon="attach_money"
+                    />
+                  </div>
+                </div>
+                <div className="border-t border-gray-200 pt-4">
+                  <DetailItem
+                    label="Szobatípus"
+                    value={selectedBooking.RoomType || "N/A"}
+                    icon="king_bed"
+                  />
+                  <DetailItem
+                    label="Emelet"
+                    value={selectedBooking.FloorNumber || "N/A"}
+                    icon="floor"
+                  />
+                </div>
+                <div className="border-t border-gray-200 pt-4">
+                  <details className="group">
+                    <summary className="flex items-center justify-between cursor-pointer list-none">
+                      <div className="flex items-center text-blue-600 group-hover:text-blue-800 transition-colors">
+                        <span className="material-symbols-outlined mr-2">
+                          person
+                        </span>
+                        <span className="font-medium">
+                          Saját adatok megtekintése
+                        </span>
+                      </div>
+                      <span className="material-symbols-outlined text-gray-500 group-open:rotate-180 transition-transform">
+                        expand_more
+                      </span>
+                    </summary>
+                    <div className="mt-3 p-4 bg-blue-50 rounded-lg space-y-2 animate-[fadeIn_0.2s_ease-in-out]">
+                      <DetailItem
+                        label="Felhasználónév"
+                        value={user.username}
+                        small
+                      />
+                      <DetailItem label="Email" value={user.email} small />
+                      <DetailItem
+                        label="Regisztráció dátuma"
+                        value={user.dateCreated}
+                        small
+                      />
+                    </div>
+                  </details>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row justify-end gap-3">
+                <button
+                  onClick={() => setSelectedBooking(null)}
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors"
+                >
+                  <span className="material-symbols-outlined">close</span>
+                  Bezárás
+                </button>
+                <button
+                  onClick={() => handleDeleteBooking(selectedBooking.BookingId)}
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg font-medium transition-colors"
+                >
+                  <span className="material-symbols-outlined">delete</span>
+                  Foglalás törlése
+                </button>
+                <button
+                  onClick={() => setShowCommentModal(true)}
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  <span className="material-symbols-outlined">rate_review</span>
+                  Értékelés
+                </button>
+                <button
+                  onClick={() => {
+                    if (selectedBooking.RoomId) {
+                      navigate(`/Foglalas/${selectedBooking.RoomId}`, {
+                        state: {
+                          room: {
+                            roomId: selectedBooking.RoomId,
+                            roomNumber: selectedBooking.RoomNumber,
+                            roomType: selectedBooking.RoomType,
+                            floorNumber: selectedBooking.FloorNumber,
+                            pricePerNight: selectedBooking.TotalPrice,
+                            capacity: selectedBooking.NumberOfGuests,
+                          },
+                          checkInDate: selectedBooking.CheckInDate,
+                          checkOutDate: selectedBooking.CheckOutDate,
+                        },
+                      });
+                    } else {
+                      navigate("/Foglalas/id", {
+                        state: {
+                          searchParams: {
+                            roomNumber: selectedBooking.RoomNumber,
+                            floor: selectedBooking.FloorNumber,
+                            type: selectedBooking.RoomType,
+                          },
+                        },
+                      });
+                    }
+                  }}
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  <span className="material-symbols-outlined">visibility</span>
+                  Szoba részletei
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {user && (
           <>
             <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md mb-6 sm:mb-8 hover:shadow-xl transition-shadow duration-300 border border-blue-100">
@@ -1304,7 +1337,6 @@ const ProfilePage = () => {
                   Jelszó kezelése
                 </h2>
               </div>
-
               <details className="mb-4 sm:mb-6 group">
                 <summary className="list-none flex items-center justify-between cursor-pointer p-3 sm:p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                   <span className="font-medium text-blue-800">
@@ -1428,7 +1460,6 @@ const ProfilePage = () => {
                         </button>
                       </div>
                     </div>
-
                     {message && (
                       <div
                         className={`p-3 rounded-lg ${message.type === "success"
@@ -1439,7 +1470,6 @@ const ProfilePage = () => {
                         {message.text}
                       </div>
                     )}
-
                     <button
                       type="submit"
                       className="w-full md:w-auto bg-indigo-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-indigo-700 transform hover:scale-105 transition-all duration-200"
@@ -1449,7 +1479,6 @@ const ProfilePage = () => {
                   </form>
                 </div>
               </details>
-
               <details className="group">
                 <summary className="list-none flex items-center justify-between cursor-pointer p-3 sm:p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                   <span className="font-medium text-blue-800">
@@ -1534,7 +1563,6 @@ const ProfilePage = () => {
                       </button>
                     </form>
                   )}
-
                   {forgotStep === 3 && (
                     <form className="space-y-4" onSubmit={handleForgotPasswordStep3}>
                       <div>
@@ -1630,7 +1658,6 @@ const ProfilePage = () => {
                 </div>
               </details>
             </div>
-
             <div className="border-t border-blue-200 pt-6 sm:pt-8 mt-6 sm:mt-8">
               <div className="bg-red-50 p-4 sm:p-6 rounded-lg border border-red-200">
                 <h2 className="text-lg sm:text-xl font-semibold text-red-600 mb-2 flex items-center">
@@ -1683,7 +1710,6 @@ const ProfilePage = () => {
             </div>
           </>
         )}
-
         {showGuestModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl">
@@ -1868,7 +1894,6 @@ const ProfilePage = () => {
             </div>
           </div>
         )}
-
         {showCommentModal && selectedBooking && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -1891,7 +1916,7 @@ const ProfilePage = () => {
                         className={`text-2xl ${star <= commentData.rating
                           ? "text-yellow-500"
                           : "text-gray-300"
-                        }`}
+                          }`}
                       >
                         ★
                       </button>
@@ -1936,4 +1961,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage; 
+export default ProfilePage;

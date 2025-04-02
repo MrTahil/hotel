@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-regular-svg-icons";
@@ -13,6 +13,7 @@ function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
+    const menuRef = useRef(null); // Ref a lenyitható menühöz
 
     // Minden rendereléskor ellenőrizzük a localStorage-ot
     const user = localStorage.getItem('username');
@@ -30,6 +31,20 @@ function Navbar() {
     const handleMenuItemClick = () => {
         setMenuOpen(false); // Menü bezárása kattintáskor
     };
+
+    // Eseményfigyelő a menü bezárására, ha kívülre kattintanak
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
 
     return (
         <>
@@ -79,7 +94,7 @@ function Navbar() {
                         </NavLink>
                     </div>
 
-                    <div className="relative">
+                    <div className="relative" ref={menuRef}>
                         <button
                             onClick={() => setMenuOpen(!menuOpen)}
                             className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
