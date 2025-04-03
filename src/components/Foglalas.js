@@ -35,7 +35,6 @@ export const Foglalas = () => {
   });
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Foglalt dátumok lekérése
   useEffect(() => {
     const fetchBookedDates = async () => {
       try {
@@ -57,7 +56,6 @@ export const Foglalas = () => {
     fetchBookedDates();
   }, [id]);
 
-  // Bejelentkezés ellenőrzése
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (!token) {
@@ -66,7 +64,6 @@ export const Foglalas = () => {
     }
   }, [navigate]);
 
-  // Vendégek lekérése
   const fetchGuests = async () => {
     const username = localStorage.getItem('username');
     const token = localStorage.getItem('authToken');
@@ -89,12 +86,10 @@ export const Foglalas = () => {
     }
   };
 
-  // Oldal betöltésekor vendégek lekérése
   useEffect(() => {
     fetchGuests();
   }, []);
 
-  // Szoba elérhetőség ellenőrzése
   const checkRoomAvailability = () => {
     if (!checkInDate || !checkOutDate) return;
 
@@ -125,7 +120,6 @@ export const Foglalas = () => {
     checkRoomAvailability();
   }, [checkInDate, checkOutDate]);
 
-  // Foglalás elküldése
   const handleBooking = async () => {
     setIsSubmitting(true);
     setBookingError("");
@@ -192,7 +186,6 @@ export const Foglalas = () => {
     return minDate.toISOString().split("T")[0];
   };
 
-  // Kényelmi szolgáltatások lekérése
   useEffect(() => {
     const fetchAmenities = async () => {
       setLoading(true);
@@ -210,37 +203,11 @@ export const Foglalas = () => {
     if (room) fetchAmenities();
   }, [room, id]);
 
-  const calculateGuestType = (dateOfBirth) => {
-    const birthDate = new Date(dateOfBirth);
-    const age = new Date().getFullYear() - birthDate.getFullYear();
-
-    if (age < 3) return '0-3';
-    if (4 < age < 18) return 'gyermekkoru';
-    if (19 < age < 26) return 'diak';
-    if (age >= 65) return 'idoskoru';
-    return 'felnott';
-  };
-
   const calculateTotalPrice = () => {
     if (!room?.pricePerNight || !checkInDate || !checkOutDate) return 0;
 
-    const basePrice = room.pricePerNight;
-    const selectedGuest = savedGuests.find(g => g.guestId === mainGuest);
-    const guestType = selectedGuest ? calculateGuestType(selectedGuest.dateOfBirth) : 'felnott';
-
-    const discounts = {
-      '0-3': 0.95,
-      'gyermekkoru': 0.8,
-      'diak': 0.4,
-      'idoskoru': 0.1,
-      'felnott': 0
-    };
-
     const nights = Math.ceil((new Date(checkOutDate) - new Date(checkInDate)) / (1000 * 3600 * 24));
-    const mainGuestPrice = basePrice * (1 - (discounts[guestType] || 0)) * nights;
-    const additionalPrice = additionalGuests * basePrice * nights;
-
-    return mainGuestPrice + additionalPrice;
+    return (additionalGuests + 1) * room.pricePerNight * nights;
   };
 
   const handleAddGuest = async (e) => {
@@ -316,9 +283,8 @@ export const Foglalas = () => {
       if (contentType && contentType.includes('application/json') && text) {
         newGuest = JSON.parse(text);
       } else {
-        console.log('Szerver válasza (szöveg):', text);
         newGuest = {
-          guestId: Date.now(), // Ideiglenes azonosító
+          guestId: Date.now(),
           ...guestData,
         };
       }
@@ -438,7 +404,6 @@ export const Foglalas = () => {
                 </div>
               </div>
 
-              {/* Komment szekció áthelyezve ide */}
               <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg mb-6 border-t-4 border-teal-500">
                 <h3 className="text-2xl font-bold text-teal-700 mb-4 flex items-center">
                   <span className="material-symbols-outlined mr-2">comment</span>
