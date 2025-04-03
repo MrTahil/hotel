@@ -2,7 +2,7 @@ using HMZ_rt.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+#pragma warning disable
 namespace HMZ_rt.Controllers
 {
     [Route("Events")]
@@ -149,7 +149,21 @@ namespace HMZ_rt.Controllers
 
 
             var dat = await _context.Events.Include(x => x.Eventbookings).Where(x=> x.EventDate > DateTime.Now.AddDays(-1) ).ToListAsync();
-                return StatusCode(200, dat);
+                
+
+                return StatusCode(200, dat.Select(x=> new
+                {
+                  x.Location,
+                  x.ContactInfo,
+                  x.EventDate,
+                  x.EventId,
+                  x.Capacity,
+                  x.Description,
+                  x.EventName,
+                  x.Images,
+                  x.Price,
+                  LefttoGet=x.Capacity -  x.Eventbookings.Sum(x=> x.NumberOfTickets)
+                }));
             }
             catch (Exception ex)
             {

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
-
+#pragma warning disable
 namespace HMZ_rt.Controllers
 {
     [Route("Payments")]

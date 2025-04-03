@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
-
+#pragma warning disable
 namespace HMZ_rt.Controllers
 {
     [Route("Guests")]

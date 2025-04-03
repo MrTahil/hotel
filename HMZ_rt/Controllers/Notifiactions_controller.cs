@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-
+#pragma warning disable
 namespace HMZ_rt.Controllers
 {
     [Route("UserAccounts")]

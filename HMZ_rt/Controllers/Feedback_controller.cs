@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+#pragma warning disable
 namespace HMZ_rt.Controllers
 {
     [Route("Feedback")]

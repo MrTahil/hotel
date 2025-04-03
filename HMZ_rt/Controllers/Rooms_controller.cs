@@ -4,7 +4,7 @@ using HMZ_rt.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Cryptography.X509Certificates;
-
+#pragma warning disable
 namespace HMZ_rt.Controllers
 {
     [Route("Rooms")]

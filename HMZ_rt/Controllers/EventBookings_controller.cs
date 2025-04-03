@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+#pragma warning disable
 namespace HMZ_rt.Controllers
 {
     [Route("Feedback")]
@@ -83,7 +83,17 @@ namespace HMZ_rt.Controllers
                 if (guestdata == null) {
                     return StatusCode(404, "Ez a vendég Id nem létezik");
                 }
-
+                var books = await _context.Eventbookings.Where(x => x.EventId == eventid).ToListAsync();
+                var counter = 0;
+                foreach (var item in books)
+                {
+                    counter += Convert.ToInt32(item.NumberOfTickets);
+                }
+                
+                if ((counter+Convert.ToInt32( crtdto.NumberOfTickets)) > eventdata.Capacity)
+                {
+                    return StatusCode(400, $"Ennyi jegy már sajnos nem foglalható {counter},{crtdto.NumberOfTickets},{eventdata.Capacity}");
+                }
                 var data = new Eventbooking
                 {
                     EventId = eventid,

@@ -5,7 +5,7 @@ using MimeKit.Text;
 using System.Net.Mail;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 using Microsoft.Extensions.Options;
-
+#pragma warning disable
 namespace HMZ_rt.Controllers
 {
     public class SmtpSettings

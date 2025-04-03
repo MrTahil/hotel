@@ -13,7 +13,7 @@ using MimeKit.Text;
 using MailKit.Security;
 using MailKit.Net.Smtp;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
-
+#pragma warning disable
 namespace HMZ_rt.Controllers
 {
     [Route("Bookings")]

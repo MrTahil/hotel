@@ -14,7 +14,7 @@ using MimeKit;
 using MailKit.Security;
 using MimeKit.Text;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
-
+#pragma warning disable
 namespace HMZ_rt.Controllers
 {
     [Route("UserAccounts")]

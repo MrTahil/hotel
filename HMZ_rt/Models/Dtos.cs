@@ -1,6 +1,7 @@
 using HMZ_rt.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography.X509Certificates;
+#pragma warning disable
 namespace HMZ_rt.Models
 {
     public class CreateUserDto
