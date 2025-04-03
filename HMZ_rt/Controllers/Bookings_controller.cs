@@ -627,6 +627,10 @@ namespace HMZ_rt.Controllers
                 {
                     return StatusCode(404, "Nem található felhasználó");
                 }
+                if (userdata.UserId != guestdata.UserId)
+                {
+                    return StatusCode(400, "Nem nézheted meg mások foglalását!");
+                }
 
 
                 

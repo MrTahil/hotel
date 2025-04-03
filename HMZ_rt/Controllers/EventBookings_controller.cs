@@ -75,11 +75,11 @@ namespace HMZ_rt.Controllers
             try
             {
                 
-                var eventdata =  _context.Events.FirstOrDefault(x => x.EventId == eventid && x.EventDate > DateTime.Now.AddDays(-1));
+                var eventdata =await  _context.Events.FirstOrDefaultAsync(x => x.EventId == eventid && x.EventDate > DateTime.Now.AddDays(-1));
                 if (eventdata == null) {
                     return StatusCode(404, "Ez az esemény nem létezik vagy már véget ért.");
                 }
-                var guestdata = _context.Guests.FirstOrDefaultAsync(x => x.GuestId == crtdto.GuestId);
+                var guestdata =await _context.Guests.FirstOrDefaultAsync(x => x.GuestId == crtdto.GuestId);
                 if (guestdata == null) {
                     return StatusCode(404, "Ez a vendég Id nem létezik");
                 }
@@ -106,7 +106,7 @@ namespace HMZ_rt.Controllers
             catch (Exception ex)
             {
 
-                return StatusCode(500, ex);
+                return StatusCode(500, ex.Message);
             }
 
         }
