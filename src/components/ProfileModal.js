@@ -25,6 +25,7 @@ const ProfilePage = () => {
   const [message, setMessage] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [eventBookings, setEventBookings] = useState([]);
+  const [events, setEvents] = useState([]); // Added to store event details
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [commentData, setCommentData] = useState({
@@ -209,7 +210,7 @@ const ProfilePage = () => {
         throw new Error(`Nem sikerült lekérni a program foglalásokat: ${response.status}`);
       }
       const data = await response.json();
-      console.log("Event Bookings Response:", data); // Logold ki az adatokat
+      console.log("Event Bookings Response:", data); // Log for debugging
       setEventBookings(data);
     } catch (err) {
       console.error("Hiba a program foglalások lekérésekor:", err.message);
@@ -218,10 +219,36 @@ const ProfilePage = () => {
     }
   };
 
+  const fetchEvents = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/Events/Geteents`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Nem sikerült lekérni az eseményeket: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Events Response:", data); // Log for debugging
+      setEvents(data);
+    } catch (err) {
+      console.error("Hiba az események lekérésekor:", err.message);
+      setError(err.message);
+      setEvents([]);
+    }
+  };
+
   useEffect(() => {
     if (user?.userId) {
-      fetchBookings();
-      fetchEventBookings();
+      const loadData = async () => {
+        await Promise.all([fetchBookings(), fetchEvents(), fetchEventBookings()]);
+      };
+      loadData();
     }
   }, [user?.userId]);
 
@@ -1024,7 +1051,7 @@ const ProfilePage = () => {
                     booking.status || booking.paymentStatus || "N/A";
                   return (
                     <div
-                      key={booking.id || booking.bookingId || `booking-${index}`}
+                      key={booking.id || booking.bookingísmoId || `booking-${index}`}
                       className="border border-blue-2 rounded-xl p-4 bg-gradient-to-br from-blue-50 to-teal-50 hover:border-teal-400 transition-all duration-300 shadow-md hover:shadow-xl"
                     >
                       <div className="flex justify-between items-center mb-3">
@@ -1092,55 +1119,58 @@ const ProfilePage = () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {eventBookings.length > 0 ? (
-                eventBookings.map((booking) => (
-                  <div
-                    key={booking.eventBookingId}
-                    className="border border-blue-200 rounded-xl p-4 bg-gradient-to-br from-purple-50 to-blue-50 hover:border-purple-400 transition-all duration-300 shadow-md hover:shadow-xl"
-                  >
-                    <div className="flex justify-between items-center mb-3">
-                      <div>
-                        <p className="text-sm font-medium text-blue-700">
-                          Program neve:{" "}
-                          <span className="font-bold text-purple-600">
-                            {booking.event?.name || "N/A"}
-                          </span>
-                        </p>
-                        <p className="text-sm font-medium text-blue-700">
-                          Dátum:{" "}
-                          <span className="font-bold text-purple-600">
-                            {booking.event?.date
-                              ? new Date(booking.event.date).toLocaleDateString("hu-HU")
-                              : "N/A"}
-                          </span>
-                        </p>
-                        <p className="text-sm font-medium text-blue-700">
-                          Helyszín:{" "}
-                          <span className="font-bold text-purple-600">
-                            {booking.event?.location || "N/A"}
-                          </span>
-                        </p>
-                        <p className="text-sm font-medium text-blue-700">
-                          Státusz:{" "}
-                          <span className="font-bold text-purple-600">
-                            {booking.status || "N/A"}
-                          </span>
-                        </p>
-                        <p className="text-sm font-medium text-blue-700">
-                          Jegyek száma:{" "}
-                          <span className="font-bold text-purple-600">
-                            {booking.numberOfTickets || "N/A"}
-                          </span>
-                        </p>
+                eventBookings.map((booking) => {
+                  const event = events.find((e) => e.eventId === booking.eventId); // Match booking to event
+                  return (
+                    <div
+                      key={booking.eventBookingId}
+                      className="border border-blue-200 rounded-xl p-4 bg-gradient-to-br from-purple-50 to-blue-50 hover:border-purple-400 transition-all duration-300 shadow-md hover:shadow-xl"
+                    >
+                      <div className="flex justify-between items-center mb-3">
+                        <div>
+                          <p className="text-sm font-medium text-blue-700">
+                            Program neve:{" "}
+                            <span className="font-bold text-purple-600">
+                              {event ? event.eventName : `Esemény #${booking.eventId}`}
+                            </span>
+                          </p>
+                          <p className="text-sm font-medium text-blue-700">
+                            Dátum:{" "}
+                            <span className="font-bold text-purple-600">
+                              {event && event.eventDate
+                                ? new Date(event.eventDate).toLocaleDateString("hu-HU")
+                                : "Nincs adat"}
+                            </span>
+                          </p>
+                          <p className="text-sm font-medium text-blue-700">
+                            Helyszín:{" "}
+                            <span className="font-bold text-purple-600">
+                              {event ? event.location : "Nincs adat"}
+                            </span>
+                          </p>
+                          <p className="text-sm font-medium text-blue-700">
+                            Státusz:{" "}
+                            <span className="font-bold text-purple-600">
+                              {booking.status || "Nincs adat"}
+                            </span>
+                          </p>
+                          <p className="text-sm font-medium text-blue-700">
+                            Jegyek száma:{" "}
+                            <span className="font-bold text-purple-600">
+                              {booking.numberOfTickets || "Nincs adat"}
+                            </span>
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteEventBooking(booking.eventBookingId)}
+                          className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-md"
+                        >
+                          Törlés
+                        </button>
                       </div>
-                      <button
-                        onClick={() => handleDeleteEventBooking(booking.eventBookingId)}
-                        className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-md"
-                      >
-                        Törlés
-                      </button>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <p className="text-blue-700 col-span-full">
                   Nincsenek program foglalásaid.
@@ -1431,7 +1461,7 @@ const ProfilePage = () => {
                     </div>
                     <div>
                       {passwordErrors.confirmPassword && (
-                        <p className="text-red-600 text-xs mb-1">
+                        <p className="text-red-/initialPassword600 text-xs mb-1">
                           {passwordErrors.confirmPassword}
                         </p>
                       )}
@@ -1901,37 +1931,34 @@ const ProfilePage = () => {
             </div>
           </div>
         )}
-        {showCommentModal && selectedBooking && (
+        {showCommentModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-md">
               <h3 className="text-xl font-semibold text-blue-800 mb-4">
-                Értékelés hozzáadása
+                Értékelés írása
               </h3>
-              <form onSubmit={handleSubmitComment}>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-blue-800 mb-2">
-                    Értékelés (1-5 csillag)
+              <form onSubmit={handleSubmitComment} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-blue-800 mb-1">
+                    Értékelés (1-5)
                   </label>
-                  <div className="flex items-center">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() =>
-                          setCommentData({ ...commentData, rating: star })
-                        }
-                        className={`text-2xl ${star <= commentData.rating
-                          ? "text-yellow-500"
-                          : "text-gray-300"
-                          }`}
-                      >
-                        ★
-                      </button>
-                    ))}
-                  </div>
+                  <input
+                    type="number"
+                    min="1"
+                    max="5"
+                    value={commentData.rating}
+                    onChange={(e) =>
+                      setCommentData({
+                        ...commentData,
+                        rating: parseInt(e.target.value),
+                      })
+                    }
+                    className="w-full p-2 border border-blue-200 rounded-lg"
+                    required
+                  />
                 </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-blue-800 mb-2">
+                <div>
+                  <label className="block text-sm font-medium text-blue-800 mb-1">
                     Megjegyzés
                   </label>
                   <textarea
@@ -1940,23 +1967,24 @@ const ProfilePage = () => {
                       setCommentData({ ...commentData, comment: e.target.value })
                     }
                     className="w-full p-2 border border-blue-200 rounded-lg"
-                    rows={4}
+                    rows="4"
+                    placeholder="Írja meg a véleményét..."
                     required
                   />
                 </div>
-                <div className="flex justify-end gap-2">
+                <div className="flex gap-2 justify-end">
+                  <button
+                    type="submit"
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                  >
+                    Küldés
+                  </button>
                   <button
                     type="button"
                     onClick={() => setShowCommentModal(false)}
-                    className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
                   >
                     Mégse
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                  >
-                    Küldés
                   </button>
                 </div>
               </form>

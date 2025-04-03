@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import "../styles/serprog.css";
 
 function Programs() {
   const [programs, setPrograms] = useState([]);
@@ -54,6 +53,7 @@ function Programs() {
         PaymentStatus: "Fizetésre vár",
         Notes: "",
       };
+      console.log("Booking payload:", payload, "Event ID:", selectedProgram.id);
       const response = await fetch(
         `${process.env.REACT_APP_API_BASE_URL}/Feedback/NewEvenBooking/${selectedProgram.id}`,
         {
@@ -80,23 +80,27 @@ function Programs() {
     const fetchPrograms = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(process.env.REACT_APP_API_BASE_URL + "/Events/Geteents");
+        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/Events/Geteents`);
         if (!response.ok) {
           throw new Error(`Hiba történt az adatok lekérésekor: ${response.status}`);
         }
         const data = await response.json();
+        console.log("Raw API response:", data); // Debugging: Log raw response
+
         const formattedPrograms = data.map((event) => ({
-          id: event.eventId,
-          name: event.eventName,
-          description: event.description,
-          images: event.images || "../img/default_imgage.png",
-          schedule: event.eventDate,
-          organizerName: event.organizerName,
-          contactInfo: event.contactInfo,
-          location: event.location,
-          capacity: event.capacity,
-          price: event.price,
+          id: event.eventId ?? event.EventId,
+          name: event.eventName ?? event.EventName ?? "Ismeretlen esemény",
+          description: event.description ?? event.Description ?? "",
+          images: event.images ?? event.Images ?? "../img/default_imgage.png",
+          schedule: event.eventDate ?? event.EventDate ?? null,
+          organizerName: event.organizerName ?? event.OrganizerName ?? "",
+          contactInfo: event.contactInfo ?? event.ContactInfo ?? "",
+          location: event.location ?? event.Location ?? "",
+          capacity: event.capacity ?? event.Capacity ?? 0,
+          price: event.price ?? event.Price ?? 0,
+          leftToGet: event.leftToGet ?? (event.capacity - (event.eventbookings?.reduce((sum, booking) => sum + booking.numberOfTickets, 0) || 0))
         }));
+        
         setPrograms(formattedPrograms);
       } catch (err) {
         console.error("Hiba történt az adatok lekérésekor:", err);
@@ -110,6 +114,7 @@ function Programs() {
   }, []);
 
   const openModal = (program) => {
+    console.log("Selected program:", program);
     setSelectedProgram(program);
     setNumberOfTickets(1);
   };
@@ -128,10 +133,10 @@ function Programs() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-lg text-blue-800">Programok betöltése...</p>
+          <div className="w-20 h-20 border-8 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-6 text-2xl font-semibold text-indigo-800 animate-pulse">Programok betöltése...</p>
         </div>
       </div>
     );
@@ -139,18 +144,29 @@ function Programs() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-blue-50 flex items-center justify-center px-4">
-        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center">
-          <div className="text-red-500 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      <div className="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center px-4">
+        <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-lg w-full text-center transform transition-all hover:scale-105">
+          <div className="text-red-600 mb-6">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-16 w-16 mx-auto"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Hiba történt</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button 
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Hiba történt</h2>
+          <p className="text-gray-700 mb-6 text-lg">{error}</p>
+          <button
             onClick={() => window.location.reload()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-indigo-600 text-white px-6 py-3 rounded-full text-lg font-semibold hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105"
           >
             Újrapróbálkozás
           </button>
@@ -160,50 +176,50 @@ function Programs() {
   }
 
   return (
-    <div className="min-h-screen bg-blue-50 py-6 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl sm:text-4xl font-bold text-blue-800 text-center mb-8 sm:mb-10">
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-indigo-800 text-center mb-10 animate-bounce tracking-tight">
           Programok
         </h1>
-        
+
         {programs.length === 0 ? (
-          <div className="text-center py-10">
-            <p className="text-gray-600 text-lg">Jelenleg nincsenek elérhető programok.</p>
+          <div className="text-center py-12">
+            <p className="text-xl text-gray-700 font-medium">Jelenleg nincsenek elérhető programok.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {programs.map((program) => (
               <div
                 key={program.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all hover:scale-105 hover:shadow-2xl"
               >
-                <div className="relative h-48 sm:h-56">
+                <div className="relative h-56 sm:h-64">
                   <img
                     src={program.images}
                     alt={program.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                     onError={(e) => {
                       e.target.src = "../img/default_imgage.png";
                     }}
                   />
-                  <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                    {program.capacity} férőhely
+                  <div className="absolute top-3 right-3 bg-indigo-600 text-white text-sm font-bold px-3 py-1 rounded-full shadow-md">
+                    {program.leftToGet} hely maradt
                   </div>
                 </div>
-                <div className="p-4 sm:p-5">
-                  <h2 className="text-xl sm:text-2xl font-semibold text-blue-800 mb-2 line-clamp-2">
+                <div className="p-6">
+                  <h2 className="text-2xl font-bold text-indigo-800 mb-3 line-clamp-2 leading-tight">
                     {program.name}
                   </h2>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                  <p className="text-gray-600 text-base mb-4 line-clamp-3">
                     {truncateDescription(program.description, 100)}
                   </p>
                   <div className="flex justify-between items-center">
-                    <span className="text-blue-600 font-bold">
-                      {program.price ? `${program.price.toLocaleString("hu-HU")} Ft` : "Ingyenes"}
+                    <span className="text-indigo-600 font-extrabold text-lg">
+                      {program.price ? `${program.price.toLocaleString("hu-HU")} Ft/fő` : "Ingyenes"}
                     </span>
                     <button
                       onClick={() => openModal(program)}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm sm:text-base hover:bg-blue-700 transition-colors"
+                      className="bg-indigo-600 text-white px-5 py-2 rounded-full font-semibold hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105"
                     >
                       Részletek
                     </button>
@@ -216,112 +232,116 @@ function Programs() {
       </div>
 
       {selectedProgram && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl mx-2 sm:mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="bg-blue-600 text-white p-4 sm:p-6 flex justify-between items-center sticky top-0 z-10">
-              <h2 className="text-xl sm:text-2xl font-bold">{selectedProgram.name}</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl mx-2 sm:mx-4 max-h-[90vh] overflow-y-auto transform transition-all scale-95 animate-fade-in">
+            <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-6 flex justify-between items-center sticky top-0 z-10">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">{selectedProgram.name}</h2>
               <button
                 onClick={closeModal}
-                className="text-white hover:text-blue-200 focus:outline-none"
+                className="text-white hover:text-indigo-200 focus:outline-none transition-colors duration-200"
                 aria-label="Bezárás"
               >
                 <svg
-                  className="w-6 h-6"
+                  className="w-8 h-8"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="p-4 sm:p-6 bg-blue-50">
-              <div className="flex flex-col md:flex-row gap-6">
+            <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50">
+              <div className="flex flex-col md:flex-row gap-8">
                 <div className="md:w-1/2">
                   <img
                     src={selectedProgram.images}
                     alt={selectedProgram.name}
-                    className="w-full h-48 sm:h-64 object-cover rounded-lg shadow-md"
+                    className="w-full h-64 sm:h-80 object-cover rounded-2xl shadow-lg transition-transform duration-300 hover:scale-105"
                     onError={(e) => {
                       e.target.src = "../img/default_imgage.png";
                     }}
                   />
                 </div>
-                <div className="md:w-1/2 space-y-3 sm:space-y-4 text-gray-800">
+                <div className="md:w-1/2 space-y-5 text-gray-800">
                   <div>
-                    <span className="font-semibold text-blue-800 block">Időpont:</span>
-                    {new Date(selectedProgram.schedule).toLocaleString("hu-HU")}
+                    <span className="font-bold text-indigo-700 text-lg block">Időpont:</span>
+                    <p className="text-gray-700">
+                      {selectedProgram.schedule
+                        ? new Date(selectedProgram.schedule).toLocaleString("hu-HU")
+                        : "N/A"}
+                    </p>
                   </div>
                   <div>
-                    <span className="font-semibold text-blue-800 block">Szervező:</span>
-                    {selectedProgram.organizerName || "N/A"}
+                    <span className="font-bold text-indigo-700 text-lg block">Szervező:</span>
+                    <p className="text-gray-700">{selectedProgram.organizerName || "N/A"}</p>
                   </div>
                   <div>
-                    <span className="font-semibold text-blue-800 block">Elérhetőség:</span>
-                    {selectedProgram.contactInfo || "N/A"}
+                    <span className="font-bold text-indigo-700 text-lg block">Elérhetőség:</span>
+                    <p className="text-gray-700">{selectedProgram.contactInfo || "N/A"}</p>
                   </div>
                   <div>
-                    <span className="font-semibold text-blue-800 block">Helyszín:</span>
-                    {selectedProgram.location || "N/A"}
+                    <span className="font-bold text-indigo-700 text-lg block">Helyszín:</span>
+                    <p className="text-gray-700">{selectedProgram.location || "N/A"}</p>
                   </div>
                   <div>
-                    <span className="font-semibold text-blue-800 block">Férőhelyek:</span>
-                    {selectedProgram.capacity || "N/A"}
+                    <span className="font-bold text-indigo-700 text-lg block">Férőhelyek:</span>
+                    <p className="text-gray-700">{selectedProgram.capacity || "N/A"} (Még {selectedProgram.leftToGet} hely van)</p>
                   </div>
                   <div>
-                    <span className="font-semibold text-blue-800 block">Ár / Fő:</span>
-                    {selectedProgram.price
-                      ? `${selectedProgram.price.toLocaleString("hu-HU")} Ft`
-                      : "Ingyenes"}
+                    <span className="font-bold text-indigo-700 text-lg block">Ár / Fő:</span>
+                    <p className="text-gray-700">
+                      {selectedProgram.price
+                        ? `${selectedProgram.price.toLocaleString("hu-HU")} Ft`
+                        : "Ingyenes"}
+                    </p>
                   </div>
                 </div>
               </div>
-              
-              <div className="mt-6">
-                <span className="font-semibold text-blue-800 block mb-2">Leírás:</span>
-                <p className="text-gray-700 bg-white p-3 rounded-lg">
+
+              <div className="mt-8">
+                <span className="font-bold text-indigo-700 text-lg block mb-3">Leírás:</span>
+                <p className="text-gray-700 bg-white p-4 rounded-xl shadow-inner">
                   {selectedProgram.description || "Nincs elérhető leírás."}
                 </p>
               </div>
-              
-              <div className="mt-6">
-                <label className="block text-sm font-semibold text-blue-800 mb-2">
-                  Jegyek száma
-                </label>
+
+              <div className="mt-8">
+                <label className="block text-lg font-bold text-indigo-700 mb-3">Jegyek száma</label>
                 <input
                   type="number"
                   min="1"
-                  max={selectedProgram.capacity}
+                  max={selectedProgram.leftToGet}
                   value={numberOfTickets}
                   onChange={(e) => {
                     const value = parseInt(e.target.value);
-                    if (value > 0 && value <= selectedProgram.capacity) {
+                    if (value > 0 && value <= selectedProgram.leftToGet) {
                       setNumberOfTickets(value);
                     }
                   }}
-                  className="w-full p-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full p-3 border-2 border-indigo-300 rounded-xl focus:ring-4 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200"
                 />
-                <div className="text-sm text-gray-500 mt-1">
-                  Maximálisan {selectedProgram.capacity} jegyet foglalhat
+                <div className="text-sm text-gray-600 mt-2">
+                  Maximálisan {selectedProgram.leftToGet} jegyet foglalhat
                 </div>
+                {selectedProgram.price > 0 && (
+                  <div className="mt-4 text-xl font-bold text-indigo-800">
+                    Összesen: {(selectedProgram.price * numberOfTickets).toLocaleString("hu-HU")} Ft
+                  </div>
+                )}
               </div>
             </div>
-            <div className="bg-blue-100 p-4 sm:p-6 flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
+            <div className="bg-indigo-100 p-6 flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-6">
               <button
                 onClick={handleBooking}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-800 transition-colors w-full sm:w-auto"
+                className="bg-indigo-600 text-white px-6 py-3 rounded-full font-bold text-lg hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-md"
               >
                 Foglalás
               </button>
               <button
                 onClick={closeModal}
-                className="bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 transition-colors w-full sm:w-auto"
+                className="bg-gray-600 text-white px-6 py-3 rounded-full font-bold text-lg hover:bg-gray-700 transition-all duration-300 transform hover:scale-105 shadow-md"
               >
                 Bezárás
               </button>

@@ -13,9 +13,8 @@ function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showProfileModal, setShowProfileModal] = useState(false);
-    const menuRef = useRef(null); // Ref a lenyitható menühöz
+    const menuRef = useRef(null);
 
-    // Minden rendereléskor ellenőrizzük a localStorage-ot
     const user = localStorage.getItem('username');
 
     const closeModal = () => setActiveModal(null);
@@ -23,23 +22,21 @@ function Navbar() {
     const handleLogout = () => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('username');
-        setMenuOpen(false); // Menü bezárása
+        setMenuOpen(false);
         setShowProfileModal(false);
-        navigate('/'); // Visszatérés a főoldalra
+        navigate('/');
     };
 
     const handleMenuItemClick = () => {
-        setMenuOpen(false); // Menü bezárása kattintáskor
+        setMenuOpen(false);
     };
 
-    // Eseményfigyelő a menü bezárására, ha kívülre kattintanak
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
                 setMenuOpen(false);
             }
         };
-
         document.addEventListener('click', handleClickOutside);
         return () => {
             document.removeEventListener('click', handleClickOutside);
@@ -48,21 +45,23 @@ function Navbar() {
 
     return (
         <>
-            <nav className="sticky top-0 bg-gradient-to-r from-blue-900 to-blue-800 shadow-lg w-full z-50">
+            <nav className="sticky top-0 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 shadow-xl w-full z-50 transition-all duration-300">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
                     <div className="flex items-center space-x-4">
-                        <img
-                            src="../logo.png"
-                            alt="Logó"
-                            className="h-9 rounded-lg shadow-lg"
-                            style={{
-                                maskImage: "radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)",
-                                WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)",
-                            }}
-                        />
+                        <Link to="/" onClick={() => setIsMobileMenuOpen(false)}>
+                            <img
+                                src="../logo.png"
+                                alt="Logó"
+                                className="h-10 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300 cursor-pointer"
+                                style={{
+                                    maskImage: "radial-gradient(circle, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%)",
+                                    WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%)",
+                                }}
+                            />
+                        </Link>
                         <button
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            className="md:hidden text-white hover:text-blue-200 transition-colors"
+                            className="md:hidden text-white hover:text-blue-300 transition-colors duration-200 p-1 rounded-full hover:bg-white/10"
                         >
                             {isMobileMenuOpen ? (
                                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,20 +75,55 @@ function Navbar() {
                         </button>
                     </div>
 
-                    <div className="hidden md:flex space-x-8">
-                        <NavLink to="/" className={({ isActive }) => `text-white hover:text-blue-200 transition-colors ${isActive ? 'text-blue-200' : ''}`}>
+                    <div className="hidden md:flex space-x-6">
+                        <NavLink
+                            to="/"
+                            className={({ isActive }) =>
+                                `relative text-white hover:text-blue-300 hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 ease-in-out ${
+                                    isActive ? 'text-blue-300 bg-white/20' : ''
+                                }`
+                            }
+                        >
                             Kezdőlap
                         </NavLink>
-                        <NavLink to="/szobak" className={({ isActive }) => `text-white hover:text-blue-200 transition-colors ${isActive ? 'text-blue-200' : ''}`}>
+                        <NavLink
+                            to="/szobak"
+                            className={({ isActive }) =>
+                                `relative text-white hover:text-blue-300 hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 ease-in-out ${
+                                    isActive ? 'text-blue-300 bg-white/20' : ''
+                                }`
+                            }
+                        >
                             Szobák
                         </NavLink>
-                        <NavLink to="/szolgaltatasok" className={({ isActive }) => `text-white hover:text-blue-200 transition-colors ${isActive ? 'text-blue-200' : ''}`}>
+                        <NavLink
+                            to="/szolgaltatasok"
+                            className={({ isActive }) =>
+                                `relative text-white hover:text-blue-300 hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 ease-in-out ${
+                                    isActive ? 'text-blue-300 bg-white/20' : ''
+                                }`
+                            }
+                        >
                             Szolgáltatások
                         </NavLink>
-                        <NavLink to="/programok" className={({ isActive }) => `text-white hover:text-blue-200 transition-colors ${isActive ? 'text-blue-200' : ''}`}>
+                        <NavLink
+                            to="/programok"
+                            className={({ isActive }) =>
+                                `relative text-white hover:text-blue-300 hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 ease-in-out ${
+                                    isActive ? 'text-blue-300 bg-white/20' : ''
+                                }`
+                            }
+                        >
                             Programok
                         </NavLink>
-                        <NavLink to="/rolunk" className={({ isActive }) => `text-white hover:text-blue-200 transition-colors ${isActive ? 'text-blue-200' : ''}`}>
+                        <NavLink
+                            to="/rolunk"
+                            className={({ isActive }) =>
+                                `relative text-white hover:text-blue-300 hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-300 ease-in-out ${
+                                    isActive ? 'text-blue-300 bg-white/20' : ''
+                                }`
+                            }
+                        >
                             Rólunk
                         </NavLink>
                     </div>
@@ -97,16 +131,20 @@ function Navbar() {
                     <div className="relative" ref={menuRef}>
                         <button
                             onClick={() => setMenuOpen(!menuOpen)}
-                            className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                            className="flex items-center justify-center w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 transform hover:scale-110 hover:shadow-lg group"
                         >
-                            <FontAwesomeIcon icon={faUser} className="text-white text-xl" />
+                            <FontAwesomeIcon
+                                icon={faUser}
+                                className="text-white text-xl group-hover:text-blue-300 transition-colors duration-300"
+                            />
                         </button>
                         {menuOpen && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2">
+                            <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl py-3 transform origin-top-right animate-[fadeIn_0.2s_ease-out] border border-blue-100">
                                 {user ? (
                                     <>
                                         <Link to="/profile" onClick={handleMenuItemClick}>
-                                            <button className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700">
+                                            <button className="block w-full text-left px-5 py-3 hover:bg-blue-50 text-gray-700 transition-colors duration-200 flex items-center">
+                                                <span className="material-symbols-outlined mr-2 text-blue-600">person</span>
                                                 Profil megnyitása
                                             </button>
                                         </Link>
@@ -115,8 +153,9 @@ function Navbar() {
                                                 handleLogout();
                                                 handleMenuItemClick();
                                             }}
-                                            className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
+                                            className="block w-full text-left px-5 py-3 hover:bg-blue-50 text-gray-700 transition-colors duration-200 flex items-center"
                                         >
+                                            <span className="material-symbols-outlined mr-2 text-red-600">logout</span>
                                             Kijelentkezés
                                         </button>
                                     </>
@@ -127,8 +166,9 @@ function Navbar() {
                                                 setActiveModal('login');
                                                 handleMenuItemClick();
                                             }}
-                                            className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
+                                            className="block w-full text-left px-5 py-3 hover:bg-blue-50 text-gray-700 transition-colors duration-200 flex items-center"
                                         >
+                                            <span className="material-symbols-outlined mr-2 text-green-600">login</span>
                                             Bejelentkezés
                                         </button>
                                         <button
@@ -136,8 +176,9 @@ function Navbar() {
                                                 setActiveModal('register');
                                                 handleMenuItemClick();
                                             }}
-                                            className="block w-full text-left px-4 py-2 hover:bg-blue-50 text-gray-700"
+                                            className="block w-full text-left px-5 py-3 hover:bg-blue-50 text-gray-700 transition-colors duration-200 flex items-center"
                                         >
+                                            <span className="material-symbols-outlined mr-2 text-blue-600">person_add</span>
                                             Regisztráció
                                         </button>
                                     </>
@@ -148,39 +189,49 @@ function Navbar() {
                 </div>
 
                 {isMobileMenuOpen && (
-                    <div className="md:hidden absolute top-full left-0 w-full bg-gradient-to-r from-blue-900 to-blue-800 z-50">
-                        <div className="px-4 py-2 space-y-2">
+                    <div className="md:hidden absolute top-full left-0 w-full bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 shadow-lg z-50 animate-[slideDown_0.3s_ease-out]">
+                        <div className="px-4 py-4 space-y-3">
                             <NavLink
                                 to="/"
-                                className={({ isActive }) => `block text-white hover:text-blue-200 py-2 px-4 ${isActive ? 'text-blue-200' : ''}`}
+                                className={({ isActive }) =>
+                                    `block text-white hover:text-blue-300 py-3 px-5 rounded-lg hover:bg-white/10 transition-all duration-200 ${isActive ? 'text-blue-300 bg-white/20' : ''}`
+                                }
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 Kezdőlap
                             </NavLink>
                             <NavLink
                                 to="/szobak"
-                                className={({ isActive }) => `block text-white hover:text-blue-200 py-2 px-4 ${isActive ? 'text-blue-200' : ''}`}
+                                className={({ isActive }) =>
+                                    `block text-white hover:text-blue-300 py-3 px-5 rounded-lg hover:bg-white/10 transition-all duration-200 ${isActive ? 'text-blue-300 bg-white/20' : ''}`
+                                }
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 Szobák
                             </NavLink>
                             <NavLink
                                 to="/szolgaltatasok"
-                                className={({ isActive }) => `block text-white hover:text-blue-200 py-2 px-4 ${isActive ? 'text-blue-200' : ''}`}
+                                className={({ isActive }) =>
+                                    `block text-white hover:text-blue-300 py-3 px-5 rounded-lg hover:bg-white/10 transition-all duration-200 ${isActive ? 'text-blue-300 bg-white/20' : ''}`
+                                }
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 Szolgáltatások
                             </NavLink>
                             <NavLink
                                 to="/programok"
-                                className={({ isActive }) => `block text-white hover:text-blue-200 py-2 px-4 ${isActive ? 'text-blue-200' : ''}`}
+                                className={({ isActive }) =>
+                                    `block text-white hover:text-blue-300 py-3 px-5 rounded-lg hover:bg-white/10 transition-all duration-200 ${isActive ? 'text-blue-300 bg-white/20' : ''}`
+                                }
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 Programok
                             </NavLink>
                             <NavLink
                                 to="/rolunk"
-                                className={({ isActive }) => `block text-white hover:text-blue-200 py-2 px-4 ${isActive ? 'text-blue-200' : ''}`}
+                                className={({ isActive }) =>
+                                    `block text-white hover:text-blue-300 py-3 px-5 rounded-lg hover:bg-white/10 transition-all duration-200 ${isActive ? 'text-blue-300 bg-white/20' : ''}`
+                                }
                                 onClick={() => setIsMobileMenuOpen(false)}
                             >
                                 Rólunk
@@ -212,6 +263,28 @@ function Navbar() {
                     onLogout={handleLogout}
                 />
             )}
+
+            {/* Animációk definiálása */}
+            <style jsx global>{`
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                    }
+                    to {
+                        opacity: 1;
+                    }
+                }
+            `}</style>
         </>
     );
 }
