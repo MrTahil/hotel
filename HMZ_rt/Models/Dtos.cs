@@ -415,3 +415,17 @@ public class EmailBooking
     public int UserId { get; set; }
 
 }
+public class Newslettersign
+{
+    [Required(ErrorMessage = "Az email kötelező.")]
+    [EmailAddress]
+    public string Email { get; set; }
+}
+
+public class NewsletterDto
+{
+    [Required(ErrorMessage = "A tárgy megadása kötelező")]
+    public string Subject { get; set; }
+    [Required(ErrorMessage = "A body kötelező")]
+    public string HtmlBody { get; set; }
+}

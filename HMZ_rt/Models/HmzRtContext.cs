@@ -33,6 +33,8 @@ public partial class HmzRtContext : DbContext
 
     public virtual DbSet<Marketing> Marketings { get; set; }
 
+    public virtual DbSet<Newsletter> Newsletters { get; set; }
+
     public virtual DbSet<Notification> Notifications { get; set; }
 
     public virtual DbSet<Payment> Payments { get; set; }
@@ -530,6 +532,29 @@ public partial class HmzRtContext : DbContext
                 .HasMaxLength(255)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnName("target_audience");
+        });
+
+        modelBuilder.Entity<Newsletter>(entity =>
+        {
+            entity.HasKey(e => e.Newsid).HasName("PRIMARY");
+
+            entity.ToTable("newsletter");
+
+            entity.HasIndex(e => e.Userid, "userid");
+
+            entity.Property(e => e.Newsid)
+                .HasColumnType("int(11)")
+                .HasColumnName("newsid");
+            entity.Property(e => e.Email)
+                .HasMaxLength(255)
+                .HasColumnName("email");
+            entity.Property(e => e.Userid)
+                .HasColumnType("int(11)")
+                .HasColumnName("userid");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Newsletters)
+                .HasForeignKey(d => d.Userid)
+                .HasConstraintName("userfk");
         });
 
         modelBuilder.Entity<Notification>(entity =>

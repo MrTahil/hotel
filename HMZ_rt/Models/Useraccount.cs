@@ -35,5 +35,7 @@ public partial class Useraccount
 
     public virtual ICollection<Guest> Guests { get; set; } = new List<Guest>();
 
+    public virtual ICollection<Newsletter> Newsletters { get; set; } = new List<Newsletter>();
+
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }

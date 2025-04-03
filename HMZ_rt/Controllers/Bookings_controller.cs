@@ -381,14 +381,31 @@ namespace HMZ_rt.Controllers
             {
                 return StatusCode(400, "Túl sok fővel próbáltál foglalni");
             }
+            TimeSpan duration = TimeSpan.Zero;
+            if (crtbooking.CheckOutDate.HasValue && crtbooking.CheckInDate.HasValue)
+            {
+                duration = crtbooking.CheckOutDate.Value - crtbooking.CheckInDate.Value;
+            }
+            if (duration.Days>30)
+            {
+                return StatusCode(400, "Nem foglalhatsz 30 napnál többre, ha mégis szeretnél kérlek E-mail-ban vagy telefonon keress fel minket");
 
+            }
+            if (crtbooking.CheckInDate < DateTime.Now)
+            {
+                return StatusCode(400, "Nem foglalhatsz visszafele");
+            }
+            if (crtbooking.CheckInDate > DateTime.Now.AddYears(1) )
+            {
+                return StatusCode(400, "Nem foglalhatsz 1 évnél előrébbre");
+            }
             var booking = new Booking
             {
                 CheckInDate = crtbooking.CheckInDate,
                 CheckOutDate = crtbooking.CheckOutDate,
                 GuestId = crtbooking.GuestId,
                 RoomId = roomid,
-                TotalPrice = roomData.PricePerNight * crtbooking.NumberOfGuests,
+                TotalPrice = roomData.PricePerNight * crtbooking.NumberOfGuests * duration.Days,
                 BookingDate = DateTime.Now,
                 PaymentStatus = "Fizetésre vár",
                 NumberOfGuests = crtbooking.NumberOfGuests,
@@ -638,6 +655,7 @@ namespace HMZ_rt.Controllers
                 
                     var booking = await _context.Bookings
                         .Where(x => x.GuestId == guestdata.GuestId)
+                        .Where(x => x.BookingId == bookdata.BookingId)
                         .Include(x => x.Guest)
                         .Include(x => x.Room)
                         .ToListAsync();
