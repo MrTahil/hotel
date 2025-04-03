@@ -215,8 +215,8 @@ export const Foglalas = () => {
     const age = new Date().getFullYear() - birthDate.getFullYear();
 
     if (age < 3) return '0-3';
-    if (age < 18) return 'gyermekkoru';
-    if (age < 26) return 'diak';
+    if (4 < age < 18) return 'gyermekkoru';
+    if (19 < age < 26) return 'diak';
     if (age >= 65) return 'idoskoru';
     return 'felnott';
   };
