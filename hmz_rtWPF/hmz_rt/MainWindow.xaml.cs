@@ -4459,9 +4459,6 @@ namespace RoomListApp
             }
         }
 
-        /// <summary>
-        /// ///
-        /// </summary>
 
 
         private readonly string _templateDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates");
@@ -4506,27 +4503,21 @@ namespace RoomListApp
                 {
                     string templateContent = File.ReadAllText(templatePath);
 
-                    // Email tárgy alapértelmezett beállítása a sablon neve alapján
                     EmailSubjectTextBox.Text = $"HMZ RT - {Path.GetFileNameWithoutExtension(templatePath)}";
 
-                    // Változók kinyerése a template-ből
                     var variables = ExtractVariablesFromTemplate(templateContent);
 
-                    // Változók panel létrehozása
                     CreateVariablesPanel(variables);
 
-                    // Eredeti template elmentése
                     _currentTemplateContent = templateContent;
                 }
             }
         }
 
-        // Változók kinyerése a template-ből
         private List<string> ExtractVariablesFromTemplate(string templateContent)
         {
             var variables = new List<string>();
 
-            // Extract the body section
             var bodyMatch = Regex.Match(templateContent, @"<body[^>]*>([\s\S]*?)<\/body>", RegexOptions.IgnoreCase);
 
             string contentToSearch = bodyMatch.Success ? bodyMatch.Groups[1].Value : templateContent;
@@ -4545,7 +4536,6 @@ namespace RoomListApp
 
             return variables;
         }
-        // Változók panel létrehozása
         private void CreateVariablesPanel(List<string> variables)
         {
             VariablesStackPanel.Children.Clear();
@@ -4604,28 +4594,23 @@ namespace RoomListApp
                     return;
                 }
 
-                // Változók értékeinek összegyűjtése és behelyettesítése csak a body részben
                 string htmlBody = _currentTemplateContent;
 
-                // Extract the body section
                 var bodyMatch = Regex.Match(htmlBody, @"<body[^>]*>([\s\S]*?)<\/body>", RegexOptions.IgnoreCase);
 
                 if (bodyMatch.Success)
                 {
                     string bodyContent = bodyMatch.Groups[1].Value;
 
-                    // Replace variables only in the body content
                     foreach (var entry in _variableTextBoxes)
                     {
                         bodyContent = bodyContent.Replace($"{{{entry.Key}}}", entry.Value.Text);
                     }
 
-                    // Replace the body content in the full template
                     htmlBody = htmlBody.Replace(bodyMatch.Groups[1].Value, bodyContent);
                 }
                 else
                 {
-                    // Ha nincs body tag, akkor az egész tartalmat helyettesítjük (fallback)
                     foreach (var entry in _variableTextBoxes)
                     {
                         htmlBody = htmlBody.Replace($"{{{entry.Key}}}", entry.Value.Text);
