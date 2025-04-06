@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentin-napi Ajánlat</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+            background-color: #fff0f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .header {
+            background: linear-gradient(to right, #ff758c, #ff7eb3);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .hotel-name {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .tagline {
+            font-size: 16px;
+            color: #fff;
+        }
+        .content {
+            padding: 20px;
+        }
+        .valentine-banner {
+            text-align: center;
+            margin: 10px 0 30px 0;
+        }
+        .valentine-title {
+            font-size: 26px;
+            font-weight: bold;
+            color: #d81b60;
+            margin-bottom: 5px;
+        }
+        .valentine-subtitle {
+            font-size: 18px;
+            color: #e91e63;
+            font-style: italic;
+        }
+        .heart-divider {
+            text-align: center;
+            font-size: 24px;
+            color: #ff4081;
+            margin: 15px 0;
+        }
+        .promotion-box {
+            background-color: #fff9fb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.1);
+            border: 1px solid #ffe4e1;
+        }
+        .promotion-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .promotion-content {
+            padding: 25px;
+        }
+        .promotion-heading {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #c2185b;
+            text-align: center;
+        }
+        .promotion-description {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #424242;
+        }
+        .romantic-features {
+            margin-bottom: 25px;
+            background-color: #fce4ec;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .feature-title {
+            font-weight: bold;
+            color: #ad1457;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .feature-item {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+        .feature-item:before {
+            content: "♥";
+            position: absolute;
+            left: 0;
+            color: #e91e63;
+        }
+        .price-box {
+            background: linear-gradient(to right, #fff9fb, #fce4ec);
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .price-label {
+            font-size: 16px;
+            color: #880e4f;
+            margin-bottom: 5px;
+        }
+        .price-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #c2185b;
+        }
+        .price-period {
+            font-size: 14px;
+            color: #616161;
+        }
+        .button-container {
+            text-align: center;
+            margin: 25px 0;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(to right, #ff758c, #ff7eb3);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 4px 8px rgba(255, 105, 180, 0.2);
+            transition: transform 0.3s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .limited-offer {
+            background-color: #fce4ec;
+            border: 1px dashed #f06292;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            margin: 25px 0;
+        }
+        .limited-text {
+            font-weight: bold;
+            color: #c2185b;
+            font-size: 16px;
+        }
+        .footer {
+            background: linear-gradient(to right, #ff758c, #ff7eb3);
+            color: white;
+            padding: 25px;
+        }
+        .contact-info {
+            margin-bottom: 20px;
+        }
+        .contact-heading {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .contact-item {
+            margin-bottom: 8px;
+        }
+        .social-heading {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .social-links {
+            margin-bottom: 20px;
+        }
+        .social-link {
+            color: white;
+            text-decoration: none;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            padding-top: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: white;
+        }
+        .unsubscribe {
+            color: white;
+            text-decoration: underline;
+        }
+        @media only screen and (max-width: 480px) {
+            .button {
+                display: block;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="hotel-name">{HotelName}</div>
+            <div class="tagline">{HotelTagline}</div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Valentine Banner -->
+            <div class="valentine-banner">
+                <div class="valentine-title">Valentin-napi Romantikus Ajánlat</div>
+                <div class="valentine-subtitle">Ünnepeljék együtt a szerelmet!</div>
+            </div>
+            
+            <div class="heart-divider">♥ ♥ ♥</div>
+
+            <!-- Main Promotion -->
+            <div class="promotion-box">
+                <img src="{MainPromotionImageUrl}" alt="{MainPromotionImageAlt}" class="promotion-image">
+                <div class="promotion-content">
+                    <h2 class="promotion-heading">{MainPromotionHeading}</h2>
+                    <p class="promotion-description">{MainPromotionDescription}</p>
+                    
+                    <div class="romantic-features">
+                        <div class="feature-title">A csomag tartalma:</div>
+                        <div class="feature-item">{RomanticFeature1}</div>
+                        <div class="feature-item">{RomanticFeature2}</div>
+                        <div class="feature-item">{RomanticFeature3}</div>
+                        <div class="feature-item">{RomanticFeature4}</div>
+                        <div class="feature-item">{RomanticFeature5}</div>
+                    </div>
+                    
+                    <div class="price-box">
+                        <div class="price-label">Romantikus csomag ára:</div>
+                        <div class="price-value">{PackagePrice}</div>
+                        <div class="price-period">{PricePeriod}</div>
+                    </div>
+                    
+                    <div class="button-container">
+                        <a href="{BookingButtonUrl}" class="button">{BookingButtonText}</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="heart-divider">♥ ♥ ♥</div>
+
+            <!-- Limited Offer -->
+            <div class="limited-offer">
+                <p class="limited-text">{LimitedOfferText}</p>
+            </div>
+
+            <!-- Additional Info -->
+            <p style="text-align: center; color: #616161;">{AdditionalInfo}</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="contact-info">
+                <div class="contact-heading">Kapcsolat</div>
+                <div class="contact-item">{Address}</div>
+                <div class="contact-item">{Phone}</div>
+                <div class="contact-item">{Email}</div>
+            </div>
+            <div class="social-heading">Kövessen Minket</div>
+            <div class="social-links">
+                <a href="{FacebookUrl}" class="social-link">Facebook</a>
+                <a href="{InstagramUrl}" class="social-link">Instagram</a>
+                <a href="{TwitterUrl}" class="social-link">Twitter</a>
+            </div>
+            <div class="footer-bottom">
+                <p>© {CurrentYear} {HotelName}. Minden jog fenntartva.</p>
+                <p>
+                    <a href="{UnsubscribeUrl}" class="unsubscribe">Leiratkozás</a> a hírlevélről
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
