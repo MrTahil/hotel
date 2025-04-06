@@ -20,6 +20,8 @@ using hmz_rt.Models.Converters;
 using System.IO;
 using System.Windows.Media.Imaging;
 using hmz_rt.Models.Services;
+using System.Windows.Documents;
+using System.Text.RegularExpressions;
 
 
 namespace RoomListApp
@@ -77,8 +79,6 @@ namespace RoomListApp
         private EventService _eventService;
 
 
-
-
         public MainWindow()
         {
             InitializeComponent();
@@ -109,6 +109,10 @@ namespace RoomListApp
             _eventBookingsService = new EventBookingsService(_tokenService);
             _guestService = new GuestService(_tokenService);
             _eventService = new EventService(_tokenService);
+
+            LoadEmailTemplates();
+
+
 
         }
 
@@ -176,6 +180,10 @@ namespace RoomListApp
             }
         }
 
+        private void RefreshRoomsButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadRoomsToListView();
+        }
         private void AddRoomButton_Click(object sender, RoutedEventArgs e)
         {
             ClearRoomFormFields();
@@ -583,6 +591,10 @@ namespace RoomListApp
             dashboardGrid.Visibility = Visibility.Visible;
         }
 
+        private void RefreshStaffButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadStaffToListView();
+        }
         private async Task LoadStaffToListView()
         {
             try
@@ -895,6 +907,11 @@ namespace RoomListApp
         {
             promotionsContainer.Visibility = Visibility.Collapsed;
             dashboardGrid.Visibility = Visibility.Visible;
+        }
+
+        private void RefreshPromotionsButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadPromotionsToListView();
         }
 
         private async Task LoadPromotionsToListView()
@@ -1233,6 +1250,10 @@ namespace RoomListApp
             dashboardGrid.Visibility = Visibility.Visible;
         }
 
+        private void RefreshGuestsButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadGuestsToListView();
+        }
         private async Task LoadGuestsToListView()
         {
             try
@@ -1594,6 +1615,10 @@ namespace RoomListApp
             bookingTypeSelectionContainer.Visibility = Visibility.Visible;
         }
 
+        private void RefreshBookingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadBookingsToListView();
+        }
         private async Task LoadBookingsToListView()
         {
             try
@@ -3137,6 +3162,10 @@ namespace RoomListApp
             dashboardGrid.Visibility = Visibility.Visible;
         }
 
+        private void RefreshMaintenanceButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadMaintenanceToListView();
+        }
         private async Task LoadMaintenanceToListView()
         {
             try
@@ -3587,6 +3616,10 @@ namespace RoomListApp
             dashboardGrid.Visibility = Visibility.Visible;
         }
 
+        private void RefreshEventsButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadEventsToListView();
+        }
         private async Task LoadEventsToListView()
         {
             try
@@ -4425,6 +4458,254 @@ namespace RoomListApp
                 MessageBox.Show($"Hiba történt a státusz módosításakor: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        /// <summary>
+        /// ///
+        /// </summary>
+
+
+        private readonly string _templateDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates");
+        private string _currentTemplateContent = "";
+        private Dictionary<string, TextBox> _variableTextBoxes = new Dictionary<string, TextBox>();
+
+        private void LoadEmailTemplates()
+        {
+            try
+            {
+                if (!Directory.Exists(_templateDirectory))
+                {
+                    Directory.CreateDirectory(_templateDirectory);
+                    MessageBox.Show("A sablonok mappa nem létezett, létrehoztuk.", "Információ", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+
+                var templates = Directory.GetFiles(_templateDirectory, "*.html")
+                    .Select(file => new { Name = Path.GetFileNameWithoutExtension(file), Path = file })
+                    .ToList();
+
+                TemplateComboBox.ItemsSource = templates;
+                TemplateComboBox.DisplayMemberPath = "Name";
+                TemplateComboBox.SelectedValuePath = "Path";
+
+                if (templates.Count > 0)
+                    TemplateComboBox.SelectedIndex = 0;
+                else
+                    MessageBox.Show("Nincsenek email sablonok a Templates mappában.", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt a sablonok betöltésekor: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void TemplateComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (TemplateComboBox.SelectedValue != null)
+            {
+                string templatePath = TemplateComboBox.SelectedValue.ToString();
+                if (File.Exists(templatePath))
+                {
+                    string templateContent = File.ReadAllText(templatePath);
+
+                    // Email tárgy alapértelmezett beállítása a sablon neve alapján
+                    EmailSubjectTextBox.Text = $"HMZ RT - {Path.GetFileNameWithoutExtension(templatePath)}";
+
+                    // Változók kinyerése a template-ből
+                    var variables = ExtractVariablesFromTemplate(templateContent);
+
+                    // Változók panel létrehozása
+                    CreateVariablesPanel(variables);
+
+                    // Eredeti template elmentése
+                    _currentTemplateContent = templateContent;
+                }
+            }
+        }
+
+        // Változók kinyerése a template-ből
+        private List<string> ExtractVariablesFromTemplate(string templateContent)
+        {
+            var variables = new List<string>();
+
+            // Extract the body section
+            var bodyMatch = Regex.Match(templateContent, @"<body[^>]*>([\s\S]*?)<\/body>", RegexOptions.IgnoreCase);
+
+            string contentToSearch = bodyMatch.Success ? bodyMatch.Groups[1].Value : templateContent;
+
+            var regex = new System.Text.RegularExpressions.Regex(@"\{([^{}]+)\}");
+            var matches = regex.Matches(contentToSearch);
+
+            foreach (System.Text.RegularExpressions.Match match in matches)
+            {
+                string variable = match.Groups[1].Value;
+                if (!variables.Contains(variable))
+                {
+                    variables.Add(variable);
+                }
+            }
+
+            return variables;
+        }
+        // Változók panel létrehozása
+        private void CreateVariablesPanel(List<string> variables)
+        {
+            VariablesStackPanel.Children.Clear();
+            _variableTextBoxes.Clear();
+
+            foreach (var variable in variables)
+            {
+                var border = new Border
+                {
+                    Margin = new Thickness(0, 0, 0, 15),
+                    BorderThickness = new Thickness(1),
+                    BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E2E8F0")),
+                    CornerRadius = new CornerRadius(8),
+                    Padding = new Thickness(15)
+                };
+
+                var stackPanel = new StackPanel();
+
+                var label = new TextBlock
+                {
+                    Text = variable,
+                    FontWeight = FontWeights.SemiBold,
+                    FontSize = 16,
+                    Margin = new Thickness(0, 0, 0, 10)
+                };
+
+                var textBox = new TextBox
+                {
+                    Padding = new Thickness(10, 8, 10, 8),
+                    FontSize = 14
+                };
+
+                _variableTextBoxes[variable] = textBox;
+
+                stackPanel.Children.Add(label);
+                stackPanel.Children.Add(textBox);
+                border.Child = stackPanel;
+
+                VariablesStackPanel.Children.Add(border);
+            }
+        }
+
+        private async void SendNewsletterButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(EmailSubjectTextBox.Text))
+                {
+                    MessageBox.Show("Kérjük, adja meg az email tárgyát!", "Hiányzó adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(_currentTemplateContent))
+                {
+                    MessageBox.Show("Kérjük, válasszon sablont!", "Hiányzó adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Változók értékeinek összegyűjtése és behelyettesítése csak a body részben
+                string htmlBody = _currentTemplateContent;
+
+                // Extract the body section
+                var bodyMatch = Regex.Match(htmlBody, @"<body[^>]*>([\s\S]*?)<\/body>", RegexOptions.IgnoreCase);
+
+                if (bodyMatch.Success)
+                {
+                    string bodyContent = bodyMatch.Groups[1].Value;
+
+                    // Replace variables only in the body content
+                    foreach (var entry in _variableTextBoxes)
+                    {
+                        bodyContent = bodyContent.Replace($"{{{entry.Key}}}", entry.Value.Text);
+                    }
+
+                    // Replace the body content in the full template
+                    htmlBody = htmlBody.Replace(bodyMatch.Groups[1].Value, bodyContent);
+                }
+                else
+                {
+                    // Ha nincs body tag, akkor az egész tartalmat helyettesítjük (fallback)
+                    foreach (var entry in _variableTextBoxes)
+                    {
+                        htmlBody = htmlBody.Replace($"{{{entry.Key}}}", entry.Value.Text);
+                    }
+                }
+
+                var newsletterDto = new NewsletterDto
+                {
+                    Subject = EmailSubjectTextBox.Text,
+                    HtmlBody = htmlBody
+                };
+
+                await SendNewsletter(newsletterDto);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt az email küldésekor: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private async Task SendNewsletter(NewsletterDto newsletterDto)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(TokenStorage.AuthToken))
+                {
+                    MessageBox.Show("Nincs érvényes token!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenStorage.AuthToken);
+
+                var content = new StringContent(
+                    JsonSerializer.Serialize(newsletterDto, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
+                    System.Text.Encoding.UTF8,
+                    "application/json");
+
+                var response = await _httpClient.PostAsync("Newsletter/SendNewsletter", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("A hírlevél sikeresen elküldve!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                    newsletterContainer.Visibility = Visibility.Collapsed;
+                    dashboardGrid.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    string errorResponse = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Hiba a hírlevél küldésekor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void EmailCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            dashboardGrid.Visibility = Visibility.Collapsed;
+            newsletterContainer.Visibility = Visibility.Visible;
+        }
+
+        private void NewsletterBackButton_Click(object sender, RoutedEventArgs e)
+        {
+            newsletterContainer.Visibility = Visibility.Collapsed;
+            dashboardGrid.Visibility = Visibility.Visible;
+        }
+
+        private void CancelNewsletterButton_Click(object sender, RoutedEventArgs e)
+        {
+            newsletterContainer.Visibility = Visibility.Collapsed;
+            dashboardGrid.Visibility = Visibility.Visible;
+        }
+
+        private void RefreshTemplatesButton_Click(object sender, RoutedEventArgs e)
+        {
+            LoadEmailTemplates();
+        }
+
+
     }
 }
 
