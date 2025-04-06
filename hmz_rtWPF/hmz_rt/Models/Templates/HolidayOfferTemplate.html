@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ünnepi Ajánlat</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .header {
+            background: linear-gradient(to right, #1e3a5f, #2c5282);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .hotel-name {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .tagline {
+            font-size: 16px;
+            color: #e0e0e0;
+        }
+        .content {
+            padding: 20px;
+        }
+        .holiday-banner {
+            background-color: #c8102e;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 25px;
+        }
+        .holiday-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .holiday-subtitle {
+            font-size: 16px;
+        }
+        .snowflake-divider {
+            text-align: center;
+            font-size: 24px;
+            color: #2c5282;
+            margin: 15px 0;
+        }
+        .promotion-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .promotion-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .promotion-content {
+            padding: 25px;
+        }
+        .promotion-heading {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #1e3a5f;
+        }
+        .promotion-description {
+            margin-bottom: 20px;
+            color: #495057;
+        }
+        .holiday-features {
+            background-color: #e9f2fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .feature-title {
+            font-weight: bold;
+            color: #1e3a5f;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .feature-item {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+        .feature-item:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #c8102e;
+            font-weight: bold;
+        }
+        .special-gift {
+            background-color: #f8d7da;
+            border: 1px dashed #c8102e;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .gift-text {
+            font-weight: bold;
+            color: #c8102e;
+        }
+        .price-box {
+            background: linear-gradient(to right, #f8f9fa, #e9f2fa);
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .price-label {
+            font-size: 16px;
+            color: #1e3a5f;
+            margin-bottom: 5px;
+        }
+        .price-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #c8102e;
+        }
+        .price-period {
+            font-size: 14px;
+            color: #495057;
+        }
+        .button-container {
+            text-align: center;
+            margin: 25px 0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #c8102e;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .limited-offer {
+            background-color: #e9f2fa;
+            border: 1px solid #2c5282;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            margin: 25px 0;
+        }
+        .limited-text {
+            font-weight: bold;
+            color: #1e3a5f;
+            font-size: 16px;
+        }
+        .footer {
+            background: linear-gradient(to right, #1e3a5f, #2c5282);
+            color: white;
+            padding: 25px;
+        }
+        .contact-info {
+            margin-bottom: 20px;
+        }
+        .contact-heading {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .contact-item {
+            margin-bottom: 8px;
+        }
+        .social-heading {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .social-links {
+            margin-bottom: 20px;
+        }
+        .social-link {
+            color: white;
+            text-decoration: none;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            padding-top: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #e0e0e0;
+        }
+        .unsubscribe {
+            color: #e0e0e0;
+            text-decoration: underline;
+        }
+        @media only screen and (max-width: 480px) {
+            .button {
+                display: block;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="hotel-name">{HotelName}</div>
+            <div class="tagline">{HotelTagline}</div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Holiday Banner -->
+            <div class="holiday-banner">
+                <div class="holiday-title">{HolidayTitle}</div>
+                <div class="holiday-subtitle">{HolidaySubtitle}</div>
+            </div>
+            
+            <div class="snowflake-divider">❄ ❄ ❄</div>
+
+            <!-- Main Promotion -->
+            <div class="promotion-box">
+                <img src="{MainPromotionImageUrl}" alt="{MainPromotionImageAlt}" class="promotion-image">
+                <div class="promotion-content">
+                    <h2 class="promotion-heading">{MainPromotionHeading}</h2>
+                    <p class="promotion-description">{MainPromotionDescription}</p>
+                    
+                    <div class="holiday-features">
+                        <div class="feature-title">Az ünnepi csomag tartalma:</div>
+                        <div class="feature-item">{HolidayFeature1}</div>
+                        <div class="feature-item">{HolidayFeature2}</div>
+                        <div class="feature-item">{HolidayFeature3}</div>
+                        <div class="feature-item">{HolidayFeature4}</div>
+                    </div>
+                    
+                    <div class="special-gift">
+                        <p class="gift-text">{SpecialGiftText}</p>
+                    </div>
+                    
+                    <div class="price-box">
+                        <div class="price-label">Ünnepi csomag ára:</div>
+                        <div class="price-value">{PackagePrice}</div>
+                        <div class="price-period">{PricePeriod}</div>
+                    </div>
+                    
+                    <div class="button-container">
+                        <a href="{BookingButtonUrl}" class="button">{BookingButtonText}</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="snowflake-divider">❄ ❄ ❄</div>
+
+            <!-- Limited Offer -->
+            <div class="limited-offer">
+                <p class="limited-text">{LimitedOfferText}</p>
+            </div>
+
+            <!-- Additional Info -->
+            <p style="text-align: center; color: #495057;">{AdditionalInfo}</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="contact-info">
+                <div class="contact-heading">Kapcsolat</div>
+                <div class="contact-item">{Address}</div>
+                <div class="contact-item">{Phone}</div>
+                <div class="contact-item">{Email}</div>
+            </div>
+            <div class="social-heading">Kövessen Minket</div>
+            <div class="social-links">
+                <a href="{FacebookUrl}" class="social-link">Facebook</a>
+                <a href="{InstagramUrl}" class="social-link">Instagram</a>
+                <a href="{TwitterUrl}" class="social-link">Twitter</a>
+            </div>
+            <div class="footer-bottom">
+                <p>© {CurrentYear} {HotelName}. Minden jog fenntartva.</p>
+                <p>
+                    <a href="{UnsubscribeUrl}" class="unsubscribe">Leiratkozás</a> a hírlevélről
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
