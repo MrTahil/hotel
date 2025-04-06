@@ -4691,6 +4691,31 @@ namespace RoomListApp
         }
 
 
+        private void LoyaltyProgram_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            MessageBox.Show("A Loyalty program funkció jelenleg fejlesztés alatt áll, és a későbbiekben lesz elérhető.",
+                            "Jövőbeli fejlesztés",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+        }
+
+        private void Schedules_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            MessageBox.Show("A Beosztások kezelése funkció jelenleg fejlesztés alatt áll, és a későbbiekben lesz elérhető.",
+                            "Jövőbeli fejlesztés",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+        }
+
+        private void Notifications_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            MessageBox.Show("Az Értesítések kezelése funkció jelenleg fejlesztés alatt áll, és a későbbiekben lesz elérhető.",
+                            "Jövőbeli fejlesztés",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+        }
+
+
     }
 }
 

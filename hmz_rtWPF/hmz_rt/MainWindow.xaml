@@ -200,7 +200,7 @@
 
 
             <!-- Értesítések kezelése -->
-            <Border Style="{StaticResource DashboardCard}" Background="#FEF2F2">
+            <Border Style="{StaticResource DashboardCard}" MouseLeftButtonDown="Notifications_MouseLeftButtonDown" Background="#FEF2F2">
                 <Border.RenderTransform>
                     <ScaleTransform/>
                 </Border.RenderTransform>
@@ -223,7 +223,7 @@
 
 
             <!-- Beosztások -->
-            <Border Style="{StaticResource DashboardCard}" Background="#FFF7ED">
+            <Border Style="{StaticResource DashboardCard}" MouseLeftButtonDown="Schedules_MouseLeftButtonDown" Background="#FFF7ED">
                 <Border.RenderTransform>
                     <ScaleTransform/>
                 </Border.RenderTransform>
@@ -245,7 +245,7 @@
             </Border>
 
             <!-- Loyalty program -->
-            <Border Style="{StaticResource DashboardCard}" Background="#FDF2F8">
+            <Border Style="{StaticResource DashboardCard}" MouseLeftButtonDown="LoyaltyProgram_MouseLeftButtonDown" Background="#FDF2F8">
                 <Border.RenderTransform>
                     <ScaleTransform/>
                 </Border.RenderTransform>
