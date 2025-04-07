@@ -1255,6 +1255,7 @@ const ProfilePage = () => {
                 <button
                   type="submit"
                   className="flex items-center justify-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transform hover:scale-105 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg"
+                  style={{ backgroundColor: 'blue' }} // Explicit háttérszín
                 >
                   <span className="material-symbols-outlined">mail</span>
                   <span>Feliratkozás most</span>
