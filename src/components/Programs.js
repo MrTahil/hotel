@@ -85,7 +85,7 @@ function Programs() {
           throw new Error(`Hiba történt az adatok lekérésekor: ${response.status}`);
         }
         const data = await response.json();
-        console.log("Raw API response:", data); // Debugging: Log raw response
+        console.log("Raw API response:", data);
 
         const formattedPrograms = data.map((event) => ({
           id: event.eventId ?? event.EventId,
@@ -98,9 +98,9 @@ function Programs() {
           location: event.location ?? event.Location ?? "",
           capacity: event.capacity ?? event.Capacity ?? 0,
           price: event.price ?? event.Price ?? 0,
-          leftToGet: event.leftToGet ?? (event.capacity - (event.eventbookings?.reduce((sum, booking) => sum + booking.numberOfTickets, 0) || 0))
+          leftToGet: event.leftToGet ?? (event.capacity - (event.eventbookings?.reduce((sum, booking) => sum + booking.numberOfTickets, 0) || 0)),
         }));
-        
+
         setPrograms(formattedPrograms);
       } catch (err) {
         console.error("Hiba történt az adatok lekérésekor:", err);
@@ -232,17 +232,17 @@ function Programs() {
       </div>
 
       {selectedProgram && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl mx-2 sm:mx-4 max-h-[90vh] overflow-y-auto transform transition-all scale-95 animate-fade-in">
-            <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-6 flex justify-between items-center sticky top-0 z-10">
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">{selectedProgram.name}</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg flex flex-col h-auto max-h-[95vh] overflow-y-auto">
+            <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-3 flex justify-between items-center flex-shrink-0 rounded-t-xl">
+              <h2 className="text-lg font-semibold truncate">{selectedProgram.name}</h2>
               <button
                 onClick={closeModal}
-                className="text-white hover:text-indigo-200 focus:outline-none transition-colors duration-200"
+                className="text-white hover:text-indigo-200 transition-colors duration-200"
                 aria-label="Bezárás"
               >
                 <svg
-                  className="w-8 h-8"
+                  className="w-5 h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -252,63 +252,62 @@ function Programs() {
                 </svg>
               </button>
             </div>
-            <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50">
-              <div className="flex flex-col md:flex-row gap-8">
-                <div className="md:w-1/2">
+
+            <div className="flex flex-col p-3 bg-gradient-to-br from-indigo-50 to-blue-50">
+              <div className="w-full flex-shrink-0 mb-3">
+                <div className="relative w-full h-32 rounded-lg overflow-hidden shadow-md">
                   <img
                     src={selectedProgram.images}
                     alt={selectedProgram.name}
-                    className="w-full h-64 sm:h-80 object-cover rounded-2xl shadow-lg transition-transform duration-300 hover:scale-105"
+                    className="w-full h-full object-cover"
                     onError={(e) => {
                       e.target.src = "../img/default_imgage.png";
                     }}
                   />
                 </div>
-                <div className="md:w-1/2 space-y-5 text-gray-800">
-                  <div>
-                    <span className="font-bold text-indigo-700 text-lg block">Időpont:</span>
-                    <p className="text-gray-700">
-                      {selectedProgram.schedule
-                        ? new Date(selectedProgram.schedule).toLocaleString("hu-HU")
-                        : "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="font-bold text-indigo-700 text-lg block">Szervező:</span>
-                    <p className="text-gray-700">{selectedProgram.organizerName || "N/A"}</p>
-                  </div>
-                  <div>
-                    <span className="font-bold text-indigo-700 text-lg block">Elérhetőség:</span>
-                    <p className="text-gray-700">{selectedProgram.contactInfo || "N/A"}</p>
-                  </div>
-                  <div>
-                    <span className="font-bold text-indigo-700 text-lg block">Helyszín:</span>
-                    <p className="text-gray-700">{selectedProgram.location || "N/A"}</p>
-                  </div>
-                  <div>
-                    <span className="font-bold text-indigo-700 text-lg block">Férőhelyek:</span>
-                    <p className="text-gray-700">{selectedProgram.capacity || "N/A"} (Még {selectedProgram.leftToGet} hely van)</p>
-                  </div>
-                  <div>
-                    <span className="font-bold text-indigo-700 text-lg block">Ár / Fő:</span>
-                    <p className="text-gray-700">
-                      {selectedProgram.price
-                        ? `${selectedProgram.price.toLocaleString("hu-HU")} Ft`
-                        : "Ingyenes"}
-                    </p>
-                  </div>
+              </div>
+
+              <div className="space-y-2 text-sm text-gray-700">
+                <div className="flex items-start">
+                  <span className="font-semibold text-indigo-600 w-20 flex-shrink-0">Időpont:</span>
+                  <p className="flex-1">
+                    {selectedProgram.schedule
+                      ? new Date(selectedProgram.schedule).toLocaleString("hu-HU")
+                      : "N/A"}
+                  </p>
+                </div>
+                <div className="flex items-start">
+                  <span className="font-semibold text-indigo-600 w-20 flex-shrink-0">Szervező:</span>
+                  <p className="flex-1">{selectedProgram.organizerName || "N/A"}</p>
+                </div>
+                <div className="flex items-start">
+                  <span className="font-semibold text-indigo-600 w-20 flex-shrink-0">Helyszín:</span>
+                  <p className="flex-1">{selectedProgram.location || "N/A"}</p>
+                </div>
+                <div className="flex items-start">
+                  <span className="font-semibold text-indigo-600 w-20 flex-shrink-0">Férőhely:</span>
+                  <p className="flex-1">
+                    {selectedProgram.capacity || "N/A"} (Még {selectedProgram.leftToGet} hely)
+                  </p>
+                </div>
+                <div className="flex items-start">
+                  <span className="font-semibold text-indigo-600 w-20 flex-shrink-0">Ár / Fő:</span>
+                  <p className="flex-1">
+                    {selectedProgram.price
+                      ? `${selectedProgram.price.toLocaleString("hu-HU")} Ft`
+                      : "Ingyenes"}
+                  </p>
+                </div>
+                <div className="flex items-start">
+                  <span className="font-semibold text-indigo-600 w-20 flex-shrink-0">Leírás:</span>
+                  <p className="flex-1 line-clamp-2">
+                    {selectedProgram.description || "Nincs elérhető leírás."}
+                  </p>
                 </div>
               </div>
 
-              <div className="mt-8">
-                <span className="font-bold text-indigo-700 text-lg block mb-3">Leírás:</span>
-                <p className="text-gray-700 bg-white p-4 rounded-xl shadow-inner">
-                  {selectedProgram.description || "Nincs elérhető leírás."}
-                </p>
-              </div>
-
-              <div className="mt-8">
-                <label className="block text-lg font-bold text-indigo-700 mb-3">Jegyek száma</label>
+              <div className="mt-3">
+                <label className="block text-sm font-semibold text-indigo-600 mb-1">Jegyek száma</label>
                 <input
                   type="number"
                   min="1"
@@ -320,28 +319,29 @@ function Programs() {
                       setNumberOfTickets(value);
                     }
                   }}
-                  className="w-full p-3 border-2 border-indigo-300 rounded-xl focus:ring-4 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200"
+                  className="w-full p-2 border border-indigo-300 rounded-md focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none text-sm"
                 />
-                <div className="text-sm text-gray-600 mt-2">
-                  Maximálisan {selectedProgram.leftToGet} jegyet foglalhat
-                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Max: {selectedProgram.leftToGet} jegy
+                </p>
                 {selectedProgram.price > 0 && (
-                  <div className="mt-4 text-xl font-bold text-indigo-800">
+                  <p className="mt-2 text-sm font-semibold text-indigo-700">
                     Összesen: {(selectedProgram.price * numberOfTickets).toLocaleString("hu-HU")} Ft
-                  </div>
+                  </p>
                 )}
               </div>
             </div>
-            <div className="bg-indigo-100 p-6 flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-6">
+
+            <div className="bg-indigo-100 p-3 flex flex-col sm:flex-row justify-end gap-2 flex-shrink-0 rounded-b-xl">
               <button
                 onClick={handleBooking}
-                className="bg-indigo-600 text-white px-6 py-3 rounded-full font-bold text-lg hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105 shadow-md"
+                className="bg-indigo-600 text-white px-3 py-1 rounded-md font-semibold hover:bg-indigo-700 transition-all duration-300 text-sm"
               >
                 Foglalás
               </button>
               <button
                 onClick={closeModal}
-                className="bg-gray-600 text-white px-6 py-3 rounded-full font-bold text-lg hover:bg-gray-700 transition-all duration-300 transform hover:scale-105 shadow-md"
+                className="bg-gray-500 text-white px-3 py-1 rounded-md font-semibold hover:bg-gray-600 transition-all duration-300 text-sm"
               >
                 Bezárás
               </button>

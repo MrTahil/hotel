@@ -23,17 +23,15 @@ function App() {
           <Routes>
             <Route path="/" element={<Hero />} />
             <Route path="/szobak" element={<Rooms />} />
-            <Route path="/szobak/:roomId" element={<Foglalas />} /> {/* Changed from /foglalas/:id to match room navigation */}
+            <Route path="/szobak/:roomId" element={<Foglalas />} />
             <Route path="/rolunk" element={<About />} />
             <Route path="/programok" element={<Programs />} />
             <Route path="/szolgaltatasok" element={<Services />} />
-            <Route path="/login" element={<LoginModal />} /> {/* Added login route */}
+            <Route path="/login" element={<LoginModal />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/Foglalas/:id" element={<Foglalas />} />
             <Route path="*" element={<h1>404 - Az oldal nem található</h1>} />
             <Route path="/booking/:bookingId" element={<ManageBookingEmail />} />
-
-
           </Routes>
         </div>
         <Footer />

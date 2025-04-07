@@ -1188,7 +1188,6 @@ const ProfilePage = () => {
               className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-out"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header */}
               <div className="bg-gradient-to-r from-teal-500 to-blue-600 p-4 sm:p-6 text-white sticky top-0 z-10">
                 <div className="flex justify-between items-start">
                   <div>
@@ -1209,7 +1208,6 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              {/* Content */}
               <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                   <div className="space-y-3">
@@ -1302,7 +1300,6 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              {/* Footer Buttons */}
               <div className="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap justify-end gap-2 sm:gap-3 sticky bottom-0">
                 <button
                   onClick={() => setSelectedBooking(null)}

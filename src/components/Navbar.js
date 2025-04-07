@@ -18,16 +18,15 @@ function Navbar() {
     const user = localStorage.getItem('username');
     const token = localStorage.getItem('authToken');
 
-    // Function to check if token is expired
     const isTokenExpired = () => {
-        if (!token) return true; // No token means it's "expired"
+        if (!token) return true;
         try {
-            const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decode JWT payload
-            const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-            return decodedToken.exp < currentTime; // Check if expiration time is in the past
+            const decodedToken = JSON.parse(atob(token.split('.')[1]));
+            const currentTime = Math.floor(Date.now() / 1000);
+            return decodedToken.exp < currentTime;
         } catch (error) {
             console.error('Error decoding token:', error);
-            return true; // If token is invalid, treat it as expired
+            return true;
         }
     };
 
@@ -47,10 +46,10 @@ function Navbar() {
 
     const handleProfileClick = () => {
         if (isTokenExpired()) {
-            setActiveModal('login'); // Redirect to login if token is expired
+            setActiveModal('login');
             setMenuOpen(false);
         } else {
-            navigate('/profile'); // Navigate to profile if token is valid
+            navigate('/profile');
             handleMenuItemClick();
         }
     };

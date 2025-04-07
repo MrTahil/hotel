@@ -11,20 +11,16 @@ function RegisterModal({ onClose, switchToLogin }) {
   const [successMessage, setSuccessMessage] = useState('');
   const [showVerification, setShowVerification] = useState(false);
 
-  // Email validáció
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  // Jelszó validáció
   const validatePassword = (password) => {
-    // Legalább 6 karakter, legalább egy nagybetű, és legalább egy speciális karakter (bármilyen billentyűzeten lévő)
     const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`]).{6,}$/;
     return passwordRegex.test(password);
   };
 
-  // Felhasználónév validáció
   const validateUsername = (username) => {
     const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
     return usernameRegex.test(username);

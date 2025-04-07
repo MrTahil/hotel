@@ -8,7 +8,7 @@ function Hero() {
     const [transitionEnabled, setTransitionEnabled] = useState(true);
     const [programs, setPrograms] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedFeature, setSelectedFeature] = useState(null); // Kiválasztott feature állapota
+    const [selectedFeature, setSelectedFeature] = useState(null);
     const navigate = useNavigate();
     const sliderRef = useRef(null);
     const containerRef = useRef(null);
@@ -311,7 +311,6 @@ function Hero() {
                     </div>
                 </section>
 
-                {/* Részletek Modal */}
                 {selectedFeature && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">

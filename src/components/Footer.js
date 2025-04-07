@@ -12,7 +12,6 @@ export default function Footer() {
 
   return (
     <footer className="bg-blue-900 text-white py-8">
-      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white text-blue-900 rounded-lg p-6 max-w-md w-full">
@@ -57,7 +56,6 @@ export default function Footer() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Kapcsolat rész */}
           <div className="space-y-3">
             <div className="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -81,7 +79,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Cím rész */}
           <div className="space-y-3">
             <div className="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -98,7 +95,6 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Közösségi média rész */}
           <div className="space-y-4">
             <div className="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">

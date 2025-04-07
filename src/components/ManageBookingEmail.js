@@ -111,7 +111,6 @@ export default function ManageBookingEmail() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-50 py-8 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
-        {/* Header Card */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
           <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -143,9 +142,7 @@ export default function ManageBookingEmail() {
           </div>
         </div>
 
-        {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Guest Information */}
           <div className="bg-white rounded-xl shadow-lg overflow-hidden lg:col-span-1">
             <div className="bg-blue-100 p-4 border-b border-blue-200">
               <h2 className="text-lg font-semibold text-blue-800 flex items-center gap-2">
@@ -167,7 +164,6 @@ export default function ManageBookingEmail() {
             </div>
           </div>
 
-          {/* Room Information */}
           <div className="bg-white rounded-xl shadow-lg overflow-hidden lg:col-span-1">
             <div className="bg-blue-100 p-4 border-b border-blue-200">
               <h2 className="text-lg font-semibold text-blue-800 flex items-center gap-2">
@@ -193,7 +189,6 @@ export default function ManageBookingEmail() {
             </div>
           </div>
 
-          {/* Booking Details */}
           <div className="bg-white rounded-xl shadow-lg overflow-hidden lg:col-span-1">
             <div className="bg-blue-100 p-4 border-b border-blue-200">
               <h2 className="text-lg font-semibold text-blue-800 flex items-center gap-2">
@@ -251,7 +246,6 @@ export default function ManageBookingEmail() {
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden">

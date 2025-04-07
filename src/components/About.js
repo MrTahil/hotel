@@ -13,10 +13,7 @@ function About() {
 
     return (
         <section className="relative py-16 bg-gradient-to-b from-blue-50 to-white">
-            {/* Dekoratív fejléc sáv */}
-
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Cím rész */}
                 <div className="text-center mb-16 pt-8">
                     <div className="inline-block relative">
                         <h2 className="animate-bounce text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
@@ -33,7 +30,6 @@ function About() {
                     </p>
                 </div>
 
-                {/* Szolgáltatások */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
                     <FeatureCard
                         emoji="🏨"
@@ -65,7 +61,6 @@ function About() {
                     />
                 </div>
 
-                {/* Google Maps térkép */}
                 <div className="mt-12 mb-20 bg-white rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl">
                     <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -97,7 +92,6 @@ function About() {
                     </div>
                 </div>
 
-                {/* Ügyfélvélemény */}
                 <div className="mt-12 bg-white p-8 rounded-2xl shadow-lg max-w-4xl mx-auto border-l-4 border-blue-500 transform transition-all duration-300 hover:-translate-y-1">
                     <div className="flex items-start">
                         <div className="text-4xl mr-4 text-blue-400">"</div>
@@ -129,7 +123,6 @@ function About() {
     );
 }
 
-// Továbbfejlesztett FeatureCard komponens
 function FeatureCard({ emoji, title, description, bgColor = "bg-blue-50", borderColor = "border-blue-300" }) {
     return (
         <div className={`bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border-t-4 ${borderColor} group`}>

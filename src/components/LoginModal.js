@@ -27,7 +27,7 @@ function LoginModal({ onClose, switchToRegister, setUser }) {
       localStorage.setItem('authToken', data.accessToken);
       console.log(data.accessToken)
       localStorage.setItem('username', username);
-      localStorage.setItem('email', data.email); // Az email mentése
+      localStorage.setItem('email', data.email);
       setUser(username);
     } catch (error) {
       setError(error.message);
