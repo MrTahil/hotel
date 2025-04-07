@@ -1,14 +1,22 @@
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 function VerificationModal({ email, onClose, onSuccess }) {
     const [code, setCode] = useState('');  
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState(''); 
+    const inputRef = useRef(null); // Ref for auto-focusing the input
+
+    // Auto-focus the input when the modal mounts
+    useEffect(() => {
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, []);
 
     const handleVerify = async () => {
-        setErrorMessage(null);
-        setSuccessMessage(null);
+        setErrorMessage('');
+        setSuccessMessage('');
 
         if (!code) {
             setErrorMessage('Kérjük, adja meg a 2FA kódot!');
@@ -16,25 +24,32 @@ function VerificationModal({ email, onClose, onSuccess }) {
         }
 
         try {
-            console.log(email + ",")
-            console.log(String(code) + ",")
-            const response = await axios.post(process.env.REACT_APP_API_BASE_URL+'/UserAccounts/Verify2FA', 
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/Verify2FA`, 
                 {
                     email: email,
                     code: String(code)
                 }
             );
 
-            console.log(response);
-
             if (response.status === 200) {
                 setSuccessMessage('Sikeres aktiválás, mostmár bejelentkezhetsz!');
-                onSuccess();
-            } else {
-                setErrorMessage(response.data.message || 'Hiba történt a kód ellenőrzésekor!');
+                setTimeout(() => onSuccess(), 1000); // Delay for user to see success message
             }
         } catch (error) {
-            setErrorMessage('Hálózati hiba történt. Próbáld újra később!');
+            if (error.response && error.response.status === 400) {
+                setErrorMessage('Hibás kód!');
+            } else {
+                setErrorMessage('Hálózati hiba történt. Próbáld újra később!');
+            }
+        }
+    };
+
+    // Handle Enter key press
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent form submission if wrapped in a form
+            handleVerify();
         }
     };
 
@@ -68,8 +83,10 @@ function VerificationModal({ email, onClose, onSuccess }) {
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-xl"
                             value={code}
                             onChange={(e) => setCode(e.target.value)}
+                            onKeyPress={handleKeyPress} // Add Enter key listener
                             maxLength="6"
                             placeholder="••••••"
+                            ref={inputRef} // Attach ref for auto-focus
                         />
                     </div>
 

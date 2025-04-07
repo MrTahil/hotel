@@ -6,6 +6,8 @@ function Programs() {
   const [numberOfTickets, setNumberOfTickets] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [bookingError, setBookingError] = useState(null);
+  const [bookingSuccess, setBookingSuccess] = useState(null); // New state for success message
 
   const fetchGuestData = async () => {
     try {
@@ -37,13 +39,16 @@ function Programs() {
 
   const handleBooking = async () => {
     try {
+      setBookingError(null);
+      setBookingSuccess(null); // Clear previous success message
       const token = localStorage.getItem("authToken");
       if (!token) {
-        throw new Error("Nincs token elmentve! Jelentkezz be újra.");
+        throw new Error("Nincs bejelentkezve, kérem jelentkezzen be vagy regisztráljon!");
       }
       const guestData = await fetchGuestData();
       if (!guestData || guestData.length === 0) {
-        throw new Error("Nincs vendég adat a felhasználóhoz!");
+        setBookingError("Nincs vendégadat a foglaláshoz! Kérlek, jelentkezz be vagy regisztrálj vendégként.");
+        return;
       }
       const guestId = guestData[0].guestId;
       const payload = {
@@ -68,11 +73,11 @@ function Programs() {
       if (!response.ok) {
         throw new Error(`Hiba a foglalás során: ${response.status}`);
       }
-      alert("Foglalás sikeres!");
-      closeModal();
+      setBookingSuccess("Foglalás sikeres! A modal hamarosan bezárul.");
+      setTimeout(() => closeModal(), 2000); // Close modal after 2 seconds
     } catch (err) {
       console.error("Hiba a foglalás közben:", err.message);
-      alert(err.message);
+      setBookingError(err.message);
     }
   };
 
@@ -117,10 +122,14 @@ function Programs() {
     console.log("Selected program:", program);
     setSelectedProgram(program);
     setNumberOfTickets(1);
+    setBookingError(null);
+    setBookingSuccess(null); // Clear success message when opening modal
   };
 
   const closeModal = () => {
     setSelectedProgram(null);
+    setBookingError(null);
+    setBookingSuccess(null); // Clear success message when closing modal
   };
 
   const truncateDescription = (description, maxLength) => {
@@ -306,36 +315,73 @@ function Programs() {
                 </div>
               </div>
 
-              <div className="mt-3">
-                <label className="block text-sm font-semibold text-indigo-600 mb-1">Jegyek száma</label>
-                <input
-                  type="number"
-                  min="1"
-                  max={selectedProgram.leftToGet}
-                  value={numberOfTickets}
-                  onChange={(e) => {
-                    const value = parseInt(e.target.value);
-                    if (value > 0 && value <= selectedProgram.leftToGet) {
-                      setNumberOfTickets(value);
-                    }
-                  }}
-                  className="w-full p-2 border border-indigo-300 rounded-md focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none text-sm bg-white/80"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Max: {selectedProgram.leftToGet} jegy
-                </p>
-                {selectedProgram.price > 0 && (
-                  <p className="mt-2 text-sm font-semibold text-indigo-700">
-                    Összesen: {(selectedProgram.price * numberOfTickets).toLocaleString("hu-HU")} Ft
+              {selectedProgram.leftToGet > 0 && !bookingSuccess ? (
+                <div className="mt-3">
+                  <label className="block text-sm font-semibold text-indigo-600 mb-1">Jegyek száma</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max={selectedProgram.leftToGet}
+                    value={numberOfTickets}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      if (value > 0 && value <= selectedProgram.leftToGet) {
+                        setNumberOfTickets(value);
+                      }
+                    }}
+                    className="w-full p-2 border border-indigo-300 rounded-md focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none text-sm bg-white/80"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Max: {selectedProgram.leftToGet} jegy
                   </p>
-                )}
-              </div>
+                  {selectedProgram.price > 0 && (
+                    <p className="mt-2 text-sm font-semibold text-indigo-700">
+                      Összesen: {(selectedProgram.price * numberOfTickets).toLocaleString("hu-HU")} Ft
+                    </p>
+                  )}
+                </div>
+              ) : selectedProgram.leftToGet === 0 ? (
+                <div className="mt-3 text-center text-red-600 font-semibold">
+                  Nincs több szabad hely erre a programra!
+                </div>
+              ) : null}
+
+              {bookingError && (
+                <div className="mt-3 bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md text-sm">
+                  {bookingError}
+                </div>
+              )}
+
+              {bookingSuccess && (
+                <div className="mt-3 bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded-md text-sm flex items-center">
+                  <svg
+                    className="w-5 h-5 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  {bookingSuccess}
+                </div>
+              )}
             </div>
 
             <div className="bg-indigo-100 p-3 flex flex-col sm:flex-row justify-end gap-2 flex-shrink-0 rounded-b-xl">
               <button
                 onClick={handleBooking}
-                className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white px-3 py-1 rounded-md font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 text-sm shadow-md hover:shadow-lg"
+                className={`bg-gradient-to-r from-indigo-600 to-blue-500 text-white px-3 py-1 rounded-md font-semibold transition-all duration-300 text-sm shadow-md hover:shadow-lg ${
+                  selectedProgram.leftToGet === 0 || bookingSuccess
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:from-blue-600 hover:to-indigo-700"
+                }`}
+                disabled={selectedProgram.leftToGet === 0 || bookingSuccess} // Disable after success too
               >
                 Foglalás
               </button>
