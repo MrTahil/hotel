@@ -16,14 +16,19 @@ function RegisterModal({ onClose, switchToLogin }) {
     return emailRegex.test(email);
   };
 
-  const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`]).{6,}$/;
-    return passwordRegex.test(password);
-  };
-
   const validateUsername = (username) => {
     const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
     return usernameRegex.test(username);
+  };
+
+  const validatePasswordLength = (password) => {
+    const minPasswordLength = 6;
+    return password.length >= minPasswordLength;
+  };
+
+  const validatePasswordContent = (password) => {
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`]).*$/;
+    return passwordRegex.test(password);
   };
 
   const handleSubmit = async (e) => {
@@ -46,8 +51,13 @@ function RegisterModal({ onClose, switchToLogin }) {
       return;
     }
 
-    if (!validatePassword(password)) {
-      setErrorMessage('A jelszónak legalább 6 karakter hosszúnak kell lennie, tartalmaznia kell legalább egy nagybetűt és egy speciális karaktert (pl. !@#$%^&*()_+-=[]{}|;:,.<>?/~)!');
+    if (!validatePasswordLength(password)) {
+      setErrorMessage('A jelszónak legalább 8 karakter hosszúnak kell lennie!');
+      return;
+    }
+
+    if (!validatePasswordContent(password)) {
+      setErrorMessage('A jelszónak tartalmaznia kell legalább egy nagybetűt és egy speciális karaktert!');
       return;
     }
 
@@ -121,7 +131,7 @@ function RegisterModal({ onClose, switchToLogin }) {
                   Felhasználónév
                 </label>
                 <input
-              placeholder='PetőfiSanyi'
+                  placeholder='PetőfiSanyi'
                   required
                   type="text"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -149,7 +159,7 @@ function RegisterModal({ onClose, switchToLogin }) {
                   Jelszó
                 </label>
                 <input
-                placeholder='Ezt jól jegyezd meg!'
+                  placeholder='Ezt jól jegyezd meg!'
                   required
                   type="password"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -163,7 +173,7 @@ function RegisterModal({ onClose, switchToLogin }) {
                   Jelszó megerősítése
                 </label>
                 <input
-                placeholder='És ne felejtsd el...'
+                  placeholder='És ne felejtsd el...'
                   required
                   type="password"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

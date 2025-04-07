@@ -232,11 +232,11 @@ const ProfilePage = () => {
   const fetchEventBookings = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("Nincs token elmentve! Jelentkezz be újra.");
+      if (!token || !user?.userId) {
+        throw new Error("Nincs token vagy felhasználó ID elmentve! Jelentkezz be újra.");
       }
       const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL}/Feedback/GetEventBookings`,
+        `${process.env.REACT_APP_API_BASE_URL}/Feedback/GetOneUsersEventBookings/${user.userId}`,
         {
           method: "GET",
           headers: {
@@ -253,8 +253,8 @@ const ProfilePage = () => {
         throw new Error(`Nem sikerült lekérni a program foglalásokat: ${response.status}`);
       }
       const data = await response.json();
-      console.log("Event Bookings Response:", data);
-      setEventBookings(data);
+      console.log("User's Event Bookings Response:", data);
+      setEventBookings(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Hiba a program foglalások lekérésekor:", err.message);
       if (err.message.includes("403")) {
@@ -280,7 +280,7 @@ const ProfilePage = () => {
         throw new Error(`Nem sikerült lekérni az eseményeket: ${response.status}`);
       }
       const data = await response.json();
-      console.log("Events Response:", data); // Log for debugging
+      console.log("Events Response:", data);
       setEvents(data);
     } catch (err) {
       console.error("Hiba az események lekérésekor:", err.message);
@@ -1255,7 +1255,7 @@ const ProfilePage = () => {
                 <button
                   type="submit"
                   className="flex items-center justify-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transform hover:scale-105 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg"
-                  style={{ backgroundColor: 'blue' }} // Explicit háttérszín
+                  style={{ backgroundColor: 'blue' }}
                 >
                   <span className="material-symbols-outlined">mail</span>
                   <span>Feliratkozás most</span>

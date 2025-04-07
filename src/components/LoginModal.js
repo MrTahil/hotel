@@ -6,9 +6,17 @@ function LoginModal({ onClose, switchToRegister, setUser }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  const minPasswordLength = 8; // A minimális jelszóhossz
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Jelszó hosszának ellenőrzése
+    if (password.length < minPasswordLength) {
+      setError(`A jelszó túl rövid. Legalább ${minPasswordLength} karakter hosszú kell legyen.`);
+      return;
+    }
 
     try {
       const response = await fetch(process.env.REACT_APP_API_BASE_URL+'/UserAccounts/Login', {
@@ -68,7 +76,7 @@ function LoginModal({ onClose, switchToRegister, setUser }) {
                 Jelszó
               </label>
               <input
-              placeholder='Ezt neked kell tudni...'
+                placeholder='Ezt neked kell tudni...'
                 type="password"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 value={password}
