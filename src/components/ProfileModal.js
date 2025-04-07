@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import DetailItem from "./DetailItem";
 
 const ProfilePage = () => {
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [newsletterEmail, setNewsletterEmail] = useState("");
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -77,6 +79,40 @@ const ProfilePage = () => {
     } catch (err) {
       console.error("Hiba a szoba azonosító lekérdezésekor:", err.message);
       return null;
+    }
+  };
+
+  const handleNewsletterSubscribe = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("Nincs token elmentve! Jelentkezz be újra.");
+      }
+
+      const response = await fetch(
+        `${process.env.REACT_APP_API_BASE_URL}/Newsletter/SubscribeForNewsLetter/${user.userId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            Email: newsletterEmail || user.email,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Hiba történt a feliratkozás során");
+      }
+
+      setMessage({ type: "success", text: "Sikeresen feliratkozott a hírlevélre!" });
+      setIsSubscribed(true);
+    } catch (err) {
+      console.error("Hiba a feliratkozás során:", err.message);
+      setMessage({ type: "error", text: err.message });
     }
   };
 
@@ -1189,6 +1225,50 @@ const ProfilePage = () => {
             </div>
           </div>
         )}
+
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md mb-6 sm:mb-8 hover:shadow-xl transition-shadow duration-300 border border-blue-100">
+          <div className="flex items-center mb-4">
+            <span className="material-symbols-outlined text-3xl sm:text-4xl mr-3 sm:mr-4 bg-orange-100 p-2 sm:p-3 rounded-full text-orange-600">
+              campaign
+            </span>
+            <h2 className="text-xl sm:text-2xl font-semibold text-blue-800">
+              Hírlevél feliratkozás
+            </h2>
+          </div>
+
+          {!isSubscribed ? (
+            <form onSubmit={handleNewsletterSubscribe} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-blue-800">
+                  Email cím
+                </label>
+                <input
+                  type="email"
+                  className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                  placeholder="Email cím"
+                  value={newsletterEmail || user?.email || ""}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex justify-center">
+                <button
+                  type="submit"
+                  className="flex items-center justify-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transform hover:scale-105 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg"
+                >
+                  <span className="material-symbols-outlined">mail</span>
+                  <span>Feliratkozás most</span>
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="p-4 bg-green-100 text-green-800 rounded-lg">
+              <p className="font-medium">Köszönjük, hogy feliratkozott hírlevelünkre!</p>
+              <p className="text-sm mt-1">Az email címére küldött híreket fog kapni.</p>
+            </div>
+          )}
+        </div>
+
         {selectedBooking && (
           <div
             className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-2 sm:p-4 backdrop-blur-sm"
@@ -1749,11 +1829,20 @@ const ProfilePage = () => {
                       Végleges törlés
                     </button>
                   </div>
+
                 </details>
+
+
               </div>
             </div>
+
+
           </>
+
+
         )}
+
+
         {showGuestModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl">
