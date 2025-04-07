@@ -514,7 +514,7 @@ function Hero() {
                             <div className="flex justify-center space-x-6">
                                 <Link to="/szobak" className="text-blue-600 hover:text-blue-800">Szobák</Link>
                                 <Link to="/programok" className="text-blue-600 hover:text-blue-800">Programok</Link>
-                                <Link to="/kapcsolat" className="text-blue-600 hover:text-blue-800">Kapcsolat</Link>
+                                <Link to="/rolunk" className="text-blue-600 hover:text-blue-800">Kapcsolat</Link>
                             </div>
                         </div>
                     </div>

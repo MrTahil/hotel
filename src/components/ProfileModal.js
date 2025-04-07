@@ -175,7 +175,7 @@ const ProfilePage = () => {
         }
       );
       if (!response.ok) {
-        if (response.status === 400) {
+        if (response.status === 400 || response.status === 403) {
           setBookings([]);
           return;
         }
@@ -185,8 +185,11 @@ const ProfilePage = () => {
       setBookings(data);
     } catch (err) {
       console.error("Hiba a foglalások lekérésekor:", err.message);
-      setError(err.message);
-      setBookings([]);
+      if (err.message.includes("403")) {
+        setBookings([]);
+      } else {
+        setError(err.message);
+      }
     }
   };
 
@@ -207,15 +210,22 @@ const ProfilePage = () => {
         }
       );
       if (!response.ok) {
+        if (response.status === 400 || response.status === 403) {
+          setEventBookings([]);
+          return;
+        }
         throw new Error(`Nem sikerült lekérni a program foglalásokat: ${response.status}`);
       }
       const data = await response.json();
-      console.log("Event Bookings Response:", data); // Log for debugging
+      console.log("Event Bookings Response:", data);
       setEventBookings(data);
     } catch (err) {
       console.error("Hiba a program foglalások lekérésekor:", err.message);
-      setError(err.message);
-      setEventBookings([]);
+      if (err.message.includes("403")) {
+        setEventBookings([]);
+      } else {
+        setError(err.message);
+      }
     }
   };
 
