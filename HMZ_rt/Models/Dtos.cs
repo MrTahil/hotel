@@ -49,7 +49,11 @@ public class UpdateBooking
     public int NumberOfGuests { get; set; }
 
 }
-
+public class Subscribenewsletter
+{
+    [EmailAddress(ErrorMessage = "Nem email formátum")]
+    public string Email { get; set; }
+}
 
 
 

@@ -93,6 +93,25 @@ namespace HMZ_rt.Controllers
                 });
             }
         }
+
+        [HttpPost("SubscribeForNewsLetter/{userid}")]
+        public async Task<ActionResult<Newsletter>> Subscribe(int userid, Subscribenewsletter addto)
+        {
+            var use = await _context.Useraccounts.FirstOrDefaultAsync(x => x.UserId == userid);
+            if (use != null)
+            {
+                var news = new Newsletter
+                {
+                    Userid = userid,
+                    Email = addto.Email,
+
+                };
+                await _context.Newsletters.AddAsync(news);
+                await _context.SaveChangesAsync();
+                return StatusCode(201, "Sikeres feliratkozás");
+            }
+            return StatusCode(404, "Nem található felhasználó");
+        }
     }
 
    
