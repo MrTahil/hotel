@@ -16,6 +16,20 @@ function Navbar() {
     const menuRef = useRef(null);
 
     const user = localStorage.getItem('username');
+    const token = localStorage.getItem('authToken');
+
+    // Function to check if token is expired
+    const isTokenExpired = () => {
+        if (!token) return true; // No token means it's "expired"
+        try {
+            const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decode JWT payload
+            const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+            return decodedToken.exp < currentTime; // Check if expiration time is in the past
+        } catch (error) {
+            console.error('Error decoding token:', error);
+            return true; // If token is invalid, treat it as expired
+        }
+    };
 
     const closeModal = () => setActiveModal(null);
 
@@ -29,6 +43,16 @@ function Navbar() {
 
     const handleMenuItemClick = () => {
         setMenuOpen(false);
+    };
+
+    const handleProfileClick = () => {
+        if (isTokenExpired()) {
+            setActiveModal('login'); // Redirect to login if token is expired
+            setMenuOpen(false);
+        } else {
+            navigate('/profile'); // Navigate to profile if token is valid
+            handleMenuItemClick();
+        }
     };
 
     useEffect(() => {
@@ -140,14 +164,15 @@ function Navbar() {
                         </button>
                         {menuOpen && (
                             <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl py-3 transform origin-top-right animate-[fadeIn_0.2s_ease-out] border border-blue-100">
-                                {user ? (
+                                {user && token && !isTokenExpired() ? (
                                     <>
-                                        <Link to="/profile" onClick={handleMenuItemClick}>
-                                            <button className="block w-full text-left px-5 py-3 hover:bg-blue-50 text-gray-700 transition-colors duration-200 flex items-center">
-                                                <span className="material-symbols-outlined mr-2 text-blue-600">person</span>
-                                                Profil megnyitása
-                                            </button>
-                                        </Link>
+                                        <button
+                                            onClick={handleProfileClick}
+                                            className="block w-full text-left px-5 py-3 hover:bg-blue-50 text-gray-700 transition-colors duration-200 flex items-center"
+                                        >
+                                            <span className="material-symbols-outlined mr-2 text-blue-600">person</span>
+                                            Profil megnyitása
+                                        </button>
                                         <button
                                             onClick={() => {
                                                 handleLogout();
@@ -256,7 +281,7 @@ function Navbar() {
                 />
             )}
 
-            {showProfileModal && (
+            {showProfileModal && !isTokenExpired() && (
                 <ProfileModal
                     user={user}
                     onClose={() => setShowProfileModal(false)}
@@ -264,7 +289,6 @@ function Navbar() {
                 />
             )}
 
-            {/* Animációk definiálása */}
             <style jsx global>{`
                 @keyframes slideDown {
                     from {
