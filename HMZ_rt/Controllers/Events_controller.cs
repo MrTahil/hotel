@@ -122,7 +122,7 @@ namespace HMZ_rt.Controllers
                     {
                         return BadRequest("Nem lehet kevesebb mint 0 az ár");
                     }
-                    if (data.EventDate > DateTime.Now.AddDays(1))
+                    if (data.EventDate < DateTime.Now.AddDays(1))
                     {
                         return BadRequest("Nem lehet 1 napnál hamarabbi eseményt hozzáadni");
                     }

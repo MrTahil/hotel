@@ -20,6 +20,11 @@ namespace HMZ_rt.Controllers
             _context = context;
         }
 
+        private async Task<ActionResult> HandleError(Exception ex)
+        {
+            return StatusCode(500, new { message = "Belső szerver hiba", ex.Message });
+        }
+
         /// <summary>
         /// Creates a new amenity for a room
         /// </summary>
@@ -31,6 +36,11 @@ namespace HMZ_rt.Controllers
         {
             try
             {
+                if (upload.RoomId <= 0)
+                {
+                    return BadRequest(new { message = "Érvénytelen szoba azonosító!" });
+                }
+
                 var amenity = new Amenity
                 {
                     AmenityName = upload.AmenityName,
@@ -50,7 +60,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Internal server error", ex.Message });
+                return await HandleError(ex);
             }
         }
 
@@ -78,7 +88,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Internal server error", ex.Message });
+                return await HandleError(ex);
             }
         }
 
@@ -89,7 +99,7 @@ namespace HMZ_rt.Controllers
         /// <returns>Deletion result</returns>
         [Authorize(Roles = "Admin,System,Recept")]
         [HttpDelete("DeleteAmenity/{id}")]
-        public async Task<ActionResult<Amenity>> DeleteAmenity(int id)
+        public async Task<ActionResult> DeleteAmenity(int id)
         {
             try
             {
@@ -107,7 +117,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Internal server error", ex.Message });
+                return await HandleError(ex);
             }
         }
 
@@ -115,38 +125,38 @@ namespace HMZ_rt.Controllers
         /// Updates an existing amenity
         /// </summary>
         /// <param name="id">Amenity identifier</param>
-        /// <param name="udto">Update data transfer object</param>
+        /// <param name="updateDto">Update data transfer object</param>
         /// <returns>Update result</returns>
         [Authorize(Roles = "Admin,System,Recept")]
         [HttpPut("UpdateAmenity/{id}")]
-        public async Task<ActionResult<Amenity>> UpdateAmenity(int id, UpdateAmenity udto)
+        public async Task<ActionResult> UpdateAmenity(int id, UpdateAmenity updateDto)
         {
             try
             {
                 var data = await _context.Amenities
                     .FirstOrDefaultAsync(x => x.AmenityId == id);
 
-                if (data != null)
+                if (data == null)
                 {
-                    data.AmenityName = udto.AmenityName;
-                    data.Description = udto.Descript;
-                    data.Availability = udto.Availability;
-                    data.Status = udto.Status;
-                    data.Icon = udto.Icon;
-                    data.Category = udto.Category;
-                    data.Priority = udto.Priority;
-
-                    _context.Amenities.Update(data);
-                    await _context.SaveChangesAsync();
-
-                    return StatusCode(200, new { message = "Sikeres frissítés" });
+                    return StatusCode(404, new { message = "Az adat nem található!" });
                 }
 
-                return StatusCode(404, new { message = "Az adat nem található!" });
+                data.AmenityName = updateDto.AmenityName;
+                data.Description = updateDto.Descript;
+                data.Availability = updateDto.Availability;
+                data.Status = updateDto.Status;
+                data.Icon = updateDto.Icon;
+                data.Category = updateDto.Category;
+                data.Priority = updateDto.Priority;
+
+                _context.Amenities.Update(data);
+                await _context.SaveChangesAsync();
+
+                return StatusCode(204);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Internal server error", ex.Message });
+                return await HandleError(ex);
             }
         }
     }

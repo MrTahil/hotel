@@ -64,6 +64,7 @@ public class NewStaffDto
    public string? LastName { get; set; }
     [EmailAddress(ErrorMessage = "Nem megfelelő Email forma.")]
     public     string? Email { get; set; }
+    [Phone(ErrorMessage = "Nem megfelelő telefonszám formátum")]
   public      string? PhoneNumber { get; set; }
      public   string? Position { get; set; }
    public     decimal? Salary { get; set; }
@@ -81,6 +82,7 @@ public class UpdateStaffDto
     [EmailAddress(ErrorMessage ="Nem megfelelő Email forma.")]
     public string? Email { get; set; }
     [Required(ErrorMessage = "A Telefonszám megadása kötelező!")]
+    [Phone(ErrorMessage ="Nem megfelelő telefonszám formátum.")]
     public string? PhoneNumber { get; set; }
     [Required(ErrorMessage = "A Pozicíó megadása kötelező!")]
     public string? Position { get; set; }
