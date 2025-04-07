@@ -121,6 +121,51 @@ namespace HMZ_rt.Controllers
 
         }
 
+        [Authorize(Roles = "Admin,System,Recept,Base")]
+        [HttpGet("GetOneUsersEventBookings/{userid}")]
+        public async Task<ActionResult<List<Eventbooking>>> GetOne(int userid)
+        {
+            try
+            {
+                
+                var userAccounts = await _context.Useraccounts
+                    .Where(x => x.UserId == userid)
+                    .Include(x => x.Guests)
+                    .ToListAsync();
+
+                
+                if (userAccounts == null)
+                {
+                    return Ok(new List<Eventbooking>());
+                }
+
+               
+                var guestIds = userAccounts
+                    .SelectMany(x => x.Guests)
+                    .Select(x => x.GuestId)
+                    .ToList();
+
+                
+                if (guestIds.Count == 0)
+                {
+                    return Ok(new List<Eventbooking>());
+                }
+
+                
+                var eventBookings = await _context.Eventbookings
+                    .Where(x => guestIds.Contains(x.GuestId))
+                    .ToListAsync();
+
+                
+                return Ok(eventBookings);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
     }
 }
 

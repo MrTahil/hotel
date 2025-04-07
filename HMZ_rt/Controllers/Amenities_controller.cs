@@ -2,29 +2,35 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 #pragma warning disable
+
 namespace HMZ_rt.Controllers
 {
     [Route("Amenities")]
     [ApiController]
-    public class Amenities_controller : Controller
+    public class AmenitiesController : ControllerBase
     {
         private readonly HmzRtContext _context;
-        public Amenities_controller(HmzRtContext context)
+
+        public AmenitiesController(HmzRtContext context)
         {
             _context = context;
         }
 
-
+        /// <summary>
+        /// Creates a new amenity for a room
+        /// </summary>
+        /// <param name="upload">Amenity data to create</param>
+        /// <returns>Create amenity response</returns>
         [Authorize(Roles = "Admin,System,Recept")]
-        [HttpPost("New aminiti")]
-        public async Task<ActionResult<Amenity>> GenerateNewAmenitie( UploadAmenitiesForNewRoomDto upload)
+        [HttpPost("NewAmenity")]
+        public async Task<ActionResult<Amenity>> GenerateNewAmenity(UploadAmenitiesForNewRoomDto upload)
         {
             try
             {
-
-
-                //mentés
                 var amenity = new Amenity
                 {
                     AmenityName = upload.AmenityName,
@@ -33,76 +39,93 @@ namespace HMZ_rt.Controllers
                     RoomId = upload.RoomId,
                     Status = upload.Status,
                     Icon = upload.Icon,
-                    Category= upload.Categ,
+                    Category = upload.Categ,
                     Priority = upload.Priority
-
                 };
-                if (amenity != null)
-                {
-                    await _context.Amenities.AddAsync(amenity);
-                    await _context.SaveChangesAsync();
-                    return StatusCode(201, amenity);
-                }
-                return BadRequest();
+
+                await _context.Amenities.AddAsync(amenity);
+                await _context.SaveChangesAsync();
+
+                return StatusCode(201, amenity);
             }
             catch (Exception ex)
             {
-
-                return StatusCode(500, ex);
+                return StatusCode(500, new { message = "Internal server error", ex.Message });
             }
         }
 
-        //[Authorize(Roles = "Admin,System,Recept")]
-        [HttpGet("GetAmenitiesForRoom/{Id}")]
-
-        public async Task<ActionResult<IEnumerable<Amenity>>> GetResultsForRunner(int Id)
+        /// <summary>
+        /// Gets all amenities for a specific room
+        /// </summary>
+        /// <param name="id">Room identifier</param>
+        /// <returns>Amenities for the room</returns>
+        [Authorize(Roles = "Admin,System,Recept")]
+        [HttpGet("GetAmenitiesForRoom/{id}")]
+        public async Task<ActionResult<IEnumerable<Amenity>>> GetAmenitiesForRoom(int id)
         {
             try
             {
+                var data = await _context.Amenities
+                    .Where(x => x.RoomId == id)
+                    .ToListAsync();
 
+                if (!data.Any())
+                {
+                    return NotFound(new { message = "Nincsenek szolgáltatások ezen a szobához!" });
+                }
 
-            var data = await _context.Amenities.Where(x => x.RoomId == Id).ToListAsync();
-
-            if (!data.Any())
-            {
-                return NotFound(new { message = "Elfelejtetted feltölteni ezt a szekciót!" });
-            }
-            return Ok(data);
+                return Ok(data);
             }
             catch (Exception ex)
             {
-
-                return StatusCode(500, ex);
+                return StatusCode(500, new { message = "Internal server error", ex.Message });
             }
         }
 
+        /// <summary>
+        /// Deletes an amenity by its identifier
+        /// </summary>
+        /// <param name="id">Amenity identifier</param>
+        /// <returns>Deletion result</returns>
         [Authorize(Roles = "Admin,System,Recept")]
         [HttpDelete("DeleteAmenity/{id}")]
-        public async Task<ActionResult<Amenity>> Deleteamenity(int id)
+        public async Task<ActionResult<Amenity>> DeleteAmenity(int id)
         {
             try
             {
-                var data = await _context.Amenities.FirstOrDefaultAsync(x => x.AmenityId == id);
-                if (data != null) { 
-                _context.Amenities.Remove(data);
+                var data = await _context.Amenities
+                    .FirstOrDefaultAsync(x => x.AmenityId == id);
+
+                if (data != null)
+                {
+                    _context.Amenities.Remove(data);
                     await _context.SaveChangesAsync();
-                    return StatusCode(201, "Sikeres törlés");
-                } return StatusCode(404, "Ez az adat nem található az adatbázisban!");
+                    return StatusCode(200, new { message = "Sikeres törlés" });
+                }
+
+                return StatusCode(404, new { message = "Az adat nem található!" });
             }
             catch (Exception ex)
             {
-
-                return StatusCode(500, ex);
+                return StatusCode(500, new { message = "Internal server error", ex.Message });
             }
         }
 
+        /// <summary>
+        /// Updates an existing amenity
+        /// </summary>
+        /// <param name="id">Amenity identifier</param>
+        /// <param name="udto">Update data transfer object</param>
+        /// <returns>Update result</returns>
         [Authorize(Roles = "Admin,System,Recept")]
         [HttpPut("UpdateAmenity/{id}")]
         public async Task<ActionResult<Amenity>> UpdateAmenity(int id, UpdateAmenity udto)
         {
             try
             {
-                var data = await _context.Amenities.FirstOrDefaultAsync(x => x.AmenityId == id);
+                var data = await _context.Amenities
+                    .FirstOrDefaultAsync(x => x.AmenityId == id);
+
                 if (data != null)
                 {
                     data.AmenityName = udto.AmenityName;
@@ -112,19 +135,19 @@ namespace HMZ_rt.Controllers
                     data.Icon = udto.Icon;
                     data.Category = udto.Category;
                     data.Priority = udto.Priority;
+
                     _context.Amenities.Update(data);
                     await _context.SaveChangesAsync();
-                    return StatusCode(201, "Sikeres frissítés");
-                    
+
+                    return StatusCode(200, new { message = "Sikeres frissítés" });
                 }
-                return StatusCode(404, "Nem található");
+
+                return StatusCode(404, new { message = "Az adat nem található!" });
             }
             catch (Exception ex)
             {
-
-                return StatusCode(500, ex);
+                return StatusCode(500, new { message = "Internal server error", ex.Message });
             }
         }
-
     }
 }
