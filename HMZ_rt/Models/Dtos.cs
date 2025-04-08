@@ -33,7 +33,8 @@ namespace HMZ_rt.Models
     [Required(ErrorMessage = "Jelszó megadása kötelező!")]
     public string? Password { get; set; }
 }
-    public record UpdateRoomDto(string? Status);
+    public record UpdateRoomDto(string? Status, string? Description, string? RoomType, string? RoomNumber, int? Capacity,
+        decimal? PricePerNight, int? FloorNumber);
     public class CreateBookingDto {
         public int GuestId { get; set; }
         public DateTime? CheckInDate { get; set; }

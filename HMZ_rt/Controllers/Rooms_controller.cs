@@ -140,7 +140,7 @@ namespace HMZ_rt.Controllers
         }
 
         [Authorize(Roles = "System,Admin,Recept")]
-        [HttpPut("SzobaUpdate/{Id}")]
+        [HttpPut("RoomUpdate/{Id}")]
         public async Task<ActionResult<Room>> UpdateRoomById(int Id, UpdateRoomDto udto)
         {
             try
@@ -152,6 +152,12 @@ namespace HMZ_rt.Controllers
                 {
 
                     os.Status = udto.Status;
+                    os.Description = udto.Description;
+                    os.RoomType = udto.RoomType;
+                    os.RoomNumber = udto.RoomNumber;
+                    os.Capacity = udto.Capacity;
+                    os.PricePerNight = udto.PricePerNight;
+                    os.FloorNumber = udto.FloorNumber;
                     await _context.SaveChangesAsync();
                     return Ok();
                 }
