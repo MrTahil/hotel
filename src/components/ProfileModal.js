@@ -56,6 +56,8 @@ const ProfilePage = () => {
   const [forgotStep, setForgotStep] = useState(1);
   const [showNewPasswordForgot, setShowNewPasswordForgot] = useState(false);
   const [showConfirmPasswordForgot, setShowConfirmPasswordForgot] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [deletionSuccess, setDeletionSuccess] = useState(false);
 
   const fetchRoomIdByNumber = async (roomNumber) => {
     try {
@@ -1070,38 +1072,36 @@ const ProfilePage = () => {
                 Foglalásaim
               </h2>
             </div>
+
+            {/* Sikeres törlés üzenet */}
+            {deletionSuccess && (
+              <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg animate-fade-in">
+                <div className="flex items-center">
+                  <span className="material-symbols-outlined mr-2 text-green-600">check_circle</span>
+                  <p>Sikeresen törölted a foglalást!</p>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {bookings.length > 0 ? (
                 bookings.map((booking, index) => {
-                  const roomNumber =
-                    booking.room?.number || booking.roomNumber || "N/A";
-                  const checkInDate =
-                    booking.startDate ||
-                    booking.checkInDate ||
-                    booking.dateFrom ||
-                    "N/A";
-                  const checkOutDate =
-                    booking.endDate ||
-                    booking.checkOutDate ||
-                    booking.dateTo ||
-                    "N/A";
-                  const firstName =
-                    booking.guest?.firstName || booking.firstName || "N/A";
-                  const lastName =
-                    booking.guest?.lastName || booking.lastName || "N/A";
-                  const floorNumber =
-                    booking.room?.floor || booking.floorNumber || "N/A";
-                  const roomType =
-                    booking.room?.type || booking.roomType || "N/A";
-                  const numberOfGuests =
-                    booking.guestCount || booking.numberOfGuests || "N/A";
+                  const roomNumber = booking.room?.number || booking.roomNumber || "N/A";
+                  const checkInDate = booking.startDate || booking.checkInDate || booking.dateFrom || "N/A";
+                  const checkOutDate = booking.endDate || booking.checkOutDate || booking.dateTo || "N/A";
+                  const firstName = booking.guest?.firstName || booking.firstName || "N/A";
+                  const lastName = booking.guest?.lastName || booking.lastName || "N/A";
+                  const floorNumber = booking.room?.floor || booking.floorNumber || "N/A";
+                  const roomType = booking.room?.type || booking.roomType || "N/A";
+                  const numberOfGuests = booking.guestCount || booking.numberOfGuests || "N/A";
                   const totalPrice = booking.price || booking.totalPrice || "N/A";
-                  const paymentStatus =
-                    booking.status || booking.paymentStatus || "N/A";
+                  const paymentStatus = booking.status || booking.paymentStatus || "N/A";
+
                   return (
                     <div
-                      key={booking.id || booking.bookingísmoId || `booking-${index}`}
-                      className="border border-blue-2 rounded-xl p-4 bg-gradient-to-br from-blue-50 to-teal-50 hover:border-teal-400 transition-all duration-300 shadow-md hover:shadow-xl"
+                      key={booking.id || booking.bookingId || `booking-${index}`}
+                      className={`border border-blue-200 rounded-xl p-4 bg-gradient-to-br from-blue-50 to-teal-50 hover:border-teal-400 transition-all duration-300 shadow-md hover:shadow-xl ${deletingId === (booking.id || booking.bookingId) ? 'opacity-50' : ''
+                        }`}
                     >
                       <div className="flex justify-between items-center mb-3">
                         <div>
@@ -1115,35 +1115,57 @@ const ProfilePage = () => {
                             Időpont:{" "}
                             <span className="font-bold text-teal-600">
                               {checkInDate !== "N/A" && checkOutDate !== "N/A"
-                                ? `${new Date(
-                                  checkInDate
-                                ).toLocaleDateString("hu-HU")} - ${new Date(
-                                  checkOutDate
-                                ).toLocaleDateString("hu-HU")}`
+                                ? `${new Date(checkInDate).toLocaleDateString("hu-HU")} - ${new Date(checkOutDate).toLocaleDateString("hu-HU")}`
                                 : "N/A"}
                             </span>
                           </p>
                         </div>
-                        <button
-                          onClick={() =>
-                            handleOpenDetails({
-                              ...booking,
-                              RoomNumber: roomNumber,
-                              CheckInDate: checkInDate,
-                              CheckOutDate: checkOutDate,
-                              FirstName: firstName,
-                              LastName: lastName,
-                              FloorNumber: floorNumber,
-                              RoomType: roomType,
-                              NumberOfGuests: numberOfGuests,
-                              TotalPrice: totalPrice,
-                              PaymentStatus: paymentStatus,
-                            })
-                          }
-                          className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-blue-600 transform hover:scale-105 transition-all duration-200 shadow-md"
-                        >
-                          Részletek
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() =>
+                              handleOpenDetails({
+                                ...booking,
+                                RoomNumber: roomNumber,
+                                CheckInDate: checkInDate,
+                                CheckOutDate: checkOutDate,
+                                FirstName: firstName,
+                                LastName: lastName,
+                                FloorNumber: floorNumber,
+                                RoomType: roomType,
+                                NumberOfGuests: numberOfGuests,
+                                TotalPrice: totalPrice,
+                                PaymentStatus: paymentStatus,
+                              })
+                            }
+                            className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-blue-600 transform hover:scale-105 transition-all duration-200 shadow-md"
+                          >
+                            Részletek
+                          </button>
+                          <button
+                            onClick={() => {
+                              const bookingId = booking.id || booking.bookingId;
+                              setDeletingId(bookingId);
+                              handleDeleteBooking(bookingId)
+                                .then(() => {
+                                  setDeletionSuccess(true);
+                                  setTimeout(() => setDeletionSuccess(false), 3000);
+                                })
+                                .finally(() => setDeletingId(null));
+                            }}
+                            disabled={deletingId === (booking.id || booking.bookingId)}
+                            className={`bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-md ${deletingId === (booking.id || booking.bookingId) ? 'opacity-70 cursor-not-allowed' : ''
+                              }`}
+                          >
+                            {deletingId === (booking.id || booking.bookingId) ? (
+                              <span className="flex items-center">
+                                <span className="material-symbols-outlined animate-spin mr-1">refresh</span>
+                                Törlés...
+                              </span>
+                            ) : (
+                              'Törlés'
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -1166,14 +1188,26 @@ const ProfilePage = () => {
                 Program foglalásaim
               </h2>
             </div>
+
+            {/* Sikeres törlés üzenet */}
+            {deletionSuccess && (
+              <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg animate-fade-in">
+                <div className="flex items-center">
+                  <span className="material-symbols-outlined mr-2 text-green-600">check_circle</span>
+                  <p>Sikeresen törölted a foglalást!</p>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {eventBookings.length > 0 ? (
                 eventBookings.map((booking) => {
-                  const event = events.find((e) => e.eventId === booking.eventId); // Match booking to event
+                  const event = events.find((e) => e.eventId === booking.eventId);
                   return (
                     <div
                       key={booking.eventBookingId}
-                      className="border border-blue-200 rounded-xl p-4 bg-gradient-to-br from-purple-50 to-blue-50 hover:border-purple-400 transition-all duration-300 shadow-md hover:shadow-xl"
+                      className={`border border-blue-200 rounded-xl p-4 bg-gradient-to-br from-purple-50 to-blue-50 hover:border-purple-400 transition-all duration-300 shadow-md hover:shadow-xl ${deletingId === booking.eventBookingId ? 'opacity-50' : ''
+                        }`}
                     >
                       <div className="flex justify-between items-center mb-3">
                         <div>
@@ -1211,10 +1245,27 @@ const ProfilePage = () => {
                           </p>
                         </div>
                         <button
-                          onClick={() => handleDeleteEventBooking(booking.eventBookingId)}
-                          className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-md"
+                          onClick={() => {
+                            setDeletingId(booking.eventBookingId);
+                            handleDeleteEventBooking(booking.eventBookingId)
+                              .then(() => {
+                                setDeletionSuccess(true);
+                                setTimeout(() => setDeletionSuccess(false), 3000);
+                              })
+                              .finally(() => setDeletingId(null));
+                          }}
+                          disabled={deletingId === booking.eventBookingId}
+                          className={`bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-md ${deletingId === booking.eventBookingId ? 'opacity-70 cursor-not-allowed' : ''
+                            }`}
                         >
-                          Törlés
+                          {deletingId === booking.eventBookingId ? (
+                            <span className="flex items-center">
+                              <span className="material-symbols-outlined animate-spin mr-1">refresh</span>
+                              Törlés...
+                            </span>
+                          ) : (
+                            'Törlés'
+                          )}
                         </button>
                       </div>
                     </div>
