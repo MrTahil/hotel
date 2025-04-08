@@ -208,5 +208,25 @@ namespace HMZ_rt.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [Authorize(Roles = "Admin,System,Recept")]
+        [HttpGet("GetByEmail/{email}")]
+        public async Task<ActionResult<Guest>> GetOneUserGuestEmail(string email)
+        {
+            try
+            {
+                var data = await _context.Guests.FirstOrDefaultAsync(x => x.Email == email);
+                if (data != null)
+                {
+                    return StatusCode(200, data.GuestId);
+                }
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }
