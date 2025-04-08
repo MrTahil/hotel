@@ -925,25 +925,26 @@ const ProfilePage = () => {
         </div>
       )}
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-6 gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3 sm:gap-4">
           <button
             onClick={() => window.history.back()}
-            className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center sm:justify-start order-1 sm:order-none"
           >
-            <span className="material-symbols-outlined mr-2">arrow_back</span>
-            Vissza
+            <span className="material-symbols-outlined mr-1 sm:mr-2">arrow_back</span>
+            <span className="hidden sm:inline">Vissza</span>
           </button>
 
-          <h1 className="animate-bounce text-2xl sm:text-3xl font-bold text-blue-800 text-center flex-grow">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-800 text-center flex-grow order-2 sm:order-none mx-2 my-2 sm:my-0">
             Profil kezelése
           </h1>
 
           <button
             onClick={handleLogout}
-            className="flex items-center bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            className="flex items-center bg-red-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-red-700 transition-colors w-full sm:w-auto justify-center sm:justify-start order-3 sm:order-none"
           >
-            <span className="material-symbols-outlined mr-2">logout</span>
-            Kijelentkezés
+            <span className="material-symbols-outlined mr-1 sm:mr-2">logout</span>
+            <span className="hidden sm:inline">Kijelentkezés</span>
+            <span className="sm:hidden">Kilépés</span>
           </button>
         </div>
         {error && <p className="text-red-600 mb-4">{error}</p>}
