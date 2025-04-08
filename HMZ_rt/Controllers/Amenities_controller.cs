@@ -38,7 +38,7 @@ namespace HMZ_rt.Controllers
             {
                 if (upload.RoomId <= 0)
                 {
-                    return BadRequest(new { message = "Érvénytelen szoba azonosító!" });
+                    return BadRequest("Érvénytelen szoba azonosító!");
                 }
 
                 var amenity = new Amenity
@@ -81,7 +81,7 @@ namespace HMZ_rt.Controllers
 
                 if (!data.Any())
                 {
-                    return NotFound(new { message = "Nincsenek szolgáltatások ezen a szobához!" });
+                    return NotFound("Nincsenek szolgáltatások ezen a szobához!");
                 }
 
                 return Ok(data);
@@ -110,10 +110,10 @@ namespace HMZ_rt.Controllers
                 {
                     _context.Amenities.Remove(data);
                     await _context.SaveChangesAsync();
-                    return StatusCode(200, new { message = "Sikeres törlés" });
+                    return StatusCode(200, "Sikeres törlés" );
                 }
 
-                return StatusCode(404, new { message = "Az adat nem található!" });
+                return StatusCode(404,  "Az adat nem található!" );
             }
             catch (Exception ex)
             {
@@ -138,7 +138,7 @@ namespace HMZ_rt.Controllers
 
                 if (data == null)
                 {
-                    return StatusCode(404, new { message = "Az adat nem található!" });
+                    return StatusCode(404,  "Az adat nem található!" );
                 }
 
                 data.AmenityName = updateDto.AmenityName;

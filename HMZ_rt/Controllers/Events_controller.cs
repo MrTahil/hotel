@@ -38,35 +38,16 @@ namespace HMZ_rt.Controllers
 
         [Authorize(Roles = "Admin,System,Recept")]
         [HttpPost("CreateEvent")]
-        public async Task<ActionResult<Event>> Createevent([FromForm] CreateEvent crtdto)
+        public async Task<ActionResult<Event>> Createevent( CreateEvent crtdto)
         {
             try
             {
                 var existing = await _context.Events.FirstOrDefaultAsync(x => x.EventName == crtdto.EventName);
                 if (existing == null)
                 {
-                    string imagePath = "";
+                    
 
-                    if (crtdto.ImageFile != null && crtdto.ImageFile.Length > 0)
-                    {
-                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(crtdto.ImageFile.FileName);
-
-                        string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "events");
-
-                        if (!Directory.Exists(uploadsFolder))
-                        {
-                            Directory.CreateDirectory(uploadsFolder);
-                        }
-
-                        string filePath = Path.Combine(uploadsFolder, fileName);
-
-                        using (var fileStream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await crtdto.ImageFile.CopyToAsync(fileStream);
-                        }
-
-                        imagePath = "/images/events/" + fileName;
-                    }
+                    
 
                     var news = new Event
                     {
@@ -80,7 +61,7 @@ namespace HMZ_rt.Controllers
                         ContactInfo = crtdto.ContactInfo,
                         DateAdded = DateTime.Now,
                         Price = (decimal)crtdto.Price,
-                        Images = imagePath
+                        Images = ""
                     };
 
                     if (news != null)
@@ -162,6 +143,7 @@ namespace HMZ_rt.Controllers
                   x.EventName,
                   x.Images,
                   x.Price,
+                  x.OrganizerName,
                   LefttoGet=x.Capacity -  x.Eventbookings.Sum(x=> x.NumberOfTickets)
                 }));
             }

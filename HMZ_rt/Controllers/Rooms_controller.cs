@@ -140,7 +140,7 @@ namespace HMZ_rt.Controllers
         }
 
         [Authorize(Roles = "System,Admin,Recept")]
-        [HttpPut("SzobaUpdate")]
+        [HttpPut("SzobaUpdate/{Id}")]
         public async Task<ActionResult<Room>> UpdateRoomById(int Id, UpdateRoomDto udto)
         {
             try

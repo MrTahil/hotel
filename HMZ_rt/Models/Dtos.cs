@@ -266,8 +266,6 @@ public class CreateEvent
     [Required(ErrorMessage = "Az ár megadása kötelező!")]
     public decimal? Price { get; set; }
 
-    [DataType(DataType.Upload)]
-    public IFormFile? ImageFile { get; set; }
 }
 public class UpdateEvent
 {
