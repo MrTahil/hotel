@@ -48,7 +48,7 @@ function Services() {
       category: "business",
       features: ["HD projektor", "Hangosítás", "Kávészünet", "Flipchart"],
       priceRange: "50,000 - 200,000 Ft",
-      duration: "Napijellegű",
+      duration: "Napi jellegű",
     },
     {
       id: 5,

@@ -925,17 +925,19 @@ const ProfilePage = () => {
         </div>
       )}
       <div className="max-w-4xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center mb-6 gap-4">
+        <div className="flex justify-between items-center mb-6 gap-4">
           <button
             onClick={() => window.history.back()}
             className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             <span className="material-symbols-outlined mr-2">arrow_back</span>
-            Vissza a főoldalra
+            Vissza
           </button>
-          <h1 className="text-2xl sm:text-3xl font-bold text-blue-800">
+
+          <h1 className="animate-bounce text-2xl sm:text-3xl font-bold text-blue-800 text-center flex-grow">
             Profil kezelése
           </h1>
+
           <button
             onClick={handleLogout}
             className="flex items-center bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
