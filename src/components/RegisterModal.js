@@ -72,11 +72,11 @@ function RegisterModal({ onClose, switchToLogin }) {
         body: JSON.stringify({ UserName: username, Email: email, Password: password }),
       });
 
-      const data = await response.json();
-      console.log('Szerver válasz:', data);
+      const responseText = await response.text();
+      console.log('Szerver válasz:', responseText, 'Státusz:', response.status);
 
-      if (response.ok) {
-        setSuccessMessage('Sikeres regisztráció! Kérlek ellenőrizd az emailed és add meg a kódot!');
+      if (response.status === 201) {
+        setSuccessMessage(responseText || 'Sikeres regisztráció! Kérlek ellenőrizd az emailed és add meg a kódot!');
         localStorage.setItem('username', username);
         localStorage.setItem('email', email);
         setTimeout(() => {
@@ -85,10 +85,14 @@ function RegisterModal({ onClose, switchToLogin }) {
         }, 2000);
       } else {
         let errorMsg = 'Ismeretlen hiba történt a regisztráció során!';
-        if (data.message === 'Név vagy Email már használatban van') {
-          errorMsg = 'A felhasználónév vagy email már foglalt!';
-        } else if (data.message) {
-          errorMsg = data.message;
+        if (response.status === 400) {
+          if (responseText.includes('Név vagy Email már használatban van')) {
+            errorMsg = 'A felhasználónév vagy email már foglalt!';
+          } else {
+            errorMsg = responseText || 'Hibás kérés!';
+          }
+        } else if (response.status === 500) {
+          errorMsg = responseText || 'Szerverhiba történt!';
         }
         setErrorMessage(errorMsg);
         setIsLoading(false);
