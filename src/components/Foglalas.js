@@ -207,19 +207,19 @@ export const Foglalas = () => {
 
         if (!response.ok) {
           const errorText = await response.text();
-          throw new Error(`Hiba a kényelmi szolgáltatások lekérdezése során: ${response.status} - ${errorText}`);
+          throw new Error(`Nincs az adott szobához kényelmi szolgáltatás!`);
         }
 
         const data = await response.json();
         if (!Array.isArray(data) || data.length === 0) {
-          console.warn("Nincsenek kényelmi szolgáltatások a szobához:", id);
-          setAmenities([]);
+          console.log("Nincsenek kényelmi szolgáltatások a szobához:", id); // Changed from warn to log
+          setAmenities([]); // Set empty array, no error
         } else {
           setAmenities(data);
         }
       } catch (error) {
         console.error("Fetch amenities error:", error.message);
-        setError(error.message);
+        setError(error.message); // Only set error for actual fetch failures
         setAmenities([]);
       } finally {
         setLoading(false);

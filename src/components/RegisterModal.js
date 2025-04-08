@@ -12,7 +12,7 @@ function RegisterModal({ onClose, switchToLogin }) {
   const [showVerification, setShowVerification] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // New loading state
+  const [isLoading, setIsLoading] = useState(false);
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -25,7 +25,7 @@ function RegisterModal({ onClose, switchToLogin }) {
   };
 
   const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`]).{6,}$/;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?/~`]).{8,}$/;
     return passwordRegex.test(password);
   };
 
@@ -33,16 +33,16 @@ function RegisterModal({ onClose, switchToLogin }) {
     e.preventDefault();
     setErrorMessage('');
     setSuccessMessage('');
-    setIsLoading(true); // Start loading
+    setIsLoading(true);
 
     if (!username.trim()) {
       setErrorMessage('A felhasználónév nem lehet üres!');
-      setIsLoading(false); // Stop loading
+      setIsLoading(false);
       return;
     }
 
     if (!validateUsername(username)) {
-      setErrorMessage('A felhasználónév csak betűket (beleértve ékezeteseket is), számokat és aláhúzást tartalmazhat, és 3-20 karakter hosszú kell legyen!');
+      setErrorMessage('A felhasználónév túl rövid vagy csak betűket (beleértve ékezeteseket is), számokat és aláhúzást tartalmazhat, és 3-20 karakter hosszú kell legyen!');
       setIsLoading(false);
       return;
     }
@@ -54,7 +54,7 @@ function RegisterModal({ onClose, switchToLogin }) {
     }
 
     if (!validatePassword(password)) {
-      setErrorMessage('A jelszónak legalább 6 karakter hosszúnak kell lennie, és tartalmaznia kell legalább egy nagybetűt és egy speciális karaktert!');
+      setErrorMessage('A jelszónak legalább 8 karakter hosszúnak kell lennie, és tartalmaznia kell legalább egy nagybetűt és egy speciális karaktert!');
       setIsLoading(false);
       return;
     }
@@ -81,7 +81,7 @@ function RegisterModal({ onClose, switchToLogin }) {
         localStorage.setItem('email', email);
         setTimeout(() => {
           setShowVerification(true);
-          setIsLoading(false); // Stop loading when verification modal appears
+          setIsLoading(false);
         }, 2000);
       } else {
         let errorMsg = 'Ismeretlen hiba történt a regisztráció során!';
@@ -91,12 +91,12 @@ function RegisterModal({ onClose, switchToLogin }) {
           errorMsg = data.message;
         }
         setErrorMessage(errorMsg);
-        setIsLoading(false); // Stop loading on error
+        setIsLoading(false);
       }
     } catch (error) {
       setErrorMessage('Hálózati hiba történt. Kérjük próbáld újra később!');
       console.error('Hiba részletei:', error);
-      setIsLoading(false); // Stop loading on network error
+      setIsLoading(false);
     }
   };
 
@@ -226,7 +226,7 @@ function RegisterModal({ onClose, switchToLogin }) {
             <button
               type="submit"
               className="w-full bg-gradient-to-r from-blue-900 to-blue-800 text-white py-2 px-4 rounded-lg hover:from-blue-800 hover:to-blue-700 transition-all duration-200 flex items-center justify-center"
-              disabled={isLoading} // Disable button while loading
+              disabled={isLoading}
             >
               {isLoading ? (
                 <>

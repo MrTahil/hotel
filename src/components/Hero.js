@@ -216,9 +216,9 @@ function Hero() {
                 />
                 <div className="absolute inset-0 bg-blue-900 z-10"></div>
                 <div className="relative z-20 text-center px-4">
-                    <h1 className=" animate-bounce text-4xl md:text-6xl font-bold mb-6">Üdvözöljük a Luxus Szállodában</h1>
-                    <p className="text-lg md:text-2xl max-w-3xl mx-auto mb-8 text-blue-100">
-                        Modern kényelem és elegancia várja Önt exkluzív szobáinkban.
+                    <h1 class="animate-bounce text-4xl md:text-6xl font-bold mb-6">Üdvözöljük az álomnyaralás kezdetén</h1>
+                    <p class="text-lg md:text-2xl max-w-3xl mx-auto mb-8 text-blue-100">
+                        Fedezze fel a tökéletes pihenés és kiváló szolgáltatások harmonikus világát
                     </p>
                     <Link to="/szobak">
                         <button className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 shadow-lg">

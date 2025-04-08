@@ -7,7 +7,7 @@ function Programs() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [bookingError, setBookingError] = useState(null);
-  const [bookingSuccess, setBookingSuccess] = useState(null); // New state for success message
+  const [bookingSuccess, setBookingSuccess] = useState(null);
 
   const fetchGuestData = async () => {
     try {
@@ -40,7 +40,7 @@ function Programs() {
   const handleBooking = async () => {
     try {
       setBookingError(null);
-      setBookingSuccess(null); // Clear previous success message
+      setBookingSuccess(null);
       const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("Nincs bejelentkezve, kérem jelentkezzen be vagy regisztráljon!");
@@ -73,8 +73,19 @@ function Programs() {
       if (!response.ok) {
         throw new Error(`Hiba a foglalás során: ${response.status}`);
       }
+      setPrograms((prevPrograms) =>
+        prevPrograms.map((program) =>
+          program.id === selectedProgram.id
+            ? { ...program, leftToGet: program.leftToGet - numberOfTickets }
+            : program
+        )
+      );
+      setSelectedProgram((prev) => ({
+        ...prev,
+        leftToGet: prev.leftToGet - numberOfTickets,
+      }));
       setBookingSuccess("Foglalás sikeres! A modal hamarosan bezárul.");
-      setTimeout(() => closeModal(), 2000); // Close modal after 2 seconds
+      setTimeout(() => closeModal(), 2000);
     } catch (err) {
       console.error("Hiba a foglalás közben:", err.message);
       setBookingError(err.message);
@@ -98,7 +109,7 @@ function Programs() {
           description: event.description ?? "",
           images: event.images ?? "../img/default_imgage.png",
           schedule: event.eventDate ?? null,
-          organizerName: event.organizerName ?? "Nincs megadva",
+          organizerName: event.organizerName ?? "Nincs megadva", // Use backend data or fallback
           contactInfo: event.contactInfo ?? "",
           location: event.location ?? "",
           capacity: event.capacity ?? 0,
@@ -123,13 +134,13 @@ function Programs() {
     setSelectedProgram(program);
     setNumberOfTickets(1);
     setBookingError(null);
-    setBookingSuccess(null); // Clear success message when opening modal
+    setBookingSuccess(null);
   };
 
   const closeModal = () => {
     setSelectedProgram(null);
     setBookingError(null);
-    setBookingSuccess(null); // Clear success message when closing modal
+    setBookingSuccess(null);
   };
 
   const truncateDescription = (description, maxLength) => {
@@ -188,7 +199,7 @@ function Programs() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-200 via-blue-100 to-purple-200 py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-300/20 via-transparent to-transparent pointer-events-none"></div>
       <div className="max-w-7xl mx-auto relative z-10">
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500 text-center mb-12 drop-shadow-lg animate-fade-in">
+        <h1 className=" animate-bounce text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500 text-center mb-12 drop-shadow-lg animate-fade-in">
           Programok
         </h1>
 
@@ -381,7 +392,7 @@ function Programs() {
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:from-blue-600 hover:to-indigo-700"
                 }`}
-                disabled={selectedProgram.leftToGet === 0 || bookingSuccess} // Disable after success too
+                disabled={selectedProgram.leftToGet === 0 || bookingSuccess}
               >
                 Foglalás
               </button>
@@ -395,18 +406,22 @@ function Programs() {
           </div>
         </div>
       )}
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: scale(0.95);
+
+      {/* Move styles to a global CSS scope */}
+      <style>
+        {`
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: scale(0.95);
+            }
+            to {
+              opacity: 1;
+              transform: scale(1);
+            }
           }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 }
