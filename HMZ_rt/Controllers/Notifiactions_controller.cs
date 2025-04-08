@@ -54,7 +54,7 @@ namespace HMZ_rt.Controllers
                 await _context.SaveChangesAsync();
                 return Ok(oke);
             }
-            return NotFound(new { message = "Nincs ilyen id-val rendelkező adat az adatbázisban." });
+            return NotFound( "Nincs ilyen id-val rendelkező adat az adatbázisban." );
         }
         
         [HttpPut("UpdateOpenedTime/{NotiId}")]
@@ -68,7 +68,7 @@ namespace HMZ_rt.Controllers
                 await _context.SaveChangesAsync();
                 return Ok(oke);
             }
-            return NotFound(new { message = "Nincs ilyen id-val rendelkező adat az adatbázisban." });
+            return NotFound( "Nincs ilyen id-val rendelkező adat az adatbázisban." );
         }
 
         [Authorize(Roles = "Admin,System,Recept")]
@@ -88,7 +88,7 @@ namespace HMZ_rt.Controllers
             catch (Exception ex)
             {
 
-                return StatusCode(500, ex);
+                return StatusCode(500, ex.Message);
             }
             
         }
@@ -112,7 +112,7 @@ namespace HMZ_rt.Controllers
             catch (Exception ex)
             {
 
-                return StatusCode(500, ex);
+                return StatusCode(500, ex.Message);
             }
         }
     }

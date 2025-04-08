@@ -20,10 +20,7 @@ namespace HMZ_rt.Controllers
             _context = context;
         }
 
-        private async Task<ActionResult> HandleError(Exception ex)
-        {
-            return StatusCode(500, new { message = "Belső szerver hiba", ex.Message });
-        }
+        
 
         /// <summary>
         /// Creates a new amenity for a room
@@ -60,7 +57,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return await HandleError(ex);
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -88,7 +85,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return await HandleError(ex);
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -117,7 +114,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return await HandleError(ex);
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -156,7 +153,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return await HandleError(ex);
+                return StatusCode(500, ex.Message);
             }
         }
     }

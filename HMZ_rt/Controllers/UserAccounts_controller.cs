@@ -211,7 +211,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Szerverhiba lépett fel" });
+                return StatusCode(500,  "Szerverhiba lépett fel" );
             }
         }
 
@@ -221,10 +221,10 @@ namespace HMZ_rt.Controllers
             try
             {
                 if (newuser == null)
-                    return BadRequest(new { message = "Hibás felhasználói adatok" });
+                    return BadRequest("Hibás felhasználói adatok" );
 
                 if (await UserExists(newuser.UserName, newuser.Email))
-                    return BadRequest(new { message = "Név vagy Email már használatban van" });
+                    return BadRequest( "Név vagy Email már használatban van" );
 
                 var twoFactorCode = Generate2FACode();
                 var user = await CreateNewUser(newuser, twoFactorCode);
@@ -233,11 +233,11 @@ namespace HMZ_rt.Controllers
                 await _context.SaveChangesAsync();
                 await Send2FACode(user.Username, user.Email, twoFactorCode);
 
-                return StatusCode(201, new { message = "Sikeres regisztráció, emailben elküldtük az aktiváló kódot" });
+                return StatusCode(201,  "Sikeres regisztráció, emailben elküldtük az aktiváló kódot" );
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500,  ex.Message );
             }
         }
 
@@ -274,17 +274,17 @@ namespace HMZ_rt.Controllers
                     .FirstOrDefaultAsync(u => u.Email == dto.Email);
 
                 if (user == null)
-                    return NotFound(new { message = "Felhasználható nem található" });
+                    return NotFound( "Felhasználható nem található" );
 
                 if (!IsValidTwoFactorCode(user, dto.Code))
-                    return BadRequest(new { message = "Hibás vagy lejárt hitelesítő kód" });
+                    return BadRequest( "Hibás vagy lejárt hitelesítő kód" );
 
                 await ActivateUser(user);
-                return Ok(new { message = "Sikeres aktiválás, mostmár bejelentkezhetsz" });
+                return Ok( "Sikeres aktiválás, mostmár bejelentkezhetsz" );
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Szerver miatti sikertelen aktiváls, ha a hiba továbbra is fenn áll kérlek kérd a munkatársaink segítéségét" });
+                return StatusCode(500, "Szerver miatti sikertelen aktiváls, ha a hiba továbbra is fenn áll kérlek kérd a munkatársaink segítéségét" );
             }
         }
 
@@ -312,7 +312,7 @@ namespace HMZ_rt.Controllers
                     .FirstOrDefaultAsync(x => x.Username == Username);
 
                 if (user == null)
-                    return NotFound(new { message = "Felhasználó nem található" });
+                    return NotFound( "Felhasználó nem található" );
                 if (ddto == null) {
                     return StatusCode(404, "Nem lehet üres a jelszó");
                 }
@@ -326,7 +326,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Szerverhiba miatt sikertelen törlés" });
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -343,13 +343,13 @@ namespace HMZ_rt.Controllers
                     .ToListAsync();
 
                 if (!userData.Any())
-                    return NotFound(new { message = "Felhasználó nem található" });
+                    return NotFound(  "Felhasználó nem található" );
 
                 return Ok(userData);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Az adatok lekérése sikertelen" });
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -359,11 +359,11 @@ namespace HMZ_rt.Controllers
             try
             {
                 if (loginDto == null)
-                    return BadRequest(new { message = "Hibás bejelentési adatok" });
+                    return BadRequest( "Hibás bejelentési adatok" );
 
                 var user = await ValidateUser(loginDto);
                 if (user == null)
-                    return Unauthorized(new { message = "Hibás adatok" });
+                    return Unauthorized( "Hibás adatok" );
 
                 var (accessToken, refreshToken) = GenerateTokens(user);
                 await UpdateUserRefreshToken(user, refreshToken);
@@ -377,7 +377,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Sikertelen bejelentkezés szerverhiba miatt" });
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -415,13 +415,13 @@ namespace HMZ_rt.Controllers
             try
             {
                 if (string.IsNullOrEmpty(refreshToken))
-                    return BadRequest(new { message = "Hibás token" });
+                    return BadRequest( "Hibás token" );
 
                 var user = await _context.Useraccounts
                     .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
 
                 if (!IsValidRefreshToken(user))
-                    return Unauthorized(new { message = "Hibás vagy lejárt token" });
+                    return Unauthorized( "Hibás vagy lejárt token" );
 
                 var (accessToken, newRefreshToken) = GenerateTokens(user);
                 await UpdateUserRefreshToken(user, newRefreshToken);
@@ -430,7 +430,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Szerverhiba miatt sikertelen tokenrefresh" });
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -448,7 +448,7 @@ namespace HMZ_rt.Controllers
                         .FirstOrDefaultAsync(x => x.Email == email);
 
                     if (user == null)
-                        return NotFound(new { message = "Felhasználó nem található!" });
+                        return NotFound( "Felhasználó nem található!" );
                     user.Authenticationcode = code;
                     user.Authenticationexpire = DateTime.Now.AddDays(TwoFactorCodeExpiryDays);
                     await Send2FACode(user.Username, email, code);
@@ -460,7 +460,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { ex.Message });
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -501,10 +501,10 @@ namespace HMZ_rt.Controllers
                         user.Authenticationcode = "activated";
                         _context.Useraccounts.Update(user);
                         await _context.SaveChangesAsync();
-                        return StatusCode(201, new { message = "Sikeres jelszóváltoztatás!" });
+                        return StatusCode(201,  "Sikeres jelszóváltoztatás!" );
                     } }
             }
-            return StatusCode(500, new { message = "Valami nem jó biza" });
+            return StatusCode(500,  "Valami nem jó biza" );
         }
 
         private bool IsValidRefreshToken(Useraccount user)
@@ -575,7 +575,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return StatusCode(500, ex.Message);
             }
             
         }

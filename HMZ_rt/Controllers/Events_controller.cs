@@ -32,7 +32,7 @@ namespace HMZ_rt.Controllers
             catch (Exception ex)
             {
 
-                return StatusCode(500, ex);
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -76,7 +76,7 @@ namespace HMZ_rt.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex);
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -119,7 +119,7 @@ namespace HMZ_rt.Controllers
             catch (Exception ex)
             {
 
-                return StatusCode(500, ex);
+                return StatusCode(500, ex.Message);
             }
         }
         [HttpGet("Geteents")]
@@ -150,7 +150,7 @@ namespace HMZ_rt.Controllers
             catch (Exception ex)
             {
 
-                return StatusCode(500, ex);
+                return StatusCode(500, ex.Message);
             }
         }
         [Authorize(Roles ="Admin,System,Recept")]
@@ -170,7 +170,7 @@ namespace HMZ_rt.Controllers
             catch (Exception ex)
             {
 
-                return StatusCode(500, ex);
+                return StatusCode(500, ex.Message);
             }
         }
     }

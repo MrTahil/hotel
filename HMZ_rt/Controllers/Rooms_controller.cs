@@ -31,7 +31,7 @@ namespace HMZ_rt.Controllers
 
                 if (existingRoomByNumber != null)
                 {
-                    return BadRequest(new { message = "Ez a szobaszám már használatban van!" });
+                    return BadRequest( "Ez a szobaszám már használatban van!" );
                 }
 
 
@@ -58,7 +58,7 @@ namespace HMZ_rt.Controllers
             catch (Exception ex)
             {
 
-                return StatusCode(500, ex);
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -88,7 +88,7 @@ namespace HMZ_rt.Controllers
             catch (Exception ex)
             {
 
-                return StatusCode(500, ex);
+                return StatusCode(500, ex.Message);
             }
         }
         [HttpGet("GetRoomWith")]
@@ -110,7 +110,7 @@ namespace HMZ_rt.Controllers
             catch (Exception ex)
             {
 
-                return StatusCode(500, ex);
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -128,14 +128,14 @@ namespace HMZ_rt.Controllers
             {
                 _context.Rooms.Remove(os);
                 await _context.SaveChangesAsync();
-                return Ok(new { message = "Sikeresen törölve!" });
+                return Ok( "Sikeresen törölve!" );
             }
             return NotFound();
             }
             catch (Exception ex)
             {
 
-                return StatusCode(500, ex);
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -167,7 +167,7 @@ namespace HMZ_rt.Controllers
             catch (Exception ex)
             {
 
-                return StatusCode(500,ex);
+                return StatusCode(500, ex.Message);
             }
         }
 

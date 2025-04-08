@@ -92,7 +92,8 @@ namespace HMZ_rt.Controllers
             catch (Exception ex)
             {
 
-                return StatusCode(500, ex);           }
+                return StatusCode(500, ex.Message);
+            }
         }
 
 
