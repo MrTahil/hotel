@@ -17,7 +17,7 @@ function Hero() {
         fetch(process.env.REACT_APP_API_BASE_URL + '/Rooms/GetRoomWith')
             .then(response => {
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.json();
+                return response.text();
             })
             .then(data => {
                 if (!Array.isArray(data)) {
@@ -46,7 +46,7 @@ function Hero() {
         fetch(process.env.REACT_APP_API_BASE_URL + `/Events/Geteents`)
             .then(response => {
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.json();
+                return response.text();
             })
             .then(data => {
                 if (!Array.isArray(data)) {

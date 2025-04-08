@@ -73,7 +73,7 @@ const ProfilePage = () => {
       if (!response.ok) {
         throw new Error(`Nem sikerült lekérni a szobák adatait: ${response.status}`);
       }
-      const rooms = await response.json();
+      const rooms = await response.text();
       const room = rooms.find((r) => r.roomNumber === roomNumber);
       return room?.roomId || null;
     } catch (err) {
@@ -132,7 +132,7 @@ const ProfilePage = () => {
       if (!response.ok) {
         throw new Error("Nem sikerült lekérni a foglalás részleteit");
       }
-      const data = await response.json();
+      const data = await response.text();
       return data.roomId || data.room?.id;
     } catch (err) {
       console.error("Hiba a foglalás részleteinek lekérésekor:", err.message);
@@ -170,7 +170,7 @@ const ProfilePage = () => {
         if (!response.ok) {
           throw new Error(`HTTP hiba! Státusz: ${response.status}`);
         }
-        const data = await response.json();
+        const data = await response.text();
         setUser({
           username: data.username,
           email: data.email,
@@ -217,7 +217,7 @@ const ProfilePage = () => {
         }
         throw new Error(`Nem sikerült lekérni a foglalásokat: ${response.status}`);
       }
-      const data = await response.json();
+      const data = await response.text();
       setBookings(data);
     } catch (err) {
       console.error("Hiba a foglalások lekérésekor:", err.message);
@@ -252,7 +252,7 @@ const ProfilePage = () => {
         }
         throw new Error(`Nem sikerült lekérni a program foglalásokat: ${response.status}`);
       }
-      const data = await response.json();
+      const data = await response.jstexton();
       console.log("User's Event Bookings Response:", data);
       setEventBookings(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -279,7 +279,7 @@ const ProfilePage = () => {
       if (!response.ok) {
         throw new Error(`Nem sikerült lekérni az eseményeket: ${response.status}`);
       }
-      const data = await response.json();
+      const data = await response.text();
       console.log("Events Response:", data);
       setEvents(data);
     } catch (err) {
@@ -410,7 +410,7 @@ const ProfilePage = () => {
         }
         throw new Error(`Nem sikerült lekérni a vendégeket: ${response.status}`);
       }
-      const data = await response.json();
+      const data = await response.text();
       setGuests(Array.isArray(data) ? data : [data]);
     } catch (err) {
       console.error("Hiba a vendéglista lekérésekor:", err.message);
@@ -586,7 +586,7 @@ const ProfilePage = () => {
           }),
         }
       );
-      const data = await response.json();
+      const data = await response.text();
       if (!response.ok) {
         throw new Error(
           data.message || "Hiba történt az új jelszó beállításakor!"
@@ -668,7 +668,7 @@ const ProfilePage = () => {
     });
     const responseClone = response.clone();
     try {
-      const data = await response.json();
+      const data = await response.text();
       return { response, data };
     } catch (error) {
       const text = await responseClone.text();
@@ -895,7 +895,7 @@ const ProfilePage = () => {
       if (!response.ok) {
         let errorMessage = "Hiba történt az értékelés küldése közben";
         try {
-          const errorData = await response.json();
+          const errorData = await response.errorText();
           errorMessage = errorData.message || errorMessage;
         } catch (jsonError) {
           console.error("JSON parsing error:", jsonError);
@@ -925,25 +925,26 @@ const ProfilePage = () => {
         </div>
       )}
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-6 gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3 sm:gap-4">
           <button
             onClick={() => window.history.back()}
-            className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center sm:justify-start order-1 sm:order-none"
           >
-            <span className="material-symbols-outlined mr-2">arrow_back</span>
-            Vissza
+            <span className="material-symbols-outlined mr-1 sm:mr-2">arrow_back</span>
+            <span className="hidden sm:inline">Vissza</span>
           </button>
 
-          <h1 className="animate-bounce text-2xl sm:text-3xl font-bold text-blue-800 text-center flex-grow">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-800 text-center flex-grow order-2 sm:order-none mx-2 my-2 sm:my-0">
             Profil kezelése
           </h1>
 
           <button
             onClick={handleLogout}
-            className="flex items-center bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            className="flex items-center bg-red-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-red-700 transition-colors w-full sm:w-auto justify-center sm:justify-start order-3 sm:order-none"
           >
-            <span className="material-symbols-outlined mr-2">logout</span>
-            Kijelentkezés
+            <span className="material-symbols-outlined mr-1 sm:mr-2">logout</span>
+            <span className="hidden sm:inline">Kijelentkezés</span>
+            <span className="sm:hidden">Kilépés</span>
           </button>
         </div>
         {error && <p className="text-red-600 mb-4">{error}</p>}

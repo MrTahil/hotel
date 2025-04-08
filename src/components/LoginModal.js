@@ -30,7 +30,7 @@ function LoginModal({ onClose, switchToRegister, setUser }) {
         throw new Error('Hibás felhasználónév vagy jelszó');
       }
 
-      const data = await response.json();
+      const data = await response.text();
       console.log('Sikeres bejelentkezés:', data);
       onClose();
       localStorage.setItem('authToken', data.accessToken);

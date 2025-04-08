@@ -29,7 +29,7 @@ function Programs() {
       if (!response.ok) {
         throw new Error(`Nem sikerült lekérni a vendég adatait: ${response.status}`);
       }
-      const data = await response.json();
+      const data = await response.text();
       return data;
     } catch (err) {
       console.error("Hiba a vendég adatok lekérdezésekor:", err.message);
@@ -100,7 +100,7 @@ function Programs() {
         if (!response.ok) {
           throw new Error(`Hiba történt az adatok lekérésekor: ${response.status}`);
         }
-        const data = await response.json();
+        const data = await response.text();
         console.log("Raw API response:", data);
 
         const formattedPrograms = data.map((event) => ({
