@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import '../styles/Hero.css';
 import { Link, useNavigate } from 'react-router-dom';
@@ -17,7 +18,7 @@ function Hero() {
         fetch(process.env.REACT_APP_API_BASE_URL + '/Rooms/GetRoomWith')
             .then(response => {
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.text();
+                return response.json();
             })
             .then(data => {
                 if (!Array.isArray(data)) {
@@ -46,7 +47,7 @@ function Hero() {
         fetch(process.env.REACT_APP_API_BASE_URL + `/Events/Geteents`)
             .then(response => {
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.text();
+                return response.json();
             })
             .then(data => {
                 if (!Array.isArray(data)) {

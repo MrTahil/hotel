@@ -36,7 +36,7 @@ export default function ManageBookingEmail() {
           throw new Error('Nem sikerült betölteni a foglalás adatait');
         }
 
-        const data = await response.text();
+        const data = await response.json();
         setBooking(data[0]);
       } catch (err) {
         setError(err.message);

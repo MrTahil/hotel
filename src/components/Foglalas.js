@@ -45,7 +45,7 @@ export const Foglalas = () => {
         );
 
         if (!response.ok) throw new Error("Hiba a foglalt dátumok lekérésekor");
-        const data = await response.text();
+        const data = await response.json();
         setBookedDates(data);
       } catch (error) {
         console.error("Hiba a foglalt dátumoknál:", error);
@@ -75,7 +75,7 @@ export const Foglalas = () => {
       );
 
       if (!response.ok) throw new Error('Nem sikerült lekérni a vendégeket');
-      const data = await response.text();
+      const data = await response.json();
       const guestsArray = Array.isArray(data) ? data : [data];
 
       setSavedGuests(guestsArray);
@@ -161,7 +161,7 @@ export const Foglalas = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.text();
+        const errorData = await response.json();
         throw new Error(errorData.message || "Hiba történt a foglalás során.");
       }
 
@@ -279,7 +279,7 @@ export const Foglalas = () => {
         throw new Error(`Nem sikerült lekérni a felhasználói adatokat: ${errorText}`);
       }
 
-      const userData = await userResponse.text();
+      const userData = await userResponse.json();
       const userId = userData.userId;
 
       if (!userId) {
@@ -310,7 +310,7 @@ export const Foglalas = () => {
         let errorData;
 
         if (contentType && contentType.includes('application/json')) {
-          errorData = await response.text();
+          errorData = await response.json();
           throw new Error(errorData.message || `Hiba a vendég hozzáadása során: ${response.status}`);
         } else {
           const errorText = await response.text();
@@ -446,17 +446,17 @@ export const Foglalas = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl p-4 md:p-8 shadow-xl mb-8 border-t-4 border-teal-600">
-                <h3 className="text-2xl md:text-3xl font-bold text-teal-800 mb-4 md:mb-6 flex items-center flex-wrap">
-                  <span className="material-symbols-outlined mr-2 md:mr-3 text-2xl md:text-3xl">comment</span>
+              <div className="bg-white rounded-2xl p-6 md:p-8 shadow-xl mb-8 border-t-4 border-teal-600">
+                <h3 className="text-3xl font-bold text-teal-800 mb-6 flex items-center">
+                  <span className="material-symbols-outlined mr-3 text-3xl">comment</span>
                   Vendégvélemények
                 </h3>
                 {room?.reviews && room.reviews.length > 0 ? (
-                  <div className="space-y-6 md:space-y-8">
+                  <div className="space-y-8">
                     {room.reviews.map((review) => (
-                      <div key={review.id} className="border-b border-gray-300 pb-4 md:pb-6">
-                        <div className="flex items-center justify-between mb-2 md:mb-3">
-                          <div className="text-yellow-500 flex text-lg md:text-xl">
+                      <div key={review.id} className="border-b border-gray-300 pb-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="text-yellow-500 flex text-xl">
                             {[...Array(5)].map((_, i) => (
                               <span
                                 key={i}
@@ -466,22 +466,22 @@ export const Foglalas = () => {
                               </span>
                             ))}
                           </div>
-                          <span className="text-xs md:text-sm text-gray-600">
+                          <span className="text-sm text-gray-600">
                             {new Date(review.reviewDate).toLocaleDateString('hu-HU')}
                           </span>
                         </div>
-                        <p className="text-gray-800 text-base md:text-lg mb-2 md:mb-3">{review.comment}</p>
+                        <p className="text-gray-800 text-lg mb-3">{review.comment}</p>
                         {review.response && (
-                          <div className="bg-teal-100 p-3 md:p-4 rounded-xl mt-2 md:mt-3">
-                            <p className="text-xs md:text-sm font-semibold text-teal-900">Válasz a szállásadótól:</p>
-                            <p className="text-gray-800 text-sm md:text-base">{review.response}</p>
+                          <div className="bg-teal-100 p-4 rounded-xl mt-3">
+                            <p className="text-sm font-semibold text-teal-900">Válasz a szállásadótól:</p>
+                            <p className="text-gray-800">{review.response}</p>
                           </div>
                         )}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-800 text-base md:text-lg italic">Még nincsenek vélemények ehhez a szobához.</p>
+                  <p className="text-gray-800 text-lg italic">Még nincsenek vélemények ehhez a szobához.</p>
                 )}
               </div>
             </div>

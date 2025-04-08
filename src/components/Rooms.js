@@ -31,7 +31,7 @@ function RoomCard() {
       try {
         const roomsResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_API_ROOMS_URL}`);
         if (!roomsResponse.ok) throw new Error(process.env.REACT_APP_ERROR_NETWORK);
-        const roomsData = await roomsResponse.text();
+        const roomsData = await roomsResponse.json();
 
         const token = localStorage.getItem('authToken');
         const bookingsPromises = roomsData.map(async room => {
@@ -40,7 +40,7 @@ function RoomCard() {
               `${process.env.REACT_APP_API_BASE_URL}/Bookings/GetBookedDates/${room.roomId}`,
               { headers: token ? { "Authorization": `Bearer ${token}` } : {} }
             );
-            return response.ok ? await response.text() : [];
+            return response.ok ? await response.json() : [];
           } catch (err) {
             console.warn(`Failed to fetch booked dates for room ${room.roomId}:`, err.message);
             return [];
