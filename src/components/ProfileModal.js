@@ -1226,71 +1226,46 @@ const ProfilePage = () => {
           </div>
         )}
 
-        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-lg mb-6 sm:mb-8 hover:shadow-2xl transition-all duration-300 border border-blue-200 overflow-hidden relative">
-          {/* Subtle gradient overlay for depth */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-orange-50/50 pointer-events-none"></div>
-
-          <div className="flex items-center mb-4 sm:mb-6 relative z-10">
-            <span className="material-symbols-outlined text-3xl sm:text-4xl mr-3 sm:mr-4 bg-orange-100 p-2 sm:p-3 rounded-full text-orange-600 animate-pulse">
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md mb-6 sm:mb-8 hover:shadow-xl transition-shadow duration-300 border border-blue-100">
+          <div className="flex items-center mb-4">
+            <span className="material-symbols-outlined text-3xl sm:text-4xl mr-3 sm:mr-4 bg-orange-100 p-2 sm:p-3 rounded-full text-orange-600">
               campaign
             </span>
-            <h2 className="text-xl sm:text-2xl font-bold text-blue-900 bg-gradient-to-r from-blue-700 to-orange-500 bg-clip-text text-transparent">
+            <h2 className="text-xl sm:text-2xl font-semibold text-blue-800">
               Hírlevél feliratkozás
             </h2>
           </div>
 
           {!isSubscribed ? (
-            <form onSubmit={handleNewsletterSubscribe} className="space-y-5 relative z-10">
-              <div className="relative">
-                <label className="block text-sm font-semibold mb-2 text-blue-800 tracking-wide">
+            <form onSubmit={handleNewsletterSubscribe} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-blue-800">
                   Email cím
                 </label>
-                <div className="relative group">
-                  <input
-                    type="email"
-                    className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-orange-500 bg-white/80 shadow-sm transition-all duration-300 group-hover:shadow-md placeholder-gray-400 text-gray-800"
-                    placeholder="Add meg az email címedet"
-                    value={newsletterEmail || user?.email || ""}
-                    onChange={(e) => setNewsletterEmail(e.target.value)}
-                    required
-                  />
-                  <span className="absolute inset-y-0 right-3 flex items-center text-gray-400 group-focus-within:text-orange-500 transition-colors duration-300">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                      />
-                    </svg>
-                  </span>
-                </div>
+                <input
+                  type="email"
+                  className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                  placeholder="Email cím"
+                  value={newsletterEmail || user?.email || ""}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  required
+                />
               </div>
               <div className="flex justify-center">
                 <button
                   type="submit"
-                  className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-orange-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-orange-700 transform hover:scale-105 active:scale-95 transition-all duration-300 shadow-md hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-orange-300/50"
+                  className="flex items-center justify-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transform hover:scale-105 active:scale-95 transition-all duration-200 shadow-md hover:shadow-lg"
+                  style={{ backgroundColor: 'blue' }}
                 >
-                  <span className="material-symbols-outlined text-lg">mail</span>
-                  <span className="font-semibold tracking-wide">Feliratkozás most</span>
+                  <span className="material-symbols-outlined">mail</span>
+                  <span>Feliratkozás most</span>
                 </button>
               </div>
             </form>
           ) : (
-            <div className="p-4 sm:p-5 bg-green-50 text-green-800 rounded-lg shadow-inner border border-green-200 animate-fade-in relative z-10">
-              <p className="font-semibold text-lg flex items-center gap-2">
-                <span className="material-symbols-outlined text-green-600">check_circle</span>
-                Köszönjük, hogy feliratkozott!
-              </p>
-              <p className="text-sm mt-2 text-green-700">
-                Hamarosan érkeznek a legfrissebb híreink az email címedre.
-              </p>
+            <div className="p-4 bg-green-100 text-green-800 rounded-lg">
+              <p className="font-medium">Köszönjük, hogy feliratkozott hírlevelünkre!</p>
+              <p className="text-sm mt-1">Az email címére küldött híreket fog kapni.</p>
             </div>
           )}
         </div>
