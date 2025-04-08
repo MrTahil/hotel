@@ -65,7 +65,7 @@ function About() {
                     <div className="p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                             <div>
-                                <h3 className="text-2xl font-bold mb-1">Megtalálás</h3>
+                                <h3 className="text-2xl font-bold mb-1">Lokáció</h3>
                                 <p className="text-blue-100">{hotelLocation.address}</p>
                             </div>
                             <button

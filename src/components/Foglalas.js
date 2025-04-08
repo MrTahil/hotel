@@ -193,33 +193,49 @@ export const Foglalas = () => {
   useEffect(() => {
     const fetchAmenities = async () => {
       setLoading(true);
+      setError(null); // Reset error state before fetch
       try {
         const token = localStorage.getItem("authToken");
         if (!token) {
-          throw new Error("Nincs érvényes autentikációs token!");
+          throw new Error("Nincs érvényes autentikációs token! Kérjük, jelentkezz be újra.");
         }
 
+        console.log(`Fetching amenities for room ID: ${id} with token: ${token.substring(0, 10)}...`);
         const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/Amenities/GetAmenitiesForRoom/${id}`, {
           headers: {
             "Authorization": `Bearer ${token}`,
           },
         });
 
+        console.log(`Response status: ${response.status}`);
+        const responseText = await response.text();
+        console.log(`Response text: ${responseText}`);
+
         if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Nincs az adott szobához kényelmi szolgáltatás!`);
+          throw new Error(`Hiba a kényelmi szolgáltatások lekérdezésekor: ${response.status} - ${responseText || "Ismeretlen hiba"}`);
         }
 
-        const data = await response.json();
-        if (!Array.isArray(data) || data.length === 0) {
-          console.log("Nincsenek kényelmi szolgáltatások a szobához:", id); // Changed from warn to log
-          setAmenities([]); // Set empty array, no error
+        let data;
+        try {
+          data = responseText ? JSON.parse(responseText) : [];
+        } catch (parseError) {
+          console.error("JSON parse error:", parseError);
+          data = [];
+        }
+
+        if (!Array.isArray(data)) {
+          console.warn("A válasz nem tömb, normalizáljuk üres tömbre:", data);
+          setAmenities([]);
+        } else if (data.length === 0) {
+          console.log("Nincsenek kényelmi szolgáltatások a szobához:", id);
+          setAmenities([]);
         } else {
+          console.log("Amenities sikeresen betöltve:", data);
           setAmenities(data);
         }
       } catch (error) {
         console.error("Fetch amenities error:", error.message);
-        setError(error.message); // Only set error for actual fetch failures
+        setError(error.message);
         setAmenities([]);
       } finally {
         setLoading(false);
