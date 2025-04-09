@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginModal from './LoginModal';
 import RegisterModal from './RegisterModal';
+import axios from 'axios';
 
 function RoomCard() {
   const [rooms, setRooms] = useState([]);
@@ -29,18 +30,17 @@ function RoomCard() {
     const fetchRoomsAndBookings = async () => {
       setIsLoading(true);
       try {
-        const roomsResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_API_ROOMS_URL}`);
-        if (!roomsResponse.ok) throw new Error(process.env.REACT_APP_ERROR_NETWORK);
-        const roomsData = await roomsResponse.json();
+        const roomsResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL}${process.env.REACT_APP_API_ROOMS_URL}`);
+        const roomsData = roomsResponse.data;
 
         const token = localStorage.getItem('authToken');
         const bookingsPromises = roomsData.map(async room => {
           try {
-            const response = await fetch(
+            const response = await axios.get(
               `${process.env.REACT_APP_API_BASE_URL}/Bookings/GetBookedDates/${room.roomId}`,
               { headers: token ? { "Authorization": `Bearer ${token}` } : {} }
             );
-            return response.ok ? await response.json() : [];
+            return response.data;
           } catch (err) {
             console.warn(`Failed to fetch booked dates for room ${room.roomId}:`, err.message);
             return [];

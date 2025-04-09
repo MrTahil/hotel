@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 
 export default function ManageBookingEmail() {
@@ -20,26 +21,20 @@ export default function ManageBookingEmail() {
         const decodedToken = jwtDecode(token);
         const userId = decodedToken.sub;
 
-        const response = await fetch(
+        const response = await axios.post(
           `${process.env.REACT_APP_API_BASE_URL}/Bookings/GetEmailBooking/${bookingId}`,
+          { userId: parseInt(userId) },
           {
-            method: 'POST',
             headers: {
               Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ userId: parseInt(userId) }),
           }
         );
 
-        if (!response.ok) {
-          throw new Error('Nem sikerült betölteni a foglalás adatait');
-        }
-
-        const data = await response.json();
-        setBooking(data[0]);
+        setBooking(response.data[0]);
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.message || err.message);
       } finally {
         setLoading(false);
       }
@@ -51,23 +46,17 @@ export default function ManageBookingEmail() {
   const handleDelete = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(
+      await axios.delete(
         `${process.env.REACT_APP_API_BASE_URL}/Bookings/DeleteBooking/${bookingId}`,
         {
-          method: 'DELETE',
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-
-      if (response.ok) {
-        window.location.href = 'https://hmzrt.eu';
-      } else {
-        throw new Error('Nem sikerült törölni a foglalást');
-      }
+      window.location.href = 'https://hmzrt.eu';
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
     }
   };
 

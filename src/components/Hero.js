@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import '../styles/Hero.css';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function Hero() {
     const [rooms, setRooms] = useState([]);
@@ -15,17 +15,21 @@ function Hero() {
     const containerRef = useRef(null);
 
     useEffect(() => {
-        fetch(process.env.REACT_APP_API_BASE_URL + '/Rooms/GetRoomWith')
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.json();
-            })
-            .then(data => {
+        const fetchRooms = async () => {
+            try {
+                const response = await axios.get(process.env.REACT_APP_API_BASE_URL + '/Rooms/GetRoomWith');
+                if (response.status !== 200) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = response.data;
+
                 if (!Array.isArray(data)) {
                     console.error('Expected an array from API, got:', data);
                     setRooms([]);
                     return;
                 }
+
                 const availableRooms = data
                     .filter(room => room.status?.toLowerCase() !== 'unavailable')
                     .map(room => ({
@@ -37,24 +41,29 @@ function Hero() {
                         amenities: room.amenities || ['Wi-Fi', 'TV', 'Minibar']
                     }));
                 setRooms(availableRooms);
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error fetching rooms:', error);
                 setRooms([]);
-            })
-            .finally(() => setLoading(false));
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        fetch(process.env.REACT_APP_API_BASE_URL + `/Events/Geteents`)
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.json();
-            })
-            .then(data => {
+        const fetchEvents = async () => {
+            try {
+                const response = await axios.get(process.env.REACT_APP_API_BASE_URL + `/Events/Geteents`);
+                if (response.status !== 200) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = response.data;
+
                 if (!Array.isArray(data)) {
                     console.error('Expected an array from API, got:', data);
                     setPrograms([]);
                     return;
                 }
+
                 const formattedPrograms = data.map(event => ({
                     id: event.eventId,
                     name: event.eventName,
@@ -68,11 +77,14 @@ function Hero() {
                     price: event.price,
                 }));
                 setPrograms(formattedPrograms.slice(0, 3));
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error fetching events:', error);
                 setPrograms([]);
-            });
+            }
+        };
+
+        fetchRooms();
+        fetchEvents();
     }, []);
 
     const truncateDescription = (description, maxLength) => {
@@ -312,215 +324,227 @@ function Hero() {
                     </div>
                 </section>
 
-                {selectedFeature && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-2xl font-bold text-blue-900">{selectedFeature.title}</h3>
-                                <button
-                                    onClick={closeDetails}
-                                    className="text-gray-600 hover:text-gray-800"
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-6 w-6"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M6 18L18 6M6 6l12 12"
-                                        />
-                                    </svg>
-                                </button>
-                            </div>
-                            <p className="text-gray-700 mb-4">{selectedFeature.detailedDesc.description}</p>
-                            <div className="space-y-4">
-                                {selectedFeature.detailedDesc.facilities || selectedFeature.detailedDesc.menuHighlights ? (
-                                    <div>
-                                        <h4 className="text-lg font-semibold text-blue-800">
-                                            {selectedFeature.title === 'Gourmet Étterem' ? 'Menü kiemelések' : 'Szolgáltatások'}
-                                        </h4>
-                                        <ul className="list-disc pl-5 text-gray-600">
-                                            {(selectedFeature.detailedDesc.facilities || selectedFeature.detailedDesc.menuHighlights).map((item, idx) => (
-                                                <li key={idx}>{item}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                ) : null}
-
-                                {selectedFeature.detailedDesc.openingHours && (
-                                    <div>
-                                        <h4 className="text-lg font-semibold text-blue-800">Nyitvatartás</h4>
-                                        <p className="text-gray-600">{selectedFeature.detailedDesc.openingHours}</p>
-                                    </div>
-                                )}
-
-                                {selectedFeature.detailedDesc.pricing && (
-                                    <div>
-                                        <h4 className="text-lg font-semibold text-blue-800">Árak</h4>
-                                        <p className="text-gray-600">{selectedFeature.detailedDesc.pricing}</p>
-                                    </div>
-                                )}
-
-                                {selectedFeature.detailedDesc.additionalInfo && (
-                                    <div>
-                                        <h4 className="text-lg font-semibold text-blue-800">További információ</h4>
-                                        <p className="text-gray-600">{selectedFeature.detailedDesc.additionalInfo}</p>
-                                    </div>
-                                )}
-                            </div>
+                <section className="py-16 bg-blue-100">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <h2 className="text-3xl font-bold text-blue-900 mb-8 text-center">
+                            Fedezze Fel Szobáinkat
+                        </h2>
+                        <div className="relative" ref={containerRef}>
                             <button
-                                onClick={closeDetails}
-                                className="mt-6 w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                                className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-full z-10 hover:bg-blue-700 focus:outline-none"
+                                onClick={handleSlideLeft}
+                                aria-label="Előző szoba"
                             >
-                                Bezárás
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M15 19l-7-7 7-7"
+                                    />
+                                </svg>
                             </button>
-                        </div>
-                    </div>
-                )}
-
-                <section className="py-16 bg-white">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <h2 className="text-3xl md:text-5xl font-bold text-blue-900 text-center mb-12">Szobáink</h2>
-                        {rooms.length === 0 ? (
-                            <p className="text-center text-blue-700">Jelenleg nincsenek elérhető szobák.</p>
-                        ) : (
-                            <div className="relative" ref={containerRef}>
-                                <button
-                                    onClick={handleSlideLeft}
-                                    className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 z-10"
-                                >
-                                    <span className="material-symbols-outlined">chevron_left</span>
-                                </button>
-                                <div className="overflow-hidden">
+                            <div
+                                className="overflow-hidden whitespace-nowrap transition-transform duration-500 ease-out"
+                                style={{
+                                    transform: `translateX(${getSlideOffset()}px)`,
+                                    transition: transitionEnabled ? undefined : 'none'
+                                }}
+                                ref={sliderRef}
+                            >
+                                {duplicatedRooms.map((room, index) => (
                                     <div
-                                        ref={sliderRef}
-                                        className={`flex ${transitionEnabled ? 'transition-transform duration-500 ease-in-out' : ''} gap-6`}
-                                        style={{ transform: `translateX(${getSlideOffset()}px)` }}
+                                        key={index}
+                                        className="inline-block w-96 p-4 transform transition-transform duration-300 hover:scale-105 cursor-pointer"
+                                        style={{ width: 'calc(100% / 3)', minWidth: '300px' }}
+                                        onClick={() => handleRoomClick(room.id)}
                                     >
-                                        {duplicatedRooms.map((room, index) => (
-                                            <div
-                                                key={`${room.id}-${index}`}
-                                                className="flex-shrink-0 w-[90%] sm:w-1/2 lg:w-1/3 px-2"
-                                                onClick={() => handleRoomClick(room.id)}
-                                            >
-                                                <div className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer">
-                                                    <div
-                                                        className="h-64 bg-cover bg-center"
-                                                        style={{ backgroundImage: `url(${room.image})` }}
-                                                    ></div>
-                                                    <div className="p-6">
-                                                        <h3 className="text-xl font-bold text-blue-900 mb-2">{room.name}</h3>
-                                                        <p className="text-sm text-blue-700 mb-4">{truncateDescription(room.description, 80)}</p>
-                                                        <p className="text-blue-600 font-semibold mb-4">Ár: {room.price} Ft/éj</p>
-                                                        <ul className="text-sm text-blue-600 space-y-1">
-                                                            {room.amenities.map((amenity, i) => (
-                                                                <li key={i}>• {amenity}</li>
-                                                            ))}
-                                                        </ul>
-                                                        <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">Foglalás</button>
-                                                    </div>
-                                                </div>
+                                        <div className="rounded-xl shadow-lg overflow-hidden bg-white">
+                                            <img
+                                                src={room.image}
+                                                alt={room.name}
+                                                className="w-full h-56 object-cover"
+                                            />
+                                            <div className="p-4">
+                                                <h3 className="font-bold text-xl mb-2 text-blue-900">
+                                                    {room.name}
+                                                </h3>
+                                                <p className="text-blue-700 text-base">
+                                                    {truncateDescription(room.description, 100)}
+                                                </p>
+                                                <p className="text-blue-600 mt-2">
+                                                    Ár: {room.price} / éjszaka
+                                                </p>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={handleSlideRight}
-                                    className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 z-10"
-                                >
-                                    <span className="material-symbols-outlined">chevron_right</span>
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </section>
-
-                <section className="py-16 bg-blue-50">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <h2 className="text-3xl md:text-5xl font-bold text-blue-900 text-center mb-12">Események</h2>
-                        {programs.length === 0 ? (
-                            <p className="text-center text-blue-700">Jelenleg nincsenek elérhető események.</p>
-                        ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {programs.map((program) => (
-                                    <div key={program.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                                        <div className="h-64 bg-cover bg-center" style={{ backgroundImage: `url(${program.images})` }}></div>
-                                        <div className="p-6">
-                                            <h3 className="text-xl font-bold text-blue-900 mb-2">{program.name}</h3>
-                                            <p className="text-sm text-blue-700 mb-4">{truncateDescription(program.description, 80)}</p>
-                                            <p className="text-blue-600 mb-2">Időpont: {new Date(program.schedule).toLocaleDateString('hu-HU')}</p>
-                                            <p className="text-blue-600 mb-4">Helyszín: {program.location}</p>
-                                            <Link to="/programok">
-                                                <button className="w-full bg-blue-800 text-white py-2 rounded-lg font-semibold hover:bg-blue-900">Részletek</button>
-                                            </Link>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                        )}
+                            <button
+                                className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-full z-10 hover:bg-blue-700 focus:outline-none"
+                                onClick={handleSlideRight}
+                                aria-label="Következő szoba"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 5l7 7-7 7"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </section>
 
-                <section className="py-16 bg-white">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                        <h2 className="text-3xl md:text-5xl font-bold text-blue-900 mb-12">Vendégeink Véleménye</h2>
+                <section className="py-16">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <h2 className="text-3xl font-bold text-blue-900 mb-8 text-center">
+                            Programok és Események
+                        </h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {[
-                                { name: 'Kovács Anna', text: 'Kiváló kiszolgálás, modern és tiszta szobák.' },
-                                { name: 'Nagy Péter', text: 'A design és a kényelem lenyűgöző, ajánlom mindenkinek!' },
-                                { name: 'Szabó Eszter', text: 'Elegáns környezet, tökéletes pihenés.' }
-                            ].map((testimonial, idx) => (
-                                <div key={idx} className="bg-blue-50 p-6 rounded-lg shadow-md">
-                                    <p className="text-blue-700 italic mb-4">"{testimonial.text}"</p>
-                                    <p className="text-blue-900 font-semibold">{testimonial.name}</p>
+                            {programs.map((program) => (
+                                <div
+                                    key={program.id}
+                                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                                >
+                                    <img
+                                        src={program.images}
+                                        alt={program.name}
+                                        className="w-full h-56 object-cover"
+                                    />
+                                    <div className="p-6">
+                                        <h3 className="font-bold text-xl mb-2 text-blue-900">
+                                            {program.name}
+                                        </h3>
+                                        <p className="text-blue-700 mb-4">
+                                            {truncateDescription(program.description, 80)}
+                                        </p>
+                                        <p className="text-blue-600">
+                                            Időpont: {new Date(program.schedule).toLocaleDateString()}
+                                        </p>
+                                        <p className="text-blue-600">
+                                            Helyszín: {program.location}
+                                        </p>
+                                    </div>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </section>
-
-                <section className="py-16 bg-blue-50">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <div className="bg-white rounded-lg shadow-md p-6 text-center">
-                                <span className="material-symbols-outlined text-4xl text-blue-600 mb-4">hotel</span>
-                                <h3 className="text-xl font-bold text-blue-900 mb-4">Foglaljon Most!</h3>
-                                <p className="text-blue-700 mb-6">Tapasztalja meg a modern luxust nálunk.</p>
-                                <Link to="/szobak">
-                                    <button className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700">Foglalás</button>
-                                </Link>
-                            </div>
-                            <div className="bg-white rounded-lg shadow-md p-6 text-center">
-                                <span className="material-symbols-outlined text-4xl text-blue-600 mb-4">location_on</span>
-                                <h3 className="text-xl font-bold text-blue-900 mb-4">Kapcsolat</h3>
-                                <p className="text-blue-700">3526 Miskolc, Palóczy László utca 3</p>
-                                <p className="text-blue-700">Telefon: +36 12 345 6789</p>
-                                <p className="text-blue-700">Email: hmzrtkando@gmail.com</p>
-                            </div>
-                            <div className="bg-white rounded-lg shadow-md p-6 text-center">
-                                <span className="material-symbols-outlined text-4xl text-blue-600 mb-4">schedule</span>
-                                <h3 className="text-xl font-bold text-blue-900 mb-4">Nyitvatartás</h3>
-                                <p className="text-blue-700">Recepció: 0-24</p>
-                                <p className="text-blue-700">Spa: 8:00 - 20:00</p>
-                                <p className="text-blue-700">Étterem: 7:00 - 22:00</p>
-                            </div>
-                        </div>
-                        <div className="mt-12 text-center">
-                            <h3 className="text-xl font-bold text-blue-900 mb-4">Gyors Linkek</h3>
-                            <div className="flex justify-center space-x-6">
-                                <Link to="/szobak" className="text-blue-600 hover:text-blue-800">Szobák</Link>
-                                <Link to="/programok" className="text-blue-600 hover:text-blue-800">Programok</Link>
-                                <Link to="/rolunk" className="text-blue-600 hover:text-blue-800">Kapcsolat</Link>
-                            </div>
-                        </div>
-                    </div>
-                </section>
             </main>
+
+            <footer className="bg-blue-900 text-white py-8">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div>
+                        <h4 className="font-bold text-lg mb-4">Rólunk</h4>
+                        <p className="text-blue-200">
+                            Szállodánk a tökéletes választás a pihenésre és kikapcsolódásra vágyó vendégek számára.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-lg mb-4">Kapcsolat</h4>
+                        <p className="text-blue-200">Cím: 123 Fő utca, Budapest</p>
+                        <p className="text-blue-200">Telefon: +36 1 123 4567</p>
+                        <p className="text-blue-200">Email: info@examplehotel.com</p>
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-lg mb-4">Következő Oldalak</h4>
+                        <ul className="list-none">
+                            <li>
+                                <Link to="/" className="text-blue-200 hover:text-white">Főoldal</Link>
+                            </li>
+                            <li>
+                                <Link to="/szobak" className="text-blue-200 hover:text-white">Szobák</Link>
+                            </li>
+                            <li>
+                                <Link to="/login" className="text-blue-200 hover:text-white">Bejelentkezés</Link>
+                            </li>
+                            <li>
+                                <Link to="/register" className="text-blue-200 hover:text-white">Regisztráció</Link>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div className="text-center mt-8 text-blue-300">
+                    © 2024 DreamStay Hotel. Minden jog fenntartva.
+                </div>
+            </footer>
+
+            {selectedFeature && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-2xl font-bold text-blue-900">{selectedFeature.title}</h3>
+                            <button
+                                onClick={closeDetails}
+                                className="text-gray-600 hover:text-gray-800"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M6 18L18 6M6 6l12 12"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+                        <p className="text-blue-700 mb-4">{selectedFeature.detailedDesc.description}</p>
+                        {selectedFeature.detailedDesc.facilities && (
+                            <>
+                                <h4 className="font-bold text-blue-900 mb-2">Felszereltség:</h4>
+                                <ul className="list-disc list-inside text-blue-700 mb-4">
+                                    {selectedFeature.detailedDesc.facilities.map((facility, index) => (
+                                        <li key={index}>{facility}</li>
+                                    ))}
+                                </ul>
+                            </>
+                        )}
+                        {selectedFeature.detailedDesc.menuHighlights && (
+                            <>
+                                <h4 className="font-bold text-blue-900 mb-2">Kiemelt Fogások:</h4>
+                                <ul className="list-disc list-inside text-blue-700 mb-4">
+                                    {selectedFeature.detailedDesc.menuHighlights.map((highlight, index) => (
+                                        <li key={index}>{highlight}</li>
+                                    ))}
+                                </ul>
+                            </>
+                        )}
+                        <p className="text-blue-700 mb-2">
+                            <span className="font-bold text-blue-900">Nyitvatartás:</span>{' '}
+                            {selectedFeature.detailedDesc.openingHours}
+                        </p>
+                        <p className="text-blue-700 mb-2">
+                            <span className="font-bold text-blue-900">Árak:</span>{' '}
+                            {selectedFeature.detailedDesc.pricing}
+                        </p>
+                        <p className="text-blue-700">
+                            <span className="font-bold text-blue-900">További Információ:</span>{' '}
+                            {selectedFeature.detailedDesc.additionalInfo}
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

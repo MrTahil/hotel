@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 function Programs() {
   const [programs, setPrograms] = useState([]);
@@ -16,21 +17,16 @@ function Programs() {
       if (!token || !username) {
         throw new Error("Nincs token vagy felhasználónév elmentve! Jelentkezz be.");
       }
-      const response = await fetch(
+      const response = await axios.get(
         `${process.env.REACT_APP_API_BASE_URL}/Guests/GetGuestData/${username}`,
         {
-          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
       );
-      if (!response.ok) {
-        throw new Error(`Nem sikerült lekérni a vendég adatait: ${response.status}`);
-      }
-      const data = await response.json();
-      return data;
+      return response.data;
     } catch (err) {
       console.error("Hiba a vendég adatok lekérdezésekor:", err.message);
       return null;
@@ -59,20 +55,16 @@ function Programs() {
         Notes: "",
       };
       console.log("Booking payload:", payload, "Event ID:", selectedProgram.id);
-      const response = await fetch(
+      const response = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/Feedback/NewEvenBooking/${selectedProgram.id}`,
+        payload,
         {
-          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(payload),
         }
       );
-      if (!response.ok) {
-        throw new Error(`Hiba a foglalás során: ${response.status}`);
-      }
       setPrograms((prevPrograms) =>
         prevPrograms.map((program) =>
           program.id === selectedProgram.id
@@ -96,11 +88,8 @@ function Programs() {
     const fetchPrograms = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/Events/Geteents`);
-        if (!response.ok) {
-          throw new Error(`Hiba történt az adatok lekérésekor: ${response.status}`);
-        }
-        const data = await response.json();
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/Events/Geteents`);
+        const data = response.data;
         console.log("Raw API response:", data);
 
         const formattedPrograms = data.map((event) => ({
@@ -109,7 +98,7 @@ function Programs() {
           description: event.description ?? "",
           images: event.images ?? "../img/default_imgage.png",
           schedule: event.eventDate ?? null,
-          organizerName: event.organizerName ?? "Nincs megadva", // Use backend data or fallback
+          organizerName: event.organizerName ?? "Nincs megadva",
           contactInfo: event.contactInfo ?? "",
           location: event.location ?? "",
           capacity: event.capacity ?? 0,
@@ -199,7 +188,7 @@ function Programs() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-200 via-blue-100 to-purple-200 py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-300/20 via-transparent to-transparent pointer-events-none"></div>
       <div className="max-w-7xl mx-auto relative z-10">
-        <h1 className=" animate-bounce text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500 text-center mb-12 drop-shadow-lg animate-fade-in">
+        <h1 className="animate-bounce text-4xl sm:text-5xl font-extrabold text-indigo-600 text-center mb-12 drop-shadow-lg animate-fade-in py-2">
           Programok
         </h1>
 
@@ -407,7 +396,6 @@ function Programs() {
         </div>
       )}
 
-      {/* Move styles to a global CSS scope */}
       <style>
         {`
           @keyframes fadeIn {

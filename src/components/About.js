@@ -1,15 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 function About() {
-    const hotelLocation = {
-        lat: 48.10565239780123,
-        lng: 20.7797250711158,
-        address: "Miskolc, Palóczy László utca 3, 3525"
-    };
+    const [hotelLocation, setHotelLocation] = useState(null);
+
+    useEffect(() => {
+        axios.get('/api/hotel-location')
+            .then(response => {
+                setHotelLocation(response.data);
+            })
+            .catch(error => {
+                console.error("Hiba a hotel adatainak lekérésekor:", error);
+            });
+    }, []);
 
     const openGoogleMaps = () => {
+        if (!hotelLocation) return;
         window.open(`https://www.google.com/maps/dir/?api=1&destination=${hotelLocation.lat},${hotelLocation.lng}&travelmode=driving`, '_blank');
     };
+
+    if (!hotelLocation) {
+        return (
+            <div className="text-center py-16 text-xl text-gray-500">
+                Betöltés folyamatban...
+            </div>
+        );
+    }
 
     return (
         <section className="relative py-16 bg-gradient-to-b from-blue-50 to-white">

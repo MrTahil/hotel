@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import axios from 'axios';
 
 export const Foglalas = () => {
   const location = useLocation();
@@ -39,14 +40,11 @@ export const Foglalas = () => {
     const fetchBookedDates = async () => {
       try {
         const token = localStorage.getItem('authToken');
-        const response = await fetch(
-          `${process.env.REACT_APP_API_BASE_URL}/Bookings/GetBookedDates/${id}`,
-          { headers: { "Authorization": `Bearer ${token}` } }
-        );
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/Bookings/GetBookedDates/${id}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
 
-        if (!response.ok) throw new Error("Hiba a foglalt dátumok lekérésekor");
-        const data = await response.json();
-        setBookedDates(data);
+        setBookedDates(response.data);
       } catch (error) {
         console.error("Hiba a foglalt dátumoknál:", error);
         setBookedDates([]);
@@ -69,14 +67,11 @@ export const Foglalas = () => {
     const token = localStorage.getItem('authToken');
 
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL}/Guests/GetGuestData/${username}`,
-        { headers: { 'Authorization': `Bearer ${token}` } }
-      );
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/Guests/GetGuestData/${username}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
 
-      if (!response.ok) throw new Error('Nem sikerült lekérni a vendégeket');
-      const data = await response.json();
-      const guestsArray = Array.isArray(data) ? data : [data];
+      const guestsArray = Array.isArray(response.data) ? response.data : [response.data];
 
       setSavedGuests(guestsArray);
       if (guestsArray.length > 0 && !mainGuest) setMainGuest(guestsArray[0].guestId);
@@ -151,19 +146,12 @@ export const Foglalas = () => {
       };
 
       const token = localStorage.getItem("authToken");
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/Bookings/New_Booking/${id}`, {
-        method: "POST",
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/Bookings/New_Booking/${id}`, bookingData, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
         },
-        body: JSON.stringify(bookingData),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Hiba történt a foglalás során.");
-      }
 
       setSuccessMessage("Foglalásodat sikeresen rögzítettük! Hamarosan emailt kapsz a visszaigazolással.");
       setTimeout(() => {
@@ -200,38 +188,18 @@ export const Foglalas = () => {
           throw new Error("Nincs érvényes autentikációs token! Kérjük, jelentkezz be újra.");
         }
 
-        console.log(`Fetching amenities for room ID: ${id} with token: ${token.substring(0, 10)}...`);
-        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/Amenities/GetAmenitiesForRoom/${id}`, {
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/Amenities/GetAmenitiesForRoom/${id}`, {
           headers: {
             "Authorization": `Bearer ${token}`,
           },
         });
 
-        console.log(`Response status: ${response.status}`);
-        const responseText = await response.text();
-        console.log(`Response text: ${responseText}`);
-
-        if (!response.ok) {
-          throw new Error(`Hiba a kényelmi szolgáltatások lekérdezésekor: ${response.status} - ${responseText || "Ismeretlen hiba"}`);
-        }
-
-        let data;
-        try {
-          data = responseText ? JSON.parse(responseText) : [];
-        } catch (parseError) {
-          console.error("JSON parse error:", parseError);
-          data = [];
-        }
-
-        if (!Array.isArray(data)) {
-          console.warn("A válasz nem tömb, normalizáljuk üres tömbre:", data);
-          setAmenities([]);
-        } else if (data.length === 0) {
-          console.log("Nincsenek kényelmi szolgáltatások a szobához:", id);
+        if (!Array.isArray(response.data)) {
+          console.warn("A válasz nem tömb, normalizáljuk üres tömbre:", response.data);
           setAmenities([]);
         } else {
-          console.log("Amenities sikeresen betöltve:", data);
-          setAmenities(data);
+          console.log("Amenities sikeresen betöltve:", response.data);
+          setAmenities(response.data);
         }
       } catch (error) {
         console.error("Fetch amenities error:", error.message);
@@ -267,19 +235,11 @@ export const Foglalas = () => {
         throw new Error('Nincs felhasználónév elmentve! Jelentkezz be újra.');
       }
 
-      const userResponse = await fetch(
-        `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/GetOneUserData/${username}`,
-        {
-          headers: { 'Authorization': `Bearer ${token}` },
-        }
-      );
+      const userResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/UserAccounts/GetOneUserData/${username}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
 
-      if (!userResponse.ok) {
-        const errorText = await userResponse.text();
-        throw new Error(`Nem sikerült lekérni a felhasználói adatokat: ${errorText}`);
-      }
-
-      const userData = await userResponse.json();
+      const userData = userResponse.data;
       const userId = userData.userId;
 
       if (!userId) {
@@ -296,40 +256,14 @@ export const Foglalas = () => {
         dateOfBirth: guestData.dateOfBirth ? new Date(guestData.dateOfBirth).toISOString() : null,
       };
 
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/Guests/Addnewguest`, {
-        method: 'POST',
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/Guests/Addnewguest`, payload, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        const contentType = response.headers.get('Content-Type');
-        let errorData;
-
-        if (contentType && contentType.includes('application/json')) {
-          errorData = await response.json();
-          throw new Error(errorData.message || `Hiba a vendég hozzáadása során: ${response.status}`);
-        } else {
-          const errorText = await response.text();
-          throw new Error(errorText || `Hiba a vendég hozzáadása során: ${response.status}`);
-        }
-      }
-
-      const text = await response.text();
-      let newGuest;
-
-      const contentType = response.headers.get('Content-Type');
-      if (contentType && contentType.includes('application/json') && text) {
-        newGuest = JSON.parse(text);
-      } else {
-        newGuest = {
-          guestId: Date.now(),
-          ...guestData,
-        };
-      }
+      const newGuest = response.data;
 
       const updatedGuests = [...savedGuests, newGuest];
       setSavedGuests(updatedGuests);
@@ -351,7 +285,7 @@ export const Foglalas = () => {
       setSuccessMessage('Vendég sikeresen hozzáadva!');
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      console.error('Hiba a vendég hozzáadása közben:', err.message);
+      console.error('Hiba a vendég hozzáadása közben:', err);
       setError(err.message);
     }
   };

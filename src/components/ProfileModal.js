@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DetailItem from "./DetailItem";
+import axios from 'axios';
 
 const ProfilePage = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -27,7 +28,7 @@ const ProfilePage = () => {
   const [message, setMessage] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [eventBookings, setEventBookings] = useState([]);
-  const [events, setEvents] = useState([]); // Added to store event details
+  const [events, setEvents] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [commentData, setCommentData] = useState({
@@ -62,20 +63,16 @@ const ProfilePage = () => {
   const fetchRoomIdByNumber = async (roomNumber) => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch(
+      const response = await axios.get(
         `${process.env.REACT_APP_API_BASE_URL}/Rooms/GetRoomWith`,
         {
-          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
       );
-      if (!response.ok) {
-        throw new Error(`Nem sikerült lekérni a szobák adatait: ${response.status}`);
-      }
-      const rooms = await response.json();
+      const rooms = response.data;
       const room = rooms.find((r) => r.roomNumber === roomNumber);
       return room?.roomId || null;
     } catch (err) {
@@ -92,23 +89,18 @@ const ProfilePage = () => {
         throw new Error("Nincs token elmentve! Jelentkezz be újra.");
       }
 
-      const response = await fetch(
+      const response = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/Newsletter/SubscribeForNewsLetter/${user.userId}`,
         {
-          method: "POST",
+          Email: newsletterEmail || user.email,
+        },
+        {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            Email: newsletterEmail || user.email,
-          }),
         }
       );
-
-      if (!response.ok) {
-        throw new Error("Hiba történt a feliratkozás során");
-      }
 
       setMessage({ type: "success", text: "Sikeresen feliratkozott a hírlevélre!" });
       setIsSubscribed(true);
@@ -121,20 +113,16 @@ const ProfilePage = () => {
   const fetchBookingDetails = async (bookingId) => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch(
+      const response = await axios.get(
         `${process.env.REACT_APP_API_BASE_URL}/Bookings/GetBookingDetails/${bookingId}`,
         {
-          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
       );
-      if (!response.ok) {
-        throw new Error("Nem sikerült lekérni a foglalás részleteit");
-      }
-      const data = await response.json();
+      const data = response.data;
       return data.roomId || data.room?.id;
     } catch (err) {
       console.error("Hiba a foglalás részleteinek lekérésekor:", err.message);
@@ -156,23 +144,16 @@ const ProfilePage = () => {
         if (!token) {
           throw new Error("Nincs token elmentve! Jelentkezz be újra.");
         }
-        const response = await fetch(
+        const response = await axios.get(
           `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/GetOneUserData/${localStorage.getItem("username")}`,
           {
-            method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
         );
-        if (response.status === 401) {
-          throw new Error("Token érvénytelen vagy lejárt!");
-        }
-        if (!response.ok) {
-          throw new Error(`HTTP hiba! Státusz: ${response.status}`);
-        }
-        const data = await response.json();
+        const data = response.data;
         setUser({
           username: data.username,
           email: data.email,
@@ -185,7 +166,7 @@ const ProfilePage = () => {
       } catch (error) {
         console.error("Hiba történt:", error.message);
         setError(error.message);
-        if (error.message.includes("token") || error.message.includes("401")) {
+        if (error.message.includes("token") || error.response?.status === 401) {
           navigate("/login");
         }
       } finally {
@@ -202,28 +183,19 @@ const ProfilePage = () => {
         setError("Hiányzó autentikációs adatok vagy felhasználó ID");
         return;
       }
-      const response = await fetch(
+      const response = await axios.get(
         `${process.env.REACT_APP_API_BASE_URL}/Bookings/BookingsByUser/${user.userId}`,
         {
-          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
       );
-      if (!response.ok) {
-        if (response.status === 400 || response.status === 403) {
-          setBookings([]);
-          return;
-        }
-        throw new Error(`Nem sikerült lekérni a foglalásokat: ${response.status}`);
-      }
-      const data = await response.json();
-      setBookings(data);
+      setBookings(response.data);
     } catch (err) {
       console.error("Hiba a foglalások lekérésekor:", err.message);
-      if (err.message.includes("403")) {
+      if (err.response?.status === 400 || err.response?.status === 403) {
         setBookings([]);
       } else {
         setError(err.message);
@@ -237,29 +209,20 @@ const ProfilePage = () => {
       if (!token || !user?.userId) {
         throw new Error("Nincs token vagy felhasználó ID elmentve! Jelentkezz be újra.");
       }
-      const response = await fetch(
+      const response = await axios.get(
         `${process.env.REACT_APP_API_BASE_URL}/Feedback/GetOneUsersEventBookings/${user.userId}`,
         {
-          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
       );
-      if (!response.ok) {
-        if (response.status === 400 || response.status === 403) {
-          setEventBookings([]);
-          return;
-        }
-        throw new Error(`Nem sikerült lekérni a program foglalásokat: ${response.status}`);
-      }
-      const data = await response.json();
-      console.log("User's Event Bookings Response:", data);
-      setEventBookings(Array.isArray(data) ? data : []);
+      console.log("User's Event Bookings Response:", response.data);
+      setEventBookings(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
       console.error("Hiba a program foglalások lekérésekor:", err.message);
-      if (err.message.includes("403")) {
+      if (err.response?.status === 403) {
         setEventBookings([]);
       } else {
         setError(err.message);
@@ -269,21 +232,16 @@ const ProfilePage = () => {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch(
+      const response = await axios.get(
         `${process.env.REACT_APP_API_BASE_URL}/Events/Geteents`,
         {
-          method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
-      if (!response.ok) {
-        throw new Error(`Nem sikerült lekérni az eseményeket: ${response.status}`);
-      }
-      const data = await response.json();
-      console.log("Events Response:", data);
-      setEvents(data);
+      console.log("Events Response:", response.data);
+      setEvents(response.data);
     } catch (err) {
       console.error("Hiba az események lekérésekor:", err.message);
       setError(err.message);
@@ -339,19 +297,15 @@ const ProfilePage = () => {
       if (!token) {
         throw new Error("Nincs token elmentve! Jelentkezz be újra.");
       }
-      const response = await fetch(
+      await axios.delete(
         `${process.env.REACT_APP_API_BASE_URL}/Bookings/DeleteBooking/${bookingId}`,
         {
-          method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
       );
-      if (!response.ok) {
-        throw new Error(`Hiba a foglalás törlése során: ${response.status}`);
-      }
       setMessage({ type: "success", text: "Foglalás sikeresen törölve!" });
       fetchBookings();
     } catch (err) {
@@ -366,19 +320,15 @@ const ProfilePage = () => {
       if (!token) {
         throw new Error("Nincs token elmentve! Jelentkezz be újra.");
       }
-      const response = await fetch(
+      await axios.delete(
         `${process.env.REACT_APP_API_BASE_URL}/Feedback/DeleteBookingById/${id}`,
         {
-          method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
       );
-      if (!response.ok) {
-        throw new Error(`Hiba a program foglalás törlése során: ${response.status}`);
-      }
       setMessage({ type: "success", text: "Program foglalás sikeresen törölve!" });
       fetchEventBookings();
     } catch (err) {
@@ -396,7 +346,7 @@ const ProfilePage = () => {
         setError("Hiányzó autentikációs adatok");
         return;
       }
-      const response = await fetch(
+      const response = await axios.get(
         `${process.env.REACT_APP_API_BASE_URL}/Guests/GetGuestData/${user.username}`,
         {
           headers: {
@@ -405,15 +355,7 @@ const ProfilePage = () => {
           },
         }
       );
-      if (!response.ok) {
-        if (response.status === 404) {
-          setGuests([]);
-          return;
-        }
-        throw new Error(`Nem sikerült lekérni a vendégeket: ${response.status}`);
-      }
-      const data = await response.json();
-      setGuests(Array.isArray(data) ? data : [data]);
+      setGuests(Array.isArray(response.data) ? response.data : [response.data]);
     } catch (err) {
       console.error("Hiba a vendéglista lekérésekor:", err.message);
       setError(err.message);
@@ -464,7 +406,7 @@ const ProfilePage = () => {
           Password: passwordData.newPassword,
         }
       );
-      if (!response.ok) {
+      if (!response.status === 200) {
         if (
           data.message &&
           (data.message.includes("jelenlegi jelszó") ||
@@ -496,10 +438,10 @@ const ProfilePage = () => {
     e.preventDefault();
     setMessage(null);
     try {
-      const response = await fetch(
+      const response = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/ForgotPasswordsendemail/${forgotEmail}`,
+        {},
         {
-          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
@@ -507,9 +449,6 @@ const ProfilePage = () => {
       );
       if (response.status === 418) {
         throw new Error("Ez az email cím nem szerepel az adatbázisban!");
-      }
-      if (!response.ok) {
-        throw new Error("Hiba történt a jelszó-visszaállítási kérelem során!");
       }
       setMessage({
         type: "success",
@@ -526,24 +465,20 @@ const ProfilePage = () => {
     e.preventDefault();
     setMessage(null);
     try {
-      const response = await fetch(
+      const response = await axios.put(
         `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/VerifyTheforgotpass`,
         {
-          method: "PUT",
+          Email: forgotEmail,
+          Code: verificationCode,
+        },
+        {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            Email: forgotEmail,
-            Code: verificationCode,
-          }),
         }
       );
       if (response.status === 202) {
         throw new Error("Hibás kód vagy email!");
-      }
-      if (!response.ok) {
-        throw new Error(`Hiba az ellenőrzés során: ${response.status}`);
       }
       setMessage({ type: "success", text: "Kód elfogadva!" });
       setForgotStep(3);
@@ -575,25 +510,19 @@ const ProfilePage = () => {
         }));
         return;
       }
-      const response = await fetch(
+      const response = await axios.put(
         `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/SetNewPassword`,
         {
-          method: "PUT",
+          Email: forgotEmail,
+          Password: newPasswordData.newPassword,
+        },
+        {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            Email: forgotEmail,
-            Password: newPasswordData.newPassword,
-          }),
         }
       );
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Hiba történt az új jelszó beállításakor!"
-        );
-      }
+      const data = response.data;
       setMessage({
         type: "success",
         text:
@@ -620,29 +549,16 @@ const ProfilePage = () => {
       if (!username) {
         throw new Error("Nincs felhasználónév elmentve!");
       }
-      const response = await fetch(
+      await axios.delete(
         `${process.env.REACT_APP_API_BASE_URL}/UserAccounts/DeleteUserByUsername/${username}`,
         {
-          method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ Password: deletePassword }),
+          data: { Password: deletePassword },
         }
       );
-      if (response.status === 401) {
-        throw new Error("Token érvénytelen vagy lejárt!");
-      }
-      if (response.status === 404) {
-        throw new Error("Felhasználó nem található!");
-      }
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(
-          errorData || `HTTP hiba! Státusz: ${response.status}`
-        );
-      }
       localStorage.removeItem("authToken");
       localStorage.removeItem("username");
       navigate("/");
@@ -663,19 +579,14 @@ const ProfilePage = () => {
       }
       headers["Authorization"] = `Bearer ${token}`;
     }
-    const response = await fetch(url, {
+    const config = {
       method,
+      url,
       headers,
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    const responseClone = response.clone();
-    try {
-      const data = await response.json();
-      return { response, data };
-    } catch (error) {
-      const text = await responseClone.text();
-      return { response, data: { message: text } };
-    }
+      data: body,
+    };
+    const response = await axios(config);
+    return { response: { status: response.status, ok: response.status >= 200 && response.status < 300 }, data: response.data };
   };
 
   const handleAddGuest = async (e) => {
@@ -701,23 +612,17 @@ const ProfilePage = () => {
           ? new Date(guestData.dateOfBirth).toISOString()
           : null,
       };
-      const response = await fetch(
+      const response = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/Guests/Addnewguest`,
+        payload,
         {
-          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(payload),
         }
       );
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Hiba a vendég hozzáadása során: ${errorText}`);
-      }
-      const responseText = await response.text();
-      if (responseText.includes("Sikeres")) {
+      if (response.data.includes("Sikeres")) {
         await fetchGuests();
         setShowGuestModal(false);
         setGuestData({
@@ -733,7 +638,7 @@ const ProfilePage = () => {
         });
         setMessage({ type: "success", text: "Vendég sikeresen hozzáadva!" });
       } else {
-        throw new Error(`Váratlan válasz a szervertől: ${responseText}`);
+        throw new Error(`Váratlan válasz a szervertől: ${response.data}`);
       }
     } catch (err) {
       console.error("Hiba a vendég hozzáadása közben:", err.message);
@@ -750,25 +655,15 @@ const ProfilePage = () => {
       if (!token) {
         throw new Error("Nincs token elmentve! Jelentkezz be újra.");
       }
-      const response = await fetch(
+      await axios.delete(
         `${process.env.REACT_APP_API_BASE_URL}/Guests/DeleteGuest/${guestId}`,
         {
-          method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
       );
-      if (!response.ok) {
-        let errorText;
-        try {
-          errorText = await response.text();
-        } catch (e) {
-          errorText = `Hiba a válasz olvasása közben: ${response.status}`;
-        }
-        throw new Error(`Hiba a vendég törlése során: ${errorText}`);
-      }
       await fetchGuests();
       setMessage({ type: "success", text: "Vendég sikeresen törölve!" });
     } catch (err) {
@@ -812,23 +707,17 @@ const ProfilePage = () => {
           ? new Date(guestData.dateOfBirth).toISOString()
           : null,
       };
-      const response = await fetch(
+      const response = await axios.put(
         `${process.env.REACT_APP_API_BASE_URL}/Guests/UpdateGuest/${editGuestId}`,
+        payload,
         {
-          method: "PUT",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(payload),
         }
       );
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Hiba a vendég módosítása során: ${errorText}`);
-      }
-      const responseText = await response.text();
-      if (responseText.includes("Sikeres frissítés")) {
+      if (response.data.includes("Sikeres frissítés")) {
         await fetchGuests();
         setShowGuestModal(false);
         setGuestData({
@@ -845,7 +734,7 @@ const ProfilePage = () => {
         setEditGuestId(null);
         setMessage({ type: "success", text: "Vendég sikeresen módosítva!" });
       } else {
-        throw new Error(`Váratlan válasz a szervertől: ${responseText}`);
+        throw new Error(`Váratlan válasz a szervertől: ${response.data}`);
       }
     } catch (err) {
       console.error("Hiba a vendég módosítása közben:", err.message);
@@ -878,32 +767,21 @@ const ProfilePage = () => {
       if (!bookingId) {
         throw new Error("A foglalás azonosítója (BookingId) hiányzik az adatokból!");
       }
-      const response = await fetch(
+      await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/Reviews/NewComment/${roomId}`,
         {
-          method: "POST",
+          BookingId: bookingId,
+          GuestId: guests[0].guestId,
+          Rating: commentData.rating,
+          Comment: commentData.comment,
+        },
+        {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            BookingId: bookingId,
-            GuestId: guests[0].guestId,
-            Rating: commentData.rating,
-            Comment: commentData.comment,
-          }),
         }
       );
-      if (!response.ok) {
-        let errorMessage = "Hiba történt az értékelés küldése közben";
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch (jsonError) {
-          console.error("JSON parsing error:", jsonError);
-        }
-        throw new Error(`${errorMessage} (Státusz: ${response.status})`);
-      }
       setMessage({ type: "success", text: "Értékelés sikeresen elküldve!" });
       setShowCommentModal(false);
       setCommentData({ rating: 5, comment: "" });
@@ -1073,7 +951,6 @@ const ProfilePage = () => {
               </h2>
             </div>
 
-            {/* Sikeres törlés üzenet */}
             {deletionSuccess && (
               <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg animate-fade-in">
                 <div className="flex items-center">
@@ -1189,7 +1066,6 @@ const ProfilePage = () => {
               </h2>
             </div>
 
-            {/* Sikeres törlés üzenet */}
             {deletionSuccess && (
               <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg animate-fade-in">
                 <div className="flex items-center">
@@ -1217,6 +1093,7 @@ const ProfilePage = () => {
                               {event ? event.eventName : `Esemény #${booking.eventId}`}
                             </span>
                           </p>
+                          کارشناس
                           <p className="text-sm font-medium text-blue-700">
                             Dátum:{" "}
                             <span className="font-bold text-purple-600">
@@ -1994,7 +1871,7 @@ const ProfilePage = () => {
                       Cím
                     </label>
                     <input
-                      placeholder="Palóczy László u. 3"
+                      placeholder="Kossuth Lajos utca 1."
                       type="text"
                       value={guestData.address}
                       onChange={(e) =>
@@ -2005,7 +1882,7 @@ const ProfilePage = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-blue-800">
-                      Település
+                      Város
                     </label>
                     <input
                       placeholder="Budapest"
@@ -2045,17 +1922,11 @@ const ProfilePage = () => {
                       <option value="">Válasszon</option>
                       <option value="Férfi">Férfi</option>
                       <option value="Nő">Nő</option>
-                      <option value="Egyéb">Kalács</option>
+                      <option value="Egyéb">Egyéb</option>
                     </select>
                   </div>
                 </div>
-                <div className="sm:col-span-2 flex gap-2 justify-end mt-4">
-                  <button
-                    type="submit"
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                  >
-                    {editGuestId ? "Mentés" : "Hozzáadás"}
-                  </button>
+                <div className="col-span-1 sm:col-span-2 flex justify-end gap-2 mt-4">
                   <button
                     type="button"
                     onClick={() => {
@@ -2073,16 +1944,23 @@ const ProfilePage = () => {
                         gender: "",
                       });
                     }}
-                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
                   >
                     Mégse
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    {editGuestId ? "Mentés" : "Hozzáadás"}
                   </button>
                 </div>
               </form>
             </div>
           </div>
         )}
-        {showCommentModal && (
+
+        {showCommentModal && selectedBooking && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-md">
               <h3 className="text-xl font-semibold text-blue-800 mb-4">
@@ -2090,27 +1968,26 @@ const ProfilePage = () => {
               </h3>
               <form onSubmit={handleSubmitComment} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-blue-800 mb-1">
+                  <label className="block text-sm font-medium text-blue-800">
                     Értékelés (1-5)
                   </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="5"
+                  <select
                     value={commentData.rating}
                     onChange={(e) =>
-                      setCommentData({
-                        ...commentData,
-                        rating: parseInt(e.target.value),
-                      })
+                      setCommentData({ ...commentData, rating: parseInt(e.target.value) })
                     }
                     className="w-full p-2 border border-blue-200 rounded-lg"
-                    required
-                  />
+                  >
+                    <option value={5}>5 - Kiváló</option>
+                    <option value={4}>4 - Nagyon jó</option>
+                    <option value={3}>3 - Átlagos</option>
+                    <option value={2}>2 - Gyenge</option>
+                    <option value={1}>1 - Rossz</option>
+                  </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-blue-800 mb-1">
-                    Megjegyzés
+                  <label className="block text-sm font-medium text-blue-800">
+                    Hozzászólás
                   </label>
                   <textarea
                     value={commentData.comment}
@@ -2119,23 +1996,22 @@ const ProfilePage = () => {
                     }
                     className="w-full p-2 border border-blue-200 rounded-lg"
                     rows="4"
-                    placeholder="Írja meg a véleményét..."
-                    required
+                    placeholder="Írja meg véleményét..."
                   />
                 </div>
-                <div className="flex gap-2 justify-end">
-                  <button
-                    type="submit"
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                  >
-                    Küldés
-                  </button>
+                <div className="flex justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setShowCommentModal(false)}
-                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
                   >
                     Mégse
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    Küldés
                   </button>
                 </div>
               </form>
