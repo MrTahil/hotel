@@ -154,6 +154,30 @@ function Hero() {
         setSelectedFeature(null);
     };
 
+    const testimonials = [
+        {
+            name: "Kovács Anna",
+            role: "Üzleti utas",
+            content: "A legjobb szálloda, ahol valaha megfordultam! A személyzet figyelmes, a szoba hihetetlenül kényelmes volt, és a wellness részleg tökéletes volt a munka utáni relaxáláshoz.",
+            rating: 5,
+            image: "https://randomuser.me/api/portraits/women/43.jpg"
+        },
+        {
+            name: "Ardelean Milán",
+            role: "Honeymoon utas",
+            content: "Tökéletes választás volt a nászútunkra! A kilátás a tengerre lenyűgöző, a séf különleges vacsorát készített nekünk (bundáskenyér) , és az egész élmény varázslatos volt. Annyi a kár hogy xbox helyett ps-t kellett vona a tvk-hez adni. TT!",
+            rating: 5,
+            image: "https://th.bing.com/th/id/OIP.3H2ZzNxqIihEaOOlCg5jFAHaE_?rs=1&pid=ImgDetMain"
+        },
+        {
+            name: "Tóth Eszter",
+            role: "Családos anyuka",
+            content: "A gyerekek imádták a medencét és a játékteret, míg mi felnőttek élveztük a spa kezeléseket. Mindenki megtalálta a számára való szórakozást!",
+            rating: 4,
+            image: "https://randomuser.me/api/portraits/women/65.jpg"
+        }
+    ];
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-screen bg-blue-50">
@@ -337,44 +361,45 @@ function Hero() {
                         </div>
                     </div>
                 </section>
-            </main>
 
-            <footer className="bg-blue-900 text-white py-8">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div>
-                        <h4 className="font-bold text-lg mb-4">Rólunk</h4>
-                        <p className="text-blue-200">
-                            Szállodánk a tökéletes választás a pihenésre és kikapcsolódásra vágyó vendégek számára.
-                        </p>
+                {/* Testimonial Section */}
+                {/* Testimonial Section */}
+                <section className="py-16 bg-white">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <h2 className="text-3xl font-bold text-blue-900 mb-12 text-center">Vendégeink Véleménye</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {testimonials.map((testimonial, index) => (
+                                <div key={index} className="bg-blue-50 p-6 rounded-lg shadow-lg">
+                                    <div className="flex items-center mb-4">
+                                        <img
+                                            src={testimonial.image}
+                                            alt={testimonial.name}
+                                            className="w-12 h-12 rounded-full object-cover mr-4"
+                                        />
+                                        <div>
+                                            <h4 className="font-bold text-lg text-blue-900">{testimonial.name}</h4>
+                                            <p className="text-blue-600 text-sm">{testimonial.role}</p>
+                                        </div>
+                                    </div>
+                                    <p className="mb-4 text-blue-700">"{testimonial.content}"</p>
+                                    <div className="flex">
+                                        {[...Array(5)].map((_, i) => (
+                                            <svg
+                                                key={i}
+                                                className={`w-5 h-5 ${i < testimonial.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                    <div>
-                        <h4 className="font-bold text-lg mb-4">Kapcsolat</h4>
-                        <p className="text-blue-200">Cím: 123 Fő utca, Budapest</p>
-                        <p className="text-blue-200">Telefon: +36 1 123 4567</p>
-                        <p className="text-blue-200">Email: info@examplehotel.com</p>
-                    </div>
-                    <div>
-                        <h4 className="font-bold text-lg mb-4">Következő Oldalak</h4>
-                        <ul className="list-none">
-                            <li>
-                                <Link to="/" className="text-blue-200 hover:text-white">Főoldal</Link>
-                            </li>
-                            <li>
-                                <Link to="/szobak" className="text-blue-200 hover:text-white">Szobák</Link>
-                            </li>
-                            <li>
-                                <Link to="/login" className="text-blue-200 hover:text-white">Bejelentkezés</Link>
-                            </li>
-                            <li>
-                                <Link to="/register" className="text-blue-200 hover:text-white">Regisztráció</Link>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div className="text-center mt-8 text-blue-300">
-                    © 2024 DreamStay Hotel. Minden jog fenntartva.
-                </div>
-            </footer>
+                </section>
+            </main>
 
             {selectedFeature && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
