@@ -1,18 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/Hero.css';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function Hero() {
     const [rooms, setRooms] = useState([]);
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [transitionEnabled, setTransitionEnabled] = useState(true);
     const [programs, setPrograms] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedFeature, setSelectedFeature] = useState(null);
     const navigate = useNavigate();
-    const sliderRef = useRef(null);
-    const containerRef = useRef(null);
 
     useEffect(() => {
         const fetchRooms = async () => {
@@ -93,62 +89,11 @@ function Hero() {
             : description || 'Nincs leírás';
     };
 
-    const handleRoomClick = (roomId) => {
+    const handleRoomClick = () => {
         const token = localStorage.getItem('authToken');
-        if (token) navigate(`/szobak/${roomId}`);
+        if (token) navigate('/szobak');
         else navigate('/login');
     };
-
-    const getSlideOffset = () => {
-        if (!containerRef.current) return 0;
-
-        const containerWidth = containerRef.current.offsetWidth;
-        const cardWidth = calculateCardWidth(containerWidth);
-        return -(currentIndex * cardWidth) + (containerWidth - cardWidth) / 2;
-    };
-
-    const calculateCardWidth = (containerWidth) => {
-        const width = window.innerWidth;
-        if (width < 640) {
-            return containerWidth * 0.9;
-        } else if (width < 1024) {
-            return containerWidth / 2;
-        } else {
-            return containerWidth / 3;
-        }
-    };
-
-    const handleSlideLeft = () => {
-        setCurrentIndex((prev) => {
-            const newIndex = prev - 1;
-            if (newIndex < 0) {
-                setTransitionEnabled(false);
-                setTimeout(() => {
-                    setTransitionEnabled(true);
-                    setCurrentIndex(rooms.length - 1);
-                }, 0);
-                return rooms.length - 1;
-            }
-            return newIndex;
-        });
-    };
-
-    const handleSlideRight = () => {
-        setCurrentIndex((prev) => {
-            const newIndex = prev + 1;
-            if (newIndex >= rooms.length) {
-                setTransitionEnabled(false);
-                setTimeout(() => {
-                    setTransitionEnabled(true);
-                    setCurrentIndex(0);
-                }, 0);
-                return 0;
-            }
-            return newIndex;
-        });
-    };
-
-    const duplicatedRooms = rooms.length > 0 ? [...rooms, ...rooms, ...rooms] : [];
 
     const features = [
         {
@@ -229,8 +174,8 @@ function Hero() {
                 />
                 <div className="absolute inset-0 bg-blue-900 z-10"></div>
                 <div className="relative z-20 text-center px-4">
-                    <h1 class="animate-bounce text-4xl md:text-6xl font-bold mb-6">Üdvözöljük az álomnyaralás kezdetén</h1>
-                    <p class="text-lg md:text-2xl max-w-3xl mx-auto mb-8 text-blue-100">
+                    <h1 className="animate-bounce text-4xl md:text-6xl font-bold mb-6">Üdvözöljük az álomnyaralás kezdetén</h1>
+                    <p className="text-lg md:text-2xl max-w-3xl mx-auto mb-8 text-blue-100">
                         Fedezze fel a tökéletes pihenés és kiváló szolgáltatások harmonikus világát
                     </p>
                     <Link to="/szobak">
@@ -264,7 +209,6 @@ function Hero() {
                             <span className="sr-only">Görgés lefele</span>
                         </button>
                     </div>
-
                     <div className="absolute bottom-10 right-10 animate-bounce z-30">
                         <button
                             onClick={() => {
@@ -329,83 +273,31 @@ function Hero() {
                         <h2 className="text-3xl font-bold text-blue-900 mb-8 text-center">
                             Fedezze Fel Szobáinkat
                         </h2>
-                        <div className="relative" ref={containerRef}>
-                            <button
-                                className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-full z-10 hover:bg-blue-700 focus:outline-none"
-                                onClick={handleSlideLeft}
-                                aria-label="Előző szoba"
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-6 w-6"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {rooms.slice(0, 3).map((room) => (
+                                <div
+                                    key={room.id}
+                                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+                                    onClick={handleRoomClick}
                                 >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M15 19l-7-7 7-7"
+                                    <img
+                                        src={room.image}
+                                        alt={room.name}
+                                        className="w-full h-56 object-cover"
                                     />
-                                </svg>
-                            </button>
-                            <div
-                                className="overflow-hidden whitespace-nowrap transition-transform duration-500 ease-out"
-                                style={{
-                                    transform: `translateX(${getSlideOffset()}px)`,
-                                    transition: transitionEnabled ? undefined : 'none'
-                                }}
-                                ref={sliderRef}
-                            >
-                                {duplicatedRooms.map((room, index) => (
-                                    <div
-                                        key={index}
-                                        className="inline-block w-96 p-4 transform transition-transform duration-300 hover:scale-105 cursor-pointer"
-                                        style={{ width: 'calc(100% / 3)', minWidth: '300px' }}
-                                        onClick={() => handleRoomClick(room.id)}
-                                    >
-                                        <div className="rounded-xl shadow-lg overflow-hidden bg-white">
-                                            <img
-                                                src={room.image}
-                                                alt={room.name}
-                                                className="w-full h-56 object-cover"
-                                            />
-                                            <div className="p-4">
-                                                <h3 className="font-bold text-xl mb-2 text-blue-900">
-                                                    {room.name}
-                                                </h3>
-                                                <p className="text-blue-700 text-base">
-                                                    {truncateDescription(room.description, 100)}
-                                                </p>
-                                                <p className="text-blue-600 mt-2">
-                                                    Ár: {room.price} / éjszaka
-                                                </p>
-                                            </div>
-                                        </div>
+                                    <div className="p-6">
+                                        <h3 className="font-bold text-xl mb-2 text-blue-900">
+                                            {room.name}
+                                        </h3>
+                                        <p className="text-blue-700 mb-4">
+                                            {truncateDescription(room.description, 100)}
+                                        </p>
+                                        <p className="text-blue-600">
+                                            Ár: {room.price} / éjszaka
+                                        </p>
                                     </div>
-                                ))}
-                            </div>
-                            <button
-                                className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-full z-10 hover:bg-blue-700 focus:outline-none"
-                                onClick={handleSlideRight}
-                                aria-label="Következő szoba"
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-6 w-6"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M9 5l7 7-7 7"
-                                    />
-                                </svg>
-                            </button>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </section>
