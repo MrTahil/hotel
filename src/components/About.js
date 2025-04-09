@@ -120,6 +120,59 @@ function About() {
                         </div>
                     </div>
                 </div>
+
+                <div className="mt-12 bg-white p-8 rounded-2xl shadow-lg max-w-4xl mx-auto border-l-4 border-blue-500 transform transition-all duration-300 hover:-translate-y-1">
+                    <div className="flex items-start">
+                        <div className="text-4xl mr-4 text-blue-400">"</div>
+                        <div>
+                            <blockquote className="text-2xl italic text-gray-700 mb-4">
+                                Olyan, mintha hazajönnék – a HMZ Hotelben minden részlet tökéletes, a párnák puhaságától a reggeli friss péksüteményekig.
+                            </blockquote>
+                            <p className="text-right text-blue-600 font-medium">- Kovács Eszter, Törzsvendég</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-12 bg-white p-8 rounded-2xl shadow-lg max-w-4xl mx-auto border-l-4 border-blue-500 transform transition-all duration-300 hover:-translate-y-1">
+                    <div className="flex items-start">
+                        <div className="text-4xl mr-4 text-blue-400">"</div>
+                        <div>
+                            <blockquote className="text-2xl italic text-gray-700 mb-4">
+                                A wellness részleg varázslatos! A szauna után a csillagos ég alatti jakuzzi olyan élmény volt, amit soha nem felejtek.
+                            </blockquote>
+                            <p className="text-right text-blue-600 font-medium">- Tóth Balázs, Honeymoon vendég</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-12 bg-white p-8 rounded-2xl shadow-lg max-w-4xl mx-auto border-l-4 border-blue-500 transform transition-all duration-300 hover:-translate-y-1">
+                    <div className="flex items-start">
+                        <div className="text-4xl mr-4 text-blue-400">"</div>
+                        <div>
+                            <blockquote className="text-2xl italic text-gray-700 mb-4">
+                                A kertből behozott levendulaillat, a tó partjáról érkező madárcsicsergés – itt a zajok helyett a csend zenéje ébreszt.
+                            </blockquote>
+                            <p className="text-right text-blue-600 font-medium">- Szabó Réka, Wellness hétvége</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-12 bg-white p-8 rounded-2xl shadow-lg max-w-4xl mx-auto border-l-4 border-blue-500 transform transition-all duration-300 hover:-translate-y-1">
+                    <div className="flex items-start">
+                        <div className="text-4xl mr-4 text-blue-400">"</div>
+                        <div>
+                            <blockquote className="text-2xl italic text-gray-700 mb-4">
+                                A séfek művészek, a borok költők – egy vacsora a HMZ-ban olyan, mint egy gasztronómiai szonett.
+                            </blockquote>
+                            <p className="text-right text-blue-600 font-medium">- Fördős Zé, Gasztroblogger</p>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
             </div>
         </section>
     );
