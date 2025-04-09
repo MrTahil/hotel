@@ -1,4 +1,4 @@
-﻿using hmz_rt.Models.Dtos;
+using hmz_rt.Models.Dtos;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -51,5 +51,47 @@ namespace hmz_rt.Models.Services
             var allGuests = await GetAllGuests();
             return allGuests.Find(g => g.GuestId == guestId);
         }
+        public async Task<int> GetEventGuestIdByEmail(string email)
+        {
+            try
+            {
+                await SetAuthorizationHeader();
+                var response = await _httpClient.GetAsync($"{_baseUrl}/GetByEmail/{email}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+
+                    if (int.TryParse(content, out int guestId))
+                    {
+                        return guestId;
+                    }
+
+                    try
+                    {
+                        var guestIdObj = JsonConvert.DeserializeObject<dynamic>(content);
+                        return (int)guestIdObj;
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"Nem sikerült deszerializálni a választ: {content}");
+                        return -1;
+                    }
+                }
+
+                Console.WriteLine($"Sikertelen API hívás: {response.StatusCode}");
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Kivétel: {ex.Message}");
+                return -1;
+            }
+        }
+
+
+
     }
+
+
 }
