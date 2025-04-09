@@ -11,28 +11,29 @@ using System.Windows;
 
 namespace hmz_rt.Models.Converters
 {
-    public class StatusToButtonTextConverter : IValueConverter
+    public class StatusToButtonTextConverter : IMultiValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            string status = value?.ToString();
+            if (values[0] == null) return "Állapot";
+
+            string status = values[0].ToString();
+
             switch (status)
             {
-                case "Jóváhagyva":
                 case "Függőben":
-                    return "Check In";
+                case "Jóváhagyva":
+                    return "Check-In";
                 case "Checked In":
-                    return "Check Out";
+                    return "Check-Out";
                 case "Finished":
                     return "Lezárva";
-                case "Lemondva":
-                    return "Lemondva";
                 default:
                     return status;
             }
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }
@@ -118,6 +119,22 @@ namespace hmz_rt.Models.Converters
                 }
             }
             return Brushes.Black;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class PaymentStatusToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null) return Visibility.Visible;
+
+            string paymentStatus = value.ToString();
+            return paymentStatus == "Fizetve" ? Visibility.Collapsed : Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
