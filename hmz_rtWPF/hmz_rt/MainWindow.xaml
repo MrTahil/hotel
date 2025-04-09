@@ -15,6 +15,7 @@
         <converters:StatusToButtonTextConverter x:Key="StatusToButtonTextConverter"/>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:PaymentStatusToColorConverter x:Key="PaymentStatusToColorConverter"/>
+        <converters:PaymentStatusToVisibilityConverter x:Key="PaymentStatusToVisibilityConverter"/>
         <DropShadowEffect x:Key="BoxShadow" BlurRadius="10" Direction="315" ShadowDepth="3" Opacity="0.2" Color="#000000"/>
 
         <!-- Card Style -->
@@ -217,7 +218,7 @@
                 </Border.RenderTransform>
                 <StackPanel>
                     <TextBlock Text="&#xE715;" Style="{StaticResource DashboardIcon}" Foreground="#4F46E5"/>
-                    <TextBlock Text="Email kiküldése" Style="{StaticResource DashboardTitle}" Foreground="#312E81"/>
+                    <TextBlock Text="Email kiküldése [BETA]" Style="{StaticResource DashboardTitle}" Foreground="#312E81"/>
                 </StackPanel>
             </Border>
 
@@ -413,14 +414,14 @@
                   FontSize="16">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="Szobaszám" DisplayMemberBinding="{Binding RoomNumber}" Width="100"/>
-                            <GridViewColumn Header="Típus" DisplayMemberBinding="{Binding RoomType}" Width="120"/>
-                            <GridViewColumn Header="Kapacitás" DisplayMemberBinding="{Binding Capacity}" Width="80"/>
-                            <GridViewColumn Header="Ár/éj" DisplayMemberBinding="{Binding PricePerNight, StringFormat='{}{0:N0} Ft'}" Width="100"/>
-                            <GridViewColumn Header="Állapot" DisplayMemberBinding="{Binding Status}" Width="100"/>
-                            <GridViewColumn Header="Emelet" DisplayMemberBinding="{Binding FloorNumber}" Width="70"/>
-                            <GridViewColumn Header="Hozzáadva" DisplayMemberBinding="{Binding DateAdded, StringFormat='{}{0:yyyy.MM.dd}'}" Width="100"/>
-                            <GridViewColumn Header="Leírás" DisplayMemberBinding="{Binding Description}" Width="200"/>
+                            <GridViewColumn Header="Szobaszám" DisplayMemberBinding="{Binding RoomNumber}" Width="Auto"/>
+                            <GridViewColumn Header="Típus" DisplayMemberBinding="{Binding RoomType}" Width="Auto"/>
+                            <GridViewColumn Header="Kapacitás" DisplayMemberBinding="{Binding Capacity}" Width="Auto"/>
+                            <GridViewColumn Header="Ár/éj" DisplayMemberBinding="{Binding PricePerNight, StringFormat='{}{0:N0} Ft'}" Width="Auto"/>
+                            <GridViewColumn Header="Állapot" DisplayMemberBinding="{Binding Status}" Width="Auto"/>
+                            <GridViewColumn Header="Emelet" DisplayMemberBinding="{Binding FloorNumber}" Width="Auto"/>
+                            <GridViewColumn Header="Hozzáadva" DisplayMemberBinding="{Binding DateAdded, StringFormat='{}{0:yyyy.MM.dd}'}" Width="Auto"/>
+                            <GridViewColumn Header="Leírás" DisplayMemberBinding="{Binding Description}" Width="Auto"/>
                         </GridView>
                     </ListView.View>
                     <ListView.ItemContainerStyle>
@@ -495,14 +496,14 @@
                                 <Border Margin="0,0,0,20" BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="12" Padding="20">
                                     <StackPanel>
                                         <TextBlock Text="Kapacitás" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
-                                        <TextBox x:Name="CapacityTextBox" Padding="15,12" FontSize="16"/>
+                                        <TextBox x:Name="CapacityTextBox" Padding="15,12" FontSize="16"  PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"/>
                                     </StackPanel>
                                 </Border>
 
                                 <Border Margin="0,0,0,20" BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="12" Padding="20">
                                     <StackPanel>
                                         <TextBlock Text="Ár/éj" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
-                                        <TextBox x:Name="PricePerNightTextBox" Padding="15,12" FontSize="16"/>
+                                        <TextBox x:Name="PricePerNightTextBox" Padding="15,12" FontSize="16" PreviewTextInput="DecimalOnlyTextBox_PreviewTextInput"/>
                                     </StackPanel>
                                 </Border>
 
@@ -522,7 +523,7 @@
                                 <Border Margin="0,0,0,20" BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="12" Padding="20">
                                     <StackPanel>
                                         <TextBlock Text="Emelet" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
-                                        <TextBox x:Name="FloorNumberTextBox" Padding="15,12" FontSize="16"/>
+                                        <TextBox x:Name="FloorNumberTextBox" Padding="15,12" FontSize="16" PreviewTextInput="NumberOnlyTextBox_PreviewTextInput"/>
                                     </StackPanel>
                                 </Border>
 
@@ -538,17 +539,6 @@
                                     </StackPanel>
                                 </Border>
 
-                                <Border Margin="0,0,0,20" BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="12" Padding="20">
-                                    <StackPanel>
-                                        <TextBlock Text="Felszereltség" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
-                                        <TextBox x:Name="AmenitiesTextBox" 
-                                         TextWrapping="Wrap" 
-                                         AcceptsReturn="True" 
-                                         Height="100" 
-                                         Padding="15,12" 
-                                         FontSize="16"/>
-                                    </StackPanel>
-                                </Border>
 
                                 <!-- Műveleti gombok -->
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
@@ -718,14 +708,14 @@
                   FontSize="16">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="Vezetéknév" DisplayMemberBinding="{Binding LastName}" Width="150"/>
-                            <GridViewColumn Header="Keresztnév" DisplayMemberBinding="{Binding FirstName}" Width="150"/>
-                            <GridViewColumn Header="Email" DisplayMemberBinding="{Binding Email}" Width="200"/>
-                            <GridViewColumn Header="Telefonszám" DisplayMemberBinding="{Binding PhoneNumber}" Width="150"/>
-                            <GridViewColumn Header="Pozíció" DisplayMemberBinding="{Binding Position}" Width="150"/>
-                            <GridViewColumn Header="Fizetés" DisplayMemberBinding="{Binding Salary, StringFormat='{}{0:N0} Ft'}" Width="120"/>
-                            <GridViewColumn Header="Státusz" DisplayMemberBinding="{Binding Status}" Width="120"/>
-                            <GridViewColumn Header="Részleg" DisplayMemberBinding="{Binding Department}" Width="150"/>
+                            <GridViewColumn Header="Vezetéknév" DisplayMemberBinding="{Binding LastName}" Width="Auto"/>
+                            <GridViewColumn Header="Keresztnév" DisplayMemberBinding="{Binding FirstName}" Width="Auto"/>
+                            <GridViewColumn Header="Email" DisplayMemberBinding="{Binding Email}" Width="Auto"/>
+                            <GridViewColumn Header="Telefonszám" DisplayMemberBinding="{Binding PhoneNumber}" Width="Auto"/>
+                            <GridViewColumn Header="Pozíció" DisplayMemberBinding="{Binding Position}" Width="Auto"/>
+                            <GridViewColumn Header="Fizetés" DisplayMemberBinding="{Binding Salary, StringFormat='{}{0:N0} Ft'}" Width="Auto"/>
+                            <GridViewColumn Header="Státusz" DisplayMemberBinding="{Binding Status}" Width="Auto"/>
+                            <GridViewColumn Header="Részleg" DisplayMemberBinding="{Binding Department}" Width="Auto"/>
                         </GridView>
                     </ListView.View>
                     <ListView.ItemContainerStyle>
@@ -814,7 +804,7 @@
                                 <Border Margin="0,0,0,20" BorderThickness="1" BorderBrush="#E2E8F0" CornerRadius="12" Padding="20">
                                     <StackPanel>
                                         <TextBlock Text="Fizetés" FontWeight="SemiBold" FontSize="18" Margin="0,0,0,15"/>
-                                        <TextBox x:Name="SalaryTextBox" Padding="15,12" FontSize="16"/>
+                                        <TextBox x:Name="SalaryTextBox" Padding="15,12" FontSize="16" PreviewTextInput="SalaryTextBox_PreviewTextInput"/>
                                     </StackPanel>
                                 </Border>
 
@@ -1003,13 +993,13 @@ Click="PromotionsBackButton_Click">
                   FontSize="16">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="Név" DisplayMemberBinding="{Binding PromotionName}" Width="200"/>
-                            <GridViewColumn Header="Kezdő dátum" DisplayMemberBinding="{Binding StartDate, StringFormat='{}{0:yyyy.MM.dd}'}" Width="120"/>
-                            <GridViewColumn Header="Befejező dátum" DisplayMemberBinding="{Binding EndDate, StringFormat='{}{0:yyyy.MM.dd}'}" Width="120"/>
-                            <GridViewColumn Header="Kedvezmény" DisplayMemberBinding="{Binding DiscountPercentage, StringFormat='{}{0}%'}" Width="100"/>
-                            <GridViewColumn Header="Státusz" DisplayMemberBinding="{Binding Status}" Width="100"/>
-                            <GridViewColumn Header="Szoba" DisplayMemberBinding="{Binding RoomId}" Width="80"/>
-                            <GridViewColumn Header="Leírás" DisplayMemberBinding="{Binding Description}" Width="250"/>
+                            <GridViewColumn Header="Név" DisplayMemberBinding="{Binding PromotionName}" Width="Auto"/>
+                            <GridViewColumn Header="Kezdő dátum" DisplayMemberBinding="{Binding StartDate, StringFormat='{}{0:yyyy.MM.dd}'}" Width="Auto"/>
+                            <GridViewColumn Header="Befejező dátum" DisplayMemberBinding="{Binding EndDate, StringFormat='{}{0:yyyy.MM.dd}'}" Width="Auto"/>
+                            <GridViewColumn Header="Kedvezmény" DisplayMemberBinding="{Binding DiscountPercentage, StringFormat='{}{0}%'}" Width="Auto"/>
+                            <GridViewColumn Header="Státusz" DisplayMemberBinding="{Binding Status}" Width="Auto"/>
+                            <GridViewColumn Header="Szoba" DisplayMemberBinding="{Binding RoomId}" Width="Auto"/>
+                            <GridViewColumn Header="Leírás" DisplayMemberBinding="{Binding Description}" Width="Auto"/>
                         </GridView>
                     </ListView.View>
                     <ListView.ItemContainerStyle>
@@ -1295,14 +1285,14 @@ Click="PromotionsBackButton_Click">
                   FontSize="16">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="Vezetéknév" DisplayMemberBinding="{Binding LastName}" Width="150"/>
-                            <GridViewColumn Header="Keresztnév" DisplayMemberBinding="{Binding FirstName}" Width="150"/>
-                            <GridViewColumn Header="Email" DisplayMemberBinding="{Binding Email}" Width="200"/>
-                            <GridViewColumn Header="Telefonszám" DisplayMemberBinding="{Binding PhoneNumber}" Width="130"/>
-                            <GridViewColumn Header="Cím" DisplayMemberBinding="{Binding Address}" Width="200"/>
-                            <GridViewColumn Header="Város" DisplayMemberBinding="{Binding City}" Width="120"/>
-                            <GridViewColumn Header="Ország" DisplayMemberBinding="{Binding Country}" Width="120"/>
-                            <GridViewColumn Header="Nem" DisplayMemberBinding="{Binding Gender}" Width="80"/>
+                            <GridViewColumn Header="Vezetéknév" DisplayMemberBinding="{Binding LastName}" Width="Auto"/>
+                            <GridViewColumn Header="Keresztnév" DisplayMemberBinding="{Binding FirstName}" Width="Auto"/>
+                            <GridViewColumn Header="Email" DisplayMemberBinding="{Binding Email}" Width="Auto"/>
+                            <GridViewColumn Header="Telefonszám" DisplayMemberBinding="{Binding PhoneNumber}" Width="Auto"/>
+                            <GridViewColumn Header="Cím" DisplayMemberBinding="{Binding Address}" Width="Auto"/>
+                            <GridViewColumn Header="Város" DisplayMemberBinding="{Binding City}" Width="Auto"/>
+                            <GridViewColumn Header="Ország" DisplayMemberBinding="{Binding Country}" Width="Auto"/>
+                            <GridViewColumn Header="Nem" DisplayMemberBinding="{Binding Gender}" Width="Auto"/>
                         </GridView>
                     </ListView.View>
                     <ListView.ItemContainerStyle>
@@ -1514,21 +1504,7 @@ Click="PromotionsBackButton_Click">
                         </Button.Resources>
                     </Button>
 
-                    <Button x:Name="EditBookingButton"
-                    Content="✏️ Szerkesztés" 
-                    Margin="5,0" 
-                    Padding="15,12" 
-                    Background="#2563EB" 
-                    Foreground="White" 
-                    BorderThickness="0"
-                    FontSize="16"
-                    Click="EditBookingButton_Click">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="8"/>
-                            </Style>
-                        </Button.Resources>
-                    </Button>
+                    
 
                     <Button x:Name="DeleteBookingButton"
                     Content="🗑️ Törlés" 
@@ -1571,19 +1547,39 @@ Click="PromotionsBackButton_Click">
                             <GridViewColumn Header="Vendégek" DisplayMemberBinding="{Binding NumberOfGuests}" Width="Auto"/>
                             <GridViewColumn Header="Összár" DisplayMemberBinding="{Binding TotalPrice, StringFormat='{}{0:N0} Ft'}" Width="Auto"/>
                             <GridViewColumn Header="Fizetés" DisplayMemberBinding="{Binding PaymentStatus}" Width="Auto"/>
-                            <GridViewColumn Header="Státusz" DisplayMemberBinding="{Binding Status}" Width="Auto"/>
-                            <GridViewColumn Header="Műveletek" Width="200">
+                            <GridViewColumn Header="Státusz" Width="Auto">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="{Binding Status}" 
+                    Tag="{Binding BookingId}" 
+                    Click="StatusButton_Click" 
+                    Background="Transparent" 
+                    BorderThickness="0" 
+                    Padding="0" 
+                    Cursor="Hand">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Foreground" Value="Black"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="TextBlock.TextDecorations" Value="Underline"/>
+                                                            <Setter Property="Foreground" Value="#4F46E5"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Műveletek" Width="Auto">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
-                                            <Button Content="Állapot" Margin="0,0,3,0" Padding="8,4" Tag="{Binding BookingId}" Click="StatusButton_Click" Background="#4F46E5" Foreground="White" BorderThickness="0">
-                                                <Button.Resources>
-                                                    <Style TargetType="Border">
-                                                        <Setter Property="CornerRadius" Value="4"/>
-                                                    </Style>
-                                                </Button.Resources>
-                                            </Button>
                                             <Button Content="Fizetés" Margin="0,0,3,0" Padding="8,4" Tag="{Binding BookingId}" Click="PaymentButton_Click" Background="#16A34A" Foreground="White" BorderThickness="0">
+                                                <Button.Visibility>
+                                                    <Binding Path="PaymentStatus" Converter="{StaticResource PaymentStatusToVisibilityConverter}"/>
+                                                </Button.Visibility>
                                                 <Button.Resources>
                                                     <Style TargetType="Border">
                                                         <Setter Property="CornerRadius" Value="4"/>
@@ -1706,7 +1702,8 @@ Click="PromotionsBackButton_Click">
                                         <TextBox x:Name="NumberOfGuestsTextBox" 
                                          Padding="15,12" 
                                          FontSize="16"
-                                         TextChanged="NumberOfGuestsTextBox_TextChanged"/>
+                                         TextChanged="NumberOfGuestsTextBox_TextChanged"
+                                         PreviewTextInput="NumberOfGuestsTextBox_PreviewTextInput"/>
                                     </StackPanel>
                                 </Border>
 
@@ -1729,8 +1726,7 @@ Click="PromotionsBackButton_Click">
                                     Background="#6B7280" 
                                     Foreground="White" 
                                     BorderThickness="0"
-                                    FontSize="16"
-                                    Click="CancelBookingEditButton_Click">
+                                    FontSize="16">
                                         <Button.Resources>
                                             <Style TargetType="Border">
                                                 <Setter Property="CornerRadius" Value="8"/>
@@ -1882,7 +1878,6 @@ Click="PromotionsBackButton_Click">
         </Grid>
 
 
-        <!-- Szoba takarítás kezelés konténer -->
         <!-- Szoba takarítás kezelés konténer -->
         <Grid x:Name="maintenanceContainer" Grid.Row="1" Visibility="Collapsed">
             <Grid.RowDefinitions>
@@ -2322,13 +2317,13 @@ Click="PromotionsBackButton_Click">
                   FontSize="16">
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="Név" DisplayMemberBinding="{Binding EventName}" Width="200"/>
-                            <GridViewColumn Header="Dátum" DisplayMemberBinding="{Binding EventDate, StringFormat='{}{0:yyyy.MM.dd}'}" Width="100"/>
-                            <GridViewColumn Header="Helyszín" DisplayMemberBinding="{Binding Location}" Width="150"/>
-                            <GridViewColumn Header="Kapacitás" DisplayMemberBinding="{Binding Capacity}" Width="80"/>
-                            <GridViewColumn Header="Ár" DisplayMemberBinding="{Binding Price, StringFormat='{}{0:N0} Ft'}" Width="100"/>
-                            <GridViewColumn Header="Státusz" DisplayMemberBinding="{Binding Status}" Width="100"/>
-                            <GridViewColumn Header="Szervező" DisplayMemberBinding="{Binding OrganizerName}" Width="150"/>
+                            <GridViewColumn Header="Név" DisplayMemberBinding="{Binding EventName}" Width="Auto"/>
+                            <GridViewColumn Header="Dátum" DisplayMemberBinding="{Binding EventDate, StringFormat='{}{0:yyyy.MM.dd}'}" Width="Auto"/>
+                            <GridViewColumn Header="Helyszín" DisplayMemberBinding="{Binding Location}" Width="Auto"/>
+                            <GridViewColumn Header="Kapacitás" DisplayMemberBinding="{Binding Capacity}" Width="Auto"/>
+                            <GridViewColumn Header="Ár" DisplayMemberBinding="{Binding Price, StringFormat='{}{0:N0} Ft'}" Width="Auto"/>
+                            <GridViewColumn Header="Státusz" DisplayMemberBinding="{Binding Status}" Width="Auto"/>
+                            <GridViewColumn Header="Szervező" DisplayMemberBinding="{Binding OrganizerName}" Width="Auto"/>
                         </GridView>
                     </ListView.View>
                     <ListView.ItemContainerStyle>
@@ -2713,115 +2708,77 @@ Click="PromotionsBackButton_Click">
                 CornerRadius="12" 
                 Padding="0">
                     <ListView x:Name="eventBookingsListView" 
-                      BorderThickness="0" 
-                      Background="Transparent"
-                      SelectionMode="Single">
+          BorderThickness="0" 
+          Background="Transparent"
+          SelectionMode="Single"
+          FontSize="16">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Header="Foglalás ID" Width="100">
+                                <GridViewColumn Header="Foglalás ID" Width="Auto">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding EventBookingId}" VerticalAlignment="Center"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Esemény" Width="200">
+                                <GridViewColumn Header="Esemény" Width="Auto">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding EventName}" VerticalAlignment="Center"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Vendég" Width="200">
+                                <GridViewColumn Header="Vendég" Width="Auto">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding GuestName}" VerticalAlignment="Center"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Jegyek száma" Width="120">
+                                <GridViewColumn Header="Jegyek száma" Width="Auto">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding NumberOfTickets}" VerticalAlignment="Center"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Összeg" Width="120">
+                                <GridViewColumn Header="Összeg" Width="Auto">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding TotalPrice, StringFormat='{}{0:N0} Ft'}" VerticalAlignment="Center"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Foglalás dátuma" Width="150">
+                                <GridViewColumn Header="Foglalás dátuma" Width="Auto">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding BookingDate, StringFormat='{}{0:yyyy.MM.dd}'}" VerticalAlignment="Center"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Státusz" Width="150">
+                                <GridViewColumn Header="Státusz" Width="80">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Button x:Name="EventStatusButton" 
-                                            Content="{Binding Status}"
-                                            Tag="{Binding EventBookingId}"
-                                            Click="EventStatusButton_Click"
-                                            Width="130"
-                                            Height="36"
-                                            BorderThickness="1"
-                                            Margin="5,2">
+                                            <Button Margin="0,0,3,0" Padding="8,4" Tag="{Binding BookingId}" Click="StatusButton_Click" Background="#4F46E5" Foreground="White" BorderThickness="0">
+                                                <Button.Content>
+                                                    <TextBlock>
+                                                        <TextBlock.Text>
+                                                            <MultiBinding Converter="{StaticResource StatusToButtonTextConverter}">
+                                                                <Binding Path="Status"/>
+                                                            </MultiBinding>
+                                                        </TextBlock.Text>
+                                                    </TextBlock>
+                                                </Button.Content>
                                                 <Button.Resources>
                                                     <Style TargetType="Border">
-                                                        <Setter Property="CornerRadius" Value="8"/>
-                                                        <Setter Property="Effect">
-                                                            <Setter.Value>
-                                                                <DropShadowEffect ShadowDepth="2" BlurRadius="4" Opacity="0.3" />
-                                                            </Setter.Value>
-                                                        </Setter>
+                                                        <Setter Property="CornerRadius" Value="4"/>
                                                     </Style>
                                                 </Button.Resources>
-                                                <Button.Style>
-                                                    <Style TargetType="Button">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Status}" Value="Jóváhagyva">
-                                                                <Setter Property="Background" Value="#DCFCE7"/>
-                                                                <Setter Property="Foreground" Value="#065F46"/>
-                                                                <Setter Property="BorderBrush" Value="#10B981"/>
-                                                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Status}" Value="Függőben">
-                                                                <Setter Property="Background" Value="#FEF3C7"/>
-                                                                <Setter Property="Foreground" Value="#92400E"/>
-                                                                <Setter Property="BorderBrush" Value="#F59E0B"/>
-                                                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Status}" Value="Checked In">
-                                                                <Setter Property="Background" Value="#EFF6FF"/>
-                                                                <Setter Property="Foreground" Value="#1E40AF"/>
-                                                                <Setter Property="BorderBrush" Value="#3B82F6"/>
-                                                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Status}" Value="Finished">
-                                                                <Setter Property="Background" Value="#D1D5DB"/>
-                                                                <Setter Property="Foreground" Value="#374151"/>
-                                                                <Setter Property="BorderBrush" Value="#9CA3AF"/>
-                                                                <Setter Property="IsEnabled" Value="False"/>
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding Status}" Value="Lemondva">
-                                                                <Setter Property="Background" Value="#FEE2E2"/>
-                                                                <Setter Property="Foreground" Value="#991B1B"/>
-                                                                <Setter Property="BorderBrush" Value="#EF4444"/>
-                                                                <Setter Property="IsEnabled" Value="False"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Button.Style>
                                             </Button>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Fizetési státusz" Width="150">
+                                <GridViewColumn Header="Fizetési státusz" Width="Auto">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding PaymentStatus}" VerticalAlignment="Center">
@@ -2843,7 +2800,7 @@ Click="PromotionsBackButton_Click">
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Műveletek" Width="200">
+                                <GridViewColumn Header="Műveletek" Width="170">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal">
@@ -2961,13 +2918,13 @@ Click="PromotionsBackButton_Click">
 
                         <!-- Vendég kiválasztása -->
                         <StackPanel Grid.Row="0" Grid.Column="1" Margin="10,0,0,20">
-                            <TextBlock Text="Vendég kiválasztása" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
-                            <ComboBox x:Name="EventGuestComboBox" 
-                              DisplayMemberPath="FullName"
-                              SelectedValuePath="GuestId"
+                            <TextBlock Text="Vendég email címe:" FontSize="16" Margin="0,0,0,5"/>
+                            <TextBox x:Name="EventGuestEmailTextBox"
                               FontSize="16"
-                              Padding="10"/>
+                              Padding="15,12"/>
                         </StackPanel>
+
+                       
 
                         <!-- Jegyek száma -->
                         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,20">
@@ -3081,21 +3038,23 @@ Click="PromotionsBackButton_Click">
 
         <!-- Newsletter konténer -->
         <Grid x:Name="newsletterContainer" Grid.Row="1" Visibility="Collapsed">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-            <!-- Felső fejléc és menü -->
-            <Grid Grid.Row="0" Background="#1E293B" Margin="0,0,0,25">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" MinWidth="100"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+                    <!-- Felső fejléc és menü -->
+                    <Grid Grid.Row="0" Background="#1E293B" Margin="0,0,0,25">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" MinWidth="100"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                <!-- Vissza gomb -->
-                <Button Grid.Column="0" 
+                        <!-- Vissza gomb -->
+                        <Button Grid.Column="0" 
                 x:Name="NewsletterBackButton"
                 Content="⬅ Vissza" 
                 HorizontalAlignment="Left" 
@@ -3106,15 +3065,15 @@ Click="PromotionsBackButton_Click">
                 BorderThickness="0"
                 FontSize="18"
                 Click="NewsletterBackButton_Click">
-                    <Button.Resources>
-                        <Style TargetType="Border">
-                            <Setter Property="CornerRadius" Value="8"/>
-                        </Style>
-                    </Button.Resources>
-                </Button>
+                            <Button.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="CornerRadius" Value="8"/>
+                                </Style>
+                            </Button.Resources>
+                        </Button>
 
-                <!-- Cím -->
-                <TextBlock Grid.Column="1" 
+                        <!-- Cím -->
+                        <TextBlock Grid.Column="1" 
                    Text="Hírlevél Küldése" 
                    VerticalAlignment="Center" 
                    HorizontalAlignment="Center" 
@@ -3122,9 +3081,9 @@ Click="PromotionsBackButton_Click">
                    FontWeight="SemiBold" 
                    Foreground="White"/>
 
-                <!-- Műveleti gombok -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="30,20">
-                    <Button x:Name="RefreshTemplatesButton" 
+                        <!-- Műveleti gombok -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="30,20">
+                            <Button x:Name="RefreshTemplatesButton" 
                     Content="🔄 Sablonok frissítése" 
                     Margin="5,0" 
                     Padding="15,12"
@@ -3133,25 +3092,26 @@ Click="PromotionsBackButton_Click">
                     BorderThickness="0"
                     FontSize="16"
                     Click="RefreshTemplatesButton_Click">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="8"/>
-                            </Style>
-                        </Button.Resources>
-                    </Button>
-                </StackPanel>
-            </Grid>
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="8"/>
+                                    </Style>
+                                </Button.Resources>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
 
-            <Grid Grid.Row="1" Margin="40,0,40,40">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+                    <!-- Tartalom -->
+                    <Grid Grid.Row="1" Margin="40,0,40,40">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                <!-- Sablon választó -->
-                <Border Grid.Row="0" 
+                        <!-- Sablon választó -->
+                        <Border Grid.Row="0" 
                 Padding="20" 
                 Margin="0,0,0,20" 
                 Background="White" 
@@ -3159,20 +3119,20 @@ Click="PromotionsBackButton_Click">
                 BorderThickness="1"
                 BorderBrush="#E2E8F0"
                 Effect="{StaticResource BoxShadow}">
-                    <StackPanel>
-                        <TextBlock Text="Válassz sablont" 
+                            <StackPanel>
+                                <TextBlock Text="Válassz sablont" 
                            FontSize="20" 
                            FontWeight="SemiBold" 
                            Margin="0,0,0,15"/>
-                        <ComboBox x:Name="TemplateComboBox" 
+                                <ComboBox x:Name="TemplateComboBox" 
                           Padding="15,12" 
                           FontSize="16"
                           SelectionChanged="TemplateComboBox_SelectionChanged"/>
-                    </StackPanel>
-                </Border>
+                            </StackPanel>
+                        </Border>
 
-                <!-- Email tárgy -->
-                <Border Grid.Row="1" 
+                        <!-- Email tárgy -->
+                        <Border Grid.Row="1" 
                 Padding="20" 
                 Margin="0,0,0,20" 
                 Background="White" 
@@ -3180,19 +3140,19 @@ Click="PromotionsBackButton_Click">
                 BorderThickness="1"
                 BorderBrush="#E2E8F0"
                 Effect="{StaticResource BoxShadow}">
-                    <StackPanel>
-                        <TextBlock Text="Email tárgya" 
+                            <StackPanel>
+                                <TextBlock Text="Email tárgya" 
                            FontSize="20" 
                            FontWeight="SemiBold" 
                            Margin="0,0,0,15"/>
-                        <TextBox x:Name="EmailSubjectTextBox" 
+                                <TextBox x:Name="EmailSubjectTextBox" 
                          Padding="15,12" 
                          FontSize="16"/>
-                    </StackPanel>
-                </Border>
+                            </StackPanel>
+                        </Border>
 
-                <!-- Változók szerkesztése -->
-                <Border Grid.Row="2" 
+                        <!-- Változók szerkesztése -->
+                        <Border Grid.Row="2" 
                 Padding="20" 
                 Margin="0,0,0,20" 
                 Background="White" 
@@ -3200,51 +3160,35 @@ Click="PromotionsBackButton_Click">
                 BorderThickness="1"
                 BorderBrush="#E2E8F0"
                 Effect="{StaticResource BoxShadow}">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <TextBlock Text="Változók szerkesztése" 
-                               FontSize="20" 
-                               FontWeight="SemiBold" 
-                               Margin="0,0,0,15"/>
-                            <StackPanel x:Name="VariablesStackPanel"/>
-                        </StackPanel>
-                    </ScrollViewer>
-                </Border>
+                            <StackPanel>
+                                <TextBlock Text="Változók szerkesztése" 
+                           FontSize="20" 
+                           FontWeight="SemiBold" 
+                           Margin="0,0,0,15"/>
+                                <StackPanel x:Name="VariablesStackPanel"/>
+                            </StackPanel>
+                        </Border>
 
-                <!-- Műveleti gombok -->
-                <StackPanel Grid.Row="3" 
+                        <!-- Műveleti gombok -->
+                        <StackPanel Grid.Row="3" 
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right" 
                     Margin="0,10,0,0">
-                    <Button Content="Mégse" 
-                    Padding="25,15" 
-                    Margin="0,0,10,0" 
-                    Background="#6B7280" 
-                    Foreground="White" 
-                    BorderThickness="0"
-                    FontSize="16"
-                    Click="CancelNewsletterButton_Click">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="8"/>
-                            </Style>
-                        </Button.Resources>
-                    </Button>
-                    <Button Content="Küldés" 
-                    Padding="25,15" 
-                    Background="#16A34A" 
-                    Foreground="White" 
-                    BorderThickness="0"
-                    FontSize="16"
-                    Click="SendNewsletterButton_Click">
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="8"/>
-                            </Style>
-                        </Button.Resources>
-                    </Button>
-                </StackPanel>
-            </Grid>
+                            <Button x:Name="SendNewsletterButton" Padding="25,15" Background="#16A34A" Foreground="White" BorderThickness="0" FontSize="16" Click="SendNewsletterButton_Click">
+                                <Button.Resources>
+                                    <Style TargetType="Border">
+                                        <Setter Property="CornerRadius" Value="8"/>
+                                    </Style>
+                                </Button.Resources>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="SendButtonText" Text="Küldés" />
+                                    <ProgressBar x:Name="SendProgressBar" Width="20" Height="20" Margin="5,0,0,0" IsIndeterminate="True" Visibility="Collapsed" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </ScrollViewer>
         </Grid>
 
 

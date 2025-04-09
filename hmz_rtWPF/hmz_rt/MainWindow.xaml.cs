@@ -22,6 +22,7 @@ using System.Windows.Media.Imaging;
 using hmz_rt.Models.Services;
 using System.Windows.Documents;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 
 namespace RoomListApp
@@ -78,6 +79,62 @@ namespace RoomListApp
         private GuestService _guestService;
         private EventService _eventService;
 
+        private void NumberOnlyTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !int.TryParse(e.Text, out _);
+        }
+
+        // Csak számok és tizedesvessző/pont bevitelét engedélyezi
+        private void DecimalOnlyTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !decimal.TryParse(e.Text, out _) && e.Text != "." && e.Text != ",";
+        }
+
+        private void NumberOfGuestsTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !int.TryParse(e.Text, out _);
+        }
+
+        private void SalaryTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !IsTextNumeric(e.Text);
+        }
+
+        // Ellenőrzi, hogy a szöveg csak számjegyeket tartalmaz-e
+        private bool IsTextNumeric(string text)
+        {
+            return text.All(char.IsDigit);
+        }
+
+        // Beillesztés kezelése, hogy csak számokat lehessen beilleszteni
+        private void SalaryTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.V && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                string clipboardText = Clipboard.GetText();
+                if (!clipboardText.All(char.IsDigit))
+                {
+                    e.Handled = true;
+                }
+            }
+        }
+
+        // Ellenőrzi, hogy a bevitt érték nem haladja-e meg az 1 milliót
+        private void SalaryTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(SalaryTextBox.Text))
+            {
+                if (decimal.TryParse(SalaryTextBox.Text, out decimal value))
+                {
+                    if (value > 1000000)
+                    {
+                        SalaryTextBox.Text = "1000000";
+                        SalaryTextBox.SelectionStart = SalaryTextBox.Text.Length;
+                    }
+                }
+            }
+        }
+
 
         public MainWindow()
         {
@@ -116,6 +173,9 @@ namespace RoomListApp
 
         }
 
+
+        // Frissíti az aktuális idő megjelenítését a felhasználói felületen.
+
         private void Timer_Tick(object sender, EventArgs e)
         {
             UpdateTimeDisplay();
@@ -126,6 +186,7 @@ namespace RoomListApp
             CurrentTime.Text = DateTime.Now.ToString("HH:mm:ss");
         }
 
+        // A szobák kezelése gomb kattintására elrejti az irányítópultot, megjeleníti a szobák nézetet, és betölti a szobák listáját.
         private async void szobak_kez_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             try
@@ -144,6 +205,8 @@ namespace RoomListApp
             }
         }
 
+
+        // Lekéri a szobák listáját az API-ból és megjeleníti őket a ListView-ben.
         private async Task LoadRoomsToListView()
         {
             try
@@ -180,10 +243,13 @@ namespace RoomListApp
             }
         }
 
+        //Frissíti a szobák listáját a ListView-ben.
         private void RefreshRoomsButton_Click(object sender, RoutedEventArgs e)
         {
             LoadRoomsToListView();
         }
+
+        //Megjeleníti a szobák szerkesztési panelt, ahol új szobát lehet hozzáadni.
         private void AddRoomButton_Click(object sender, RoutedEventArgs e)
         {
             ClearRoomFormFields();
@@ -193,6 +259,7 @@ namespace RoomListApp
             roomEditPanel.Visibility = Visibility.Visible;
         }
 
+        //Megjeleníti a kiválasztott szoba adatait a szerkesztési panelen, ahol a felhasználó módosíthatja az adatokat.
         private async void EditRoomButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedRoom = roomsListView.SelectedItem as Room;
@@ -210,8 +277,6 @@ namespace RoomListApp
             PricePerNightTextBox.Text = selectedRoom.PricePerNight?.ToString();
             FloorNumberTextBox.Text = selectedRoom.FloorNumber?.ToString();
             RoomDescriptionTextBox.Text = selectedRoom.Description;
-            AmenitiesTextBox.Text = selectedRoom.Amenities;
-
             foreach (ComboBoxItem item in RoomTypeComboBox.Items)
             {
                 if (item.Content.ToString() == selectedRoom.RoomType)
@@ -220,7 +285,6 @@ namespace RoomListApp
                     break;
                 }
             }
-
             foreach (ComboBoxItem item in RoomStatusComboBox.Items)
             {
                 if (item.Content.ToString() == selectedRoom.Status)
@@ -230,12 +294,10 @@ namespace RoomListApp
                 }
             }
 
-            // A képkezeléssel kapcsolatos kód eltávolítva
-
             roomEditPanel.Visibility = Visibility.Visible;
         }
 
-
+        // Törli a kiválasztott szobát.
         private async void DeleteRoomButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedRoom = roomsListView.SelectedItem as Room;
@@ -257,6 +319,7 @@ namespace RoomListApp
             }
         }
 
+        //Ment egy új szobát vagy frissíti egy meglévő szoba adatait.
         private async void SaveRoomButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -273,39 +336,64 @@ namespace RoomListApp
                     return;
                 }
 
-                if (!int.TryParse(CapacityTextBox.Text, out int capacity) || capacity < 1)
+                // Kapacitás validáció
+                if (!int.TryParse(CapacityTextBox.Text, out int capacity) || capacity <= 0)
                 {
-                    MessageBox.Show("Kérjük, adjon meg érvényes kapacitást (legalább 1)!", "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Kérjük, adjon meg érvényes kapacitást (pozitív egész szám)!",
+                        "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                if (!decimal.TryParse(PricePerNightTextBox.Text, out decimal pricePerNight) || pricePerNight < 0)
+                if (capacity > 6)
                 {
-                    MessageBox.Show("Kérjük, adjon meg érvényes árat (nem lehet negatív)!", "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("A kapacitás nem lehet nagyobb, mint 6 fő!",
+                        "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                if (!int.TryParse(FloorNumberTextBox.Text, out int floorNumber))
+                // Ár validáció
+                if (!decimal.TryParse(PricePerNightTextBox.Text, out decimal pricePerNight) || pricePerNight <= 0)
                 {
-                    MessageBox.Show("Kérjük, adjon meg érvényes emelet számot!", "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Kérjük, adjon meg érvényes árat (pozitív szám)!",
+                        "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (pricePerNight > 250000)
+                {
+                    MessageBox.Show("Az ár nem haladhatja meg a 250.000 Ft-ot!",
+                        "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Emelet validáció
+                if (!int.TryParse(FloorNumberTextBox.Text, out int floorNumber) || floorNumber < 0)
+                {
+                    MessageBox.Show("Kérjük, adjon meg érvényes emelet számot (nem lehet negatív)!",
+                        "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (floorNumber > 10)
+                {
+                    MessageBox.Show("Az emelet szám nem lehet nagyobb, mint 10!",
+                        "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
                 var selectedRoomType = (RoomTypeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
                 var selectedStatus = (RoomStatusComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
-
                 if (isEditRoom)
                 {
                     var updateDto = new UpdateRoom
                     {
                         RoomNumber = RoomNumberTextBox.Text,
                         RoomType = selectedRoomType,
-                        Capacity = int.Parse(CapacityTextBox.Text),
-                        PricePerNight = decimal.Parse(PricePerNightTextBox.Text),
+                        Capacity = capacity,
+                        PricePerNight = pricePerNight,
                         Status = selectedStatus,
-                        FloorNumber = int.Parse(FloorNumberTextBox.Text),
-                        Description = RoomDescriptionTextBox.Text,
-                        Amenities = AmenitiesTextBox.Text
+                        FloorNumber = floorNumber,
+                        Description = RoomDescriptionTextBox.Text
                     };
                     await UpdateRoom(currentRoomId, updateDto);
                 }
@@ -315,12 +403,11 @@ namespace RoomListApp
                     {
                         RoomNumber = RoomNumberTextBox.Text,
                         RoomType = selectedRoomType,
-                        Capacity = int.Parse(CapacityTextBox.Text),
-                        PricePerNight = decimal.Parse(PricePerNightTextBox.Text),
+                        Capacity = capacity,
+                        PricePerNight = pricePerNight,
                         Status = selectedStatus,
-                        FloorNumber = int.Parse(FloorNumberTextBox.Text),
-                        Description = RoomDescriptionTextBox.Text,
-                        Amenities = AmenitiesTextBox.Text
+                        FloorNumber = floorNumber,
+                        Description = RoomDescriptionTextBox.Text
                     };
                     await CreateRoom(createDto);
                 }
@@ -332,6 +419,7 @@ namespace RoomListApp
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private async Task CreateRoom(CreateRoom newRoom)
         {
@@ -380,7 +468,10 @@ namespace RoomListApp
                     JsonSerializer.Serialize(updateRoom, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }),
                     System.Text.Encoding.UTF8,
                     "application/json");
-                var response = await _httpClient.PutAsync($"Rooms/UpdateRoom/{roomId}", content);
+
+                // Itt van a változtatás: UpdateRoom/{roomId} helyett RoomUpdate/{roomId}
+                var response = await _httpClient.PutAsync($"Rooms/RoomUpdate/{roomId}", content);
+
                 if (!response.IsSuccessStatusCode)
                 {
                     string errorResponse = await response.Content.ReadAsStringAsync();
@@ -396,6 +487,7 @@ namespace RoomListApp
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private async Task DeleteRoom(int roomId)
         {
@@ -479,6 +571,7 @@ namespace RoomListApp
         }
         */
 
+        // Bezárja a szoba szerkesztési panelt és alaphelyzetbe állítja a szerkesztési módot.
         private void CancelRoomEditButton_Click(object sender, RoutedEventArgs e)
         {
             roomEditPanel.Visibility = Visibility.Collapsed;
@@ -530,6 +623,7 @@ namespace RoomListApp
              }
          }*/
 
+        // Törli a szoba adatok űrlapjának mezőit, hogy újra meg lehessen jeleníteni a főoldal.
         private void ClearRoomFormFields()
         {
             RoomNumberTextBox.Text = string.Empty;
@@ -539,14 +633,15 @@ namespace RoomListApp
             RoomStatusComboBox.SelectedIndex = -1;
             FloorNumberTextBox.Text = string.Empty;
             RoomDescriptionTextBox.Text = string.Empty;
-            AmenitiesTextBox.Text = string.Empty;
         }
+        // Visszatér a főoldalra, elrejti az aktuális nézetet.
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
             roomsContainer.Visibility = Visibility.Collapsed;
             dashboardGrid.Visibility = Visibility.Visible;
         }
 
+        // Kilépteti a felhasználót, törli a hitelesítő adatokat, és visszairányítja a bejelentkezési ablakhoz.
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
             if (timer != null)
@@ -562,6 +657,8 @@ namespace RoomListApp
 
             this.Close();
         }
+
+        // A dolgozók kezelése gomb kattintására elrejti az irányítópultot, megjeleníti a dolgozók nézetet, és betölti a dolgozók listáját.
 
         private async void Staff_MouseLeftButtonDown_1(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
@@ -585,16 +682,21 @@ namespace RoomListApp
             }
         }
 
+        // Visszatér a főoldalra, elrejti az aktuális nézetet.
         private void StaffBackButton_Click(object sender, RoutedEventArgs e)
         {
             staffContainer.Visibility = Visibility.Collapsed;
             dashboardGrid.Visibility = Visibility.Visible;
         }
 
+        // Frissíti a dolgozók listáját a ListView-ben.
         private void RefreshStaffButton_Click(object sender, RoutedEventArgs e)
         {
             LoadStaffToListView();
         }
+
+        // Lekéri a dolgozók listáját az API-ból és megjeleníti őket a ListView-ben.
+
         private async Task LoadStaffToListView()
         {
             try
@@ -633,6 +735,7 @@ namespace RoomListApp
             }
         }
 
+        //Megjeleníti a dolgozók szerkesztési panelt, ahol új dolgozót lehet hozzáadni.
         private void AddStaffButton_Click(object sender, RoutedEventArgs e)
         {
             ClearStaffFormFields();
@@ -643,6 +746,7 @@ namespace RoomListApp
             staffEditPanel.Visibility = Visibility.Visible;
         }
 
+        //Megjeleníti a kiválasztott dolgozó adatait a szerkesztési panelen, ahol a felhasználó módosíthatja az adatokat.
         private void EditStaffButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedStaff = staffListView.SelectedItem as Staff;
@@ -675,6 +779,7 @@ namespace RoomListApp
             staffEditPanel.Visibility = Visibility.Visible;
         }
 
+        // Törli a kiválasztott dolgozót.
         private async void DeleteStaffButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedStaff = staffListView.SelectedItem as Staff;
@@ -726,6 +831,7 @@ namespace RoomListApp
             }
         }
 
+        // Bezárja a dolgozók szerkesztési panelt és alaphelyzetbe állítja a szerkesztési módot.
         private void CancelEditButton_Click(object sender, RoutedEventArgs e)
         {
             staffEditPanel.Visibility = Visibility.Collapsed;
@@ -733,6 +839,7 @@ namespace RoomListApp
             currentEditStaffId = 0;
         }
 
+        //Ment egy új dolgozót vagy frissíti egy meglévő dolgozó adatait.
         private async void SaveStaffButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -749,6 +856,14 @@ namespace RoomListApp
                 if (!decimal.TryParse(SalaryTextBox.Text, out decimal salary))
                 {
                     MessageBox.Show("Kérjük, adjon meg érvényes fizetést!", "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Maximum 1 millió ellenőrzése
+                if (salary > 1000000)
+                {
+                    MessageBox.Show("A fizetés nem haladhatja meg az 1 millió forintot!", "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    SalaryTextBox.Text = "1000000";
                     return;
                 }
 
@@ -879,6 +994,7 @@ namespace RoomListApp
             StatusComboBox.SelectedIndex = 0;
         }
 
+        // A promóciók kezelése gomb kattintására elrejti az irányítópultot, megjeleníti a promóciók nézetet, és betölti a promóciók listáját.
         private async void PromotionsCard_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             try
@@ -903,16 +1019,20 @@ namespace RoomListApp
             }
         }
 
+        // Visszatér a főoldalra, elrejti az aktuális nézetet.
         private void PromotionsBackButton_Click(object sender, RoutedEventArgs e)
         {
             promotionsContainer.Visibility = Visibility.Collapsed;
             dashboardGrid.Visibility = Visibility.Visible;
         }
 
+        // Frissíti a promóciók listáját a ListView-ben.
         private void RefreshPromotionsButton_Click(object sender, RoutedEventArgs e)
         {
             LoadPromotionsToListView();
         }
+
+        // Lekéri a promóciók listáját az API-ból és megjeleníti őket a ListView-ben.
 
         private async Task LoadPromotionsToListView()
         {
@@ -945,7 +1065,7 @@ namespace RoomListApp
             }
         }
 
-
+        //Megjeleníti a promóciók szerkesztési panelt, ahol új promóciót lehet hozzáadni.
         private void AddPromotionButton_Click(object sender, RoutedEventArgs e)
         {
             ClearPromotionFormFields();
@@ -956,6 +1076,7 @@ namespace RoomListApp
             promotionEditPanel.Visibility = Visibility.Visible;
         }
 
+        //Megjeleníti a kiválasztott promóció adatait a szerkesztési panelen, ahol a felhasználó módosíthatja az adatokat.
         private void EditPromotionButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedPromotion = promotionsListView.SelectedItem as Promotion;
@@ -991,6 +1112,7 @@ namespace RoomListApp
             promotionEditPanel.Visibility = Visibility.Visible;
         }
 
+        // Törli a kiválasztott promóciót.
         private async void DeletePromotionButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedPromotion = promotionsListView.SelectedItem as Promotion;
@@ -1043,7 +1165,7 @@ namespace RoomListApp
             }
         }
 
-
+        // Bezárja a promóciók szerkesztési panelt és alaphelyzetbe állítja a szerkesztési módot.
         private void CancelPromotionEditButton_Click(object sender, RoutedEventArgs e)
         {
             promotionEditPanel.Visibility = Visibility.Collapsed;
@@ -1051,6 +1173,7 @@ namespace RoomListApp
             currentEditPromotionId = 0;
         }
 
+        //Ment egy új promóciót vagy frissíti egy meglévő promóció adatait.
         private async void SavePromotionButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -1222,6 +1345,7 @@ namespace RoomListApp
             PromotionStatusComboBox.SelectedIndex = 0;
         }
 
+        // A vendégek kezelése gomb kattintására elrejti az irányítópultot, megjeleníti a vendégek nézetet, és betölti a vendégek listáját.
         private async void Guest_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             try
@@ -1244,16 +1368,21 @@ namespace RoomListApp
             }
         }
 
+        // Visszatér a főoldalra, elrejti az aktuális nézetet.
         private void GuestsBackButton_Click(object sender, RoutedEventArgs e)
         {
             guestsContainer.Visibility = Visibility.Collapsed;
             dashboardGrid.Visibility = Visibility.Visible;
         }
 
+        // Frissíti a vendégek listáját a ListView-ben.
         private void RefreshGuestsButton_Click(object sender, RoutedEventArgs e)
         {
             LoadGuestsToListView();
         }
+
+        // Lekéri a vendégek listáját az API-ból és megjeleníti őket a ListView-ben.
+
         private async Task LoadGuestsToListView()
         {
             try
@@ -1292,6 +1421,7 @@ namespace RoomListApp
             }
         }
 
+        //Megjeleníti a vendégek szerkesztési panelt, ahol új vendéget lehet hozzáadni.
         private void AddGuestButton_Click(object sender, RoutedEventArgs e)
         {
             ClearGuestFormFields();
@@ -1307,6 +1437,7 @@ namespace RoomListApp
             guestEditPanel.Visibility = Visibility.Visible;
         }
 
+        //Megjeleníti a kiválasztott vendég adatait a szerkesztési panelen, ahol a felhasználó módosíthatja az adatokat.
         private void EditGuestButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedGuest = guestsListView.SelectedItem as Guest;
@@ -1344,6 +1475,7 @@ namespace RoomListApp
             guestEditPanel.Visibility = Visibility.Visible;
         }
 
+        // Törli a kiválasztott vendéget.
         private async void DeleteGuestButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedGuest = guestsListView.SelectedItem as Guest;
@@ -1365,6 +1497,8 @@ namespace RoomListApp
             }
         }
 
+
+        // Bezárja a vendégek szerkesztési panelt és alaphelyzetbe állítja a szerkesztési módot.
         private void CancelGuestEditButton_Click(object sender, RoutedEventArgs e)
         {
             guestEditPanel.Visibility = Visibility.Collapsed;
@@ -1372,6 +1506,7 @@ namespace RoomListApp
             currentEditGuestId = 0;
         }
 
+        //Ment egy új vendéget vagy frissíti egy meglévő vendég adatait.
         private async void SaveGuestButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -1608,17 +1743,21 @@ namespace RoomListApp
             GuestGenderComboBox.SelectedIndex = -1;
         }
 
-
+        // A foglalások kezelése gomb kattintására elrejti az irányítópultot, megjeleníti a foglalások nézetet, és betölti a foglalások listáját.
         private void BookingsCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             dashboardGrid.Visibility = Visibility.Collapsed;
             bookingTypeSelectionContainer.Visibility = Visibility.Visible;
+            GuestComboBox.IsEnabled = false;
         }
 
+        //Frissíti a szoba foglalások listáját a ListView-ben.
         private void RefreshBookingsButton_Click(object sender, RoutedEventArgs e)
         {
             LoadBookingsToListView();
         }
+
+        // Lekéri a szoba foglalások listáját az API-ból és megjeleníti őket a ListView-ben.
         private async Task LoadBookingsToListView()
         {
             try
@@ -1693,8 +1832,6 @@ namespace RoomListApp
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-
         private async Task<Guest> GetGuestById(int guestId)
         {
             try
@@ -1720,7 +1857,6 @@ namespace RoomListApp
                 return null;
             }
         }
-
         private async Task<Room> GetRoomById(int roomId)
         {
             try
@@ -1746,7 +1882,6 @@ namespace RoomListApp
                 return null;
             }
         }
-
         private async Task LoadRoomsComboBox()
         {
             try
@@ -1827,6 +1962,7 @@ namespace RoomListApp
             }
         }
 
+        //Megjeleníti a szoba foglalások szerkesztési panelt, ahol a meglévő foglalást lehet szerkeszteni.
         private void EditBookingButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedBooking = bookingsListView.SelectedItem as BookingViewModel;
@@ -1851,12 +1987,11 @@ namespace RoomListApp
                 }
             }
 
+            GuestComboBox.IsEnabled = false;
             CheckInDatePicker.SelectedDate = selectedBooking.CheckInDate;
             CheckOutDatePicker.SelectedDate = selectedBooking.CheckOutDate;
             NumberOfGuestsTextBox.Text = selectedBooking.NumberOfGuests?.ToString();
             TotalPriceTextBox.Text = selectedBooking.TotalPrice?.ToString("N0") + " Ft";
-
-
 
             bookingEditPanel.Visibility = Visibility.Visible;
         }
@@ -1901,6 +2036,7 @@ namespace RoomListApp
             }
         }
 
+        // Törli a kiválasztott szoba foglalást.
         private async void DeleteBookingButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedBooking = bookingsListView.SelectedItem as BookingViewModel;
@@ -1952,18 +2088,42 @@ namespace RoomListApp
             }
         }
 
-        private void CancelBookingEditButton_Click(object sender, RoutedEventArgs e)
-        {
-            bookingEditPanel.Visibility = Visibility.Collapsed;
-            isEditBooking = false;
-            currentEditBookingId = 0;
-        }
 
 
         private void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Jelenlegi dátum beállítása minimumként
+            DateTime today = DateTime.Today;
+
+            // Ha a bejelentkezési dátum a múltban van, állítsuk be a mai napra
+            if (CheckInDatePicker.SelectedDate.HasValue && CheckInDatePicker.SelectedDate.Value < today)
+            {
+                CheckInDatePicker.SelectedDate = today;
+            }
+
+            // Ha a kijelentkezési dátum a múltban vagy a bejelentkezés előtt van, állítsuk be a bejelentkezés utáni napra
+            if (CheckOutDatePicker.SelectedDate.HasValue &&
+                (CheckOutDatePicker.SelectedDate.Value < today ||
+                 (CheckInDatePicker.SelectedDate.HasValue && CheckOutDatePicker.SelectedDate.Value <= CheckInDatePicker.SelectedDate.Value)))
+            {
+                CheckOutDatePicker.SelectedDate = CheckInDatePicker.SelectedDate.HasValue ?
+                    CheckInDatePicker.SelectedDate.Value.AddDays(1) : today.AddDays(1);
+            }
+
+            // Ellenőrizzük, hogy a foglalás ne legyen hosszabb egy hónapnál
+            if (CheckInDatePicker.SelectedDate.HasValue && CheckOutDatePicker.SelectedDate.HasValue)
+            {
+                TimeSpan duration = CheckOutDatePicker.SelectedDate.Value - CheckInDatePicker.SelectedDate.Value;
+                if (duration.TotalDays > 30)
+                {
+                    CheckOutDatePicker.SelectedDate = CheckInDatePicker.SelectedDate.Value.AddDays(30);
+                    MessageBox.Show("A foglalás nem lehet hosszabb 30 napnál!", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+
             UpdateTotalPrice();
         }
+
 
         private void RoomComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -2004,6 +2164,7 @@ namespace RoomListApp
             TotalPriceTextBox.Text = string.Empty;
         }
 
+        //Frissíti egy meglévő szobafoglalás adatait.
         private async void SaveBookingButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -2018,6 +2179,20 @@ namespace RoomListApp
 
                 {
                     MessageBox.Show("Kérjük, töltse ki az összes kötelező mezőt!", "Hiányzó adatok", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                DateTime today = DateTime.Today;
+                if (CheckInDatePicker.SelectedDate < today)
+                {
+                    MessageBox.Show("A bejelentkezés dátuma nem lehet a múltban!", "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                TimeSpan duration = CheckOutDatePicker.SelectedDate.Value - CheckInDatePicker.SelectedDate.Value;
+                if (duration.TotalDays > 30)
+                {
+                    MessageBox.Show("A foglalás nem lehet hosszabb 30 napnál!", "Érvénytelen adat", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -2041,18 +2216,6 @@ namespace RoomListApp
                 }
 
 
-                if (isEditBooking)
-                {
-                    var updateDto = new UpdateBooking
-                    {
-                        CheckInDate = CheckInDatePicker.SelectedDate,
-                        CheckOutDate = CheckOutDatePicker.SelectedDate,
-                        NumberOfGuests = numberOfGuests
-                    };
-
-                    await UpdateBooking(currentEditBookingId, updateDto);
-                }
-                else { }
 
                 bookingEditPanel.Visibility = Visibility.Collapsed;
                 isEditBooking = false;
@@ -2110,7 +2273,7 @@ namespace RoomListApp
             TotalPriceTextBox.Text = string.Empty;
         }
 
-
+        //A kiválasztott foglalás státuszát változtatja.
         private async void StatusButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag != null)
@@ -2129,6 +2292,15 @@ namespace RoomListApp
                         break;
 
                     case "Checked In":
+                        // Először ellenőrizzük, hogy ki van-e fizetve a foglalás
+                        if (booking.PaymentStatus != "Fizetve")
+                        {
+                            MessageBox.Show("A foglalás nem zárható le, mert még nincs kifizetve. Kérjük, először intézze a fizetést!",
+                                "Fizetés szükséges", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+
+                        // Ha ki van fizetve, csak akkor kérdezzük meg, hogy minden rendben volt-e
                         bool isEverythingOk = await ShowCheckoutConfirmation();
                         if (isEverythingOk)
                         {
@@ -2146,6 +2318,7 @@ namespace RoomListApp
                 }
             }
         }
+
 
         private async Task UpdateBookingStatus(int bookingId, string newStatus)
         {
@@ -2473,6 +2646,7 @@ namespace RoomListApp
             return null;
         }
 
+        //Ment egy új véleményt vagy frissíti egy meglévő vélemény adatait.
         private async Task SaveComplaint(int bookingId, string complaintText)
         {
             try
@@ -2524,6 +2698,7 @@ namespace RoomListApp
             }
         }
 
+        //Megjeleníti a kiválasztott foglalás visszajelzéseit.
         private async void ViewFeedback_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag != null)
@@ -3031,6 +3206,7 @@ namespace RoomListApp
 
         private int currentPaymentBookingId = 0;
 
+        //Megjeleníti a kiválasztott foglalás fizetési módszereit.
         private void PaymentButton_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
@@ -3041,6 +3217,8 @@ namespace RoomListApp
             bookingsContainer.Visibility = Visibility.Collapsed;
             paymentPanel.Visibility = Visibility.Visible;
         }
+
+        //Frissíti a kiválasztott foglalás fizetési státuszát.
         private async Task UpdatePaymentStatus(int bookingId, string status, string paymentMethod)
         {
             try
@@ -3087,6 +3265,8 @@ namespace RoomListApp
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        //Bezárja a fizetési panelt és visszatér a foglalások listájához.
         private void PaymentBackButton_Click(object sender, RoutedEventArgs e)
         {
             paymentPanel.Visibility = Visibility.Collapsed;
@@ -3094,6 +3274,7 @@ namespace RoomListApp
             currentPaymentBookingId = 0;
         }
 
+        //Készpénzes fizetési lehetőség gombjának eseménykezelője.
         private async void CashButton_Click(object sender, RoutedEventArgs e)
         {
             await UpdatePaymentStatus(currentPaymentBookingId, "Fizetve", "Készpénz");
@@ -3102,6 +3283,8 @@ namespace RoomListApp
             bookingsContainer.Visibility = Visibility.Visible;
             currentPaymentBookingId = 0;
         }
+
+        //Bankkártyás fizetési lehetőség gombjának eseménykezelője.
         private async void CardButton_Click(object sender, RoutedEventArgs e)
         {
             await UpdatePaymentStatus(currentPaymentBookingId, "Fizetve", "Bankkártya");
@@ -3110,6 +3293,8 @@ namespace RoomListApp
             bookingsContainer.Visibility = Visibility.Visible;
             currentPaymentBookingId = 0;
         }
+
+        //Megerősíti a kiválasztott foglalás fizetési státuszát és módszerét.
         private async void ConfirmPaymentButton_Click(object sender, RoutedEventArgs e)
         {
             string paymentMethod = "Készpénz";
@@ -3129,6 +3314,8 @@ namespace RoomListApp
             bookingsContainer.Visibility = Visibility.Visible;
             currentPaymentBookingId = 0;
         }
+
+        //Megszakítja a kiválasztott foglalás fizetési folyamatát.
         private void CancelPaymentButton_Click(object sender, RoutedEventArgs e)
         {
             paymentPanel.Visibility = Visibility.Collapsed;
@@ -3136,6 +3323,7 @@ namespace RoomListApp
             currentPaymentBookingId = 0;
         }
 
+        //Megjeleníti a karbantartási kártyát és betölti a karbantartási kérelmek listáját.
         private async void MaintenanceCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             try
@@ -3156,16 +3344,21 @@ namespace RoomListApp
             }
         }
 
+        //Visszatér a karbantartási kártyáról a főoldalra.
         private void MaintenanceBackButton_Click(object sender, RoutedEventArgs e)
         {
             maintenanceContainer.Visibility = Visibility.Collapsed;
             dashboardGrid.Visibility = Visibility.Visible;
         }
 
+        //Frissíti a karbantartási kérelmek listáját.
         private void RefreshMaintenanceButton_Click(object sender, RoutedEventArgs e)
         {
             LoadMaintenanceToListView();
         }
+
+        // Lekéri a karbantartások listáját az API-ból és megjeleníti őket a ListView-ben.
+
         private async Task LoadMaintenanceToListView()
         {
             try
@@ -3248,6 +3441,7 @@ namespace RoomListApp
             }
         }
 
+        //Megjeleníti a karbantartások szerkesztési panelt, ahol új karbantartást lehet feljegyezni.
         private void AddMaintenanceButton_Click(object sender, RoutedEventArgs e)
         {
             ClearMaintenanceFormFields();
@@ -3256,6 +3450,7 @@ namespace RoomListApp
             maintenanceEditPanel.Visibility = Visibility.Visible;
         }
 
+        // Törli a kiválasztott karbantartást.
         private async void DeleteMaintenanceButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedMaintenance = maintenanceListView.SelectedItem as RoomMaintenanceViewModel;
@@ -3278,16 +3473,20 @@ namespace RoomListApp
             }
         }
 
+        //Bezárja a karbantartási kérelmek szerkesztési panelt, és visszatér a karbantartási listához.
         private void CancelMaintenanceEditButton_Click(object sender, RoutedEventArgs e)
         {
             maintenanceEditPanel.Visibility = Visibility.Collapsed;
 
         }
+
+        //Frissíti az elérhető szobák listáját.
         private async void ReloadRoomsButton_Click(object sender, RoutedEventArgs e)
         {
             await LoadRoomsComboBox();
             MessageBox.Show($"Betöltött szobák száma: {MaintenanceRoomComboBox.Items.Count}");
         }
+
 
         private void SetMaintenancePanelState(bool isEdit)
         {
@@ -3311,6 +3510,7 @@ namespace RoomListApp
         }
 
 
+        //Ment egy új karbantartást vagy frissíti egy meglévő karbantartási jelentés adatait.
         private async void SaveMaintenanceButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -3592,6 +3792,7 @@ namespace RoomListApp
             }
         }
 
+        //Megjeleníti az események kártyát és betölti az események listáját.
         private async void EventsCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             try
@@ -3610,16 +3811,21 @@ namespace RoomListApp
             }
         }
 
+        //Visszatér az események kártyáról a főoldalra.
         private void EventsBackButton_Click(object sender, RoutedEventArgs e)
         {
             eventsContainer.Visibility = Visibility.Collapsed;
             dashboardGrid.Visibility = Visibility.Visible;
         }
 
+        //Frissíti az események listáját.
         private void RefreshEventsButton_Click(object sender, RoutedEventArgs e)
         {
             LoadEventsToListView();
         }
+
+        // Lekéri a programok listáját az API-ból és megjeleníti őket a ListView-ben.
+
         private async Task LoadEventsToListView()
         {
             try
@@ -3660,6 +3866,7 @@ namespace RoomListApp
             }
         }
 
+        //Megjeleníti a programok szerkesztési panelt, ahol új programot lehet feljegyezni.
         private void AddEventButton_Click(object sender, RoutedEventArgs e)
         {
             ClearEventFormFields();
@@ -3669,6 +3876,7 @@ namespace RoomListApp
             eventEditPanel.Visibility = Visibility.Visible;
         }
 
+        //Megjeleníti a kiválasztott esemény adatait a szerkesztési panelen.
         private async void EditEventButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedEvent = eventsListView.SelectedItem as Event;
@@ -3704,6 +3912,7 @@ namespace RoomListApp
             eventEditPanel.Visibility = Visibility.Visible;
         }
 
+        // Törli a kiválasztott programot.
         private async void DeleteEventButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedEvent = eventsListView.SelectedItem as Event;
@@ -3726,6 +3935,8 @@ namespace RoomListApp
             }
         }
 
+        //Bezárja a program kérelmek szerkesztési panelt, és visszatér a programok listához.
+
         private void CancelEventEditButton_Click(object sender, RoutedEventArgs e)
         {
             eventEditPanel.Visibility = Visibility.Collapsed;
@@ -3733,6 +3944,7 @@ namespace RoomListApp
             currentEventId = 0;
         }
 
+        //Ment egy új programot vagy frissíti egy meglévő program adatait.
         private async void SaveEventButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -4120,6 +4332,7 @@ namespace RoomListApp
         */
 
 
+        // Visszatér a főoldalra a foglalások típus választó oldalról.
         private void BookingTypeBackButton_Click(object sender, RoutedEventArgs e)
         {
             bookingTypeSelectionContainer.Visibility = Visibility.Collapsed;
@@ -4137,6 +4350,8 @@ namespace RoomListApp
                 MessageBox.Show($"Hiba történt a foglalások betöltésekor: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        //A szoba foglalások oldalára navigál.
         private void RoomBookingsCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             bookingTypeSelectionContainer.Visibility = Visibility.Collapsed;
@@ -4144,6 +4359,7 @@ namespace RoomListApp
             LoadBookings();
         }
 
+        //A program foglalások oldalára navigál.
         private void EventBookingsCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             bookingTypeSelectionContainer.Visibility = Visibility.Collapsed;
@@ -4152,6 +4368,7 @@ namespace RoomListApp
         }
 
 
+        // Lekéri a program foglalások listáját az API-ból és megjeleníti őket.
         private async void LoadEventBookings()
         {
             try
@@ -4187,22 +4404,27 @@ namespace RoomListApp
             }
         }
 
+        //Visszatér a foglalások típús választóról a program foglalások oldalról.
         private void EventBookingsBackButton_Click(object sender, RoutedEventArgs e)
         {
             eventBookingsContainer.Visibility = Visibility.Collapsed;
             bookingTypeSelectionContainer.Visibility = Visibility.Visible;
         }
+
+        //Visszatér a foglalások típús választóról a szoba foglalások oldalról.
         private void BookingsBackButton_Click(object sender, RoutedEventArgs e)
         {
             bookingsContainer.Visibility = Visibility.Collapsed;
             bookingTypeSelectionContainer.Visibility = Visibility.Visible;
         }
 
+        //Frissíti a program foglalások listáját.
         private void RefreshEventBookingsButton_Click(object sender, RoutedEventArgs e)
         {
             LoadEventBookings();
         }
 
+        //Keresést végez a program foglalások listájában.
         private void EventBookingSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             string searchText = EventBookingSearchTextBox.Text.ToLower();
@@ -4227,7 +4449,7 @@ namespace RoomListApp
             }
         }
 
-
+        //Megjeleníti a program foglalások szerkesztési panelt, ahol új program foglalást lehet feljegyezni.
         private async void NewEventBookingButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -4235,18 +4457,10 @@ namespace RoomListApp
                 var events = await _eventService.GetAllEvents();
                 EventComboBox.ItemsSource = events;
 
-                var guests = await _guestService.GetAllGuests();
-                if (guests != null && guests.Count > 0)
-                {
-                    GuestComboBox.ItemsSource = guests;
-                }
-                else
-                {
-                    MessageBox.Show("Nincsenek elérhető vendégek az adatbázisban.", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-                EventGuestComboBox.ItemsSource = guests;
+                // Töröljük a vendégek betöltését, mivel email alapján fogunk dolgozni
+                EventGuestEmailTextBox.Text = string.Empty;
 
-                StatusComboBox.SelectedIndex = 0;
+                // Státusz ComboBox-ot is eltávolítjuk, mivel mindig "Foglalt" lesz
                 PaymentStatusComboBox.SelectedIndex = 0;
                 TicketsTextBox.Text = "1";
 
@@ -4259,44 +4473,40 @@ namespace RoomListApp
             }
         }
 
+
+        //Bezárja a program foglalások szerkesztési panelt, és visszatér a program foglalások listához.
         private void NewEventBookingBackButton_Click(object sender, RoutedEventArgs e)
         {
             newEventBookingPanel.Visibility = Visibility.Collapsed;
             eventBookingsContainer.Visibility = Visibility.Visible;
         }
 
+
         private void EventComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (EventComboBox.SelectedItem is Event selectedEvent)
+            var selectedEvent = EventComboBox.SelectedItem as Event;
+            if (selectedEvent != null)
             {
+                // Esemény információk frissítése
                 EventNameInfoTextBlock.Text = selectedEvent.EventName;
-                EventDateInfoTextBlock.Text = selectedEvent.EventDate?.ToString("yyyy.MM.dd. HH:mm");
+                EventDateInfoTextBlock.Text = selectedEvent.EventDate?.ToString("yyyy.MM.dd HH:mm");
                 EventLocationInfoTextBlock.Text = selectedEvent.Location;
-                EventPriceInfoTextBlock.Text = $"{selectedEvent.Price:N0} Ft";
+                EventPriceInfoTextBlock.Text = selectedEvent.Price?.ToString("N0") + " Ft";
 
-                CalculateTotalPrice();
+                // Összeg frissítése
+                UpdateEventTotalPrice();
             }
         }
+
 
         private void TicketsTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            CalculateTotalPrice();
+            UpdateEventTotalPrice();
         }
 
-        private void CalculateTotalPrice()
-        {
-            if (EventComboBox.SelectedItem is Event selectedEvent &&
-                int.TryParse(TicketsTextBox.Text, out int numberOfTickets))
-            {
-                decimal totalPrice = (selectedEvent.Price ?? 0) * numberOfTickets;
-                TotalPriceTextBox.Text = $"{totalPrice:N0} Ft";
-            }
-            else
-            {
-                TotalPriceTextBox.Text = "0 Ft";
-            }
-        }
 
+
+        //Ment egy új program foglalást vagy frissíti egy meglévő program foglalás adatait.
         private async void SaveEventBookingButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -4307,9 +4517,9 @@ namespace RoomListApp
                     return;
                 }
 
-                if (EventGuestComboBox.SelectedItem == null)
+                if (string.IsNullOrWhiteSpace(EventGuestEmailTextBox.Text))
                 {
-                    MessageBox.Show("Kérjük, válasszon vendéget!", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Kérjük, adja meg a vendég email címét!", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -4319,16 +4529,23 @@ namespace RoomListApp
                     return;
                 }
 
+                // Email alapján lekérjük a vendég azonosítóját
+                var guestId = await _guestService.GetEventGuestIdByEmail(EventGuestEmailTextBox.Text);
+
+                if (guestId <= 0)
+                {
+                    MessageBox.Show("Nem található vendég a megadott email címmel!", "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
                 var selectedEvent = (Event)EventComboBox.SelectedItem;
-                var selectedGuest = (Guest)EventGuestComboBox.SelectedItem;
-                var selectedStatus = ((ComboBoxItem)StatusComboBox.SelectedItem).Content.ToString();
                 var selectedPaymentStatus = ((ComboBoxItem)PaymentStatusComboBox.SelectedItem).Content.ToString();
 
                 var newBooking = new CreateEventBooking
                 {
-                    GuestId = selectedGuest.GuestId,
+                    GuestId = guestId,
                     NumberOfTickets = numberOfTickets,
-                    Status = selectedStatus,
+                    Status = "Foglalt", // Státusz "Foglalt"-ra állítva
                     PaymentStatus = selectedPaymentStatus,
                     Notes = NotesTextBox.Text
                 };
@@ -4351,6 +4568,8 @@ namespace RoomListApp
             }
         }
 
+
+        // Törli a kiválasztott program foglalást.
         private async void DeleteEventBookingButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -4379,6 +4598,7 @@ namespace RoomListApp
             }
         }
 
+        //Megjeleníti a kiválasztott program foglalás részleteit.
         private void EventBookingDetailsButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -4415,6 +4635,7 @@ namespace RoomListApp
             }
         }
 
+        //Megjeleníti a kiválasztott program foglalás státuszát.
         private async void EventStatusButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -4460,10 +4681,30 @@ namespace RoomListApp
         }
 
 
+        private void UpdateEventTotalPrice()
+        {
+            var selectedEvent = EventComboBox.SelectedItem as Event;
+            if (selectedEvent != null && !string.IsNullOrWhiteSpace(TicketsTextBox.Text))
+            {
+                if (int.TryParse(TicketsTextBox.Text, out int numberOfTickets) && numberOfTickets > 0)
+                {
+                    decimal totalPrice = selectedEvent.Price.GetValueOrDefault() * numberOfTickets;
+                    EventTotalPriceTextBox.Text = totalPrice.ToString("N0") + " Ft";
+                    return;
+                }
+            }
+
+            EventTotalPriceTextBox.Text = string.Empty;
+        }
+
+
 
         private readonly string _templateDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates");
         private string _currentTemplateContent = "";
         private Dictionary<string, TextBox> _variableTextBoxes = new Dictionary<string, TextBox>();
+
+
+        // Betölti az Email Template-ek listáját.
 
         private void LoadEmailTemplates()
         {
@@ -4514,6 +4755,7 @@ namespace RoomListApp
             }
         }
 
+        // Kivonja a változókat a sablonból.
         private List<string> ExtractVariablesFromTemplate(string templateContent)
         {
             var variables = new List<string>();
@@ -4536,6 +4778,8 @@ namespace RoomListApp
 
             return variables;
         }
+
+        // Létrehozza a változók panelt a sablonban található változók alapján.
         private void CreateVariablesPanel(List<string> variables)
         {
             VariablesStackPanel.Children.Clear();
@@ -4578,8 +4822,14 @@ namespace RoomListApp
             }
         }
 
+        // Küldi a hírlevelet az API-n keresztül.
         private async void SendNewsletterButton_Click(object sender, RoutedEventArgs e)
         {
+            // Letiltjuk a gombot és megjelenítjük a folyamatjelzőt
+            SendButtonText.Text = "Küldés folyamatban...";
+            SendProgressBar.Visibility = Visibility.Visible;
+            SendNewsletterButton.IsEnabled = false;
+
             try
             {
                 if (string.IsNullOrWhiteSpace(EmailSubjectTextBox.Text))
@@ -4629,7 +4879,15 @@ namespace RoomListApp
             {
                 MessageBox.Show($"Hiba történt az email küldésekor: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+            finally
+            {
+                // Visszaállítjuk a gomb eredeti állapotát
+                SendButtonText.Text = "Küldés";
+                SendProgressBar.Visibility = Visibility.Collapsed;
+                SendNewsletterButton.IsEnabled = true;
+            }
         }
+
         private async Task SendNewsletter(NewsletterDto newsletterDto)
         {
             try
@@ -4647,7 +4905,11 @@ namespace RoomListApp
                     System.Text.Encoding.UTF8,
                     "application/json");
 
-                var response = await _httpClient.PostAsync("Newsletter/SendNewsletter", content);
+                // Opcionálisan: Timeout beállítása, hogy ne várjon túl sokáig
+                var cancellationTokenSource = new CancellationTokenSource();
+                cancellationTokenSource.CancelAfter(TimeSpan.FromMinutes(2)); // 2 perc timeout
+
+                var response = await _httpClient.PostAsync("Newsletter/SendNewsletter", content, cancellationTokenSource.Token);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -4661,36 +4923,42 @@ namespace RoomListApp
                     MessageBox.Show($"Hiba a hírlevél küldésekor: {response.StatusCode}\n{errorResponse}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+            catch (TaskCanceledException)
+            {
+                MessageBox.Show("Az email küldése túl sokáig tartott és időtúllépés történt.", "Időtúllépés", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
             catch (Exception ex)
             {
                 MessageBox.Show($"Hiba történt: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
+
+        //Megjeleníti a hírlevél küldés panelt.
         private void EmailCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             dashboardGrid.Visibility = Visibility.Collapsed;
             newsletterContainer.Visibility = Visibility.Visible;
         }
 
+        //Bezárja a hírlevél küldés panelt és visszatér a főoldalra.
         private void NewsletterBackButton_Click(object sender, RoutedEventArgs e)
         {
             newsletterContainer.Visibility = Visibility.Collapsed;
             dashboardGrid.Visibility = Visibility.Visible;
         }
 
-        private void CancelNewsletterButton_Click(object sender, RoutedEventArgs e)
-        {
-            newsletterContainer.Visibility = Visibility.Collapsed;
-            dashboardGrid.Visibility = Visibility.Visible;
-        }
-
+        //Frissíti a sablonok listáját.
         private void RefreshTemplatesButton_Click(object sender, RoutedEventArgs e)
         {
             LoadEmailTemplates();
         }
 
 
+
+
+
+        //Nem implementált funkciók értesítése.
         private void LoyaltyProgram_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             MessageBox.Show("A Loyalty program funkció jelenleg fejlesztés alatt áll, és a későbbiekben lesz elérhető.",
