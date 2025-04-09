@@ -58,7 +58,8 @@ const ProfilePage = () => {
   const [showNewPasswordForgot, setShowNewPasswordForgot] = useState(false);
   const [showConfirmPasswordForgot, setShowConfirmPasswordForgot] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
-  const [deletionSuccess, setDeletionSuccess] = useState(false);
+  const [roomDeletionSuccess, setRoomDeletionSuccess] = useState(false);
+  const [eventDeletionSuccess, setEventDeletionSuccess] = useState(false);
   const [showLogoutSuccess, setShowLogoutSuccess] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -314,7 +315,11 @@ const ProfilePage = () => {
       setSuccessMessage("Foglalás sikeresen törölve!");
       setShowSuccessModal(true);
       fetchBookings();
-      setTimeout(() => setShowSuccessModal(false), 2000);
+      setRoomDeletionSuccess(true); // Itt állítjuk be
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        setRoomDeletionSuccess(false); // Visszaállítjuk
+      }, 2000);
     } catch (err) {
       console.error("Hiba a foglalás törlése közben:", err.message);
       setMessage({ type: "error", text: err.message });
@@ -339,7 +344,11 @@ const ProfilePage = () => {
       setSuccessMessage("Program foglalás sikeresen törölve!");
       setShowSuccessModal(true);
       fetchEventBookings();
-      setTimeout(() => setShowSuccessModal(false), 2000);
+      setEventDeletionSuccess(true); // Itt állítjuk be
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        setEventDeletionSuccess(false); // Visszaállítjuk
+      }, 2000);
     } catch (err) {
       console.error("Hiba a program foglalás törlése közben:", err.message);
       setMessage({ type: "error", text: err.message });
@@ -607,20 +616,19 @@ const ProfilePage = () => {
 
   const handleAddGuest = async (e) => {
     e.preventDefault();
+    setMessage(null); // Üzenet törlése az új próbálkozás előtt
     try {
       const token = localStorage.getItem("authToken");
       if (!token) {
-        setMessage({ type: "error", text: "Nincs token elmentve!" });
-        return;
+        throw new Error("Nincs token elmentve! Jelentkezz be újra.");
       }
       if (!user?.userId) {
-        setMessage({ type: "error", text: "Felhasználó ID hiányzik!" });
-        return;
+        throw new Error("Felhasználó ID hiányzik!");
       }
       if (!guestData.firstName || !guestData.lastName || !guestData.dateOfBirth) {
-        setMessage({ type: "error", text: "Kötelező mezők hiányoznak!" });
-        return;
+        throw new Error("Kötelező mezők (Keresztnév, Vezetéknév, Születési dátum) hiányoznak!");
       }
+
       const payload = {
         ...guestData,
         userId: user.userId,
@@ -628,6 +636,7 @@ const ProfilePage = () => {
           ? new Date(guestData.dateOfBirth).toISOString()
           : null,
       };
+
       const response = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/Guests/Addnewguest`,
         payload,
@@ -638,9 +647,11 @@ const ProfilePage = () => {
           },
         }
       );
-      if (response.data.includes("Sikeres")) {
-        await fetchGuests();
-        setShowGuestModal(false);
+
+      // Ellenőrizzük a választ: ha a státusz 200 vagy 201, akkor sikeres
+      if (response.status === 200 || response.status === 201) {
+        await fetchGuests(); // Frissítjük a vendéglistát
+        setShowGuestModal(false); // Bezárjuk a modált
         setGuestData({
           firstName: "",
           lastName: "",
@@ -651,16 +662,19 @@ const ProfilePage = () => {
           country: "",
           dateOfBirth: "",
           gender: "",
-        });
+        }); // Ürítjük az űrlapot
         setSuccessMessage("Vendég sikeresen hozzáadva!");
         setShowSuccessModal(true);
         setTimeout(() => setShowSuccessModal(false), 2000);
       } else {
-        throw new Error(`Váratlan válasz a szervertől: ${response.data}`);
+        throw new Error(`Váratlan válasz a szervertől: ${response.status}`);
       }
     } catch (err) {
-      console.error("Hiba a vendég hozzáadása közben:", err.message);
-      setMessage({ type: "error", text: err.message });
+      console.error("Hiba a vendég hozzáadása közben:", err.response?.data || err.message);
+      setMessage({
+        type: "error",
+        text: err.response?.data?.message || err.message || "Hiba történt a vendég hozzáadása közben!",
+      });
     }
   };
 
@@ -1063,7 +1077,7 @@ const ProfilePage = () => {
               </h2>
             </div>
 
-            {deletionSuccess && (
+            {roomDeletionSuccess && ( // Csak szoba törlésnél jelenik meg
               <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg animate-fade-in">
                 <div className="flex items-center">
                   <span className="material-symbols-outlined mr-2 text-green-600">check_circle</span>
@@ -1089,16 +1103,13 @@ const ProfilePage = () => {
                   return (
                     <div
                       key={booking.id || booking.bookingId || `booking-${index}`}
-                      className={`border border-blue-200 rounded-xl p-4 bg-gradient-to-br from-blue-50 to-teal-50 hover:border-teal-400 transition-all duration-300 shadow-md hover:shadow-xl ${deletingId === (booking.id || booking.bookingId) ? 'opacity-50' : ''
-                        }`}
+                      className={`border border-blue-200 rounded-xl p-4 bg-gradient-to-br from-blue-50 to-teal-50 hover:border-teal-400 transition-all duration-300 shadow-md hover:shadow-xl ${deletingId === (booking.id || booking.bookingId) ? 'opacity-50' : ''}`}
                     >
                       <div className="flex justify-between items-center mb-3">
                         <div>
                           <p className="text-sm font-medium text-blue-700">
                             Szobaszám:{" "}
-                            <span className="font-bold text-teal-600">
-                              {roomNumber}
-                            </span>
+                            <span className="font-bold text-teal-600">{roomNumber}</span>
                           </p>
                           <p className="text-sm font-medium text-blue-700">
                             Időpont:{" "}
@@ -1136,14 +1147,13 @@ const ProfilePage = () => {
                               setDeletingId(bookingId);
                               handleDeleteBooking(bookingId)
                                 .then(() => {
-                                  setDeletionSuccess(true);
-                                  setTimeout(() => setDeletionSuccess(false), 3000);
+                                  setRoomDeletionSuccess(true); // Itt állítjuk be
+                                  setTimeout(() => setRoomDeletionSuccess(false), 3000);
                                 })
                                 .finally(() => setDeletingId(null));
                             }}
                             disabled={deletingId === (booking.id || booking.bookingId)}
-                            className={`bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-md ${deletingId === (booking.id || booking.bookingId) ? 'opacity-70 cursor-not-allowed' : ''
-                              }`}
+                            className={`bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-md ${deletingId === (booking.id || booking.bookingId) ? 'opacity-70 cursor-not-allowed' : ''}`}
                           >
                             {deletingId === (booking.id || booking.bookingId) ? (
                               <span className="flex items-center">
@@ -1160,9 +1170,7 @@ const ProfilePage = () => {
                   );
                 })
               ) : (
-                <p className="text-blue-700 col-span-full">
-                  Nincsenek foglalásaid.
-                </p>
+                <p className="text-blue-700 col-span-full">Nincsenek foglalásaid.</p>
               )}
             </div>
           </div>
@@ -1178,11 +1186,11 @@ const ProfilePage = () => {
               </h2>
             </div>
 
-            {deletionSuccess && (
+            {eventDeletionSuccess && ( // Csak program törlésnél jelenik meg
               <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg animate-fade-in">
                 <div className="flex items-center">
                   <span className="material-symbols-outlined mr-2 text-green-600">check_circle</span>
-                  <p>Sikeresen törölted a foglalást!</p>
+                  <p>Sikeresen törölted a program foglalást!</p>
                 </div>
               </div>
             )}
@@ -1194,8 +1202,7 @@ const ProfilePage = () => {
                   return (
                     <div
                       key={booking.eventBookingId}
-                      className={`border border-blue-200 rounded-xl p-4 bg-gradient-to-br from-purple-50 to-blue-50 hover:border-purple-400 transition-all duration-300 shadow-md hover:shadow-xl ${deletingId === booking.eventBookingId ? 'opacity-50' : ''
-                        }`}
+                      className={`border border-blue-200 rounded-xl p-4 bg-gradient-to-br from-purple-50 to-blue-50 hover:border-purple-400 transition-all duration-300 shadow-md hover:shadow-xl ${deletingId === booking.eventBookingId ? 'opacity-50' : ''}`}
                     >
                       <div className="flex justify-between items-center mb-3">
                         <div>
@@ -1237,14 +1244,13 @@ const ProfilePage = () => {
                             setDeletingId(booking.eventBookingId);
                             handleDeleteEventBooking(booking.eventBookingId)
                               .then(() => {
-                                setDeletionSuccess(true);
-                                setTimeout(() => setDeletionSuccess(false), 3000);
+                                setEventDeletionSuccess(true); // Itt állítjuk be
+                                setTimeout(() => setEventDeletionSuccess(false), 3000);
                               })
                               .finally(() => setDeletingId(null));
                           }}
                           disabled={deletingId === booking.eventBookingId}
-                          className={`bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-md ${deletingId === booking.eventBookingId ? 'opacity-70 cursor-not-allowed' : ''
-                            }`}
+                          className={`bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-red-600 transform hover:scale-105 transition-all duration-200 shadow-md ${deletingId === booking.eventBookingId ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
                           {deletingId === booking.eventBookingId ? (
                             <span className="flex items-center">
@@ -1260,9 +1266,7 @@ const ProfilePage = () => {
                   );
                 })
               ) : (
-                <p className="text-blue-700 col-span-full">
-                  Nincsenek program foglalásaid.
-                </p>
+                <p className="text-blue-700 col-span-full">Nincsenek program foglalásaid.</p>
               )}
             </div>
           </div>
@@ -1811,8 +1815,8 @@ const ProfilePage = () => {
                       {message && (
                         <div
                           className={`p-3 rounded-lg ${message.type === "success"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
                             }`}
                         >
                           {message.text}
@@ -1883,6 +1887,16 @@ const ProfilePage = () => {
               <h3 className="text-xl font-semibold text-blue-800 mb-4">
                 {editGuestId ? "Vendég szerkesztése" : "Új vendég hozzáadása"}
               </h3>
+              {message && (
+                <div
+                  className={`p-3 rounded-lg mb-4 ${message.type === "success"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                    }`}
+                >
+                  {message.text}
+                </div>
+              )}
               <form
                 onSubmit={editGuestId ? handleUpdateGuest : handleAddGuest}
                 className="space-y-4"
@@ -1890,11 +1904,11 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-1 text-blue-800">
-                      Keresztnév
+                      Keresztnév *
                     </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500"
+                      className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                       value={guestData.firstName}
                       onChange={(e) =>
                         setGuestData({ ...guestData, firstName: e.target.value })
@@ -1904,11 +1918,11 @@ const ProfilePage = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1 text-blue-800">
-                      Vezetéknév
+                      Vezetéknév *
                     </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500"
+                      className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                       value={guestData.lastName}
                       onChange={(e) =>
                         setGuestData({ ...guestData, lastName: e.target.value })
@@ -1916,58 +1930,114 @@ const ProfilePage = () => {
                       required
                     />
                   </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-blue-800">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500"
-                    value={guestData.email}
-                    onChange={(e) =>
-                      setGuestData({ ...guestData, email: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-blue-800">
-                    Telefonszám
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500"
-                    value={guestData.phoneNumber}
-                    onChange={(e) =>
-                      setGuestData({ ...guestData, phoneNumber: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1 text-blue-800">
-                    Születési dátum
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500"
-                    value={guestData.dateOfBirth}
-                    onChange={(e) =>
-                      setGuestData({ ...guestData, dateOfBirth: e.target.value })
-                    }
-                    required
-                  />
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-blue-800">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      value={guestData.email}
+                      onChange={(e) =>
+                        setGuestData({ ...guestData, email: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-blue-800">
+                      Telefonszám
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      value={guestData.phoneNumber}
+                      onChange={(e) =>
+                        setGuestData({ ...guestData, phoneNumber: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-blue-800">
+                      Cím
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      value={guestData.address}
+                      onChange={(e) =>
+                        setGuestData({ ...guestData, address: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-blue-800">
+                      Város
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      value={guestData.city}
+                      onChange={(e) =>
+                        setGuestData({ ...guestData, city: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-blue-800">
+                      Ország
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      value={guestData.country}
+                      onChange={(e) =>
+                        setGuestData({ ...guestData, country: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-blue-800">
+                      Születési dátum *
+                    </label>
+                    <input
+                      type="date"
+                      className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      value={guestData.dateOfBirth}
+                      onChange={(e) =>
+                        setGuestData({ ...guestData, dateOfBirth: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium mb-1 text-blue-800">
+                      Nem
+                    </label>
+                    <select
+                      className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      value={guestData.gender}
+                      onChange={(e) =>
+                        setGuestData({ ...guestData, gender: e.target.value })
+                      }
+                    >
+                      <option value="">Válasszon...</option>
+                      <option value="Male">Férfi</option>
+                      <option value="Female">Nő</option>
+                      <option value="Other">Egyéb</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="flex justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setShowGuestModal(false)}
-                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
                   >
                     Mégse
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                   >
                     {editGuestId ? "Mentés" : "Hozzáadás"}
                   </button>
