@@ -13,29 +13,35 @@
             padding: 0;
             background-color: #f9f9f9;
         }
+
         .container {
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
         }
+
         .header {
             background-color: #2c3e50;
             color: white;
             padding: 20px;
             text-align: center;
         }
+
         .hotel-name {
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 5px;
         }
+
         .tagline {
             font-size: 14px;
             color: #e0e0e0;
         }
+
         .content {
             padding: 20px;
         }
+
         .weekend-banner {
             background-color: #3498db;
             color: white;
@@ -46,6 +52,7 @@
             margin-bottom: 20px;
             border-radius: 5px;
         }
+
         .promotion-box {
             background-color: #f5f5f5;
             border-radius: 5px;
@@ -53,38 +60,46 @@
             margin-bottom: 20px;
             border-left: 4px solid #3498db;
         }
+
         .promotion-image {
             width: 100%;
             height: auto;
             display: block;
         }
+
         .promotion-content {
             padding: 20px;
         }
+
         .promotion-heading {
             font-size: 22px;
             font-weight: bold;
             margin-bottom: 15px;
             color: #2c3e50;
         }
+
         .promotion-description {
             margin-bottom: 15px;
         }
+
         .promotion-features {
             margin-bottom: 20px;
         }
+
         .feature-item {
             margin-bottom: 8px;
             padding-left: 25px;
             position: relative;
         }
-        .feature-item:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #3498db;
-            font-weight: bold;
-        }
+
+            .feature-item:before {
+                content: "✓";
+                position: absolute;
+                left: 0;
+                color: #3498db;
+                font-weight: bold;
+            }
+
         .price-box {
             background-color: #eaf2f8;
             padding: 15px;
@@ -92,16 +107,19 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
+
         .original-price {
             text-decoration: line-through;
             color: #7f8c8d;
             font-size: 16px;
         }
+
         .current-price {
             font-size: 24px;
             font-weight: bold;
             color: #2c3e50;
         }
+
         .button {
             display: inline-block;
             background-color: #3498db;
@@ -112,6 +130,7 @@
             font-weight: bold;
             text-align: center;
         }
+
         .countdown {
             background-color: #f8f9fa;
             padding: 15px;
@@ -120,38 +139,47 @@
             margin: 25px 0;
             border: 1px dashed #bdc3c7;
         }
+
         .countdown-text {
             font-weight: bold;
             color: #e74c3c;
             font-size: 16px;
         }
+
         .footer {
             background-color: #2c3e50;
             color: white;
             padding: 20px;
         }
+
         .contact-info {
             margin-bottom: 20px;
         }
+
         .contact-heading {
             font-weight: bold;
             margin-bottom: 10px;
         }
+
         .contact-item {
             margin-bottom: 5px;
         }
+
         .social-heading {
             font-weight: bold;
             margin-bottom: 10px;
         }
+
         .social-links {
             margin-bottom: 20px;
         }
+
         .social-link {
             color: white;
             text-decoration: none;
             margin-right: 15px;
         }
+
         .footer-bottom {
             border-top: 1px solid #34495e;
             padding-top: 15px;
@@ -159,10 +187,12 @@
             font-size: 12px;
             color: #e0e0e0;
         }
+
         .unsubscribe {
             color: #e0e0e0;
             text-decoration: underline;
         }
+
         @media only screen and (max-width: 480px) {
             .button {
                 display: block;
@@ -175,8 +205,8 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="hotel-name">{HotelName}</div>
-            <div class="tagline">{HotelTagline}</div>
+            <div class="hotel-name">HMZ.rt</div>
+            <div class="tagline">Ahol a kényelem az alapfeltétel</div>
         </div>
 
         <!-- Content -->
@@ -188,60 +218,59 @@
 
             <!-- Main Promotion -->
             <div class="promotion-box">
-                <img src="{MainPromotionImageUrl}" alt="{MainPromotionImageAlt}" class="promotion-image">
+                <img src="{FőAjánlatKépUrl}" alt="{FőAjánlatKépAlt}" class="promotion-image">
                 <div class="promotion-content">
-                    <h2 class="promotion-heading">{MainPromotionHeading}</h2>
-                    <p class="promotion-description">{MainPromotionDescription}</p>
-                    
+                    <h2 class="promotion-heading">{FőAjánlatFejléc}</h2>
+                    <p class="promotion-description">{FőAjánlatLeírás}</p>
+
                     <div class="promotion-features">
-                        <div class="feature-item">{Feature1}</div>
-                        <div class="feature-item">{Feature2}</div>
-                        <div class="feature-item">{Feature3}</div>
-                        <div class="feature-item">{Feature4}</div>
+                        <div class="feature-item">{Jellemző1}</div>
+                        <div class="feature-item">{Jellemző2}</div>
+                        <div class="feature-item">{Jellemző3}</div>
+                        <div class="feature-item">{Jellemző4}</div>
                     </div>
-                    
+
                     <div class="price-box">
-                        <div class="original-price">{OriginalPrice}</div>
-                        <div class="current-price">{CurrentPrice}</div>
+                        <div class="original-price">{EredetiÁr}</div>
+                        <div class="current-price">{AktuálisÁr}</div>
                     </div>
-                    
+
                     <div style="text-align: center;">
-                        <a href="{BookingButtonUrl}" class="button">{BookingButtonText}</a>
+                        <a href="https://hmzrt.eu/szobak" class="button">Foglalás</a>
                     </div>
                 </div>
             </div>
 
             <!-- Countdown -->
             <div class="countdown">
-                <p class="countdown-text">{CountdownText}</p>
+                <p class="countdown-text">{VisszaszámlálóSzöveg}</p>
             </div>
 
             <!-- Additional Info -->
-            <p>{AdditionalInfo}</p>
+            <p>{TovábbInformáció}</p>
         </div>
 
         <!-- Footer -->
         <div class="footer">
             <div class="contact-info">
                 <div class="contact-heading">Kapcsolat</div>
-                <div class="contact-item">{Address}</div>
-                <div class="contact-item">{Phone}</div>
-                <div class="contact-item">{Email}</div>
+                <div class="contact-item">Palóczy László u. 3.</div>
+                <div class="contact-item">+36 70 123 4567</div>
+                <div class="contact-item">hmzrtkando@gmail.com</div>
             </div>
             <div class="social-heading">Kövessen Minket</div>
             <div class="social-links">
-                <a href="{FacebookUrl}" class="social-link">Facebook</a>
-                <a href="{InstagramUrl}" class="social-link">Instagram</a>
-                <a href="{TwitterUrl}" class="social-link">Twitter</a>
+                <a href="https://www.instagram.com/ze.zuzu/#" class="social-link">Facebook</a>
+                <a href="https://www.instagram.com/tahil_the_g/" class="social-link">Instagram</a>
+                <a href="https://www.instagram.com/monostori_r/" class="social-link">Twitter</a>
             </div>
             <div class="footer-bottom">
-                <p>© {CurrentYear} {HotelName}. Minden jog fenntartva.</p>
+                <p>© 2025 HMZ.rt. Minden jog fenntartva.</p>
                 <p>
-                    <a href="{UnsubscribeUrl}" class="unsubscribe">Leiratkozás</a> a hírlevélről
+                    <a href="{LeiratkozásUrl}" class="unsubscribe">Leiratkozás</a> a hírlevélről
                 </p>
             </div>
         </div>
     </div>
 </body>
 </html>
-
