@@ -59,6 +59,9 @@ const ProfilePage = () => {
   const [showConfirmPasswordForgot, setShowConfirmPasswordForgot] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [deletionSuccess, setDeletionSuccess] = useState(false);
+  const [showLogoutSuccess, setShowLogoutSuccess] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const fetchRoomIdByNumber = async (roomNumber) => {
     try {
@@ -102,8 +105,10 @@ const ProfilePage = () => {
         }
       );
 
-      setMessage({ type: "success", text: "Sikeresen feliratkozott a hírlevélre!" });
+      setSuccessMessage("Sikeresen feliratkozott a hírlevélre!");
+      setShowSuccessModal(true);
       setIsSubscribed(true);
+      setTimeout(() => setShowSuccessModal(false), 2000);
     } catch (err) {
       console.error("Hiba a feliratkozás során:", err.message);
       setMessage({ type: "error", text: err.message });
@@ -306,8 +311,10 @@ const ProfilePage = () => {
           },
         }
       );
-      setMessage({ type: "success", text: "Foglalás sikeresen törölve!" });
+      setSuccessMessage("Foglalás sikeresen törölve!");
+      setShowSuccessModal(true);
       fetchBookings();
+      setTimeout(() => setShowSuccessModal(false), 2000);
     } catch (err) {
       console.error("Hiba a foglalás törlése közben:", err.message);
       setMessage({ type: "error", text: err.message });
@@ -329,8 +336,10 @@ const ProfilePage = () => {
           },
         }
       );
-      setMessage({ type: "success", text: "Program foglalás sikeresen törölve!" });
+      setSuccessMessage("Program foglalás sikeresen törölve!");
+      setShowSuccessModal(true);
       fetchEventBookings();
+      setTimeout(() => setShowSuccessModal(false), 2000);
     } catch (err) {
       console.error("Hiba a program foglalás törlése közben:", err.message);
       setMessage({ type: "error", text: err.message });
@@ -423,12 +432,14 @@ const ProfilePage = () => {
         }
         return;
       }
-      setMessage({ type: "success", text: "Jelszó sikeresen megváltoztatva!" });
+      setSuccessMessage("Jelszó sikeresen megváltoztatva!");
+      setShowSuccessModal(true);
       setPasswordData({
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
+      setTimeout(() => setShowSuccessModal(false), 2000);
     } catch (err) {
       setMessage({ type: "error", text: err.message });
     }
@@ -450,11 +461,10 @@ const ProfilePage = () => {
       if (response.status === 418) {
         throw new Error("Ez az email cím nem szerepel az adatbázisban!");
       }
-      setMessage({
-        type: "success",
-        text: "Ellenőrizze email fiókját a 6 számjegyű kódért!",
-      });
+      setSuccessMessage("Ellenőrizze email fiókját a 6 számjegyű kódért!");
+      setShowSuccessModal(true);
       setForgotStep(2);
+      setTimeout(() => setShowSuccessModal(false), 2000);
     } catch (err) {
       console.error("Hiba a kód küldése során:", err.message);
       setMessage({ type: "error", text: err.message });
@@ -480,8 +490,10 @@ const ProfilePage = () => {
       if (response.status === 202) {
         throw new Error("Hibás kód vagy email!");
       }
-      setMessage({ type: "success", text: "Kód elfogadva!" });
+      setSuccessMessage("Kód elfogadva!");
+      setShowSuccessModal(true);
       setForgotStep(3);
+      setTimeout(() => setShowSuccessModal(false), 2000);
     } catch (err) {
       console.error("Hiba az ellenőrzés során:", err.message);
       setMessage({ type: "error", text: err.message });
@@ -523,16 +535,15 @@ const ProfilePage = () => {
         }
       );
       const data = response.data;
-      setMessage({
-        type: "success",
-        text:
-          data.message ||
-          "Jelszó sikeresen visszaállítva! Jelentkezzen be az új jelszóval.",
-      });
+      setSuccessMessage(
+        data.message || "Jelszó sikeresen visszaállítva! Jelentkezzen be az új jelszóval."
+      );
+      setShowSuccessModal(true);
       setForgotEmail("");
       setVerificationCode("");
       setNewPasswordData({ newPassword: "", confirmPassword: "" });
       setForgotStep(1);
+      setTimeout(() => setShowSuccessModal(false), 2000);
     } catch (err) {
       console.error("Hiba az új jelszó beállításakor:", err.message);
       setMessage({ type: "error", text: err.message });
@@ -559,9 +570,14 @@ const ProfilePage = () => {
           data: { Password: deletePassword },
         }
       );
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("username");
-      navigate("/");
+      setSuccessMessage("Fiók sikeresen törölve!");
+      setShowSuccessModal(true);
+      setTimeout(() => {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("username");
+        setShowSuccessModal(false);
+        navigate("/");
+      }, 2000);
     } catch (error) {
       console.error("Hiba történt a fiók törlése közben:", error.message);
       setError(error.message);
@@ -636,7 +652,9 @@ const ProfilePage = () => {
           dateOfBirth: "",
           gender: "",
         });
-        setMessage({ type: "success", text: "Vendég sikeresen hozzáadva!" });
+        setSuccessMessage("Vendég sikeresen hozzáadva!");
+        setShowSuccessModal(true);
+        setTimeout(() => setShowSuccessModal(false), 2000);
       } else {
         throw new Error(`Váratlan válasz a szervertől: ${response.data}`);
       }
@@ -665,7 +683,9 @@ const ProfilePage = () => {
         }
       );
       await fetchGuests();
-      setMessage({ type: "success", text: "Vendég sikeresen törölve!" });
+      setSuccessMessage("Vendég sikeresen törölve!");
+      setShowSuccessModal(true);
+      setTimeout(() => setShowSuccessModal(false), 2000);
     } catch (err) {
       console.error("Hiba a vendég törlése közben:", err.message);
       setError(err.message);
@@ -732,7 +752,9 @@ const ProfilePage = () => {
           gender: "",
         });
         setEditGuestId(null);
-        setMessage({ type: "success", text: "Vendég sikeresen módosítva!" });
+        setSuccessMessage("Vendég sikeresen módosítva!");
+        setShowSuccessModal(true);
+        setTimeout(() => setShowSuccessModal(false), 2000);
       } else {
         throw new Error(`Váratlan válasz a szervertől: ${response.data}`);
       }
@@ -743,10 +765,14 @@ const ProfilePage = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("username");
-    setUser(null);
-    navigate("/");
+    setShowLogoutSuccess(true);
+    setTimeout(() => {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("username");
+      setUser(null);
+      setShowLogoutSuccess(false);
+      navigate("/");
+    }, 2000);
   };
 
   const handleSubmitComment = async (e) => {
@@ -782,9 +808,11 @@ const ProfilePage = () => {
           },
         }
       );
-      setMessage({ type: "success", text: "Értékelés sikeresen elküldve!" });
+      setSuccessMessage("Értékelés sikeresen elküldve!");
+      setShowSuccessModal(true);
       setShowCommentModal(false);
       setCommentData({ rating: 5, comment: "" });
+      setTimeout(() => setShowSuccessModal(false), 2000);
     } catch (err) {
       console.error("Hiba az értékelés küldése közben:", err.message);
       setMessage({ type: "error", text: err.message });
@@ -794,24 +822,108 @@ const ProfilePage = () => {
   if (loading) {
     return <div className="bg-blue-50 min-h-screen p-6 sm:p-8">Betöltés...</div>;
   }
-
   return (
     <div className="bg-blue-50 min-h-screen p-6 sm:p-8 relative">
       {message && (
         <div
-          className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white ${message.type === "success" ? "bg-green-500" : "bg-red-500"}`}
+          className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white ${message.type === "success" ? "bg-green-500" : "bg-red-500"
+            }`}
         >
           {message.text}
+        </div>
+      )}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
+            <svg
+              className="w-16 h-16 text-green-500 mx-auto mb-4 animate-bounce"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <h3 className="text-2xl font-bold text-green-600 mb-4">Siker!</h3>
+            <p className="text-gray-600 mb-4">{successMessage}</p>
+            <div className="flex justify-center">
+              <svg
+                className="animate-spin h-5 w-5 text-blue-500"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
+      )}
+      {showLogoutSuccess && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center">
+            <svg
+              className="w-16 h-16 text-green-500 mx-auto mb-4 animate-bounce"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <h3 className="text-2xl font-bold text-green-600 mb-4">Sikeres kijelentkezés!</h3>
+            <p className="text-gray-600 mb-4">Viszlát, reméljük hamarosan újra látunk!</p>
+            <div className="flex justify-center">
+              <svg
+                className="animate-spin h-5 w-5 text-blue-500"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+            </div>
+          </div>
         </div>
       )}
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3 sm:gap-4">
           <button
             onClick={() => window.history.back()}
-            className="flex items-center bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center sm:justify-start order-1 sm:order-none"
+            className="flex items-center bg-blue-600 text-white px-2 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto justify-center sm:justify-start order-1 sm:order-none"
           >
-            <span className="material-symbols-outlined mr-1 sm:mr-2">arrow_back</span>
-            <span className="hidden sm:inline">Vissza</span>
+            <span className="material-symbols-outlined mr-1">arrow_back</span>
+            <span>Vissza</span>
           </button>
 
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-800 text-center flex-grow order-2 sm:order-none mx-2 my-2 sm:my-0">
@@ -820,11 +932,11 @@ const ProfilePage = () => {
 
           <button
             onClick={handleLogout}
-            className="flex items-center bg-red-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-red-700 transition-colors w-full sm:w-auto justify-center sm:justify-start order-3 sm:order-none"
+            className="flex items-center bg-red-600 text-white px-2 py-2 rounded-lg hover:bg-red-700 transition-colors w-full sm:w-auto justify-center sm:justify-start order-3 sm:order-none"
           >
-            <span className="material-symbols-outlined mr-1 sm:mr-2">logout</span>
-            <span className="hidden sm:inline">Kijelentkezés</span>
+            <span className="material-symbols-outlined mr-1">logout</span>
             <span className="sm:hidden">Kilépés</span>
+            <span className="hidden sm:inline">Kijelentkezés</span>
           </button>
         </div>
         {error && <p className="text-red-600 mb-4">{error}</p>}
@@ -1093,7 +1205,6 @@ const ProfilePage = () => {
                               {event ? event.eventName : `Esemény #${booking.eventId}`}
                             </span>
                           </p>
-                          کارشناس
                           <p className="text-sm font-medium text-blue-700">
                             Dátum:{" "}
                             <span className="font-bold text-purple-600">
@@ -1480,7 +1591,7 @@ const ProfilePage = () => {
                     </div>
                     <div>
                       {passwordErrors.confirmPassword && (
-                        <p className="text-red-/initialPassword600 text-xs mb-1">
+                        <p className="text-red-600 text-xs mb-1">
                           {passwordErrors.confirmPassword}
                         </p>
                       )}
@@ -1673,9 +1784,7 @@ const ProfilePage = () => {
                         </label>
                         <div className="relative">
                           <input
-                            type={
-                              showConfirmPasswordForgot ? "text" : "password"
-                            }
+                            type={showConfirmPasswordForgot ? "text" : "password"}
                             id="confirm-password-forgot"
                             className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                             placeholder="Új jelszó megerősítése"
@@ -1691,266 +1800,174 @@ const ProfilePage = () => {
                           <button
                             type="button"
                             onClick={() =>
-                              setShowConfirmPasswordForgot(
-                                !showConfirmPasswordForgot
-                              )
+                              setShowConfirmPasswordForgot(!showConfirmPasswordForgot)
                             }
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-600"
                           >
-                            {showConfirmPasswordForgot
-                              ? "Elrejtés"
-                              : "Megjelenítés"}
+                            {showConfirmPasswordForgot ? "Elrejtés" : "Megjelenítés"}
                           </button>
                         </div>
                       </div>
+                      {message && (
+                        <div
+                          className={`p-3 rounded-lg ${message.type === "success"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                            }`}
+                        >
+                          {message.text}
+                        </div>
+                      )}
                       <button
                         type="submit"
                         className="w-full md:w-auto bg-indigo-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-indigo-700 transform hover:scale-105 transition-all duration-200"
                       >
-                        Jelszó beállítása
+                        Jelszó mentése
                       </button>
                     </form>
                   )}
                 </div>
               </details>
             </div>
-            <div className="border-t border-blue-200 pt-6 sm:pt-8 mt-6 sm:mt-8">
-              <div className="bg-red-50 p-4 sm:p-6 rounded-lg border border-red-200">
-                <h2 className="text-lg sm:text-xl font-semibold text-red-600 mb-2 flex items-center">
-                  <span className="material-symbols-outlined mr-2">warning</span>
+
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 border border-blue-100">
+              <div className="flex items-center mb-4">
+                <span className="material-symbols-outlined text-3xl sm:text-4xl mr-3 sm:mr-4 bg-red-100 p-2 sm:p-3 rounded-full text-red-600">
+                  delete_forever
+                </span>
+                <h2 className="text-xl sm:text-2xl font-semibold text-blue-800">
                   Fiók törlése
                 </h2>
-                <p className="text-xs sm:text-sm text-blue-700 mb-4">
-                  A fiók törlése végleges művelet, és nem vonható vissza. Az összes
-                  adat, beleértve a mentett vendég adatokat is, véglegesen
-                  törlődni fog.
-                </p>
-                <details className="group">
-                  <summary className="list-none cursor-pointer flex items-center">
-                    <span className="material-symbols-outlined mr-2">
-                      delete_forever
-                    </span>
-                    <span>Fiók törlése</span>
-                  </summary>
-                  <div className="mt-4 p-3 sm:p-4 bg-white border border-red-200 rounded-lg animate-[fadeIn_0.2s_ease-in-out]">
-                    <p className="font-medium text-red-600 mb-4 text-sm sm:text-base">
-                      Biztosan törölni szeretné a fiókját? Ez a művelet nem
-                      visszavonható.
-                    </p>
-                    <div className="mb-4">
-                      <label
-                        className="block text-sm font-medium mb-1 text-blue-800"
-                        htmlFor="confirm-delete"
-                      >
-                        Írja be a jelszavát a megerősítéshez:
-                      </label>
-                      <input
-                        type="password"
-                        id="confirm-delete"
-                        className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
-                        placeholder="Jelszó"
-                        value={deletePassword}
-                        onChange={(e) => setDeletePassword(e.target.value)}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      className="w-full md:w-auto bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-red-700 transform hover:scale-105 transition-all duration-200"
-                      onClick={handleDeleteAccount}
-                    >
-                      Végleges törlés
-                    </button>
-                  </div>
-
-                </details>
-
-
+              </div>
+              <p className="text-xs sm:text-sm text-blue-700 mb-4">
+                Figyelem: A fiók törlése végleges, és minden adata elvész.
+              </p>
+              <div className="space-y-4">
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-1 text-blue-800"
+                    htmlFor="delete-password"
+                  >
+                    Jelszó megadása a törléshez
+                  </label>
+                  <input
+                    type="password"
+                    id="delete-password"
+                    className="w-full px-3 sm:px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
+                    placeholder="Jelszó"
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <button
+                  onClick={handleDeleteAccount}
+                  className="w-full md:w-auto bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-red-700 transform hover:scale-105 transition-all duration-200"
+                >
+                  Fiók törlése
+                </button>
               </div>
             </div>
-
-
           </>
-
-
         )}
 
-
         {showGuestModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-lg sm:max-w-2xl">
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            onClick={() => setShowGuestModal(false)}
+          >
+            <div
+              className="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
               <h3 className="text-xl font-semibold text-blue-800 mb-4">
                 {editGuestId ? "Vendég szerkesztése" : "Új vendég hozzáadása"}
               </h3>
               <form
                 onSubmit={editGuestId ? handleUpdateGuest : handleAddGuest}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                className="space-y-4"
               >
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-blue-800">
-                      Vezetéknév
-                    </label>
-                    <input
-                      placeholder="Petőfi"
-                      type="text"
-                      value={guestData.lastName}
-                      onChange={(e) =>
-                        setGuestData({ ...guestData, lastName: e.target.value })
-                      }
-                      className="w-full p-2 border border-blue-200 rounded-lg"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-blue-800">
+                    <label className="block text-sm font-medium mb-1 text-blue-800">
                       Keresztnév
                     </label>
                     <input
-                      placeholder="Sándor"
                       type="text"
+                      className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500"
                       value={guestData.firstName}
                       onChange={(e) =>
                         setGuestData({ ...guestData, firstName: e.target.value })
                       }
-                      className="w-full p-2 border border-blue-200 rounded-lg"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-blue-800">
-                      Email
+                    <label className="block text-sm font-medium mb-1 text-blue-800">
+                      Vezetéknév
                     </label>
                     <input
-                      placeholder="example@gmail.com"
-                      type="email"
-                      value={guestData.email}
-                      onChange={(e) =>
-                        setGuestData({ ...guestData, email: e.target.value })
-                      }
-                      className="w-full p-2 border border-blue-200 rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-blue-800">
-                      Telefonszám
-                    </label>
-                    <input
-                      placeholder="36 70 123 456"
                       type="text"
-                      value={guestData.phoneNumber}
+                      className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500"
+                      value={guestData.lastName}
                       onChange={(e) =>
-                        setGuestData({
-                          ...guestData,
-                          phoneNumber: e.target.value,
-                        })
+                        setGuestData({ ...guestData, lastName: e.target.value })
                       }
-                      className="w-full p-2 border border-blue-200 rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-blue-800">
-                      Születési dátum
-                    </label>
-                    <input
-                      type="date"
-                      value={guestData.dateOfBirth}
-                      onChange={(e) =>
-                        setGuestData({
-                          ...guestData,
-                          dateOfBirth: e.target.value,
-                        })
-                      }
-                      className="w-full p-2 border border-blue-200 rounded-lg"
                       required
                     />
                   </div>
                 </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-blue-800">
-                      Cím
-                    </label>
-                    <input
-                      placeholder="Kossuth Lajos utca 1."
-                      type="text"
-                      value={guestData.address}
-                      onChange={(e) =>
-                        setGuestData({ ...guestData, address: e.target.value })
-                      }
-                      className="w-full p-2 border border-blue-200 rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-blue-800">
-                      Város
-                    </label>
-                    <input
-                      placeholder="Budapest"
-                      type="text"
-                      value={guestData.city}
-                      onChange={(e) =>
-                        setGuestData({ ...guestData, city: e.target.value })
-                      }
-                      className="w-full p-2 border border-blue-200 rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-blue-800">
-                      Ország
-                    </label>
-                    <input
-                      placeholder="Magyarország"
-                      type="text"
-                      value={guestData.country}
-                      onChange={(e) =>
-                        setGuestData({ ...guestData, country: e.target.value })
-                      }
-                      className="w-full p-2 border border-blue-200 rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-blue-800">
-                      Nem
-                    </label>
-                    <select
-                      value={guestData.gender}
-                      onChange={(e) =>
-                        setGuestData({ ...guestData, gender: e.target.value })
-                      }
-                      className="w-full p-2 border border-blue-200 rounded-lg"
-                    >
-                      <option value="">Válasszon</option>
-                      <option value="Férfi">Férfi</option>
-                      <option value="Nő">Nő</option>
-                      <option value="Egyéb">Egyéb</option>
-                    </select>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-blue-800">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500"
+                    value={guestData.email}
+                    onChange={(e) =>
+                      setGuestData({ ...guestData, email: e.target.value })
+                    }
+                  />
                 </div>
-                <div className="col-span-1 sm:col-span-2 flex justify-end gap-2 mt-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-blue-800">
+                    Telefonszám
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500"
+                    value={guestData.phoneNumber}
+                    onChange={(e) =>
+                      setGuestData({ ...guestData, phoneNumber: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-blue-800">
+                    Születési dátum
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500"
+                    value={guestData.dateOfBirth}
+                    onChange={(e) =>
+                      setGuestData({ ...guestData, dateOfBirth: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowGuestModal(false);
-                      setEditGuestId(null);
-                      setGuestData({
-                        firstName: "",
-                        lastName: "",
-                        email: "",
-                        phoneNumber: "",
-                        address: "",
-                        city: "",
-                        country: "",
-                        dateOfBirth: "",
-                        gender: "",
-                      });
-                    }}
-                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                    onClick={() => setShowGuestModal(false)}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
                   >
                     Mégse
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                   >
                     {editGuestId ? "Mentés" : "Hozzáadás"}
                   </button>
@@ -1960,56 +1977,63 @@ const ProfilePage = () => {
           </div>
         )}
 
-        {showCommentModal && selectedBooking && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-md">
+        {showCommentModal && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            onClick={() => setShowCommentModal(false)}
+          >
+            <div
+              className="bg-white p-6 rounded-lg shadow-xl max-w-lg w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
               <h3 className="text-xl font-semibold text-blue-800 mb-4">
                 Értékelés írása
               </h3>
               <form onSubmit={handleSubmitComment} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-blue-800">
+                  <label className="block text-sm font-medium mb-1 text-blue-800">
                     Értékelés (1-5)
                   </label>
-                  <select
+                  <input
+                    type="number"
+                    min="1"
+                    max="5"
+                    className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500"
                     value={commentData.rating}
                     onChange={(e) =>
-                      setCommentData({ ...commentData, rating: parseInt(e.target.value) })
+                      setCommentData({
+                        ...commentData,
+                        rating: parseInt(e.target.value),
+                      })
                     }
-                    className="w-full p-2 border border-blue-200 rounded-lg"
-                  >
-                    <option value={5}>5 - Kiváló</option>
-                    <option value={4}>4 - Nagyon jó</option>
-                    <option value={3}>3 - Átlagos</option>
-                    <option value={2}>2 - Gyenge</option>
-                    <option value={1}>1 - Rossz</option>
-                  </select>
+                    required
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-blue-800">
-                    Hozzászólás
+                  <label className="block text-sm font-medium mb-1 text-blue-800">
+                    Komment
                   </label>
                   <textarea
+                    className="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-green-500"
+                    rows="4"
                     value={commentData.comment}
                     onChange={(e) =>
                       setCommentData({ ...commentData, comment: e.target.value })
                     }
-                    className="w-full p-2 border border-blue-200 rounded-lg"
-                    rows="4"
-                    placeholder="Írja meg véleményét..."
+                    required
                   />
                 </div>
                 <div className="flex justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setShowCommentModal(false)}
-                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
                   >
                     Mégse
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                   >
                     Küldés
                   </button>
