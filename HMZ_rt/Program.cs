@@ -13,7 +13,7 @@ using System.Text.Json;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using static System.Net.WebRequestMethods;
-
+#pragma warning disable
 namespace HMZ_rt
 {
     public class Program
@@ -25,7 +25,7 @@ namespace HMZ_rt
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowHmztr",
-                    policy => policy.WithOrigins(["http://localhost:3000", "https://hmzrt.eu", "https://api.hmzrt.eu", "https://web.hmzrt.hu"])
+                    policy => policy.WithOrigins(["http://localhost:3000", "https://hmzrt.eu", "https://api.hmzrt.eu", "https://web.hmzrt.hu", "http://localhost:3001"])
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials());
@@ -78,7 +78,7 @@ namespace HMZ_rt
                         }
                         else
                         {
-                            // Ha más státuszkód van beállítva, akkor is kezeljük, de itt most csak a 401 és 403-ra koncentrálunk
+                            
                             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                             message = "Ehhez a művelethez be kell jelentkezned";
                         }
